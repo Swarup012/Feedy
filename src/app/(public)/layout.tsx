@@ -1,5 +1,8 @@
+'use client';
+
 import Link from 'next/link';
-import { Bell, Search, ExternalLink } from 'lucide-react';
+import { usePathname } from 'next/navigation';
+import { Bell, Search, ExternalLink, Shield, Eye } from 'lucide-react';
 
 import { Logo } from '@/components/logo';
 import { ThemeToggle } from '@/components/theme-toggle';
@@ -15,6 +18,32 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+
+function AdminViewToggle() {
+  const pathname = usePathname();
+  const isAdminView = pathname.startsWith('/admin');
+
+  if (isAdminView) {
+    return (
+      <Button variant="outline" asChild>
+        <Link href="/feedback">
+          <Eye className="mr-2 h-4 w-4" />
+          Public View
+        </Link>
+      </Button>
+    );
+  }
+
+  return (
+    <Button variant="outline" asChild>
+      <Link href="/admin">
+        <Shield className="mr-2 h-4 w-4" />
+        Admin View
+      </Link>
+    </Button>
+  );
+}
+
 
 function AppHeader() {
   const isLoggedIn = true; // We'll make this dynamic later
@@ -66,6 +95,7 @@ function AppHeader() {
             <ThemeToggle />
             {isLoggedIn ? (
               <>
+                <AdminViewToggle />
                 <Button variant="ghost" size="icon">
                   <Bell className="h-5 w-5" />
                   <span className="sr-only">Notifications</span>
@@ -91,13 +121,6 @@ function AppHeader() {
                     <DropdownMenuSeparator />
                     <DropdownMenuGroup>
                       <DropdownMenuItem asChild><Link href="/profile">Profile</Link></DropdownMenuItem>
-                      <DropdownMenuItem asChild><Link href="/admin">Admin Dashboard</Link></DropdownMenuItem>
-                      <DropdownMenuItem asChild>
-                        <Link href="/feedback" className="flex justify-between items-center w-full">
-                          Public View
-                          <ExternalLink className="h-4 w-4 text-muted-foreground" />
-                        </Link>
-                      </DropdownMenuItem>
                       <DropdownMenuItem>Settings</DropdownMenuItem>
                     </DropdownMenuGroup>
                     <DropdownMenuSeparator />
