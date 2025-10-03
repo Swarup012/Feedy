@@ -19,9 +19,9 @@ export default function LoginPage() {
         <Link href="/" className="inline-block mb-4">
           <Logo className="h-8 w-8 mx-auto" />
         </Link>
-        <CardTitle className="text-2xl">Log In</CardTitle>
+        <CardTitle className="text-2xl">Sign In</CardTitle>
         <CardDescription>
-          Enter your email below to login to your account
+          Enter your email below to sign in to your account
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -48,10 +48,10 @@ export default function LoginPage() {
             <Input id="password" type="password" required />
           </div>
           <Button type="submit" className="w-full">
-            Log In
+            Sign In
           </Button>
           <Button variant="outline" className="w-full">
-            Login with Google
+            Sign in with Google
           </Button>
         </div>
         <div className="mt-4 text-center text-sm">

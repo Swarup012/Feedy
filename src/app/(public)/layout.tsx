@@ -17,6 +17,8 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 function AppHeader() {
+  const isLoggedIn = false; // We'll make this dynamic later
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center">
@@ -62,38 +64,46 @@ function AppHeader() {
           </div>
           <div className="flex items-center space-x-2">
             <ThemeToggle />
-            <Button variant="ghost" size="icon">
-              <Bell className="h-5 w-5" />
-              <span className="sr-only">Notifications</span>
-            </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src="https://picsum.photos/seed/user-avatar/40/40" alt="User" />
-                    <AvatarFallback>U</AvatarFallback>
-                  </Avatar>
+            {isLoggedIn ? (
+              <>
+                <Button variant="ghost" size="icon">
+                  <Bell className="h-5 w-5" />
+                  <span className="sr-only">Notifications</span>
                 </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56" align="end" forceMount>
-                <DropdownMenuLabel className="font-normal">
-                  <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">Demo User</p>
-                    <p className="text-xs leading-none text-muted-foreground">
-                      user@example.com
-                    </p>
-                  </div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuGroup>
-                  <DropdownMenuItem asChild><Link href="/profile">Profile</Link></DropdownMenuItem>
-                  <DropdownMenuItem asChild><Link href="/admin">Admin Dashboard</Link></DropdownMenuItem>
-                  <DropdownMenuItem>Settings</DropdownMenuItem>
-                </DropdownMenuGroup>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>Log out</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src="https://picsum.photos/seed/user-avatar/40/40" alt="User" />
+                        <AvatarFallback>U</AvatarFallback>
+                      </Avatar>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56" align="end" forceMount>
+                    <DropdownMenuLabel className="font-normal">
+                      <div className="flex flex-col space-y-1">
+                        <p className="text-sm font-medium leading-none">Demo User</p>
+                        <p className="text-xs leading-none text-muted-foreground">
+                          user@example.com
+                        </p>
+                      </div>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuGroup>
+                      <DropdownMenuItem asChild><Link href="/profile">Profile</Link></DropdownMenuItem>
+                      <DropdownMenuItem asChild><Link href="/admin">Admin Dashboard</Link></DropdownMenuItem>
+                      <DropdownMenuItem>Settings</DropdownMenuItem>
+                    </DropdownMenuGroup>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem>Log out</DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </>
+            ) : (
+              <Button asChild>
+                <Link href="/login">Sign In</Link>
+              </Button>
+            )}
           </div>
         </div>
       </div>
