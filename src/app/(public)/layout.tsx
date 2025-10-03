@@ -36,13 +36,13 @@ function AppHeader() {
             </Link>
             <Link
               href="/roadmap"
-              className="transition-colors hover:text-foreground/80 text-foreground/60"
+              className="transition-colors hover:text-foreground/80 text-foreground"
             >
               Roadmap
             </Link>
             <Link
               href="/changelog"
-              className="transition-colors hover:text-foreground/80 text-foreground/60"
+              className="transition-colors hover:text-foreground/80 text-foreground"
             >
               Changelog
             </Link>
