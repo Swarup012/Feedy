@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Bell, Search, ExternalLink, Shield, Eye } from 'lucide-react';
+import { Bell, Search, Eye, Shield } from 'lucide-react';
 
 import { Logo } from '@/components/logo';
 import { ThemeToggle } from '@/components/theme-toggle';
@@ -34,9 +34,11 @@ function AdminViewToggle() {
     );
   }
 
+  // Both buttons will now lead to a public-facing page.
+  // The distinction will be handled by application state later.
   return (
     <Button variant="outline" asChild>
-      <Link href="/admin">
+      <Link href="/feedback">
         <Shield className="mr-2 h-4 w-4" />
         Admin View
       </Link>
@@ -121,6 +123,7 @@ function AppHeader() {
                     <DropdownMenuSeparator />
                     <DropdownMenuGroup>
                       <DropdownMenuItem asChild><Link href="/profile">Profile</Link></DropdownMenuItem>
+                       <DropdownMenuItem asChild><Link href="/admin">Dashboard</Link></DropdownMenuItem>
                       <DropdownMenuItem>Settings</DropdownMenuItem>
                     </DropdownMenuGroup>
                     <DropdownMenuSeparator />
