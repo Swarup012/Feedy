@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Bell, Search } from 'lucide-react';
+import { Bell, Search, ExternalLink } from 'lucide-react';
 
 import { Logo } from '@/components/logo';
 import { ThemeToggle } from '@/components/theme-toggle';
@@ -17,7 +17,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 function AppHeader() {
-  const isLoggedIn = false; // We'll make this dynamic later
+  const isLoggedIn = true; // We'll make this dynamic later
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -92,6 +92,12 @@ function AppHeader() {
                     <DropdownMenuGroup>
                       <DropdownMenuItem asChild><Link href="/profile">Profile</Link></DropdownMenuItem>
                       <DropdownMenuItem asChild><Link href="/admin">Admin Dashboard</Link></DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href="/feedback" className="flex justify-between items-center w-full">
+                          Public View
+                          <ExternalLink className="h-4 w-4 text-muted-foreground" />
+                        </Link>
+                      </DropdownMenuItem>
                       <DropdownMenuItem>Settings</DropdownMenuItem>
                     </DropdownMenuGroup>
                     <DropdownMenuSeparator />
