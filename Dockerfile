@@ -1,35 +1,49 @@
-# 1. Base image for installing dependencies
+# ---------------------------
+# Stage 1: Base image
+# ---------------------------
 FROM node:20-alpine AS base
 WORKDIR /app
 
-# 2. Installer image
+# ---------------------------
+# Stage 2: Installer
+# ---------------------------
 FROM base AS installer
-COPY package.json ./
+COPY package.json package-lock.json* ./
 RUN npm install
 
-# 3. Builder image
+# ---------------------------
+# Stage 3: Builder (Production)
+# ---------------------------
 FROM base AS builder
 COPY --from=installer /app/node_modules ./node_modules
 COPY . .
 RUN npm run build
 
-# 4. Runner image
+# ---------------------------
+# Stage 4: Runner (Production)
+# ---------------------------
 FROM base AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
 
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
+RUN addgroup --system --gid 1001 nodejs \
+    && adduser --system --uid 1001 nextjs
 
+# Copy build outputs
 COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 USER nextjs
+EXPOSE 5173
+ENV PORT=5173
 
-EXPOSE 3000
-
-ENV PORT=3000
-
+# Default: run production server
 CMD ["node", "server.js"]
+
+# ---------------------------
+# Optional: Dev mode (hot reload)
+# ---------------------------
+# To enable dev mode, override CMD when running container:
+# docker run -it -p 3000:3000 -v $(pwd):/app -v /app/node_modules feedy npm run dev

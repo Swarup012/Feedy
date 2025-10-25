@@ -1,66 +1,123 @@
-import Link from 'next/link';
-import Image from 'next/image';
-import type { Feedback } from '@/lib/types';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
-import { MessageSquare, ArrowUp } from 'lucide-react';
+"use client";
+
+import { Post } from "@/services/postService";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { ArrowUp, MessageSquare } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
+import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 interface FeedbackCardProps {
-  feedback: Feedback;
+  feedback: Post;
 }
 
-const statusColors: { [key: string]: string } = {
-  open: 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300',
-  planned: 'bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300',
-  'in-progress': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300',
-  completed: 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300',
-  closed: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
+const STATUS_COLORS: Record<string, string> = {
+  open: "bg-gray-100 text-gray-800",
+  "under-review": "bg-blue-100 text-blue-800",
+  planned: "bg-purple-100 text-purple-800",
+  "in-progress": "bg-yellow-100 text-yellow-800",
+  completed: "bg-green-100 text-green-800",
+  closed: "bg-red-100 text-red-800",
+};
+
+const STATUS_LABELS: Record<string, string> = {
+  open: "Open",
+  "under-review": "Under Review",
+  planned: "Planned",
+  "in-progress": "In Progress",
+  completed: "Completed",
+  closed: "Closed",
 };
 
 export function FeedbackCard({ feedback }: FeedbackCardProps) {
+  const router = useRouter();
+
+  const handleClick = () => {
+    if (feedback.board) {
+      // Navigate to post detail page (you can create this later)
+      router.push(`/feedback/${feedback.board.slug}/${feedback.id}`);
+    }
+  };
+
   return (
-    <Card className="hover:shadow-md transition-shadow">
-      <CardContent className="p-4 flex items-start gap-4">
-        <div className="flex flex-col items-center gap-1">
-          <Button variant="outline" size="sm" className="flex flex-col h-auto p-2">
-            <ArrowUp className="h-4 w-4" />
-            <span className="text-xs font-bold">{feedback.voteCount}</span>
-          </Button>
-        </div>
-        <div className="flex-grow">
-          <div className="flex items-center justify-between mb-2">
-             <Link href={`/feedback/${feedback.id}`}>
-               <h3 className="font-semibold hover:text-primary transition-colors">{feedback.title}</h3>
-             </Link>
-             <div className="flex items-center gap-2">
-                <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                    <MessageSquare className="h-4 w-4" />
-                    <span>{feedback.commentCount}</span>
-                </div>
-                <Badge className={`border-transparent text-xs capitalize ${statusColors[feedback.status]}`}>{feedback.status.replace('-', ' ')}</Badge>
-             </div>
-          </div>
-          
-          <p className="text-sm text-muted-foreground line-clamp-2 mb-3">{feedback.description}</p>
-          
-          <div className="flex items-center justify-between text-xs text-muted-foreground">
-             <div className="flex items-center gap-2">
-              <Avatar className="h-6 w-6">
-                <AvatarImage src={feedback.author.avatarUrl} alt={feedback.author.name} />
-                <AvatarFallback>{feedback.author.name.charAt(0)}</AvatarFallback>
-              </Avatar>
-              <span>{feedback.author.name} &middot; {feedback.createdAt}</span>
+    <Card
+      className="hover:shadow-lg transition-shadow cursor-pointer"
+      onClick={handleClick}
+    >
+      <CardContent className="p-6">
+        <div className="space-y-4">
+          {/* Header */}
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex-1">
+              <h3 className="font-semibold text-lg mb-2">{feedback.title}</h3>
+              {feedback.description && (
+                <p className="text-sm text-gray-600 line-clamp-2">
+                  {feedback.description}
+                </p>
+              )}
             </div>
 
-            <div className="flex items-center gap-2">
-              <Badge variant="secondary">{feedback.category}</Badge>
-              {feedback.tags.map(tag => (
-                  <Badge key={tag} variant="outline" className="hidden sm:inline-flex capitalize">{tag}</Badge>
-              ))}
-            </div>
+            {/* Upvote Button */}
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-col h-auto px-3 py-2"
+              onClick={(e) => {
+                e.stopPropagation();
+                // TODO: Implement upvote (requires authentication)
+              }}
+            >
+              <ArrowUp className="h-4 w-4 mb-1" />
+              <span className="text-xs font-semibold">{feedback.upvotes}</span>
+            </Button>
           </div>
+
+          {/* Meta Info */}
+          <div className="flex items-center gap-3 text-sm text-gray-500 flex-wrap">
+            {/* Board Badge */}
+            {feedback.board && (
+              <div
+                className="flex items-center gap-1 px-2 py-1 rounded text-xs font-medium"
+                style={{
+                  backgroundColor: feedback.board.color + "20",
+                  color: feedback.board.color,
+                }}
+              >
+                <span>{feedback.board.icon}</span>
+                <span>{feedback.board.name}</span>
+              </div>
+            )}
+
+            {/* Status Badge */}
+            <Badge
+              variant="secondary"
+              className={cn("text-xs", STATUS_COLORS[feedback.status])}
+            >
+              {STATUS_LABELS[feedback.status]}
+            </Badge>
+
+            {/* Comments */}
+            <div className="flex items-center gap-1">
+              <MessageSquare className="h-4 w-4" />
+              <span>{feedback.comment_count} comments</span>
+            </div>
+
+            {/* Time */}
+            <span className="ml-auto">
+              {formatDistanceToNow(new Date(feedback.created_at), {
+                addSuffix: true,
+              })}
+            </span>
+          </div>
+
+          {/* Author */}
+          {feedback.author && (
+            <div className="text-xs text-gray-500 pt-2 border-t">
+              Posted by {feedback.author.name}
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>

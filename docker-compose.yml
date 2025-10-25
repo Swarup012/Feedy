@@ -1,0 +1,17 @@
+services:
+  nextjs-app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "5173:5173"
+    volumes:
+      - .:/app # Syncs your current code with container
+      - /app/node_modules # Prevents node_modules issues
+      - /app/.next # Caches Next.js builds (optional)
+    environment:
+      - NODE_ENV=development
+      - CHOKIDAR_USEPOLLING=true # Better file watching in Docker
+      - WATCHPACK_POLLING=true # Better hot reload in containers
+    stdin_open: true
+    tty: true

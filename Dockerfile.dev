@@ -1,0 +1,19 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Copy package files and install dependencies
+COPY package.json package-lock.json* ./
+RUN npm install
+
+# Copy project files
+COPY . .
+
+# Make local binaries available
+ENV PATH /app/node_modules/.bin:$PATH
+
+# Expose dev port
+EXPOSE 5173
+
+# Start dev server
+CMD ["npm", "run", "dev"]
