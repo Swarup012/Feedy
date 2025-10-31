@@ -25,7 +25,6 @@ import DashboardPage from "../dashboard/page";
 export default function AdminPage() {
   const { user, logout } = useAuth();
   const pathname = usePathname();
-  const [theme, setTheme] = useState<"light" | "dark">("light");
   const [isTaskbarVisible, setIsTaskbarVisible] = useState(false);
   const taskbarRef = useRef<HTMLDivElement>(null);
 
@@ -36,17 +35,6 @@ export default function AdminPage() {
     { href: "/admin/roadmap", label: "Roadmap", icon: "🗺️" },
   ];
 
-  // Initialize theme from localStorage or system preference
-  useEffect(() => {
-    const savedTheme = localStorage.getItem("theme") as "light" | "dark";
-    const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
-      .matches
-      ? "dark"
-      : "light";
-    const initialTheme = savedTheme || systemTheme;
-    setTheme(initialTheme);
-    document.documentElement.className = initialTheme;
-  }, []);
 
   // Mouse movement detection for taskbar
   useEffect(() => {
@@ -127,47 +115,6 @@ export default function AdminPage() {
               </p>
             </div>
 
-            <div className="flex flex-col sm:flex-row items-end sm:items-center gap-3">
-              {/* View Mode Toggle */}
-              <button
-                onClick={handleToggle}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-300"
-              >
-                {viewMode === "admin"
-                  ? "Switch to Public View"
-                  : "Switch to Admin View"}
-              </button>
-
-              {/* Theme Toggle Button */}
-              <button
-                onClick={toggleTheme}
-                className="p-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-300 shadow-sm"
-                aria-label={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
-              >
-                {theme === "light" ? (
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg">🌙</span>
-                    <span className="text-sm text-gray-600 dark:text-gray-400">
-                      Dark
-                    </span>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg">☀️</span>
-                    <span className="text-sm text-gray-600 dark:text-gray-400">
-                      Light
-                    </span>
-                  </div>
-                )}
-              </button>
-
-              <button
-                onClick={logout}
-                className="bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors text-sm"
-              >
-                Sign Out
-              </button>
-            </div>
           </header>
 
           {/* Stats Grid */}
