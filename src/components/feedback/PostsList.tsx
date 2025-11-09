@@ -8,6 +8,7 @@ import { Post } from "@/services/postService";
 import { Board } from "@/services/boardService";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
+import { PostsListSkeleton } from "./PostsListSkeleton";
 
 interface PostsListProps {
   posts: Post[];
@@ -79,9 +80,7 @@ export function PostsList({
       {/* Posts List */}
       <div className="flex-1 overflow-y-auto">
         {loading ? (
-          <div className="flex items-center justify-center h-full">
-            <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
-          </div>
+          <PostsListSkeleton />
         ) : posts.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center p-6">
             <div className="text-6xl mb-4">📝</div>

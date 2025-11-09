@@ -4,7 +4,9 @@ export interface User {
   id: string;
   email: string;
   name: string;
-  role: string;
+  role: string; // User's role (product_manager/founder/designer/etc) - for permissions AND content filtering
+  organization_role?: string; // Organization-specific role (owner/admin/member) - for organization permissions
+  organization_id?: string; // User's organization
   avatar_url?: string;
   created_at: string;
 }
@@ -32,20 +34,26 @@ export const authService = {
     name: string,
     email: string,
     password: string,
+    role?: string,
+    organizationId?: string,
   ): Promise<AuthResponse> {
     const response = await api.post<AuthResponse>("/api/auth/signup", {
       name,
       email,
       password,
+      role,
+      organizationId,
     });
     return response.data;
   },
 
   // Login
-  async login(email: string, password: string): Promise<AuthResponse> {
+  async login(email: string, password: string, organizationId?: string, userRole?: string): Promise<AuthResponse> {
     const response = await api.post<AuthResponse>("/api/auth/login", {
       email,
       password,
+      organizationId,
+      userRole,
     });
     return response.data;
   },

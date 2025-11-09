@@ -21,9 +21,11 @@ export default function BoardPage() {
   const [boards, setBoards] = useState<Board[]>([]);
   const [currentBoard, setCurrentBoard] = useState<Board | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
+  const [allPosts, setAllPosts] = useState<Post[]>([]); // Store all posts
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
   const [showCreatePost, setShowCreatePost] = useState(false);
+  const [selectedBoards, setSelectedBoards] = useState<string[]>([]); // Board filter
 
   // Filters
   const [filters, setFilters] = useState({
@@ -63,16 +65,33 @@ export default function BoardPage() {
     }
   };
 
-  // Fetch posts
+  // Fetch posts from all selected boards
   const fetchPosts = async () => {
     try {
       setLoading(true);
-      const response = await postService.getPostsByBoard(slug, filters);
-      setPosts(response.data.posts);
+      
+      // If no boards selected, fetch from current board only
+      if (selectedBoards.length === 0) {
+        const response = await postService.getPostsByBoard(slug, filters);
+        setPosts(response.data.posts);
+        setAllPosts(response.data.posts);
+      } else {
+        // Fetch posts from all selected boards
+        const boardsToFetch = boards.filter(b => selectedBoards.includes(b.id));
+        const postsPromises = boardsToFetch.map(board =>
+          postService.getPostsByBoard(board.slug, filters)
+        );
+        
+        const results = await Promise.all(postsPromises);
+        const combinedPosts = results.flatMap(r => r.data.posts);
+        
+        setPosts(combinedPosts);
+        setAllPosts(combinedPosts);
+      }
 
       // Auto-select first post if none selected
-      if (!selectedPost && response.data.posts.length > 0) {
-        setSelectedPost(response.data.posts[0]);
+      if (!selectedPost && posts.length > 0) {
+        setSelectedPost(posts[0]);
       }
     } catch (error: any) {
       toast({
@@ -91,8 +110,10 @@ export default function BoardPage() {
   }, [slug]);
 
   useEffect(() => {
-    fetchPosts();
-  }, [slug, filters]);
+    if (boards.length > 0) {
+      fetchPosts();
+    }
+  }, [slug, filters, selectedBoards, boards]);
 
   // Handle post created
   const handlePostCreated = (post: Post) => {
@@ -123,7 +144,7 @@ export default function BoardPage() {
   };
 
   return (
-    <ProtectedRoute allowedRoles={["admin"]}>
+    <ProtectedRoute allowedRoles={["owner", "admin"]}>
       <div className="flex h-screen overflow-hidden bg-gray-50">
         {/* LEFT SIDEBAR - Boards & Filters */}
         <LeftSidebar
@@ -131,7 +152,15 @@ export default function BoardPage() {
           currentBoardSlug={slug}
           filters={filters}
           onFilterChange={setFilters}
-          onCreateBoard={() => {}}
+          onCreateBoard={(newBoard) => {
+            setBoards([newBoard, ...boards]);
+            toast({
+              title: "Success!",
+              description: `Board "${newBoard.name}" created successfully`,
+            });
+          }}
+          selectedBoards={selectedBoards}
+          onBoardSelectionChange={setSelectedBoards}
         />
 
         {/* MIDDLE - Posts List */}

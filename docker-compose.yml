@@ -3,14 +3,15 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.dev
-    ports:
-      - "5173:5173"
+    network_mode: "host"
     volumes:
       - .:/app # Syncs your current code with container
       - /app/node_modules # Prevents node_modules issues
       - /app/.next # Caches Next.js builds (optional)
     environment:
       - NODE_ENV=development
+      - NEXT_PUBLIC_API_URL=http://localhost:3000
+      - BACKEND_URL=http://localhost:3000
       - CHOKIDAR_USEPOLLING=true # Better file watching in Docker
       - WATCHPACK_POLLING=true # Better hot reload in containers
     stdin_open: true

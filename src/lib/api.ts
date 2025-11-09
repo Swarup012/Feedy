@@ -13,16 +13,44 @@ const api: AxiosInstance = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
-  timeout: 10000,
+  timeout: 30000, // Increased to 30 seconds
 });
 
-// Request interceptor - Add auth token
+// Request interceptor - Add auth token and subdomain
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const token = TokenManager.getAccessToken();
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    
+    // Add subdomain header for multi-tenancy
+    if (config.headers && typeof window !== 'undefined') {
+      // Extract subdomain from current hostname
+      const hostname = window.location.hostname;
+      const parts = hostname.split(".");
+      let subdomain: string | null = null;
+      
+      // Handle production domains (e.g., acme.fady.com)
+      if (parts.length >= 3 && !hostname.includes("localhost")) {
+        subdomain = parts[0];
+        // Ignore www and common subdomains
+        if (subdomain === "www" || subdomain === "api" || subdomain === "admin") {
+          subdomain = null;
+        }
+      }
+      
+      // Handle development (localhost with subdomain simulation)
+      // e.g., acme.localhost:5173
+      if (hostname.includes("localhost") && parts.length > 1 && parts[0] !== "localhost") {
+        subdomain = parts[0];
+      }
+      
+      if (subdomain) {
+        config.headers['x-subdomain'] = subdomain;
+      }
+    }
+    
     return config;
   },
   (error: AxiosError) => {
@@ -46,9 +74,19 @@ api.interceptors.response.use(
         const refreshToken = TokenManager.getRefreshToken();
 
         if (!refreshToken) {
-          // No refresh token, logout user
-          TokenManager.clearTokens();
-          window.location.href = "/login";
+          // No refresh token - check if we're on a public/auth page
+          if (typeof window !== 'undefined') {
+            const currentPath = window.location.pathname;
+            const isAuthPage = currentPath.includes('/login') || 
+                             currentPath.includes('/signup') || 
+                             currentPath.includes('/forgot-password');
+            
+            // Only redirect if NOT on an auth page
+            if (!isAuthPage) {
+              TokenManager.clearTokens();
+              window.location.href = "/login";
+            }
+          }
           return Promise.reject(error);
         }
 
@@ -69,9 +107,19 @@ api.interceptors.response.use(
 
         return api(originalRequest);
       } catch (refreshError) {
-        // Refresh failed, logout user
-        TokenManager.clearTokens();
-        window.location.href = "/login";
+        // Refresh failed - check if we're on a public/auth page
+        if (typeof window !== 'undefined') {
+          const currentPath = window.location.pathname;
+          const isAuthPage = currentPath.includes('/login') || 
+                           currentPath.includes('/signup') || 
+                           currentPath.includes('/forgot-password');
+          
+          // Only redirect if NOT on an auth page
+          if (!isAuthPage) {
+            TokenManager.clearTokens();
+            window.location.href = "/login";
+          }
+        }
         return Promise.reject(refreshError);
       }
     }

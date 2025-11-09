@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { OrganizationSwitcher } from "@/components/organization/OrganizationSwitcher";
 import {useState,useEffect} from "react"
 
 export default function AdminLayout({
@@ -56,6 +57,7 @@ export default function AdminLayout({
     { name: "Feedback", path: "/admin/feedback" },
     { name: "Profile", path: "/admin/profile" },
     { name: "Roadmap", path: "/admin/roadmap" },
+    { name: "Explore", path: "/feedback"}
   ];
 
   return (
@@ -65,11 +67,14 @@ export default function AdminLayout({
 
 <nav className="fixed top-0 left-0 right-0 bg-white dark:bg-gray-800 border-b shadow-sm z-50">
         <div className="container mx-auto flex items-center justify-between px-6 py-4">
-          {/* Left side - Brand + Nav */}
-          <div className="flex items-center gap-10">
+          {/* Left side - Brand + Org Switcher + Nav */}
+          <div className="flex items-center gap-6">
             <Link href="/admin" className="text-xl font-bold tracking-tight text-gray-900 dark:text-white">
               Dashboard
             </Link>
+
+            {/* Organization Switcher */}
+            <OrganizationSwitcher />
 
             <div className="hidden md:flex items-center gap-6">
               {navItems.map((item) => (
@@ -136,10 +141,17 @@ export default function AdminLayout({
               <DropdownMenuItem onClick={() => router.push("/admin/profile")}>
                 Profile
               </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => router.push("/admin/organization")}>
+                Organization Settings
+              </DropdownMenuItem>
               <DropdownMenuItem onClick={() => router.push("/admin/feedback")}>
                 Feedback
               </DropdownMenuItem>
 
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => router.push("/create-organization")}>
+                + Create Organization
+              </DropdownMenuItem>
 
               <DropdownMenuSeparator />
               <DropdownMenuItem

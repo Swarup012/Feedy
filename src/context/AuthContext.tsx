@@ -16,11 +16,13 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   isAuthenticated: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string, organizationId?: string, userRole?: string) => Promise<void>;
   signup: (
     name: string,
     email: string,
     password: string,
+    role?: string,
+    organizationId?: string,
   ) => Promise<{ emailConfirmationRequired: boolean }>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
@@ -39,13 +41,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const checkAuth = useCallback(async () => {
     try {
       const token = TokenManager.getAccessToken();
+      const cachedUser = TokenManager.getUser();
 
       if (!token) {
         setLoading(false);
         return;
       }
 
-      // Verify token and get user
+      // If we have cached user data, use it immediately
+      if (cachedUser) {
+        setUser(cachedUser);
+      }
+
+      // Verify token and get fresh user data from server
       const response = await authService.getMe();
       setUser(response.data.user);
       TokenManager.setUser(response.data.user);
@@ -63,9 +71,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [checkAuth]);
 
   // Login function
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string, organizationId?: string, userRole?: string) => {
     try {
-      const response = await authService.login(email, password);
+      const response = await authService.login(email, password, organizationId, userRole);
 
       // Save tokens
       TokenManager.setTokens(
@@ -73,9 +81,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         response.data.refresh_token,
       );
 
-      // Save user
+      // Save user to state AND localStorage
       setUser(response.data.user);
       TokenManager.setUser(response.data.user);
+
+      // Small delay to ensure state is updated before redirect
+      await new Promise(resolve => setTimeout(resolve, 100));
 
       // Redirect based on role
       if (response.data.user.role === "admin") {
@@ -90,9 +101,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   // Signup function
-  const signup = async (name: string, email: string, password: string) => {
+  const signup = async (name: string, email: string, password: string, role?: string, organizationId?: string) => {
     try {
-      const response = await authService.signup(name, email, password);
+      const response = await authService.signup(name, email, password, role, organizationId);
 
       const emailConfirmationRequired =
         response.data.emailConfirmationRequired ?? false;

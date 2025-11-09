@@ -43,6 +43,14 @@ export const boardService = {
     return response.data;
   },
 
+  // ✅ NEW: Get public board by slug (no authentication required)
+  async getPublicBoardBySlug(
+    slug: string,
+  ): Promise<{ success: boolean; data: { board: Board } }> {
+    const response = await api.get(`/api/public/boards/${slug}`);
+    return response.data;
+  },
+
   // Get board by slug
   async getBoardBySlug(
     slug: string,

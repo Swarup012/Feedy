@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { PostDetailsSkeleton } from "./PostsListSkeleton";
 import {
   Select,
   SelectContent,
@@ -19,6 +20,7 @@ import {
   Trash2,
   Send,
   Loader2,
+  Eye,
 } from "lucide-react";
 import { Post, Comment, postService } from "@/services/postService";
 import { Board } from "@/services/boardService";
@@ -70,6 +72,7 @@ export function PostDetails({
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState("");
   const [loadingComments, setLoadingComments] = useState(false);
+  const [loadingPost, setLoadingPost] = useState(false);
   const [submittingComment, setSubmittingComment] = useState(false);
   const [upvoted, setUpvoted] = useState(false);
   const [upvoting, setUpvoting] = useState(false);
@@ -77,7 +80,8 @@ export function PostDetails({
   // Fetch comments when post changes
   useEffect(() => {
     if (post) {
-      fetchComments();
+      setLoadingPost(true);
+      fetchComments().finally(() => setLoadingPost(false));
     }
   }, [post?.id]);
 
@@ -232,6 +236,15 @@ export function PostDetails({
     return `${window.location.origin}/board/${currentBoard.slug}/${post.id}`;
   };
 
+  // Show skeleton while loading
+  if (loadingPost && post) {
+    return (
+      <div className="w-96 border-l bg-white flex flex-col">
+        <PostDetailsSkeleton />
+      </div>
+    );
+  }
+
   if (!post) {
     return (
       <div className="w-96 border-l bg-white flex items-center justify-center p-6">
@@ -307,8 +320,19 @@ export function PostDetails({
                   description: "Link copied to clipboard",
                 });
               }}
+              title="Copy link"
             >
               <ExternalLink className="h-3 w-3" />
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => {
+                window.open(getPublicLink());
+              }}
+              title="public view"
+            >
+              <Eye className="h-4 w-4" />
             </Button>
           </div>
         </div>

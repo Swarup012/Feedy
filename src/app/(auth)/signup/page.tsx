@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -16,7 +16,10 @@ import { Label } from "@/components/ui/label";
 import { Logo } from "@/components/logo";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { TokenManager } from "@/lib/tokenManager";
 import { Loader2, Eye, EyeOff } from "lucide-react";
+import api from "@/lib/api";
+import { RoleSelectionModal } from "@/components/RoleSelectionModal";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -31,6 +34,57 @@ export default function SignupPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [organizationId, setOrganizationId] = useState<string | null>(null);
+  const [organizationName, setOrganizationName] = useState<string | null>(null);
+  const [loadingOrg, setLoadingOrg] = useState(true);
+  const [showRoleModal, setShowRoleModal] = useState(false);
+  // Detect subdomain and fetch organization on mount
+  useEffect(() => {
+    const detectOrganization = async () => {
+      try {
+        // Get subdomain from hostname
+        const hostname = window.location.hostname;
+        const parts = hostname.split(".");
+        let subdomain: string | null = null;
+
+        // Handle localhost with subdomain (e.g., startups.localhost)
+        if (hostname.includes("localhost") && parts.length > 1 && parts[0] !== "localhost") {
+          subdomain = parts[0];
+        }
+        // Handle production (e.g., startups.fady.com)
+        else if (parts.length >= 3 && !hostname.includes("localhost")) {
+          subdomain = parts[0];
+          // Ignore www and common subdomains
+          if (subdomain === "www" || subdomain === "api" || subdomain === "admin") {
+            subdomain = null;
+          }
+        }
+
+        if (subdomain) {
+          console.log("🔍 Detected subdomain:", subdomain);
+          
+          // Fetch organization by subdomain
+          const response = await api.get(`/api/organizations/subdomain/${subdomain}`);
+          
+          if (response.data.success && response.data.data.organization) {
+            const org = response.data.data.organization;
+            setOrganizationId(org.id);
+            setOrganizationName(org.name);
+            console.log("✅ Found organization:", org.name, org.id);
+          }
+        } else {
+          console.log("ℹ️ No subdomain detected - user will create new organization");
+        }
+      } catch (error) {
+        console.error("❌ Error fetching organization:", error);
+        // If organization not found, user will create a new one
+      } finally {
+        setLoadingOrg(false);
+      }
+    };
+
+    detectOrganization();
+  }, []);
 
   // Validation
   const validateForm = () => {
@@ -87,6 +141,8 @@ export default function SignupPage() {
         formData.name,
         formData.email,
         formData.password,
+        undefined, // No role during signup - will be set in modal
+        organizationId || undefined, // Pass organizationId if joining existing org
       );
 
       if (emailConfirmationRequired) {
@@ -101,39 +157,62 @@ export default function SignupPage() {
           router.push("/login");
         }, 2000);
       } else {
-        toast({
-          title: "Welcome!",
-          description: "Your account has been created successfully.",
-        });
-        setTimeout(() => {
-          router.push("/login");
-        }, 2000);
-        // Router will be handled by AuthContext
+        // Show role selection modal instead of redirecting
+        setShowRoleModal(true);
       }
     } catch (error: any) {
-      toast({
-        title: "Signup failed",
-        description: error.message || "Something went wrong. Please try again.",
-        variant: "destructive",
-      });
+      // Check if email already exists
+      if (error.message?.includes('already registered') || error.message?.includes('already exists')) {
+        toast({
+          title: "Account Already Exists",
+          description: organizationName 
+            ? `You already have an account. Please login to join ${organizationName}.`
+            : "You already have an account. Please login instead.",
+          variant: "destructive",
+          duration: 5000,
+        });
+        
+        // Redirect to login after 2 seconds
+        setTimeout(() => {
+          router.push(`/login${organizationId ? `?orgId=${organizationId}&orgName=${organizationName}` : ''}`);
+        }, 2000);
+      } else {
+        toast({
+          title: "Signup failed",
+          description: error.message || "Something went wrong. Please try again.",
+          variant: "destructive",
+        });
+      }
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Card className="mx-auto max-w-sm">
-      <CardHeader className="text-center">
-        <Link href="/" className="inline-block mb-4">
-          <Logo className="h-8 w-8 mx-auto" />
-        </Link>
-        <CardTitle className="text-2xl">Sign Up</CardTitle>
-        <CardDescription>
-          Enter your information to create an account
-        </CardDescription>
-      </CardHeader>
+    <>
+      <Card className="mx-auto max-w-sm">
+        <CardHeader className="text-center">
+          <Link href="/" className="inline-block mb-4">
+            <Logo className="h-8 w-8 mx-auto" />
+          </Link>
+          <CardTitle className="text-2xl">Sign Up</CardTitle>
+          <CardDescription>
+            {loadingOrg ? (
+              "Loading..."
+            ) : organizationName ? (
+              <>Joining <strong>{organizationName}</strong></>
+            ) : (
+              "Enter your information to create an account"
+            )}
+          </CardDescription>
+        </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="grid gap-4">
+        {loadingOrg ? (
+          <div className="flex justify-center py-8">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="grid gap-4">
           {/* Name Field */}
           <div className="grid gap-2">
             <Label htmlFor="name">Full name</Label>
@@ -203,11 +282,14 @@ export default function SignupPage() {
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Creating account...
               </>
+            ) : organizationName ? (
+              `Join ${organizationName}`
             ) : (
               "Create an account"
             )}
           </Button>
         </form>
+        )}
 
         <div className="mt-4 text-center text-sm">
           Already have an account?{" "}
@@ -217,5 +299,24 @@ export default function SignupPage() {
         </div>
       </CardContent>
     </Card>
+
+      {/* Role Selection Modal - shown after successful signup */}
+      <RoleSelectionModal
+        open={showRoleModal}
+        organizationName={organizationName || undefined}
+        organizationId={organizationId || undefined}
+        isNewOrganization={!organizationId}
+        onComplete={() => {
+          setShowRoleModal(false);
+          // Refresh user data and redirect
+          const userData = TokenManager.getUser();
+          if (userData?.organization_id || organizationId) {
+            router.push("/dashboard");
+          } else {
+            router.push("/onboarding");
+          }
+        }}
+      />
+    </>
   );
 }
