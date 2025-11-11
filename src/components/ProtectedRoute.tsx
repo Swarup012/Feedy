@@ -42,7 +42,7 @@ export function ProtectedRoute({
     // Check role - Use organization_role instead of global role
     if (user) {
       // Use organization_role (owner/admin/member) instead of global role
-      const userOrgRole = user.organization_role || user.role; // Fallback to global role if org_role doesn't exist
+      const userOrgRole = user.organization_role  || user.role; // Fallback to global role if org_role doesn't exist
       const hasRole = allowedRoles.includes(userOrgRole);
       
       console.log("ProtectedRoute: User org role:", userOrgRole, "Required:", allowedRoles, "Has access:", hasRole);

@@ -88,8 +88,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Small delay to ensure state is updated before redirect
       await new Promise(resolve => setTimeout(resolve, 100));
 
-      // Redirect based on role
-      if (response.data.user.role === "admin") {
+      // Redirect based on organization_role (NOT user.role which is job role)
+      const orgRole = response.data.user.organization_role;
+      if (orgRole === "owner" || orgRole === "admin") {
         router.push("/admin");
       } else {
         router.push("/dashboard");
