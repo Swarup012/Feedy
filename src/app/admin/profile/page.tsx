@@ -48,7 +48,7 @@ import { RoleSelectionModal } from '@/components/RoleSelectionModal';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 export default function ProfilePage() {
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
@@ -135,8 +135,8 @@ export default function ProfilePage() {
     );
   }
 
-  // Check if role is missing
-  const hasIncompleteProfile = !user.role;
+  // Check if job_role is missing
+  const hasIncompleteProfile = !user.job_role;
 
   return (
     <div className="container mx-auto py-8 px-4 max-w-6xl">
@@ -195,20 +195,20 @@ export default function ProfilePage() {
                   
                   {/* Job Role Badge */}
                   <div className="mt-3 flex flex-col gap-2">
-                    {user.role ? (
+                    {user.job_role ? (
                       <Badge variant="secondary" className="justify-center">
-                        {user.role === 'product_manager' && <Briefcase className="h-3 w-3 mr-1" />}
-                        {user.role === 'founder' && <Rocket className="h-3 w-3 mr-1" />}
-                        {user.role === 'designer' && <Palette className="h-3 w-3 mr-1" />}
-                        {user.role === 'developer' && <Code className="h-3 w-3 mr-1" />}
-                        {user.role === 'marketer' && <TrendingUp className="h-3 w-3 mr-1" />}
-                        {user.role === 'other' && <UserCircle className="h-3 w-3 mr-1" />}
-                        {user.role === 'product_manager' && 'Product Manager'}
-                        {user.role === 'founder' && 'Founder'}
-                        {user.role === 'designer' && 'Designer'}
-                        {user.role === 'developer' && 'Developer'}
-                        {user.role === 'marketer' && 'Marketer'}
-                        {user.role === 'other' && 'Other'}
+                        {user.job_role === 'product_manager' && <Briefcase className="h-3 w-3 mr-1" />}
+                        {user.job_role === 'founder' && <Rocket className="h-3 w-3 mr-1" />}
+                        {user.job_role === 'designer' && <Palette className="h-3 w-3 mr-1" />}
+                        {user.job_role === 'developer' && <Code className="h-3 w-3 mr-1" />}
+                        {user.job_role === 'marketer' && <TrendingUp className="h-3 w-3 mr-1" />}
+                        {user.job_role === 'other' && <UserCircle className="h-3 w-3 mr-1" />}
+                        {user.job_role === 'product_manager' && 'Product Manager'}
+                        {user.job_role === 'founder' && 'Founder'}
+                        {user.job_role === 'designer' && 'Designer'}
+                        {user.job_role === 'developer' && 'Developer'}
+                        {user.job_role === 'marketer' && 'Marketer'}
+                        {user.job_role === 'other' && 'Other'}
                       </Badge>
                     ) : (
                       <Badge variant="outline" className="justify-center border-yellow-500 text-yellow-700">
@@ -373,32 +373,32 @@ export default function ProfilePage() {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <div className="p-2 rounded-lg bg-primary/10">
-                          {user.role === 'product_manager' && <Briefcase className="h-5 w-5 text-primary" />}
-                          {user.role === 'founder' && <Rocket className="h-5 w-5 text-primary" />}
-                          {user.role === 'designer' && <Palette className="h-5 w-5 text-primary" />}
-                          {user.role === 'developer' && <Code className="h-5 w-5 text-primary" />}
-                          {user.role === 'marketer' && <TrendingUp className="h-5 w-5 text-primary" />}
-                          {user.role === 'other' && <UserCircle className="h-5 w-5 text-primary" />}
-                          {!user.role && <AlertTriangle className="h-5 w-5 text-yellow-600" />}
+                          {user.job_role === 'product_manager' && <Briefcase className="h-5 w-5 text-primary" />}
+                          {user.job_role === 'founder' && <Rocket className="h-5 w-5 text-primary" />}
+                          {user.job_role === 'designer' && <Palette className="h-5 w-5 text-primary" />}
+                          {user.job_role === 'developer' && <Code className="h-5 w-5 text-primary" />}
+                          {user.job_role === 'marketer' && <TrendingUp className="h-5 w-5 text-primary" />}
+                          {user.job_role === 'other' && <UserCircle className="h-5 w-5 text-primary" />}
+                          {!user.job_role && <AlertTriangle className="h-5 w-5 text-yellow-600" />}
                         </div>
                         <div>
                           <p className="text-base font-medium text-gray-900">
-                            {user.role === 'product_manager' && 'Product Manager'}
-                            {user.role === 'founder' && 'Founder / CEO'}
-                            {user.role === 'designer' && 'Designer'}
-                            {user.role === 'developer' && 'Developer'}
-                            {user.role === 'marketer' && 'Marketer'}
-                            {user.role === 'other' && 'Other'}
-                            {!user.role && 'Not Set'}
+                            {user.job_role === 'product_manager' && 'Product Manager'}
+                            {user.job_role === 'founder' && 'Founder / CEO'}
+                            {user.job_role === 'designer' && 'Designer'}
+                            {user.job_role === 'developer' && 'Developer'}
+                            {user.job_role === 'marketer' && 'Marketer'}
+                            {user.job_role === 'other' && 'Other'}
+                            {!user.job_role && 'Not Set'}
                           </p>
                           <p className="text-sm text-gray-500">
-                            {user.role === 'product_manager' && 'Managing product development and roadmaps'}
-                            {user.role === 'founder' && 'Leading the company and making strategic decisions'}
-                            {user.role === 'designer' && 'Designing user experiences and interfaces'}
-                            {user.role === 'developer' && 'Building and maintaining software products'}
-                            {user.role === 'marketer' && 'Handling marketing and growth strategies'}
-                            {user.role === 'other' && 'Contributing in other ways'}
-                            {!user.role && 'Select your role to personalize your experience'}
+                            {user.job_role === 'product_manager' && 'Managing product development and roadmaps'}
+                            {user.job_role === 'founder' && 'Leading the company and making strategic decisions'}
+                            {user.job_role === 'designer' && 'Designing user experiences and interfaces'}
+                            {user.job_role === 'developer' && 'Building and maintaining software products'}
+                            {user.job_role === 'marketer' && 'Handling marketing and growth strategies'}
+                            {user.job_role === 'other' && 'Contributing in other ways'}
+                            {!user.job_role && 'Select your role to personalize your experience'}
                           </p>
                         </div>
                       </div>
@@ -407,7 +407,7 @@ export default function ProfilePage() {
                         size="sm"
                         onClick={() => setShowRoleModal(true)}
                       >
-                        {user.role ? 'Change Role' : 'Choose Role'}
+                        {user.job_role ? 'Change Role' : 'Choose Role'}
                       </Button>
                     </div>
                   </div>
@@ -625,15 +625,15 @@ export default function ProfilePage() {
       <RoleSelectionModal
         open={showRoleModal}
         isNewOrganization={false}
-        isChangingRole={!!user.role} // If user already has a role, they're changing it
-        onComplete={() => {
+        isChangingRole={!!user.job_role} // If user already has a job_role, they're changing it
+        onComplete={async () => {
           setShowRoleModal(false);
+          // Refresh user data from backend
+          await refreshUser();
           toast({
             title: "Profile Updated",
-            description: user.role ? "Your role has been updated successfully" : "Your role has been set successfully",
+            description: user.job_role ? "Your role has been updated successfully" : "Your role has been set successfully",
           });
-          // Reload page to refresh user data
-          window.location.reload();
         }}
       />
     </div>

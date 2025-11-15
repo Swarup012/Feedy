@@ -131,6 +131,51 @@ export function OrganizationProvider({ children }: { children: React.ReactNode }
     }
   };
 
+  // Auto-switch organization based on subdomain
+  useEffect(() => {
+    const autoSwitchBasedOnSubdomain = async () => {
+      // Only run if authenticated, subdomain exists, and organizations are loaded
+      if (!isAuthenticated || !subdomain || loading || organizations.length === 0 || !organization) {
+        return;
+      }
+
+      // Check if current organization matches subdomain
+      if (organization.subdomain === subdomain) {
+        console.log('✅ Already on correct organization for subdomain:', subdomain);
+        return;
+      }
+
+      // Find organization matching subdomain
+      const targetOrg = organizations.find(org => org.subdomain === subdomain);
+      
+      if (targetOrg) {
+        console.log('🔄 Subdomain mismatch detected. Switching from', organization.subdomain, 'to', subdomain);
+        
+        try {
+          // Switch to the organization that matches the subdomain
+          await fetch('/api/users/me/current-organization', {
+            method: 'PUT',
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ organizationId: targetOrg.id }),
+          });
+          
+          // Refresh organization data
+          await fetchOrganization();
+          console.log('✅ Switched to organization:', targetOrg.name);
+        } catch (error) {
+          console.error('❌ Failed to auto-switch organization:', error);
+        }
+      } else {
+        console.log('ℹ️ User is not a member of organization with subdomain:', subdomain);
+      }
+    };
+
+    autoSwitchBasedOnSubdomain();
+  }, [isAuthenticated, subdomain, loading, organizations, organization]);
+
   const switchOrganization = async (organizationId: string) => {
     try {
       const response = await fetch('/api/users/me/current-organization', {

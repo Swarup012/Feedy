@@ -33,7 +33,9 @@ interface Member {
   email: string;
   avatar_url?: string;
   organization_role: string;
+  job_role?: string;
   created_at: string;
+  joined_at?: string;
 }
 
 export default function OrganizationSettingsPage() {
@@ -92,18 +94,36 @@ export default function OrganizationSettingsPage() {
 
     try {
       setLoadingMembers(true);
+      console.log('🔍 Fetching members for organization:', organization.id);
+      
       const response = await fetch(`/api/organizations/${organization.id}/members`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
         },
       });
 
+      console.log('📡 Members API response status:', response.status);
+
       if (response.ok) {
         const data = await response.json();
+        console.log('✅ Members data received:', data);
         setMembers(data.data.members);
+      } else {
+        const errorData = await response.json();
+        console.error('❌ Failed to fetch members:', errorData);
+        toast({
+          title: 'Error',
+          description: errorData.error || 'Failed to load members',
+          variant: 'destructive',
+        });
       }
     } catch (error) {
-      console.error('Failed to fetch members:', error);
+      console.error('❌ Failed to fetch members:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to load members. Please try again.',
+        variant: 'destructive',
+      });
     } finally {
       setLoadingMembers(false);
     }

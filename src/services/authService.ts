@@ -4,9 +4,10 @@ export interface User {
   id: string;
   email: string;
   name: string;
-  role: string; // User's role (product_manager/founder/designer/etc) - for permissions AND content filtering
-  organization_role?: string; // Organization-specific role (owner/admin/member) - for organization permissions
-  organization_id?: string; // User's organization
+  current_organization_id?: string; // Which organization they're currently viewing
+  organization_role?: string; // Permission role in current org (owner/admin/member) - from organization_members table
+  job_role?: string; // Job function (founder/product_manager/designer/developer/marketer) - from organization_members table
+  organization_id?: string; // Alias for current_organization_id (for backward compatibility)
   avatar_url?: string;
   created_at: string;
 }

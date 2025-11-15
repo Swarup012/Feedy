@@ -17,9 +17,10 @@ import { Logo } from "@/components/logo";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { TokenManager } from "@/lib/tokenManager";
-import { Loader2, Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import api from "@/lib/api";
 import { RoleSelectionModal } from "@/components/RoleSelectionModal";
+import { LoadingAnimation } from "@/components/LoadingAnimation";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -157,8 +158,14 @@ export default function SignupPage() {
           router.push("/login");
         }, 2000);
       } else {
-        // Show role selection modal instead of redirecting
-        setShowRoleModal(true);
+        // Only show role modal if joining an existing organization
+        // New users will set their role during onboarding when they create their org
+        if (organizationId) {
+          setShowRoleModal(true);
+        } else {
+          // New user - go directly to onboarding to create organization
+          router.push("/onboarding");
+        }
       }
     } catch (error: any) {
       // Check if email already exists
@@ -209,7 +216,7 @@ export default function SignupPage() {
       <CardContent>
         {loadingOrg ? (
           <div className="flex justify-center py-8">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <LoadingAnimation width={32} height={32} />
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="grid gap-4">
@@ -279,7 +286,7 @@ export default function SignupPage() {
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <LoadingAnimation width={16} height={16} className="mr-2" />
                 Creating account...
               </>
             ) : organizationName ? (
@@ -310,7 +317,8 @@ export default function SignupPage() {
           setShowRoleModal(false);
           // Refresh user data and redirect
           const userData = TokenManager.getUser();
-          if (userData?.organization_id || organizationId) {
+          // Use current_organization_id instead of organization_id (which was deleted)
+          if (userData?.current_organization_id || organizationId) {
             router.push("/dashboard");
           } else {
             router.push("/onboarding");

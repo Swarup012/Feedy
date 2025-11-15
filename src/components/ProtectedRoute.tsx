@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
+import { LoadingAnimation } from "@/components/LoadingAnimation";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -39,10 +40,19 @@ export function ProtectedRoute({
       return;
     }
 
-    // Check role - Use organization_role instead of global role
+    // Check role - Use organization_role from organization_members table
     if (user) {
-      // Use organization_role (owner/admin/member) instead of global role
-      const userOrgRole = user.organization_role  || user.role; // Fallback to global role if org_role doesn't exist
+      // Get organization_role (owner/admin/member) from organization_members table
+      const userOrgRole = user.organization_role;
+      
+      // If no organization_role, user is not a member of any organization
+      if (!userOrgRole) {
+        console.log("ProtectedRoute: No organization_role found, redirecting to unauthorized");
+        router.push("/unauthorized");
+        setShouldRender(false);
+        return;
+      }
+      
       const hasRole = allowedRoles.includes(userOrgRole);
       
       console.log("ProtectedRoute: User org role:", userOrgRole, "Required:", allowedRoles, "Has access:", hasRole);
@@ -65,7 +75,7 @@ export function ProtectedRoute({
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+        <LoadingAnimation width={48} height={48} />
       </div>
     );
   }
@@ -74,7 +84,7 @@ export function ProtectedRoute({
   if (!shouldRender) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+        <LoadingAnimation width={48} height={48} />
       </div>
     );
   }

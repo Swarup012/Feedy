@@ -27,8 +27,8 @@ function AdminViewToggle() {
   const { user } = useAuth();
   const isAdminView = pathname.startsWith("/admin");
 
-  // Only show for admin users
-  if (!user || user.role !== "admin") return null;
+  // Only show for admin/owner users (organization_role)
+  if (!user || (user.organization_role !== "admin" && user.organization_role !== "owner")) return null;
 
   if (isAdminView) {
     return (
@@ -89,7 +89,7 @@ function AppHeader() {
               Feedback
             </Link>
             <Link
-              href="/roadmap"
+              href="/roadmap/testing"
               className="transition-colors hover:text-foreground/80 text-foreground"
             >
               Roadmap
@@ -163,7 +163,7 @@ function AppHeader() {
                       <DropdownMenuItem asChild>
                         <Link href="/profile">Profile</Link>
                       </DropdownMenuItem>
-                      {user.role === "admin" && (
+                      {(user.organization_role === "admin" || user.organization_role === "owner") && (
                         <DropdownMenuItem asChild>
                           <Link href="/admin/feedback">Admin Dashboard</Link>
                         </DropdownMenuItem>

@@ -57,6 +57,12 @@ export default function OnboardingFlow() {
   };
 
   const handleNext = async () => {
+    // Validate step 1 - Company name is required
+    if (currentStep === 1 && !data.companyName?.trim()) {
+      alert('Please enter your company name to continue');
+      return;
+    }
+    
     if (currentStep < TOTAL_STEPS) {
       setCurrentStep(currentStep + 1);
       // Save progress to backend

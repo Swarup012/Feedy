@@ -94,17 +94,6 @@ export default function AdminLayout({
             </div>
             
               <button
-                onClick={handleToggle}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-300"
-              >
-                {viewMode === "admin"
-                  ? "👁️ public view"
-                  : "Switch to Admin View"}
-              </button>
-
-
-
-              <button
                 onClick={toggleTheme}
                 className="p-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-300 shadow-sm"
                 aria-label={`Switch to ${theme === "light" ? "dark" : "light"} mode`}

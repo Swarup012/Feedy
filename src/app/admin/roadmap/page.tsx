@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { roadmapService, RoadmapItem } from '@/services/roadmapService';
 import { boardService } from '@/services/boardService';
 import RoadmapStats from '@/components/roadmap/RoadmapStats';
+import { LoadingAnimation } from '@/components/LoadingAnimation';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -190,7 +191,7 @@ export default function AdminRoadmapPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-96">
-        <div className="text-lg text-gray-500">Loading roadmap...</div>
+        <LoadingAnimation width={64} height={64} />
       </div>
     );
   }

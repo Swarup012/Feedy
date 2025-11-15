@@ -1,6 +1,7 @@
 "use client"
 import React from 'react';
 import { ArrowRight, MessageSquare, Lightbulb, Zap, CheckCircle, Star, Users, TrendingUp, Sparkles } from 'lucide-react';
+import { Logo } from '@/components/logo';
 
 export default function LandingPage() {
   const primaryColor = '#2563eb';
@@ -51,9 +52,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
             <div className="flex items-center space-x-2">
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-primary">
-                <Sparkles className="h-5 w-5 text-white" />
-              </div>
+              <Logo width={36} height={36} />
               <span className="text-xl font-bold text-primary">
                 Faddy
               </span>
@@ -63,7 +62,7 @@ export default function LandingPage() {
               <a href="/feedback" className="text-sm font-medium text-slate-600 hover-primary transition-colors">
                 Feedback
               </a>
-              <a href="/roadmap" className="text-sm font-medium text-slate-600 hover-primary transition-colors">
+              <a href="/roadmap/testing" className="text-sm font-medium text-slate-600 hover-primary transition-colors">
                 Roadmap
               </a>
               <a href="/changelog" className="text-sm font-medium text-slate-600 hover-primary transition-colors">

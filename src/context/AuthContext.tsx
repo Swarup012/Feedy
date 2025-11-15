@@ -73,6 +73,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Login function
   const login = async (email: string, password: string, organizationId?: string, userRole?: string) => {
     try {
+      console.log('🔐 Login called with organizationId:', organizationId);
       const response = await authService.login(email, password, organizationId, userRole);
 
       // Save tokens
@@ -85,14 +86,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(response.data.user);
       TokenManager.setUser(response.data.user);
 
+      console.log('✅ User logged in:', {
+        email: response.data.user.email,
+        current_org: response.data.user.current_organization_id,
+        org_role: response.data.user.organization_role
+      });
+
       // Small delay to ensure state is updated before redirect
       await new Promise(resolve => setTimeout(resolve, 100));
 
       // Redirect based on organization_role (NOT user.role which is job role)
       const orgRole = response.data.user.organization_role;
       if (orgRole === "owner" || orgRole === "admin") {
+        console.log('🔄 Redirecting to /admin');
         router.push("/admin");
       } else {
+        console.log('🔄 Redirecting to /dashboard');
         router.push("/dashboard");
       }
     } catch (error) {

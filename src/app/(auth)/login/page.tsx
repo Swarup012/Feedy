@@ -9,9 +9,10 @@ import { Label } from "@/components/ui/label";
 import { Logo } from "@/components/logo";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Eye, EyeOff, Sparkles, ArrowRight } from "lucide-react";
+import { Eye, EyeOff, ArrowRight } from "lucide-react";
 import api from "@/lib/api";
 import { RoleSelectionModal } from "@/components/RoleSelectionModal";
+import { LoadingAnimation } from "@/components/LoadingAnimation";
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -40,44 +41,62 @@ export default function LoginPage() {
         const orgName = searchParams.get('orgName');
         
         if (orgId) {
+          console.log("🔍 Organization from URL params:", orgName, orgId);
           setOrganizationId(orgId);
           setOrganizationName(orgName);
+          setIsJoiningOrg(true);
           return;
         }
 
         // Second priority: Detect from subdomain
         if (typeof window !== 'undefined') {
           const hostname = window.location.hostname;
+          console.log("🌐 Current hostname:", hostname);
           const parts = hostname.split('.');
+          console.log("🔍 Hostname parts:", parts);
           let subdomain: string | null = null;
 
-          // Handle localhost with subdomain (e.g., startups.localhost)
-          if (hostname.includes('localhost') && parts.length > 1) {
+          // Handle localhost with subdomain (e.g., notion.localhost)
+          if (hostname.includes('localhost') && parts.length > 1 && parts[0] !== 'localhost') {
             subdomain = parts[0];
+            console.log("🔍 Detected localhost subdomain:", subdomain);
           } else if (parts.length >= 3) {
-            // Handle production domains (e.g., startups.yourdomain.com)
+            // Handle production domains (e.g., notion.yourdomain.com)
             subdomain = parts[0];
             // Ignore www and common subdomains
             if (subdomain === "www" || subdomain === "api" || subdomain === "admin") {
+              console.log("ℹ️ Ignoring reserved subdomain:", subdomain);
               subdomain = null;
+            } else {
+              console.log("🔍 Detected production subdomain:", subdomain);
             }
           }
 
           if (subdomain) {
-            console.log("🔍 Detected subdomain:", subdomain);
+            console.log("📡 Fetching organization for subdomain:", subdomain);
 
             // Fetch organization by subdomain
             const response = await api.get(`/api/organizations/subdomain/${subdomain}`);
-            if (response.data.success && response.data.data) {
-              setOrganizationId(response.data.data.id);
-              setOrganizationName(response.data.data.name);
-              setIsJoiningOrg(true); // Flag to show role selection
-              console.log("✅ Organization detected:", response.data.data.name);
+            console.log("📡 Subdomain API response:", response.data);
+            
+            if (response.data.success && response.data.data && response.data.data.organization) {
+              const org = response.data.data.organization; // Extract nested organization object
+              console.log("✅ Organization found:", org);
+              setOrganizationId(org.id);
+              setOrganizationName(org.name);
+              setIsJoiningOrg(true); // Flag to show role selection if needed
+              console.log("✅ Organization state set:", org.name, "ID:", org.id);
+            } else {
+              console.log("❌ No organization found for subdomain:", subdomain);
+              console.log("Response structure:", response.data);
             }
+          } else {
+            console.log("ℹ️ No subdomain detected - standard login");
           }
         }
       } catch (error: any) {
-        console.error("Error detecting organization:", error);
+        console.error("❌ Error detecting organization:", error);
+        console.error("Error details:", error.response?.data || error.message);
       }
     };
 
@@ -120,19 +139,30 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      // Login first, then handle organization joining via modal
+      console.log("🔐 Submitting login with:", {
+        email: formData.email,
+        organizationId: organizationId,
+        organizationName: organizationName,
+        isJoiningOrg: isJoiningOrg
+      });
+
+      // If accessing via subdomain, pass organizationId to switch to that org
+      // If joining for first time, show role modal; otherwise just switch context
       const response = await login(
         formData.email, 
-        formData.password
+        formData.password,
+        organizationId || undefined // Pass organizationId from subdomain
       );
 
-      // If joining organization, show role modal
+      // If joining organization for the first time, show role modal
       if (isJoiningOrg && organizationId) {
         setShowRoleModal(true);
       } else {
         toast({
           title: "Welcome back!",
-          description: "You have successfully logged in.",
+          description: organizationName 
+            ? `Switched to ${organizationName}` 
+            : "You have successfully logged in.",
         });
       }
     } catch (error: any) {
@@ -159,8 +189,8 @@ export default function LoginPage() {
           {/* Logo and Back to Home */}
           <div className="text-center mb-8">
             <Link href="/" className="inline-flex items-center space-x-2 mb-6 group">
-              <div className="w-10 h-10 bg-[#2563eb] rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                <Sparkles className="h-5 w-5 text-white" />
+              <div className="flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                <Logo width={40} height={40} />
               </div>
               <span className="text-xl font-bold text-[#2563eb]">Faddy</span>
             </Link>
@@ -169,12 +199,33 @@ export default function LoginPage() {
           {/* Login Card */}
           <div className="bg-white/80 backdrop-blur-xl rounded-3xl p-8 border border-slate-200/60 shadow-2xl shadow-slate-900/5">
             <div className="text-center mb-8">
-              <h1 className="text-3xl font-bold text-slate-900 mb-2">Welcome Back</h1>
+              <h1 className="text-3xl font-bold text-slate-900 mb-2">
+                {organizationName ? `Join ${organizationName}` : 'Welcome Back'}
+              </h1>
               <p className="text-slate-600">
                 {organizationName 
-                  ? `Login to join ${organizationName}` 
+                  ? `Login to access ${organizationName}'s workspace` 
                   : 'Enter your credentials to access your account'}
               </p>
+              {organizationId && (
+                <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                  <p className="text-sm text-blue-800">
+                    🏢 You're logging into <strong>{organizationName}</strong>
+                  </p>
+                  <p className="text-xs text-blue-600 mt-1">
+                    Org ID: {organizationId}
+                  </p>
+                </div>
+              )}
+              
+              {/* Debug info - remove in production */}
+              {process.env.NODE_ENV === 'development' && (
+                <div className="mt-2 p-2 bg-gray-100 border border-gray-300 rounded text-xs">
+                  <p>Debug: organizationId = {organizationId || 'null'}</p>
+                  <p>Debug: organizationName = {organizationName || 'null'}</p>
+                  <p>Debug: hostname = {typeof window !== 'undefined' ? window.location.hostname : 'N/A'}</p>
+                </div>
+              )}
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -252,7 +303,7 @@ export default function LoginPage() {
               >
                 {loading ? (
                   <>
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                    <LoadingAnimation width={20} height={20} className="mr-2" />
                     Logging in...
                   </>
                 ) : (
