@@ -19,7 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { List, LayoutGrid, Loader2 } from "lucide-react";
+import { List, LayoutGrid, Loader2, ArrowLeft } from "lucide-react";
 import { SubmitFeedback } from "./components/submit-feedback";
 
 const feedbackStatuses = [
@@ -191,6 +191,20 @@ export default function FeedbackPage() {
 
   return (
     <div className="container mx-auto py-8">
+      {/* Back to Dashboard Button - Only for logged-in users */}
+      {isAuthenticated && (
+        <div className="mb-6">
+          <Button
+            variant="ghost"
+            onClick={() => router.push("/dashboard")}
+            className="gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Dashboard
+          </Button>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
         {/* Sidebar - Filters */}
         <aside className="md:col-span-1">

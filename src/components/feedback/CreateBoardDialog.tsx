@@ -21,9 +21,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2, Check, Lock, Globe, Sparkles } from "lucide-react";
+import { Loader2, Check, Lock, Globe, Sparkles, Users, Briefcase, Rocket, Palette, Code, TrendingUp, User } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { boardService, Board, BoardCategory } from "@/services/boardService";
 import { useToast } from "@/hooks/use-toast";
+import { IconPicker, IconDisplay } from "@/components/ui/icon-picker";
 
 interface CreateBoardDialogProps {
   open: boolean;
@@ -45,26 +47,14 @@ const BOARD_COLORS = [
   { name: "Gray", value: "#6b7280" },
 ];
 
-// Predefined emojis
-const BOARD_ICONS = [
-  "💡",
-  "🚀",
-  "🐛",
-  "💬",
-  "📝",
-  "🎯",
-  "⭐",
-  "🔥",
-  "💼",
-  "🎨",
-  "🔔",
-  "📊",
-  "🏆",
-  "💰",
-  "🎁",
-  "🔧",
-  "📱",
-  "💻",
+// Job roles for targeting with Lucide icons
+const JOB_ROLES = [
+  { value: "product_manager", label: "Product Manager", icon: "Briefcase" },
+  { value: "founder", label: "Founder / CEO", icon: "Rocket" },
+  { value: "designer", label: "Designer", icon: "Palette" },
+  { value: "developer", label: "Developer", icon: "Code" },
+  { value: "marketer", label: "Marketer", icon: "TrendingUp" },
+  { value: "other", label: "Other", icon: "User" },
 ];
 
 export function CreateBoardDialog({
@@ -78,6 +68,7 @@ export function CreateBoardDialog({
   const [categories, setCategories] = useState<BoardCategory[]>([]);
   const [customCategory, setCustomCategory] = useState("");
   const [showCustomCategory, setShowCustomCategory] = useState(false);
+  const [showIconPicker, setShowIconPicker] = useState(false); // Icon picker state
 
   // Form state
   const [formData, setFormData] = useState({
@@ -86,7 +77,8 @@ export function CreateBoardDialog({
     is_private: false,
     category: "", // ✅ ADD CATEGORY
     color: "#6366f1",
-    icon: "💡",
+    icon: "Lightbulb", // Default to Lucide icon name
+    visible_to_roles: [] as string[], // ✅ ADD JOB ROLES FILTER
   });
 
   const [slug, setSlug] = useState("");
@@ -221,6 +213,24 @@ export function CreateBoardDialog({
     }
   };
 
+  // Handle role selection
+  const handleRoleToggle = (roleValue: string) => {
+    setFormData((prev) => {
+      const currentRoles = prev.visible_to_roles;
+      if (currentRoles.includes(roleValue)) {
+        return {
+          ...prev,
+          visible_to_roles: currentRoles.filter((r) => r !== roleValue),
+        };
+      } else {
+        return {
+          ...prev,
+          visible_to_roles: [...currentRoles, roleValue],
+        };
+      }
+    });
+  };
+
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -272,6 +282,7 @@ export function CreateBoardDialog({
         category: "",
         color: "#6366f1",
         icon: "💡",
+        visible_to_roles: [],
       });
       setCustomCategory("");
       setShowCustomCategory(false);
@@ -290,11 +301,11 @@ export function CreateBoardDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto dark:bg-gray-900 dark:border-gray-700">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>Create New Board</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="dark:text-white">Create New Board</DialogTitle>
+            <DialogDescription className="dark:text-gray-400">
               Create a feedback board to organize posts by category
             </DialogDescription>
           </DialogHeader>
@@ -302,7 +313,7 @@ export function CreateBoardDialog({
           <div className="space-y-6 py-4">
             {/* Board Name */}
             <div className="space-y-2">
-              <Label htmlFor="name">
+              <Label htmlFor="name" className="dark:text-gray-300">
                 Board Name <span className="text-red-500">*</span>
               </Label>
               <Input
@@ -314,23 +325,24 @@ export function CreateBoardDialog({
                 }
                 maxLength={100}
                 required
+                className="dark:bg-gray-800 dark:border-gray-700 dark:text-white"
               />
 
               {/* URL Preview */}
               {slug && (
                 <div className="flex items-center gap-2 text-sm">
-                  <span className="text-gray-500">URL:</span>
-                  <code className="bg-gray-100 px-2 py-1 rounded text-gray-700">
+                  <span className="text-gray-500 dark:text-gray-400">URL:</span>
+                  <code className="bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded text-gray-700 dark:text-gray-300">
                     /board/{slug}
                   </code>
                   {checkingSlug && (
-                    <Loader2 className="h-3 w-3 animate-spin text-gray-400" />
+                    <Loader2 className="h-3 w-3 animate-spin text-gray-400 dark:text-gray-500" />
                   )}
                   {!checkingSlug && slugAvailable === true && (
                     <Check className="h-4 w-4 text-green-500" />
                   )}
                   {!checkingSlug && slugAvailable === false && (
-                    <span className="text-red-500 text-xs">Already taken</span>
+                    <span className="text-red-500 dark:text-red-400 text-xs">Already taken</span>
                   )}
                 </div>
               )}
@@ -391,7 +403,7 @@ export function CreateBoardDialog({
 
             {/* Description */}
             <div className="space-y-2">
-              <Label htmlFor="description">Description (optional)</Label>
+              <Label htmlFor="description" className="dark:text-gray-300">Description (optional)</Label>
               <Textarea
                 id="description"
                 placeholder="What is this board for?"
@@ -401,22 +413,23 @@ export function CreateBoardDialog({
                 }
                 rows={3}
                 maxLength={500}
+                className="dark:bg-gray-800 dark:border-gray-700 dark:text-white"
               />
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-gray-500 dark:text-gray-400">
                 {formData.description.length}/500 characters
               </p>
             </div>
 
             {/* Privacy Setting */}
             <div className="space-y-3">
-              <Label>Privacy</Label>
+              <Label className="dark:text-gray-300">Privacy</Label>
               <RadioGroup
                 value={formData.is_private ? "private" : "public"}
                 onValueChange={(value) =>
                   setFormData({ ...formData, is_private: value === "private" })
                 }
               >
-                <div className="flex items-center space-x-2 border rounded-lg p-3 cursor-pointer hover:bg-gray-50">
+                <div className="flex items-center space-x-2 border border-gray-200 dark:border-gray-700 rounded-lg p-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800">
                   <RadioGroupItem value="public" id="public" />
                   <div className="flex-1">
                     <label
@@ -425,8 +438,8 @@ export function CreateBoardDialog({
                     >
                       <Globe className="h-4 w-4 text-green-500" />
                       <div>
-                        <p className="font-medium">Public</p>
-                        <p className="text-sm text-gray-500">
+                        <p className="font-medium text-gray-900 dark:text-white">Public</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
                           Anyone can view and post feedback
                         </p>
                       </div>
@@ -434,7 +447,7 @@ export function CreateBoardDialog({
                   </div>
                 </div>
 
-                <div className="flex items-center space-x-2 border rounded-lg p-3 cursor-pointer hover:bg-gray-50">
+                <div className="flex items-center space-x-2 border border-gray-200 dark:border-gray-700 rounded-lg p-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800">
                   <RadioGroupItem value="private" id="private" />
                   <div className="flex-1">
                     <label
@@ -443,8 +456,8 @@ export function CreateBoardDialog({
                     >
                       <Lock className="h-4 w-4 text-orange-500" />
                       <div>
-                        <p className="font-medium">Private</p>
-                        <p className="text-sm text-gray-500">
+                        <p className="font-medium text-gray-900 dark:text-white">Private</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
                           Only invited members can access
                         </p>
                       </div>
@@ -452,6 +465,46 @@ export function CreateBoardDialog({
                   </div>
                 </div>
               </RadioGroup>
+            </div>
+
+            {/* Target Team / Visible to Roles */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <Users className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                <Label className="dark:text-gray-300">Target Team (Optional)</Label>
+              </div>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Select which job roles can see this board. Leave empty for all team members.
+              </p>
+              <div className="grid grid-cols-2 gap-3">
+                {JOB_ROLES.map((role) => (
+                  <div
+                    key={role.value}
+                    className="flex items-center space-x-2 border rounded-lg p-3 hover:bg-gray-50"
+                  >
+                    <Checkbox
+                      id={role.value}
+                      checked={formData.visible_to_roles.includes(role.value)}
+                      onCheckedChange={() => handleRoleToggle(role.value)}
+                    />
+                    <label
+                      htmlFor={role.value}
+                      className="flex items-center gap-2 cursor-pointer flex-1"
+                    >
+                      <IconDisplay iconName={role.icon} className="h-4 w-4 text-gray-600" />
+                      <span className="text-sm font-medium">{role.label}</span>
+                    </label>
+                  </div>
+                ))}
+              </div>
+              {formData.visible_to_roles.length > 0 && (
+                <div className="flex items-center gap-2 p-2 bg-blue-50 border border-blue-200 rounded-lg">
+                  <Users className="h-4 w-4 text-blue-600" />
+                  <p className="text-sm text-blue-800">
+                    Visible to {formData.visible_to_roles.length} role{formData.visible_to_roles.length > 1 ? 's' : ''}
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Board Color */}
@@ -479,52 +532,50 @@ export function CreateBoardDialog({
 
             {/* Board Icon */}
             <div className="space-y-2">
-              <Label>Board Icon</Label>
-              <div className="grid grid-cols-9 gap-2">
-                {BOARD_ICONS.map((icon) => (
-                  <button
-                    key={icon}
-                    type="button"
-                    onClick={() => setFormData({ ...formData, icon })}
-                    className={`h-10 w-10 rounded-lg border-2 text-xl flex items-center justify-center transition-all ${
-                      formData.icon === icon
-                        ? "border-gray-900 bg-gray-100 scale-110"
-                        : "border-gray-200 hover:border-gray-400 hover:bg-gray-50"
-                    }`}
-                  >
-                    {icon}
-                  </button>
-                ))}
-              </div>
+              <Label className="dark:text-gray-300">Board Icon</Label>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowIconPicker(true)}
+                className="w-full justify-start h-12 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:bg-gray-700"
+              >
+                <div
+                  className="h-8 w-8 rounded-lg flex items-center justify-center mr-3"
+                  style={{ backgroundColor: `${formData.color}20` }}
+                >
+                  <IconDisplay iconName={formData.icon} className="h-5 w-5" style={{ color: formData.color }} />
+                </div>
+                <span>{formData.icon || "Choose Icon"}</span>
+              </Button>
             </div>
 
             {/* Preview */}
             <div className="space-y-2">
-              <Label>Preview</Label>
+              <Label className="dark:text-gray-300">Preview</Label>
               <div
-                className="border rounded-lg p-4 flex items-center gap-3"
+                className="border rounded-lg p-4 flex items-center gap-3 dark:border-gray-700"
                 style={{ borderColor: formData.color }}
               >
                 <div
-                  className="h-12 w-12 rounded-lg flex items-center justify-center text-2xl"
+                  className="h-12 w-12 rounded-lg flex items-center justify-center"
                   style={{ backgroundColor: formData.color + "20" }}
                 >
-                  {formData.icon}
+                  <IconDisplay iconName={formData.icon} className="h-6 w-6" style={{ color: formData.color }} />
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-semibold flex items-center gap-2">
+                  <h3 className="font-semibold flex items-center gap-2 text-gray-900 dark:text-white">
                     {formData.name || "Board Name"}
                     {formData.is_private && (
-                      <Lock className="h-3 w-3 text-gray-400" />
+                      <Lock className="h-3 w-3 text-gray-400 dark:text-gray-500" />
                     )}
                   </h3>
                   {(formData.category || customCategory) && (
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
                       Category:{" "}
                       {showCustomCategory ? customCategory : formData.category}
                     </p>
                   )}
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
                     {formData.description || "Board description"}
                   </p>
                 </div>
@@ -538,6 +589,7 @@ export function CreateBoardDialog({
               variant="outline"
               onClick={() => onOpenChange(false)}
               disabled={creating}
+              className="dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:bg-gray-700"
             >
               Cancel
             </Button>
@@ -557,6 +609,14 @@ export function CreateBoardDialog({
           </DialogFooter>
         </form>
       </DialogContent>
+
+      {/* Icon Picker Dialog */}
+      <IconPicker
+        open={showIconPicker}
+        onOpenChange={setShowIconPicker}
+        onSelectIcon={(iconName) => setFormData({ ...formData, icon: iconName })}
+        currentIcon={formData.icon}
+      />
     </Dialog>
   );
 }

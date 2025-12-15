@@ -9,6 +9,7 @@ import { Board } from "@/services/boardService";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import { PostsListSkeleton } from "./PostsListSkeleton";
+import { IconDisplay } from "@/components/ui/icon-picker";
 
 interface PostsListProps {
   posts: Post[];
@@ -48,15 +49,24 @@ export function PostsList({
   onSearchChange,
 }: PostsListProps) {
   return (
-    <div className="flex-1 flex flex-col bg-white border-r">
+    <div className="flex flex-col bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700" style={{ width: '360px', minWidth: '360px' }}>
       {/* Header */}
-      <div className="p-4 border-b space-y-3 sticky top-0 bg-white z-10">
+      <div className="p-4 border-b border-gray-200 dark:border-gray-700 space-y-3 sticky top-0 bg-white dark:bg-gray-900 z-10">
         <div className="flex items-center justify-between">
           <div>
             {currentBoard && (
               <div className="flex items-center gap-2">
-                <span className="text-2xl">{currentBoard.icon}</span>
-                <h1 className="text-xl font-bold">{currentBoard.name}</h1>
+                <div
+                  className="h-8 w-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                  style={{ backgroundColor: currentBoard.color + "20" }}
+                >
+                  <IconDisplay 
+                    iconName={currentBoard.icon} 
+                    className="h-5 w-5" 
+                    style={{ color: currentBoard.color }} 
+                  />
+                </div>
+                <h1 className="text-xl font-bold text-gray-900 dark:text-white">{currentBoard.name}</h1>
               </div>
             )}
           </div>
@@ -68,10 +78,10 @@ export function PostsList({
 
         {/* Search */}
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500" />
           <Input
             placeholder="Search posts..."
-            className="pl-10"
+            className="pl-10 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:placeholder:text-gray-500"
             onChange={(e) => onSearchChange(e.target.value)}
           />
         </div>
@@ -84,40 +94,40 @@ export function PostsList({
         ) : posts.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center p-6">
             <div className="text-6xl mb-4">📝</div>
-            <h3 className="font-semibold text-lg mb-2">No posts yet</h3>
-            <p className="text-gray-500 mb-4">Be the first to create a post!</p>
+            <h3 className="font-semibold text-lg mb-2 text-gray-900 dark:text-white">No posts yet</h3>
+            <p className="text-gray-500 dark:text-gray-400 mb-4">Be the first to create a post!</p>
             <Button onClick={onCreatePost}>
               <Plus className="mr-2 h-4 w-4" />
               Create Post
             </Button>
           </div>
         ) : (
-          <div className="divide-y">
+          <div className="divide-y divide-gray-200 dark:divide-gray-700">
             {posts.map((post) => (
               <button
                 key={post.id}
                 onClick={() => onPostSelect(post)}
                 className={cn(
-                  "w-full text-left p-4 hover:bg-gray-50 transition-colors",
+                  "w-full text-left p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors",
                   selectedPost?.id === post.id &&
-                    "bg-blue-50 border-l-4 border-blue-500",
+                    "bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500",
                 )}
               >
                 <div className="space-y-2">
                   {/* Title */}
-                  <h3 className="font-semibold text-sm line-clamp-2">
+                  <h3 className="font-semibold text-sm line-clamp-2 text-gray-900 dark:text-white">
                     {post.title}
                   </h3>
 
                   {/* Description */}
                   {post.description && (
-                    <p className="text-xs text-gray-600 line-clamp-2">
+                    <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2">
                       {post.description}
                     </p>
                   )}
 
                   {/* Meta */}
-                  <div className="flex items-center gap-3 text-xs text-gray-500">
+                  <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
                     <Badge
                       variant="secondary"
                       className={cn("text-xs", STATUS_COLORS[post.status])}
@@ -144,7 +154,7 @@ export function PostsList({
 
                   {/* Author */}
                   {post.author && (
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
                       by {post.author.name}
                     </p>
                   )}

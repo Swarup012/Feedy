@@ -53,8 +53,19 @@ export default function AdminLayout({
     }
   };
 
+  // 🚀 Smart Feedback link - goes directly to last visited board
+  const getFeedbackPath = () => {
+    if (typeof window !== 'undefined') {
+      const lastBoard = localStorage.getItem('lastVisitedBoard');
+      if (lastBoard) {
+        return `/admin/feedback/boards/${lastBoard}`;
+      }
+    }
+    return '/admin/feedback'; // Fallback for first time
+  };
+
   const navItems = [
-    { name: "Feedback", path: "/admin/feedback" },
+    { name: "Feedback", path: getFeedbackPath() },
     { name: "Profile", path: "/admin/profile" },
     { name: "Roadmap", path: "/admin/roadmap" },
     { name: "Explore", path: "/feedback"}
@@ -77,7 +88,21 @@ export default function AdminLayout({
             <OrganizationSwitcher />
 
             <div className="hidden md:flex items-center gap-6">
-              {navItems.map((item) => (
+              {/* Feedback link - dynamically uses last visited board */}
+              <Link
+                href={getFeedbackPath()}
+                className={cn(
+                  "text-sm font-medium transition-colors hover:text-blue-600 dark:hover:text-blue-400",
+                  pathname?.startsWith('/admin/feedback')
+                    ? "text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 pb-1"
+                    : "text-gray-600 dark:text-gray-300"
+                )}
+              >
+                Feedback
+              </Link>
+              
+              {/* Other nav items */}
+              {navItems.slice(1).map((item) => (
                 <Link
                   key={item.path}
                   href={item.path}
@@ -115,7 +140,7 @@ export default function AdminLayout({
             <DropdownMenuTrigger asChild>
               <button className="flex items-center gap-2 focus:outline-none">
                 <Avatar className="h-9 w-9">
-                  <AvatarImage src={user?.avatar || ""} alt={user?.name || "User"} />
+                  <AvatarImage src={user?.avatar_url || ""} alt={user?.name || "User"} />
                   <AvatarFallback>{user?.name?.[0]?.toUpperCase() || "U"}</AvatarFallback>
                 </Avatar>
                 <span className="hidden sm:inline text-sm font-medium text-gray-700 dark:text-gray-200">
@@ -156,7 +181,7 @@ export default function AdminLayout({
 
       {/* 🔹 Main Content */}
 
-<main className="flex-1 container mx-auto px-6 py-8 mt-16">{children}</main>
+<main className="flex-1 mt-16 overflow-hidden">{children}</main>
     </div>
   );
 }

@@ -1,9 +1,61 @@
 "use client"
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { ArrowRight, MessageSquare, Lightbulb, Zap, CheckCircle, Star, Users, TrendingUp, Sparkles } from 'lucide-react';
 import { Logo } from '@/components/logo';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function LandingPage() {
+  const router = useRouter();
+  const { user, loading } = useAuth();
+  const [checkingBoards, setCheckingBoards] = useState(true);
+
+  useEffect(() => {
+    
+    const redirectToBoard = async () => {
+      // If user is authenticated, redirect to admin dashboard
+      if (!loading && user) {
+        router.push('/admin');
+        return;
+      }
+
+      // If not authenticated, redirect to a random public board
+      if (!loading && !user) {
+        try {
+          const { boardService } = await import('@/services/boardService');
+          const response = await boardService.getPublicBoards();
+          const publicBoards = response.data.boards;
+          
+          if (publicBoards.length > 0) {
+            // Pick a random public board
+            const randomBoard = publicBoards[Math.floor(Math.random() * publicBoards.length)];
+            router.push(`/feedback/boards/${randomBoard.slug}`);
+          } else {
+            // No public boards, show landing page
+            setCheckingBoards(false);
+          }
+        } catch (error) {
+          console.error('Error loading public boards:', error);
+          setCheckingBoards(false);
+        }
+      }
+    };
+
+    redirectToBoard();
+  }, [user, loading, router]);
+
+  // Show loading state while checking
+  if (loading || checkingBoards) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-blue-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+  
   const primaryColor = '#2563eb';
   
   return (

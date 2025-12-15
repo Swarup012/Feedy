@@ -42,6 +42,9 @@ export interface Comment {
   is_admin: boolean;
   created_at: string;
   updated_at: string;
+  parent_id?: string | null;
+  like_count?: number;
+  user_has_liked?: boolean;
   author?: {
     id: string;
     name: string;
@@ -49,6 +52,7 @@ export interface Comment {
     avatar_url?: string;
     role: string;
   };
+  replies?: Comment[];
 }
 
 export const postService = {
@@ -154,6 +158,15 @@ export const postService = {
     return response.data;
   },
 
+  // ✅ NEW: Get comments from public post (no authentication required)
+  async getPublicPostComments(postId: string): Promise<{
+    success: boolean;
+    data: { comments: Comment[]; count: number };
+  }> {
+    const response = await api.get(`/api/public/posts/${postId}/comments`);
+    return response.data;
+  },
+
   // Get comments
   async getComments(postId: string): Promise<{
     success: boolean;
@@ -163,14 +176,27 @@ export const postService = {
     return response.data;
   },
 
-  // Add comment
+  // Add comment (supports replies via parent_id)
   async addComment(
     postId: string,
     content: string,
+    parentId?: string | null,
   ): Promise<{ success: boolean; data: { comment: Comment } }> {
     const response = await api.post(`/api/posts/${postId}/comments`, {
       content,
+      parent_id: parentId,
     });
+    return response.data;
+  },
+
+  // Toggle like on comment
+  async toggleCommentLike(
+    postId: string,
+    commentId: string,
+  ): Promise<{ success: boolean; data: { liked: boolean } }> {
+    const response = await api.post(
+      `/api/posts/${postId}/comments/${commentId}/like`,
+    );
     return response.data;
   },
 

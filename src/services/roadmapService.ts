@@ -103,6 +103,35 @@ export const roadmapService = {
     return response.data;
   },
 
+  // Get ALL roadmap items across all boards (Admin/Owner)
+  async getAllRoadmapItems(
+    filters?: {
+      status?: string[];
+      category?: string;
+      isPublic?: boolean;
+      boardSlug?: string;
+    }
+  ): Promise<{ success: boolean; data: { items: RoadmapItem[]; count: number } }> {
+    const params = new URLSearchParams();
+    if (filters?.status && filters.status.length > 0) {
+      params.append('status', filters.status.join(','));
+    }
+    if (filters?.category) {
+      params.append('category', filters.category);
+    }
+    if (filters?.isPublic !== undefined) {
+      params.append('isPublic', String(filters.isPublic));
+    }
+    if (filters?.boardSlug) {
+      params.append('boardSlug', filters.boardSlug);
+    }
+
+    const response = await api.get(
+      `/api/roadmap/all?${params.toString()}`
+    );
+    return response.data;
+  },
+
   // Get roadmap items for a board (authenticated)
   async getRoadmapItems(
     boardSlug: string,

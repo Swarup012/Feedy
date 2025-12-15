@@ -21,6 +21,7 @@ import {
   CheckCircle2,
   Clock,
   AlertCircle,
+  ArrowLeft,
 } from 'lucide-react';
 
 export default function RoadmapPage() {
@@ -174,6 +175,20 @@ export default function RoadmapPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8 space-y-6">
+        {/* Back to Dashboard Button - Only for logged-in users */}
+        {user && (
+          <div className="mb-6">
+            <Button
+              variant="ghost"
+              onClick={() => window.location.href = '/dashboard'}
+              className="gap-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to Dashboard
+            </Button>
+          </div>
+        )}
+
         {/* Header */}
         <div className="text-center space-y-2 mb-8">
           <h1 className="text-4xl font-bold text-gray-900">Product Roadmap</h1>

@@ -14,6 +14,7 @@ const api: AxiosInstance = axios.create({
     "Content-Type": "application/json",
   },
   timeout: 30000, // Increased to 30 seconds
+  withCredentials: true, // Enable cookies for cross-subdomain authentication
 });
 
 // Request interceptor - Add auth token and subdomain
@@ -74,15 +75,24 @@ api.interceptors.response.use(
         const refreshToken = TokenManager.getRefreshToken();
 
         if (!refreshToken) {
-          // No refresh token - check if we're on a public/auth page
+          // No refresh token - check if we're on a public/auth page or if request is public
           if (typeof window !== 'undefined') {
             const currentPath = window.location.pathname;
+            const requestUrl = originalRequest.url || '';
+            
             const isAuthPage = currentPath.includes('/login') || 
                              currentPath.includes('/signup') || 
                              currentPath.includes('/forgot-password');
             
-            // Only redirect if NOT on an auth page
-            if (!isAuthPage) {
+            const isPublicPage = currentPath === '/' || 
+                               currentPath.startsWith('/feedback/boards/') ||
+                               currentPath.startsWith('/roadmap');
+            
+            const isPublicEndpoint = requestUrl.includes('/api/public/') ||
+                                    requestUrl.includes('/api/organizations/subdomain/');
+            
+            // Only redirect if NOT on an auth/public page AND NOT a public endpoint
+            if (!isAuthPage && !isPublicPage && !isPublicEndpoint) {
               TokenManager.clearTokens();
               window.location.href = "/login";
             }
@@ -107,15 +117,24 @@ api.interceptors.response.use(
 
         return api(originalRequest);
       } catch (refreshError) {
-        // Refresh failed - check if we're on a public/auth page
+        // Refresh failed - check if we're on a public/auth page or if request is public
         if (typeof window !== 'undefined') {
           const currentPath = window.location.pathname;
+          const requestUrl = originalRequest.url || '';
+          
           const isAuthPage = currentPath.includes('/login') || 
                            currentPath.includes('/signup') || 
                            currentPath.includes('/forgot-password');
           
-          // Only redirect if NOT on an auth page
-          if (!isAuthPage) {
+          const isPublicPage = currentPath === '/' || 
+                             currentPath.startsWith('/feedback/boards/') ||
+                             currentPath.startsWith('/roadmap');
+          
+          const isPublicEndpoint = requestUrl.includes('/api/public/') ||
+                                  requestUrl.includes('/api/organizations/subdomain/');
+          
+          // Only redirect if NOT on an auth/public page AND NOT a public endpoint
+          if (!isAuthPage && !isPublicPage && !isPublicEndpoint) {
             TokenManager.clearTokens();
             window.location.href = "/login";
           }

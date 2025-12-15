@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { roadmapService, RoadmapItem } from '@/services/roadmapService';
 import { boardService } from '@/services/boardService';
+import { useAuthContext } from '@/context/AuthContext';
 import RoadmapStats from '@/components/roadmap/RoadmapStats';
 import { LoadingAnimation } from '@/components/LoadingAnimation';
 import { Card, CardContent } from '@/components/ui/card';
@@ -53,6 +54,7 @@ import {
 } from 'lucide-react';
 
 export default function AdminRoadmapPage() {
+  const { user } = useAuthContext();
   const [items, setItems] = useState<RoadmapItem[]>([]);
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -60,14 +62,20 @@ export default function AdminRoadmapPage() {
   const [editingItem, setEditingItem] = useState<RoadmapItem | null>(null);
   const [selectedView, setSelectedView] = useState('all');
   const [boardSlug, setBoardSlug] = useState<string | null>(null);
+  const [allBoards, setAllBoards] = useState<any[]>([]);
+  const [selectedBoardFilter, setSelectedBoardFilter] = useState<string>('all');
   const { toast } = useToast();
+  
+  // Check if user is admin or owner
+  const isAdminOrOwner = user?.organization_role === 'admin' || user?.organization_role === 'owner';
 
-  // Fetch first board on mount
+  // Fetch all boards on mount
   useEffect(() => {
-    const fetchBoard = async () => {
+    const fetchBoards = async () => {
       try {
         const response = await boardService.getAllBoards();
         if (response.data.boards.length > 0) {
+          setAllBoards(response.data.boards);
           setBoardSlug(response.data.boards[0].slug);
         } else {
           toast({
@@ -84,26 +92,44 @@ export default function AdminRoadmapPage() {
         });
       }
     };
-    fetchBoard();
+    fetchBoards();
   }, []);
 
   useEffect(() => {
-    if (boardSlug) {
+    if (allBoards.length > 0) {
       loadData();
     }
-  }, [boardSlug]);
+  }, [selectedBoardFilter, boardSlug, isAdminOrOwner]);
 
   const loadData = async () => {
-    if (!boardSlug) return;
-    
     try {
       setLoading(true);
-      const [itemsRes, statsRes] = await Promise.all([
-        roadmapService.getRoadmapItems(boardSlug),
-        roadmapService.getRoadmapStats(boardSlug),
-      ]);
-      setItems(itemsRes.data.items);
-      setStats(statsRes.data);
+      
+      if (isAdminOrOwner) {
+        // Admin/Owner: Get ALL roadmap items across all boards
+        const filters: any = {};
+        if (selectedBoardFilter && selectedBoardFilter !== 'all') {
+          filters.boardSlug = selectedBoardFilter;
+        }
+        
+        const itemsRes = await roadmapService.getAllRoadmapItems(filters);
+        setItems(itemsRes.data.items);
+      } else {
+        // Member: Get roadmap items for current board only
+        if (!boardSlug) {
+          setLoading(false);
+          return;
+        }
+        
+        const itemsRes = await roadmapService.getRoadmapItems(boardSlug);
+        setItems(itemsRes.data.items);
+      }
+      
+      // Get stats for currently selected board (for stats display)
+      if (boardSlug) {
+        const statsRes = await roadmapService.getRoadmapStats(boardSlug);
+        setStats(statsRes.data);
+      }
     } catch (error: any) {
       toast({
         title: 'Error',
@@ -116,10 +142,22 @@ export default function AdminRoadmapPage() {
   };
 
   const handleCreate = async (data: any) => {
-    if (!boardSlug) return;
+    // Use the board slug from the form data, or fallback to current board
+    const targetBoardSlug = data.boardSlug || boardSlug;
+    
+    if (!targetBoardSlug) {
+      toast({
+        title: 'Error',
+        description: 'Please select a board',
+        variant: 'destructive',
+      });
+      return;
+    }
     
     try {
-      await roadmapService.createRoadmapItem(boardSlug, data);
+      // Remove boardSlug from data before sending to API
+      const { boardSlug: _, ...itemData } = data;
+      await roadmapService.createRoadmapItem(targetBoardSlug, itemData);
       toast({
         title: 'Success',
         description: 'Roadmap item created successfully',
@@ -213,6 +251,78 @@ export default function AdminRoadmapPage() {
       {/* Stats */}
       {stats && <RoadmapStats stats={stats} />}
 
+      {/* Board Selector for Members */}
+      {!isAdminOrOwner && boardSlug && (
+        <div className="flex items-center gap-4 bg-white p-4 rounded-lg border">
+          <Label htmlFor="boardSelector" className="text-sm font-medium whitespace-nowrap">
+            Select Board:
+          </Label>
+          <Select value={boardSlug} onValueChange={setBoardSlug}>
+            <SelectTrigger className="w-[300px]">
+              <SelectValue placeholder="Select a board" />
+            </SelectTrigger>
+            <SelectContent>
+              {allBoards.map((board: any) => (
+                <SelectItem key={board.slug} value={board.slug}>
+                  <div className="flex items-center gap-2">
+                    <div 
+                      className="w-3 h-3 rounded" 
+                      style={{ backgroundColor: board.color }}
+                    />
+                    {board.name}
+                  </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
+
+      {/* Board Filter - Only show for Admin/Owner */}
+      {isAdminOrOwner && (
+        <div className="flex items-center gap-4 bg-white p-4 rounded-lg border">
+          <Label htmlFor="boardFilter" className="text-sm font-medium whitespace-nowrap">
+            Filter by Board:
+          </Label>
+          <Select value={selectedBoardFilter} onValueChange={setSelectedBoardFilter}>
+            <SelectTrigger className="w-[300px]">
+              <SelectValue placeholder="All Boards" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded bg-gradient-to-r from-blue-500 to-purple-500" />
+                  All Boards ({items.length} items)
+                </div>
+              </SelectItem>
+              {allBoards.map((board: any) => {
+                const boardItemCount = items.filter((item: any) => item.board?.slug === board.slug).length;
+                return (
+                  <SelectItem key={board.slug} value={board.slug}>
+                    <div className="flex items-center gap-2">
+                      <div 
+                        className="w-3 h-3 rounded" 
+                        style={{ backgroundColor: board.color }}
+                      />
+                      {board.name} ({boardItemCount} items)
+                    </div>
+                  </SelectItem>
+                );
+              })}
+            </SelectContent>
+          </Select>
+          {selectedBoardFilter !== 'all' && (
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => setSelectedBoardFilter('all')}
+            >
+              Clear Filter
+            </Button>
+          )}
+        </div>
+      )}
+
       {/* Tabs for different views */}
       <Tabs value={selectedView} onValueChange={setSelectedView}>
         <TabsList>
@@ -236,6 +346,7 @@ export default function AdminRoadmapPage() {
                   onEdit={setEditingItem}
                   onDelete={handleDelete}
                   onUpdate={handleUpdate}
+                  showBoardBadge={isAdminOrOwner}
                 />
                 <StatusColumn
                   title="In Progress"
@@ -245,6 +356,7 @@ export default function AdminRoadmapPage() {
                   onEdit={setEditingItem}
                   onDelete={handleDelete}
                   onUpdate={handleUpdate}
+                  showBoardBadge={isAdminOrOwner}
                 />
                 <StatusColumn
                   title="In Review"
@@ -254,6 +366,7 @@ export default function AdminRoadmapPage() {
                   onEdit={setEditingItem}
                   onDelete={handleDelete}
                   onUpdate={handleUpdate}
+                  showBoardBadge={isAdminOrOwner}
                 />
                 <StatusColumn
                   title="Completed"
@@ -263,6 +376,7 @@ export default function AdminRoadmapPage() {
                   onEdit={setEditingItem}
                   onDelete={handleDelete}
                   onUpdate={handleUpdate}
+                  showBoardBadge={isAdminOrOwner}
                 />
               </>
             ) : (
@@ -273,6 +387,7 @@ export default function AdminRoadmapPage() {
                   onEdit={setEditingItem}
                   onDelete={handleDelete}
                   onUpdate={handleUpdate}
+                  showBoardBadge={isAdminOrOwner}
                 />
               </div>
             )}
@@ -286,6 +401,8 @@ export default function AdminRoadmapPage() {
         onClose={() => setShowCreateDialog(false)}
         onSave={handleCreate}
         title="Create Roadmap Item"
+        boards={allBoards}
+        defaultBoardSlug={boardSlug}
       />
 
       {/* Edit Dialog */}
@@ -314,6 +431,7 @@ function StatusColumn({
   onEdit,
   onDelete,
   onUpdate,
+  showBoardBadge,
 }: any) {
   const statusColors: any = {
     planned: 'bg-gray-100 border-gray-300',
@@ -336,6 +454,7 @@ function StatusColumn({
             onEdit={onEdit}
             onDelete={onDelete}
             onUpdate={onUpdate}
+            showBoardBadge={showBoardBadge}
           />
         ))}
         {items.length === 0 && (
@@ -347,7 +466,7 @@ function StatusColumn({
 }
 
 // Items List Component (List View)
-function ItemsList({ items, onStatusChange, onEdit, onDelete, onUpdate }: any) {
+function ItemsList({ items, onStatusChange, onEdit, onDelete, onUpdate, showBoardBadge }: any) {
   return (
     <div className="space-y-3">
       {items.map((item: RoadmapItem) => (
@@ -358,6 +477,7 @@ function ItemsList({ items, onStatusChange, onEdit, onDelete, onUpdate }: any) {
           onEdit={onEdit}
           onDelete={onDelete}
           onUpdate={onUpdate}
+          showBoardBadge={showBoardBadge}
           isListView
         />
       ))}
@@ -369,7 +489,7 @@ function ItemsList({ items, onStatusChange, onEdit, onDelete, onUpdate }: any) {
 }
 
 // Roadmap Card Component
-function RoadmapCard({ item, onStatusChange, onEdit, onDelete, onUpdate, isListView }: any) {
+function RoadmapCard({ item, onStatusChange, onEdit, onDelete, onUpdate, isListView, showBoardBadge }: any) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedTitle, setEditedTitle] = useState(item.title);
   const [editedProgress, setEditedProgress] = useState(item.progress);
@@ -428,6 +548,28 @@ function RoadmapCard({ item, onStatusChange, onEdit, onDelete, onUpdate, isListV
 
             {/* Description */}
             <p className="text-xs text-gray-600 mb-3 line-clamp-2">{item.description}</p>
+
+            {/* Board Badge (only show for admin/owner viewing all boards) */}
+            {showBoardBadge && item.board && (
+              <div className="mb-3">
+                <Badge 
+                  variant="outline" 
+                  className="text-xs"
+                  style={{ 
+                    borderColor: item.board.color,
+                    color: item.board.color
+                  }}
+                >
+                  <div className="flex items-center gap-1.5">
+                    <div 
+                      className="w-2 h-2 rounded-full" 
+                      style={{ backgroundColor: item.board.color }}
+                    />
+                    {item.board.name}
+                  </div>
+                </Badge>
+              </div>
+            )}
 
             {/* Metadata */}
             <div className="flex flex-wrap gap-2 mb-3">
@@ -537,7 +679,7 @@ function RoadmapCard({ item, onStatusChange, onEdit, onDelete, onUpdate, isListV
 }
 
 // Create/Edit Dialog Component
-function CreateEditDialog({ open, onClose, onSave, title, initialData }: any) {
+function CreateEditDialog({ open, onClose, onSave, title, initialData, boards = [], defaultBoardSlug = null }: any) {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -548,6 +690,7 @@ function CreateEditDialog({ open, onClose, onSave, title, initialData }: any) {
     target_date: '',
     progress: 0,
     is_public: true,
+    boardSlug: defaultBoardSlug || '',
   });
 
   useEffect(() => {
@@ -562,6 +705,7 @@ function CreateEditDialog({ open, onClose, onSave, title, initialData }: any) {
         target_date: initialData.target_date || '',
         progress: initialData.progress || 0,
         is_public: initialData.is_public ?? true,
+        boardSlug: initialData.board?.slug || defaultBoardSlug || '',
       });
     } else {
       setFormData({
@@ -574,9 +718,10 @@ function CreateEditDialog({ open, onClose, onSave, title, initialData }: any) {
         target_date: '',
         progress: 0,
         is_public: true,
+        boardSlug: defaultBoardSlug || '',
       });
     }
-  }, [initialData, open]);
+  }, [initialData, open, defaultBoardSlug]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -603,6 +748,34 @@ function CreateEditDialog({ open, onClose, onSave, title, initialData }: any) {
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Board Selector - Only show when creating new item */}
+          {!initialData && boards.length > 0 && (
+            <div>
+              <Label htmlFor="boardSlug">Select Board *</Label>
+              <Select 
+                value={formData.boardSlug} 
+                onValueChange={(v) => setFormData({ ...formData, boardSlug: v })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Choose a board..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {boards.map((board: any) => (
+                    <SelectItem key={board.slug} value={board.slug}>
+                      <div className="flex items-center gap-2">
+                        <div 
+                          className="w-3 h-3 rounded" 
+                          style={{ backgroundColor: board.color }}
+                        />
+                        {board.name}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
           <div>
             <Label htmlFor="title">Title *</Label>
             <Input

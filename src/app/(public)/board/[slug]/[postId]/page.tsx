@@ -6,6 +6,8 @@ import { postService, Post, Comment } from '@/services/postService';
 import { boardService, Board } from '@/services/boardService';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { usePostRealtime } from '@/hooks/usePostRealtime';
+import { getSocket } from '@/lib/socket';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
@@ -51,6 +53,58 @@ export default function PublicPostPage() {
   const [submittingComment, setSubmittingComment] = useState(false);
   const [upvoted, setUpvoted] = useState(false);
   const [upvoting, setUpvoting] = useState(false);
+
+  // 🐛 Debug: Log when component mounts with postId
+  useEffect(() => {
+    console.log('🔍 [PostPage] Component mounted/updated with postId:', postId);
+    const socket = getSocket();
+    console.log('🔍 [PostPage] Socket status:', {
+      exists: !!socket,
+      connected: socket?.connected,
+      id: socket?.id,
+    });
+  }, [postId]);
+
+  // � Real-time Socket.io updates
+  console.log('🎯 [PostPage] Calling usePostRealtime with postId:', postId);
+  usePostRealtime({
+    postId,
+    onCommentNew: (comment) => {
+      console.log('💬 [PostPage] Real-time: New comment received', comment);
+      console.log('💬 [PostPage] Current comments before:', comments.length);
+      console.log('💬 [PostPage] Comment author:', comment.author?.id, 'Current user:', user?.id);
+      
+      setComments((prev) => {
+        // Check if comment already exists (avoid duplicates when current user adds comment)
+        const exists = prev.some(c => c.id === comment.id);
+        if (exists) {
+          console.log('💬 [PostPage] Comment already exists, skipping duplicate');
+          return prev;
+        }
+        
+        console.log('💬 [PostPage] Adding comment to state. Prev length:', prev.length);
+        const newComments = [...prev, comment];
+        console.log('💬 [PostPage] New comments length:', newComments.length);
+        return newComments;
+      });
+    },
+    onCommentDeleted: (commentId) => {
+      console.log('🗑️ [PostPage] Real-time: Comment deleted', commentId);
+      setComments((prev) => prev.filter((c) => c.id !== commentId));
+    },
+    onPostUpvoted: (data) => {
+      console.log('⬆️ [PostPage] Real-time: Post upvoted', data);
+      if (post) {
+        setPost({ ...post, upvotes: data.upvoteCount });
+      }
+    },
+    onCommentCountChanged: (commentCount) => {
+      console.log('💬 [PostPage] Real-time: Comment count changed to', commentCount);
+      if (post) {
+        setPost({ ...post, comment_count: commentCount });
+      }
+    },
+  });
 
   useEffect(() => {
     fetchData();
@@ -144,12 +198,11 @@ export default function PublicPostPage() {
 
     try {
       setSubmittingComment(true);
-      const response = await postService.addComment(post.id, newComment);
-      setComments([...comments, response.data.comment]);
+      await postService.addComment(post.id, newComment);
       setNewComment('');
 
-      // Update comment count
-      setPost({ ...post, comment_count: post.comment_count + 1 });
+      // Don't manually add comment - let real-time Socket.io handle it
+      // This prevents duplicate comments when the socket event fires
 
       toast({
         title: 'Success',
@@ -173,10 +226,9 @@ export default function PublicPostPage() {
 
     try {
       await postService.deleteComment(post.id, commentId);
-      setComments(comments.filter((c) => c.id !== commentId));
-
-      // Update comment count
-      setPost({ ...post, comment_count: post.comment_count - 1 });
+      
+      // Don't manually remove comment - let real-time Socket.io handle it
+      // This prevents issues when the socket event fires
 
       toast({
         title: 'Success',

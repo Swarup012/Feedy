@@ -24,8 +24,11 @@ import {
   ExternalLink,
   Copy,
   Check,
+  Mail,
 } from 'lucide-react';
 import { OrganizationSkeleton, MembersTableSkeleton } from '@/components/admin/OrganizationSkeleton';
+import { InviteMemberModal } from '@/components/organization/InviteMemberModal';
+import { PendingInvitations } from '@/components/organization/PendingInvitations';
 
 interface Member {
   id: string;
@@ -51,6 +54,10 @@ export default function OrganizationSettingsPage() {
   const [inviteRole, setInviteRole] = useState('member');
   const [inviting, setInviting] = useState(false);
   const [copiedSubdomain, setCopiedSubdomain] = useState(false);
+  
+  // Invitation modal state
+  const [showInviteModal, setShowInviteModal] = useState(false);
+  const [invitationRefreshTrigger, setInvitationRefreshTrigger] = useState(0);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -448,41 +455,30 @@ export default function OrganizationSettingsPage() {
         {/* Members Tab */}
         <TabsContent value="members">
           <div className="space-y-6">
-            {/* Invite Member */}
-            {(organizationRole === 'owner' || organizationRole === 'admin') && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Invite Team Member</CardTitle>
-                  <CardDescription>
-                    Add new members to your organization
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex gap-4">
-                    <div className="flex-1">
-                      <Input
-                        type="email"
-                        placeholder="email@example.com"
-                        value={inviteEmail}
-                        onChange={(e) => setInviteEmail(e.target.value)}
-                      />
-                    </div>
-                    <select
-                      className="px-3 py-2 border rounded-md"
-                      value={inviteRole}
-                      onChange={(e) => setInviteRole(e.target.value)}
-                    >
-                      <option value="member">Member</option>
-                      <option value="admin">Admin</option>
-                      {organizationRole === 'owner' && <option value="owner">Owner</option>}
-                    </select>
-                    <Button onClick={handleInviteUser} disabled={inviting || !inviteEmail}>
-                      <UserPlus className="h-4 w-4 mr-2" />
-                      {inviting ? 'Sending...' : 'Invite'}
+            {/* Invite Member - New System */}
+            {organizationRole === 'owner' && (
+              <>
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Invite Team Members</CardTitle>
+                    <CardDescription>
+                      Send email invitations to add new members to your organization
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Button onClick={() => setShowInviteModal(true)}>
+                      <Mail className="h-4 w-4 mr-2" />
+                      Invite Member
                     </Button>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+
+                {/* Pending Invitations */}
+                <PendingInvitations 
+                  organizationId={organization.id} 
+                  refreshTrigger={invitationRefreshTrigger}
+                />
+              </>
             )}
 
             {/* Members List */}
@@ -605,6 +601,20 @@ export default function OrganizationSettingsPage() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Invitation Modal */}
+      {organization && (
+        <InviteMemberModal
+          open={showInviteModal}
+          onClose={() => setShowInviteModal(false)}
+          organizationId={organization.id}
+          organizationName={organization.name}
+          onInviteSent={() => {
+            setInvitationRefreshTrigger(prev => prev + 1);
+            setShowInviteModal(false);
+          }}
+        />
+      )}
     </div>
   );
 }

@@ -53,7 +53,6 @@ interface PostDetailsProps {
   currentBoard: Board | null;
   onPostUpdated: (post: Post) => void;
   onPostDeleted: (postId: string) => void;
-  onAuthRequired?: () => void; // Optional callback for when auth is required
 }
 
 const STATUS_OPTIONS = [
@@ -118,8 +117,8 @@ function CommentItem({
     <div className={depth > 0 ? "ml-8 mt-2" : ""}>
       <Card
         className={cn(
-          "p-3 dark:bg-gray-800 dark:border-gray-700",
-          comment.is_admin && "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700",
+          "p-3",
+          comment.is_admin && "bg-blue-50 border-blue-200",
         )}
       >
         <div className="flex items-start gap-3 mb-2 flex-1">
@@ -132,11 +131,11 @@ function CommentItem({
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2 min-w-0">
-                <p className="font-medium text-sm truncate text-gray-900 dark:text-white">
+                <p className="font-medium text-sm truncate">
                   {comment.author?.name}
                 </p>
                 {comment.is_admin && (
-                  <Badge variant="secondary" className="text-xs flex-shrink-0 dark:bg-blue-900 dark:text-blue-300">
+                  <Badge variant="secondary" className="text-xs flex-shrink-0">
                     Admin
                   </Badge>
                 )}
@@ -148,20 +147,20 @@ function CommentItem({
                   variant="ghost"
                   size="sm"
                   onClick={() => handleDeleteComment(comment.id)}
-                  className="text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 h-6 w-6 p-0 flex-shrink-0"
+                  className="text-red-500 hover:text-red-700 h-6 w-6 p-0 flex-shrink-0"
                 >
                   <Trash2 className="h-3 w-3" />
                 </Button>
               )}
             </div>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
+            <p className="text-xs text-gray-500">
               {formatDistanceToNow(new Date(comment.created_at), {
                 addSuffix: true,
               })}
             </p>
           </div>
         </div>
-        <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap mb-3">
+        <p className="text-sm text-gray-700 whitespace-pre-wrap mb-3">
           {comment.content}
         </p>
         {/* Like, Reply, and Show Replies buttons */}
@@ -218,7 +217,7 @@ function CommentItem({
             value={replyContent}
             onChange={(e) => setReplyContent(e.target.value)}
             rows={2}
-            className="resize-none text-sm dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+            className="resize-none text-sm"
           />
           <div className="flex gap-2">
             <Button
@@ -282,7 +281,6 @@ export function PostDetails({
   currentBoard,
   onPostUpdated,
   onPostDeleted,
-  onAuthRequired,
 }: PostDetailsProps) {
   const { toast } = useToast();
   const { user } = useAuth();
@@ -393,9 +391,8 @@ export function PostDetails({
         setComments(commentsCache[post.id]);
         setLoadingPost(false);
         
-        // Background refresh (silent update) - use public endpoint for guests
-        const refreshMethod = user ? postService.getComments : postService.getPublicPostComments;
-        refreshMethod(post.id)
+        // Background refresh (silent update)
+        postService.getComments(post.id)
           .then(response => {
             commentsCache[post.id] = response.data.comments;
             setComments(response.data.comments);
@@ -415,9 +412,7 @@ export function PostDetails({
 
     try {
       setLoadingComments(true);
-      // Use public endpoint for guests, authenticated endpoint for logged-in users
-      const fetchMethod = user ? postService.getComments : postService.getPublicPostComments;
-      const response = await fetchMethod(post.id);
+      const response = await postService.getComments(post.id);
       commentsCache[post.id] = response.data.comments; // Cache it
       setComments(response.data.comments);
       console.log('💾 Cached comments for post:', post.id, response.data.comments.length);
@@ -457,12 +452,6 @@ export function PostDetails({
   const handleUpvote = async () => {
     if (!post) return;
 
-    // Check if user is authenticated
-    if (!user && onAuthRequired) {
-      onAuthRequired();
-      return;
-    }
-
     try {
       setUpvoting(true);
       const response = await postService.toggleUpvote(post.id);
@@ -488,12 +477,6 @@ export function PostDetails({
   // Handle add comment
   const handleAddComment = async () => {
     if (!post || !newComment.trim()) return;
-
-    // Check if user is authenticated
-    if (!user && onAuthRequired) {
-      onAuthRequired();
-      return;
-    }
 
     try {
       setSubmittingComment(true);
@@ -547,12 +530,6 @@ export function PostDetails({
   const handleToggleCommentLike = async (commentId: string) => {
     if (!post) return;
 
-    // Check if user is authenticated
-    if (!user && onAuthRequired) {
-      onAuthRequired();
-      return;
-    }
-
     try {
       const response = await postService.toggleCommentLike(post.id, commentId);
       
@@ -587,12 +564,6 @@ export function PostDetails({
   // Handle reply to comment
   const handleReply = async (parentId: string) => {
     if (!post || !replyContent.trim()) return;
-
-    // Check if user is authenticated
-    if (!user && onAuthRequired) {
-      onAuthRequired();
-      return;
-    }
 
     try {
       setSubmittingComment(true);
@@ -697,19 +668,17 @@ export function PostDetails({
   // Show skeleton while loading
   if (loadingPost && post) {
     return (
-      <div className="flex-1 border-l border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex">
-        <div className="flex-1 bg-white dark:bg-gray-900">
-          <PostDetailsSkeleton />
-        </div>
+      <div className="flex-1 border-l bg-white flex flex-col">
+        <PostDetailsSkeleton />
       </div>
     );
   }
 
   if (!post) {
     return (
-      <div className="flex-1 border-l border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <div className="text-center text-gray-500 dark:text-gray-400">
-          <MessageSquare className="h-12 w-12 mx-auto mb-3 text-gray-300 dark:text-gray-600" />
+      <div className="flex-1 border-l bg-white flex items-center justify-center p-6">
+        <div className="text-center text-gray-500">
+          <MessageSquare className="h-12 w-12 mx-auto mb-3 text-gray-300" />
           <p>Select a post to view details</p>
         </div>
       </div>
@@ -717,11 +686,11 @@ export function PostDetails({
   }
 
   return (
-    <div className="flex-1 border-l border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex">
+    <div className="flex-1 border-l bg-gray-50 flex">
       {/* Main Content - Left Side */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Post Header with Upvote */}
-        <div className="bg-white dark:bg-gray-900 p-6 border-b border-gray-200 dark:border-gray-700">
+        <div className="bg-white p-6 border-b">
           <div className="flex gap-4">
             {/* Upvote Button - Left Side */}
             <div className="flex flex-col items-center gap-1">
@@ -732,25 +701,25 @@ export function PostDetails({
                 disabled={upvoting}
                 className={cn(
                   "h-8 w-8 p-0 rounded-md",
-                  upvoted ? "text-blue-600 bg-blue-50 dark:bg-blue-900/20" : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  upvoted ? "text-blue-600 bg-blue-50" : "text-gray-600 hover:bg-gray-100"
                 )}
               >
                 <ArrowUp className="h-4 w-4" />
               </Button>
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{post.upvotes}</span>
+              <span className="text-sm font-medium text-gray-700">{post.upvotes}</span>
             </div>
 
             {/* Post Title and Info */}
             <div className="flex-1 space-y-2">
               <div className="flex items-start justify-between gap-2">
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{post.title}</h1>
+                <h1 className="text-2xl font-bold text-gray-900">{post.title}</h1>
                 {(user?.organization_role === "admin" || user?.organization_role === "owner" || post.author?.id === user?.id) && (
                   <div className="flex gap-1">
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={openEditDialog}
-                      className="h-8 w-8 p-0 text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                      className="h-8 w-8 p-0 text-gray-500 hover:text-blue-600 hover:bg-blue-50"
                     >
                       <Edit2 className="h-4 w-4" />
                     </Button>
@@ -758,7 +727,7 @@ export function PostDetails({
                       variant="ghost"
                       size="sm"
                       onClick={handleDeletePost}
-                      className="h-8 w-8 p-0 text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+                      className="h-8 w-8 p-0 text-gray-500 hover:text-red-600 hover:bg-red-50"
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -768,12 +737,12 @@ export function PostDetails({
 
               {/* Author and Time */}
               {post.author && (
-                <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                <div className="flex items-center gap-2 text-sm text-gray-600">
                   <Avatar className="h-6 w-6">
                     <AvatarImage src={post.author.avatar_url || ""} />
-                    <AvatarFallback>{post.author.name?.[0] || "U"}</AvatarFallback>
+                    <AvatarFallback>{post.author.name[0]}</AvatarFallback>
                   </Avatar>
-                  <span className="font-medium text-blue-600 dark:text-blue-400">{post.author.name || "Unknown"}</span>
+                  <span className="font-medium text-blue-600">{post.author.name}</span>
                   <span>·</span>
                   <span>{formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}</span>
                   {(user?.organization_role === "admin" || user?.organization_role === "owner" || post.author?.id === user?.id) && (
@@ -806,7 +775,7 @@ export function PostDetails({
 
               {/* Description */}
               {post.description && (
-                <p className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap mt-3">
+                <p className="text-gray-700 leading-relaxed whitespace-pre-wrap mt-3">
                   {post.description}
                 </p>
               )}
@@ -815,9 +784,9 @@ export function PostDetails({
         </div>
 
         {/* Activity Feed Section */}
-        <div className="flex-1 flex flex-col overflow-hidden bg-white dark:bg-gray-900">
-          <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-            <h3 className="font-semibold text-base text-gray-900 dark:text-white">Activity Feed</h3>
+        <div className="flex-1 flex flex-col overflow-hidden bg-white">
+          <div className="p-4 border-b flex items-center justify-between">
+            <h3 className="font-semibold text-base">Activity Feed</h3>
             <Select defaultValue="all">
               <SelectTrigger className="w-40 h-9">
                 <SelectValue placeholder="View" />
@@ -834,10 +803,10 @@ export function PostDetails({
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
           {loadingComments ? (
             <div className="flex justify-center py-8">
-              <Loader2 className="h-6 w-6 animate-spin text-gray-400 dark:text-gray-500" />
+              <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
             </div>
           ) : comments.length === 0 ? (
-            <div className="text-center py-8 text-gray-500 dark:text-gray-400 text-sm">
+            <div className="text-center py-8 text-gray-500 text-sm">
               No comments yet. Be the first to comment!
             </div>
           ) : (
@@ -861,14 +830,14 @@ export function PostDetails({
         </div>
 
         {/* Add Comment */}
-        <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+        <div className="p-4 border-t bg-gray-50">
           <div className="space-y-2">
             <Textarea
               placeholder="Write a comment..."
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
               rows={3}
-              className="resize-none dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+              className="resize-none"
             />
             <Button
               onClick={handleAddComment}
@@ -890,151 +859,42 @@ export function PostDetails({
             </Button>
           </div>
         </div>
-        </div>
-        {/* End of Activity Feed Section */}
       </div>
-      {/* End of Main Content */}
-
-      {/* Details Sidebar - Right Side */}
-      <div className="w-80 bg-white dark:bg-gray-900 border-l border-gray-200 dark:border-gray-700 flex-shrink-0 overflow-y-auto">
-        <div className="p-6 space-y-6">
-          <h3 className="font-semibold text-lg text-gray-900 dark:text-white">Details</h3>
-
-          <div className="space-y-4">
-            {/* Public Link */}
-            <div>
-              <label className="text-sm text-gray-600 dark:text-gray-400 block mb-2">Public link</label>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={getPublicLink()}
-                  readOnly
-                  className="flex-1 text-sm bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded px-3 py-2 truncate text-gray-900 dark:text-white"
-                />
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => {
-                    navigator.clipboard.writeText(getPublicLink());
-                    toast({
-                      title: "Copied!",
-                      description: "Link copied to clipboard",
-                    });
-                  }}
-                  className="flex-shrink-0"
-                >
-                  <ExternalLink className="h-4 w-4" />
-                </Button>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => window.open(getPublicLink())}
-                  className="flex-shrink-0"
-                >
-                  <Eye className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-
-            {/* Board */}
-            <div>
-              <label className="text-sm text-gray-600 dark:text-gray-400 block mb-2">Board</label>
-              <div className="text-sm font-medium text-gray-900 dark:text-white">{currentBoard?.name || "—"}</div>
-            </div>
-
-            {/* Status */}
-            <div>
-              <label className="text-sm text-gray-600 dark:text-gray-400 block mb-2">Status</label>
-              {(user?.organization_role === "admin" || user?.organization_role === "owner") ? (
-                <Select value={post.status} onValueChange={handleStatusChange}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {STATUS_OPTIONS.map((status) => (
-                      <SelectItem key={status.value} value={status.value}>
-                        {status.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              ) : (
-                <div className="text-sm font-medium text-gray-900 dark:text-white">
-                  {STATUS_OPTIONS.find(s => s.value === post.status)?.label || post.status}
-                </div>
-              )}
-            </div>
-
-            {/* Owner - Placeholder */}
-            <div>
-              <label className="text-sm text-gray-600 dark:text-gray-400 block mb-2">Owner</label>
-              <div className="text-sm text-gray-500 dark:text-gray-400">{post.author?.name || "Unknown"}</div>
-            </div>
-
-            {/* Estimated - Placeholder */}
-            <div>
-              <label className="text-sm text-gray-600 dark:text-gray-400 block mb-2">Estimated</label>
-              <div className="text-sm text-gray-500 dark:text-gray-400">Comming soon</div>
-            </div>
-
-            {/* Category - Placeholder */}
-            <div>
-              <label className="text-sm text-gray-600 dark:text-gray-400 block mb-2">Category</label>
-              <button className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">Comming soon</button>
-            </div>
-          </div>
-
-          {/* Tags Section */}
-          <div>
-            <label className="text-sm text-gray-600 dark:text-gray-400 block mb-2">Tags</label>
-            <button className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">Comming soon</button>
-          </div>
-
-          {/* Voter Section */}
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <label className="text-sm text-gray-600 dark:text-gray-400">{post.upvotes} Voter{post.upvotes !== 1 ? 's' : ''}</label>
-              <button className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">Comming soon</button>
-            </div>
-          </div>
-        </div>
-      </div>
-      {/* End of Details Sidebar */}
 
       {/* Edit Post Dialog */}
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent className="dark:bg-gray-900 dark:border-gray-700">
+        <DialogContent>
           <DialogHeader>
-            <DialogTitle className="dark:text-white">Edit Post</DialogTitle>
-            <DialogDescription className="dark:text-gray-400">
+            <DialogTitle>Edit Post</DialogTitle>
+            <DialogDescription>
               Update the title and description of this post
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div>
-              <Label htmlFor="edit-title" className="dark:text-gray-300">Title *</Label>
+              <Label htmlFor="edit-title">Title *</Label>
               <Input
                 id="edit-title"
                 value={editFormData.title}
                 onChange={(e) => setEditFormData({ ...editFormData, title: e.target.value })}
                 placeholder="Enter post title"
-                className="mt-1 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+                className="mt-1"
               />
             </div>
             <div>
-              <Label htmlFor="edit-description" className="dark:text-gray-300">Description</Label>
+              <Label htmlFor="edit-description">Description</Label>
               <Textarea
                 id="edit-description"
                 value={editFormData.description}
                 onChange={(e) => setEditFormData({ ...editFormData, description: e.target.value })}
                 placeholder="Enter post description"
                 rows={6}
-                className="mt-1 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+                className="mt-1"
               />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowEditDialog(false)} className="dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:bg-gray-700">
+            <Button variant="outline" onClick={() => setShowEditDialog(false)}>
               Cancel
             </Button>
             <Button onClick={handleEditPost}>

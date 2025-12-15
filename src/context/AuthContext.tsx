@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 import { authService, User, ApiError } from "@/services/authService";
 import { TokenManager } from "@/lib/tokenManager";
 import { AxiosError } from "axios";
+import { initSocket, disconnectSocket } from "@/lib/socket";
 
 interface AuthContextType {
   user: User | null;
@@ -43,24 +44,51 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const token = TokenManager.getAccessToken();
       const cachedUser = TokenManager.getUser();
 
-      if (!token) {
-        setLoading(false);
-        return;
-      }
-
       // If we have cached user data, use it immediately
       if (cachedUser) {
         setUser(cachedUser);
       }
 
-      // Verify token and get fresh user data from server
+      // Even if no token in localStorage, try to verify with server
+      // (cookies might be present for cross-subdomain auth)
       const response = await authService.getMe();
+      
+      // 🐛 DEBUG: Log auth check info
+      if (token) {
+        const tokenHash = token.substring(0, 32);
+        console.log('🔍 DEBUG - Auth Check Response:', {
+          email: response.data.user.email,
+          tokenHash: tokenHash,
+          cachedUser: cachedUser?.email,
+          fetchedUser: response.data.user.email,
+          tokensMatch: cachedUser?.email === response.data.user.email,
+        });
+      } else {
+        console.log('🍪 Auth via cookies (no localStorage token on this subdomain)');
+      }
+      
       setUser(response.data.user);
       TokenManager.setUser(response.data.user);
+
+      // 🔌 Initialize Socket.io connection (only if we have token)
+      if (token) {
+        initSocket(token);
+      }
     } catch (error) {
-      console.error("Auth check failed:", error);
+      // Only log error if we're not on a public page (guests are expected to fail auth check)
+      const isPublicPage = typeof window !== 'undefined' && (
+        window.location.pathname === '/' ||
+        window.location.pathname.startsWith('/feedback/boards/') ||
+        window.location.pathname.startsWith('/roadmap')
+      );
+      
+      if (!isPublicPage) {
+        console.error("Auth check failed:", error);
+      }
+      
       TokenManager.clearTokens();
       setUser(null);
+      disconnectSocket();
     } finally {
       setLoading(false);
     }
@@ -82,9 +110,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         response.data.refresh_token,
       );
 
+      // 🐛 DEBUG: Log token info
+      const tokenHash = response.data.access_token.substring(0, 32);
+      console.log('🔑 DEBUG - Login Token Info:', {
+        email: response.data.user.email,
+        tokenHash: tokenHash,
+        fullToken: response.data.access_token.substring(0, 50) + '...',
+      });
+
       // Save user to state AND localStorage
       setUser(response.data.user);
       TokenManager.setUser(response.data.user);
+
+      // 🔌 Initialize Socket.io connection after successful login
+      initSocket(response.data.access_token);
+      console.log('🔌 Socket.io connection initialized after login');
 
       console.log('✅ User logged in:', {
         email: response.data.user.email,
@@ -142,6 +182,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch (error) {
       console.error("Logout error:", error);
     } finally {
+      // 🔌 Disconnect Socket.io before clearing tokens
+      disconnectSocket();
+      console.log('🔌 Socket.io disconnected after logout');
+
       TokenManager.clearTokens();
       setUser(null);
       router.push("/login");

@@ -10,6 +10,7 @@ export interface Board {
   owner_id: string;
   color: string;
   icon: string;
+  visible_to_roles?: string[]; // ✅ Job roles that can see this board
   post_count: number;
   created_at: string;
   updated_at: string;
@@ -75,6 +76,7 @@ export const boardService = {
     category?: string;
     color?: string;
     icon?: string;
+    visible_to_roles?: string[]; // ✅ Job role targeting
   }): Promise<{ success: boolean; data: { board: Board } }> {
     const response = await api.post("/api/boards", data);
     return response.data;

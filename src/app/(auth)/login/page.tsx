@@ -36,6 +36,13 @@ export default function LoginPage() {
   useEffect(() => {
     const detectOrganization = async () => {
       try {
+        // Highest priority: Check for pending invite token
+        const pendingInviteToken = localStorage.getItem('pendingInviteToken');
+        if (pendingInviteToken) {
+          console.log("🎫 Pending invite token found:", pendingInviteToken);
+          // Token will be processed after successful login
+        }
+
         // First priority: Check URL params (from signup redirect)
         const orgId = searchParams.get('orgId');
         const orgName = searchParams.get('orgName');
@@ -154,6 +161,15 @@ export default function LoginPage() {
         organizationId || undefined // Pass organizationId from subdomain
       );
 
+      // Check for pending invite token and redirect to acceptance page
+      const pendingInviteToken = localStorage.getItem('pendingInviteToken');
+      if (pendingInviteToken) {
+        console.log("🎫 Redirecting to invite acceptance page");
+        // Redirect to invite acceptance page
+        window.location.href = `/invite/${pendingInviteToken}`;
+        return;
+      }
+
       // If joining organization for the first time, show role modal
       if (isJoiningOrg && organizationId) {
         setShowRoleModal(true);
@@ -218,14 +234,14 @@ export default function LoginPage() {
                 </div>
               )}
               
-              {/* Debug info - remove in production */}
+              {/* Debug info - remove in production 
               {process.env.NODE_ENV === 'development' && (
                 <div className="mt-2 p-2 bg-gray-100 border border-gray-300 rounded text-xs">
                   <p>Debug: organizationId = {organizationId || 'null'}</p>
                   <p>Debug: organizationName = {organizationName || 'null'}</p>
                   <p>Debug: hostname = {typeof window !== 'undefined' ? window.location.hostname : 'N/A'}</p>
                 </div>
-              )}
+              )} */ }
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">

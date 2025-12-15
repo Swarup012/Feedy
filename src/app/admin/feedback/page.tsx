@@ -28,12 +28,25 @@ export default function FeedbackPage() {
   useEffect(() => {
     const checkBoards = async () => {
       try {
+        // 🔥 Check localStorage first for instant redirect
+        const lastBoardSlug = localStorage.getItem('lastVisitedBoard');
+        
+        if (lastBoardSlug) {
+          // Instant redirect to last visited board (no API call needed)
+          console.log('🚀 Instant redirect to last board:', lastBoardSlug);
+          router.replace(`/admin/feedback/boards/${lastBoardSlug}`);
+          return; // Skip API call
+        }
+
+        // First time or no history - fetch boards
         setLoading(true);
         const response = await boardService.getAllBoards();
         const fetchedBoards = response.data.boards;
         setBoards(fetchedBoards);
 
         if (fetchedBoards.length > 0) {
+          // Save first board as default and redirect
+          localStorage.setItem('lastVisitedBoard', fetchedBoards[0].slug);
           router.replace(`/admin/feedback/boards/${fetchedBoards[0].slug}`);
         } else {
           setShowCreateBoard(true);

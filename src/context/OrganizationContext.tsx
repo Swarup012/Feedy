@@ -200,13 +200,16 @@ export function OrganizationProvider({ children }: { children: React.ReactNode }
         const port = window.location.port ? `:${window.location.port}` : '';
         const protocol = window.location.protocol;
         
+        // Determine redirect path based on user's role in the new organization
+        const redirectPath = newOrg.role === 'owner' || newOrg.role === 'admin' ? '/admin' : '/dashboard';
+        
         if (hostname.includes('localhost')) {
           // Development: subdomain.localhost:5173
-          window.location.href = `${protocol}//${newOrg.subdomain}.localhost${port}/boards`;
+          window.location.href = `${protocol}//${newOrg.subdomain}.localhost${port}${redirectPath}`;
         } else {
           // Production: subdomain.yourdomain.com
           const baseDomain = hostname.split('.').slice(-2).join('.');
-          window.location.href = `${protocol}//${newOrg.subdomain}.${baseDomain}/boards`;
+          window.location.href = `${protocol}//${newOrg.subdomain}.${baseDomain}${redirectPath}`;
         }
       } else {
         // Fallback: refresh current page
