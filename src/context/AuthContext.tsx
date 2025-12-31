@@ -44,6 +44,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const token = TokenManager.getAccessToken();
       const cachedUser = TokenManager.getUser();
 
+      console.log('🔍 checkAuth started:', { 
+        hasToken: !!token, 
+        hasCachedUser: !!cachedUser,
+        cachedUserEmail: cachedUser?.email,
+        cachedUserOrg: cachedUser?.current_organization_id,
+        cachedUserOrgRole: cachedUser?.organization_role
+      });
+
       // If we have cached user data, use it immediately
       if (cachedUser) {
         setUser(cachedUser);
@@ -53,19 +61,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // (cookies might be present for cross-subdomain auth)
       const response = await authService.getMe();
       
-      // 🐛 DEBUG: Log auth check info
-      if (token) {
-        const tokenHash = token.substring(0, 32);
-        console.log('🔍 DEBUG - Auth Check Response:', {
-          email: response.data.user.email,
-          tokenHash: tokenHash,
-          cachedUser: cachedUser?.email,
-          fetchedUser: response.data.user.email,
-          tokensMatch: cachedUser?.email === response.data.user.email,
-        });
-      } else {
-        console.log('🍪 Auth via cookies (no localStorage token on this subdomain)');
-      }
+      console.log('✅ Fresh user data from server:', {
+        email: response.data.user.email,
+        current_organization_id: response.data.user.current_organization_id,
+        organization_role: response.data.user.organization_role,
+        organization_id: response.data.user.organization_id
+      });
       
       setUser(response.data.user);
       TokenManager.setUser(response.data.user);
@@ -95,7 +96,47 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
+    // 🔧 FIX: Handle cross-subdomain auth transfer via URL hash
+    if (typeof window !== 'undefined') {
+      const hash = window.location.hash;
+      if (hash && hash.includes('access_token')) {
+        console.log('🔐 Detected auth tokens in URL hash - transferring to localStorage');
+        
+        // Parse tokens from hash
+        const params = new URLSearchParams(hash.substring(1));
+        const accessToken = params.get('access_token');
+        const refreshToken = params.get('refresh_token');
+        
+        if (accessToken && refreshToken) {
+          // Save to localStorage on this subdomain
+          TokenManager.setTokens(accessToken, refreshToken);
+          console.log('✅ Auth tokens transferred to new subdomain');
+          
+          // Clean up URL
+          window.history.replaceState({}, '', window.location.pathname + window.location.search);
+          
+          // Force immediate auth check to refresh user data with new organization context
+          checkAuth();
+          return; // Don't run checkAuth again below
+        }
+      }
+    }
+    
     checkAuth();
+    
+    // If coming from invite acceptance, force a fresh auth check
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('from') === 'invite') {
+        console.log('🎫 Coming from invite - forcing fresh auth check');
+        // Remove the parameter to avoid infinite loops
+        window.history.replaceState({}, '', window.location.pathname);
+        // Force another check after a brief delay to ensure tokens are saved
+        setTimeout(() => {
+          checkAuth();
+        }, 500);
+      }
+    }
   }, [checkAuth]);
 
   // Login function
@@ -135,7 +176,40 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Small delay to ensure state is updated before redirect
       await new Promise(resolve => setTimeout(resolve, 100));
 
-      // Redirect based on organization_role (NOT user.role which is job role)
+      // 🎫 PRIORITY CHECK: If user has pending invite, redirect to invite acceptance
+      const pendingInviteToken = typeof window !== 'undefined' ? localStorage.getItem('pendingInviteToken') : null;
+      if (pendingInviteToken) {
+        console.log('🎫 Pending invite detected, redirecting to invite page:', pendingInviteToken);
+        router.push(`/invite/${pendingInviteToken}`);
+        return;
+      }
+
+      // Check if user is on a public subdomain page (feedback/roadmap/changelog)
+      const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
+      const isOnPublicPage = currentPath.startsWith('/feedback') || 
+                             currentPath.startsWith('/roadmap') || 
+                             currentPath.startsWith('/changelog');
+      
+      // Get subdomain context
+      const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
+      const parts = hostname.split('.');
+      let hasSubdomain = false;
+      
+      if (hostname.includes('localhost') && parts.length > 1 && parts[0] !== 'localhost') {
+        hasSubdomain = true;
+      } else if (parts.length >= 3 && !['www', 'api', 'admin'].includes(parts[0])) {
+        hasSubdomain = true;
+      }
+
+      // If user logged in from subdomain public page, stay on that page
+      if (hasSubdomain && isOnPublicPage) {
+        console.log('🔄 Staying on current public page after login (subdomain context)');
+        // Refresh the page to update auth state
+        window.location.reload();
+        return;
+      }
+
+      // Otherwise, redirect based on organization_role (NOT user.role which is job role)
       const orgRole = response.data.user.organization_role;
       if (orgRole === "owner" || orgRole === "admin") {
         console.log('🔄 Redirecting to /admin');

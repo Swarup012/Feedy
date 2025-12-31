@@ -253,8 +253,8 @@ export default function AdminRoadmapPage() {
 
       {/* Board Selector for Members */}
       {!isAdminOrOwner && boardSlug && (
-        <div className="flex items-center gap-4 bg-white p-4 rounded-lg border">
-          <Label htmlFor="boardSelector" className="text-sm font-medium whitespace-nowrap">
+        <div className="flex items-center gap-4 bg-white dark:bg-gray-900 p-4 rounded-lg border dark:border-gray-700">
+          <Label htmlFor="boardSelector" className="text-sm font-medium whitespace-nowrap dark:text-gray-100">
             Select Board:
           </Label>
           <Select value={boardSlug} onValueChange={setBoardSlug}>
@@ -280,8 +280,8 @@ export default function AdminRoadmapPage() {
 
       {/* Board Filter - Only show for Admin/Owner */}
       {isAdminOrOwner && (
-        <div className="flex items-center gap-4 bg-white p-4 rounded-lg border">
-          <Label htmlFor="boardFilter" className="text-sm font-medium whitespace-nowrap">
+        <div className="flex items-center gap-4 bg-white dark:bg-gray-900 p-4 rounded-lg border dark:border-gray-700">
+          <Label htmlFor="boardFilter" className="text-sm font-medium whitespace-nowrap dark:text-gray-100">
             Filter by Board:
           </Label>
           <Select value={selectedBoardFilter} onValueChange={setSelectedBoardFilter}>

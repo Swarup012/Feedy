@@ -13,6 +13,8 @@ import { LeftSidebar } from "@/components/feedback/LeftSidebar";
 import { PostsList } from "@/components/feedback/PostsList";
 import { PostDetails } from "@/components/feedback/PostDetails";
 import { CreatePostDialog } from "@/components/feedback/CreatePostDialog";
+import { UpgradeDialog } from "@/components/UpgradeDialog";
+import usageService from "@/services/usageService";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { LogIn, UserPlus } from "lucide-react";
@@ -42,10 +44,29 @@ export default function PublicBoardPage() {
   const [loading, setLoading] = useState(() => !cachedPosts || cachedPosts.length === 0);
   const [showCreatePost, setShowCreatePost] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
   const [selectedBoards, setSelectedBoards] = useState<string[]>([]);
+  
+  // Pre-load post creation limits for instant popup
+  const [canCreatePost, setCanCreatePost] = useState(true);
+  const [postLimitReason, setPostLimitReason] = useState<string>("");
   
   // Track if we're currently fetching to prevent duplicate calls
   const isFetchingPosts = useRef(false);
+
+  // Pre-load usage data on component mount (only if user is authenticated)
+  useEffect(() => {
+    if (!user) return; // Skip if not logged in
+    
+    const loadUsage = async () => {
+      const { allowed, reason } = await usageService.canCreatePost();
+      setCanCreatePost(allowed);
+      if (!allowed && reason) {
+        setPostLimitReason(reason);
+      }
+    };
+    loadUsage();
+  }, [posts.length, user]); // Re-check when posts change or user logs in
 
   // Filters
   const [filters, setFilters] = useState({
@@ -312,6 +333,13 @@ export default function PublicBoardPage() {
       setShowAuthModal(true);
       return;
     }
+    
+    // Check post limit instantly using pre-loaded data
+    if (!canCreatePost) {
+      setShowUpgradeDialog(true);
+      return;
+    }
+    
     setShowCreatePost(true);
   };
 
@@ -421,6 +449,14 @@ export default function PublicBoardPage() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Upgrade Dialog for Post Limit */}
+      <UpgradeDialog
+        open={showUpgradeDialog}
+        onOpenChange={setShowUpgradeDialog}
+        limitType="posts"
+        message={postLimitReason || "You've reached your monthly post limit. Upgrade to Pro for unlimited posts."}
+      />
     </div>
   );
 }

@@ -14,6 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { OrganizationSwitcher } from "@/components/organization/OrganizationSwitcher";
+import { ChangelogPopover } from "@/components/changelog/ChangelogPopover";
 import {useState,useEffect} from "react"
 
 export default function AdminLayout({
@@ -66,8 +67,9 @@ export default function AdminLayout({
 
   const navItems = [
     { name: "Feedback", path: getFeedbackPath() },
-    { name: "Profile", path: "/admin/profile" },
+    { name: "Changelog", path: "/admin/changelog" },
     { name: "Roadmap", path: "/admin/roadmap" },
+    { name: "Profile", path: "/admin/profile" },
     { name: "Explore", path: "/feedback"}
   ];
 
@@ -117,65 +119,72 @@ export default function AdminLayout({
                 </Link>
               ))}
             </div>
-            
-              <button
-                onClick={toggleTheme}
-                className="p-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-300 shadow-sm"
-                aria-label={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
-              >
-                {theme === "light" ? (
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg">🌙</span>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg">☀️</span>
-                  </div>
-                )}
-              </button>
           </div>
 
-          {/* Right side - User Menu */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button className="flex items-center gap-2 focus:outline-none">
-                <Avatar className="h-9 w-9">
-                  <AvatarImage src={user?.avatar_url || ""} alt={user?.name || "User"} />
-                  <AvatarFallback>{user?.name?.[0]?.toUpperCase() || "U"}</AvatarFallback>
-                </Avatar>
-                <span className="hidden sm:inline text-sm font-medium text-gray-700 dark:text-gray-200">
-                  {user?.name || "User"}
-                </span>
-              </button>
-            </DropdownMenuTrigger>
+          {/* Right side - Actions & User Menu */}
+          <div className="flex items-center gap-3">
+            {/* Changelog Bell */}
+            <ChangelogPopover />
+            
+            {/* Theme Toggle */}
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-300 shadow-sm"
+              aria-label={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
+            >
+              {theme === "light" ? (
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">🌙</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">☀️</span>
+                </div>
+              )}
+            </button>
 
-            <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuLabel>My Account</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => router.push("/admin/profile")}>
-                Profile
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => router.push("/admin/organization")}>
-                Organization Settings
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => router.push("/admin/feedback")}>
-                Feedback
-              </DropdownMenuItem>
+            {/* User Menu */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="flex items-center gap-2 focus:outline-none">
+                  <Avatar className="h-9 w-9">
+                    <AvatarImage src={user?.avatar_url || ""} alt={user?.name || "User"} />
+                    <AvatarFallback>{user?.name?.[0]?.toUpperCase() || "U"}</AvatarFallback>
+                  </Avatar>
+                  <span className="hidden sm:inline text-sm font-medium text-gray-700 dark:text-gray-200">
+                    {user?.name || "User"}
+                  </span>
+                </button>
+              </DropdownMenuTrigger>
 
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => router.push("/create-organization")}>
-                + Create Organization
-              </DropdownMenuItem>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => router.push("/admin/profile")}>
+                  Profile
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => router.push("/admin/organization")}>
+                  Organization Settings
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => router.push("/admin/feedback")}>
+                  Feedback
+                </DropdownMenuItem>
 
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                className="text-red-600 cursor-pointer"
-                onClick={logout}
-              >
-                Logout
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => router.push("/create-organization")}>
+                  + Create Organization
+                </DropdownMenuItem>
+
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className="text-red-600 cursor-pointer"
+                  onClick={logout}
+                >
+                  Logout
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
       </nav>
 

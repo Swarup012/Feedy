@@ -28,50 +28,70 @@ export default function InvitePage({ params }: { params: Promise<{ token: string
   // Unwrap params Promise in Next.js 15
   const { token } = use(params);
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const { toast } = useToast();
   const [invitation, setInvitation] = useState<InvitationDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [accepting, setAccepting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  console.log('🚀 Invite Page Rendering:', { token, user: user?.email, loading });
+
   useEffect(() => {
+    console.log('🎫 useEffect fired - verifying invitation');
     verifyInvitation();
+    
+    // 🔍 DEBUG: Check if token is already in localStorage
+    const existingToken = localStorage.getItem('pendingInviteToken');
+    console.log('🎫 Invite page mounted:', {
+      token,
+      existingToken,
+      user: user?.email,
+      isMatch: existingToken === token
+    });
   }, [token]);
 
   const verifyInvitation = async () => {
     try {
+      console.log('🔍 Starting invitation verification for token:', token);
       setLoading(true);
       setError(null);
       const result = await invitationService.verifyToken(token);
       
+      console.log('📥 Invitation verification result:', result);
+      
       if (result.valid && result.invitation) {
         setInvitation(result.invitation);
+        console.log('✅ Valid invitation:', result.invitation);
       } else {
-        setError(result.error || 'Invalid invitation');
+        const errorMsg = result.error || 'Invalid invitation';
+        console.log('❌ Invalid invitation:', errorMsg);
+        setError(errorMsg);
       }
-    } catch (err) {
-      setError('Failed to verify invitation');
+    } catch (err: any) {
+      console.error('💥 Invitation verification error:', err);
+      const errorMsg = err?.response?.data?.error || err?.message || 'Failed to verify invitation';
+      setError(errorMsg);
     } finally {
+      console.log('✅ Verification complete, setting loading to false');
       setLoading(false);
     }
   };
 
+  const handleLoginRedirect = () => {
+    // Store token and redirect to login
+    localStorage.setItem('pendingInviteToken', token);
+    toast({
+      title: 'Please log in first',
+      description: 'You need to log in to accept this invitation',
+    });
+    router.push('/login');
+  };
+
   const handleAcceptInvitation = async () => {
-    if (!user) {
-      // Store token and redirect to login
-      localStorage.setItem('pendingInviteToken', token);
-      toast({
-        title: 'Please log in first',
-        description: 'You need to log in to accept this invitation',
-      });
-      router.push(`/login?redirect=/invite/${token}`);
-      return;
-    }
+    if (!user || !invitation) return;
 
-    if (!invitation) return;
-
-    // Check if email matches
+    // Check if email matches (should already be validated by UI)
     if (user.email?.toLowerCase() !== invitation.email.toLowerCase()) {
       toast({
         title: 'Email mismatch',
@@ -94,10 +114,38 @@ export default function InvitePage({ params }: { params: Promise<{ token: string
         description: `You've joined ${invitation.organization.name} successfully`,
       });
 
-      // Role-based redirection
+      // 🔧 FIX: Pass auth tokens via URL for cross-subdomain transfer
+      // Get current tokens from localStorage to pass to new subdomain
+      const accessToken = localStorage.getItem('access_token');
+      const refreshToken = localStorage.getItem('refresh_token');
+      
       const redirectPath = invitation.role === 'member' ? '/dashboard' : '/admin';
+      
+      // Use subdomain if available, otherwise use main domain
+      const subdomain = invitation.organization.subdomain || invitation.organization.slug;
+      const hostname = window.location.hostname;
+      
+      // Construct the proper URL with subdomain and auth tokens
+      let redirectUrl;
+      if (hostname.includes('localhost')) {
+        redirectUrl = `http://${subdomain}.localhost:5173${redirectPath}`;
+      } else {
+        // Production: subdomain.yourdomain.com
+        const baseDomain = hostname.split('.').slice(-2).join('.');
+        redirectUrl = `https://${subdomain}.${baseDomain}${redirectPath}`;
+      }
+      
+      // Add tokens as URL hash (more secure than query params)
+      if (accessToken && refreshToken) {
+        redirectUrl += `#access_token=${encodeURIComponent(accessToken)}&refresh_token=${encodeURIComponent(refreshToken)}&from=invite`;
+      } else {
+        redirectUrl += `?from=invite`;
+      }
+      
+      console.log('🔄 Redirecting to organization subdomain with session transfer');
+      
       setTimeout(() => {
-        window.location.href = `http://${invitation.organization.slug}.localhost:5173${redirectPath}`;
+        window.location.href = redirectUrl;
       }, 1500);
     } catch (error: any) {
       console.error('Failed to accept invitation:', error);
@@ -109,6 +157,14 @@ export default function InvitePage({ params }: { params: Promise<{ token: string
     } finally {
       setAccepting(false);
     }
+  };
+
+  const handleLogout = async () => {
+    await logout();
+    toast({
+      title: 'Logged out',
+      description: 'Please log in with the invited email address',
+    });
   };
 
   // Loading state
@@ -227,8 +283,8 @@ export default function InvitePage({ params }: { params: Promise<{ token: string
             // Wrong email
             <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
               <div className="flex items-start gap-3">
-                <XCircle className="h-5 w-5 text-red-600 mt-0.5" />
-                <div>
+                <XCircle className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
+                <div className="flex-1">
                   <p className="text-sm font-medium text-red-900 dark:text-red-100">
                     Email mismatch
                   </p>
@@ -238,6 +294,14 @@ export default function InvitePage({ params }: { params: Promise<{ token: string
                   <p className="text-sm text-red-800 dark:text-red-200 mt-2">
                     Please log out and sign in with the invited email address.
                   </p>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={handleLogout}
+                    className="mt-3 border-red-300 text-red-700 hover:bg-red-100 dark:border-red-700 dark:text-red-300 dark:hover:bg-red-900/30"
+                  >
+                    Log out and switch accounts
+                  </Button>
                 </div>
               </div>
             </div>
@@ -262,7 +326,7 @@ export default function InvitePage({ params }: { params: Promise<{ token: string
           <div className="flex flex-col gap-3">
             {!user ? (
               <Button 
-                onClick={() => handleAcceptInvitation()}
+                onClick={handleLoginRedirect}
                 size="lg"
                 className="w-full"
               >
@@ -271,10 +335,7 @@ export default function InvitePage({ params }: { params: Promise<{ token: string
               </Button>
             ) : !emailMatches ? (
               <Button
-                onClick={() => {
-                  localStorage.removeItem('token');
-                  router.push(`/login?redirect=/invite/${params.token}`);
-                }}
+                onClick={handleLogout}
                 size="lg"
                 className="w-full"
                 variant="outline"

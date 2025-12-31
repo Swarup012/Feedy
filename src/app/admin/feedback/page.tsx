@@ -3,9 +3,11 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { boardService, Board } from "@/services/boardService";
+import usageService from "@/services/usageService";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { CreateBoardDialog } from "@/components/feedback/CreateBoardDialog";
+import { UpgradeDialog } from "@/components/UpgradeDialog";
 import {
   Card,
   CardContent,
@@ -22,7 +24,23 @@ export default function FeedbackPage() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [showCreateBoard, setShowCreateBoard] = useState(false);
+  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
   const [boards, setBoards] = useState<Board[]>([]);
+  const [canCreateBoard, setCanCreateBoard] = useState(true); // Pre-load this
+
+  // Pre-load usage data
+  useEffect(() => {
+    const loadUsage = async () => {
+      try {
+        const { allowed } = await usageService.canCreateBoard();
+        setCanCreateBoard(allowed);
+      } catch (error) {
+        console.error('Error loading usage:', error);
+        setCanCreateBoard(true); // Default to allowed on error
+      }
+    };
+    loadUsage();
+  }, []);
 
   // Fetch boards and redirect if one exists
   useEffect(() => {
@@ -49,6 +67,7 @@ export default function FeedbackPage() {
           localStorage.setItem('lastVisitedBoard', fetchedBoards[0].slug);
           router.replace(`/admin/feedback/boards/${fetchedBoards[0].slug}`);
         } else {
+          // No boards exist - open dialog immediately
           setShowCreateBoard(true);
         }
       } catch (error: any) {
@@ -57,6 +76,7 @@ export default function FeedbackPage() {
           description: error.message || "Failed to load boards",
           variant: "destructive",
         });
+        // On error, also open dialog for creation
         setShowCreateBoard(true);
       } finally {
         setLoading(false);
@@ -65,6 +85,16 @@ export default function FeedbackPage() {
 
     checkBoards();
   }, [router, toast]);
+
+  // Handle create board button click - check limits first
+  const handleCreateBoardClick = async () => {
+    // Use pre-loaded data for instant response
+    if (!canCreateBoard) {
+      setShowUpgradeDialog(true);
+    } else {
+      setShowCreateBoard(true);
+    }
+  };
 
   const handleBoardCreated = (board: Board) => {
     toast({
@@ -93,37 +123,22 @@ export default function FeedbackPage() {
     );
   }
 
-  // 🆕 Empty State (Styled like modern version)
+  // 🆕 No boards - show dialog directly (no empty state UI)
   if (boards.length === 0) {
     return (
       <>
-        <div className="flex flex-col items-center justify-center h-screen space-y-6 p-6 bg-gradient-to-br from-blue-50 to-indigo-100">
-          <div className="text-center space-y-2">
-            <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Folder className="h-8 w-8 text-blue-600" />
-            </div>
-            <h2 className="text-2xl font-bold">Create Your First Board</h2>
-            <p className="text-gray-500 max-w-md">
-              {user?.role === "admin"
-                ? "Boards help you organize feedback by product, feature, or category. Create one to get started."
-                : "No feedback boards are available yet. Please contact an administrator."}
-            </p>
-          </div>
-
-          {/* ✅ Admin-only Create Button */}
-          {user?.role === "admin" && (
-            <Button onClick={() => setShowCreateBoard(true)} size="lg">
-              <Plus className="mr-2 h-5 w-5" />
-              Create Board
-            </Button>
-          )}
-        </div>
-
-        {/* Dialog */}
+        {/* Create Board Dialog - opens automatically */}
         <CreateBoardDialog
           open={showCreateBoard}
           onOpenChange={setShowCreateBoard}
           onBoardCreated={handleBoardCreated}
+        />
+
+        {/* Upgrade Dialog */}
+        <UpgradeDialog
+          open={showUpgradeDialog}
+          onOpenChange={setShowUpgradeDialog}
+          feature="boards"
         />
       </>
     );

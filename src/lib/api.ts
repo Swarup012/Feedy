@@ -82,14 +82,16 @@ api.interceptors.response.use(
             
             const isAuthPage = currentPath.includes('/login') || 
                              currentPath.includes('/signup') || 
-                             currentPath.includes('/forgot-password');
+                             currentPath.includes('/forgot-password') ||
+                             currentPath.includes('/invite');
             
             const isPublicPage = currentPath === '/' || 
                                currentPath.startsWith('/feedback/boards/') ||
                                currentPath.startsWith('/roadmap');
             
             const isPublicEndpoint = requestUrl.includes('/api/public/') ||
-                                    requestUrl.includes('/api/organizations/subdomain/');
+                                    requestUrl.includes('/api/organizations/subdomain/') ||
+                                    requestUrl.includes('/api/invitations/');
             
             // Only redirect if NOT on an auth/public page AND NOT a public endpoint
             if (!isAuthPage && !isPublicPage && !isPublicEndpoint) {
@@ -124,14 +126,16 @@ api.interceptors.response.use(
           
           const isAuthPage = currentPath.includes('/login') || 
                            currentPath.includes('/signup') || 
-                           currentPath.includes('/forgot-password');
+                           currentPath.includes('/forgot-password') ||
+                           currentPath.includes('/invite');
           
           const isPublicPage = currentPath === '/' || 
                              currentPath.startsWith('/feedback/boards/') ||
                              currentPath.startsWith('/roadmap');
           
           const isPublicEndpoint = requestUrl.includes('/api/public/') ||
-                                  requestUrl.includes('/api/organizations/subdomain/');
+                                  requestUrl.includes('/api/organizations/subdomain/') ||
+                                  requestUrl.includes('/api/invitations/');
           
           // Only redirect if NOT on an auth/public page AND NOT a public endpoint
           if (!isAuthPage && !isPublicPage && !isPublicEndpoint) {

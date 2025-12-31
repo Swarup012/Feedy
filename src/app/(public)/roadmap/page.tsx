@@ -1,102 +1,109 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
-import { roadmapService, RoadmapItem } from '@/services/roadmapService';
-import RoadmapStats from '@/components/roadmap/RoadmapStats';
-import RoadmapFilters from '@/components/roadmap/RoadmapFilters';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useAuth } from '@/hooks/useAuth';
-import { useToast } from '@/hooks/use-toast';
+import { useRouter } from 'next/navigation';
 import { LoadingAnimation } from '@/components/LoadingAnimation';
-import {
-  ArrowUpCircle,
-  MessageSquare,
-  Calendar,
-  TrendingUp,
-  CheckCircle2,
-  Clock,
-  AlertCircle,
-  ArrowLeft,
-} from 'lucide-react';
+import api from '@/lib/api';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { ArrowRight, TrendingUp } from 'lucide-react';
 
-export default function RoadmapPage() {
-  const params = useParams();
-  const { user } = useAuth();
-  const { toast } = useToast();
-  const [items, setItems] = useState<RoadmapItem[]>([]);
-  const [stats, setStats] = useState<any>(null);
+interface Board {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+}
+
+export default function RoadmapIndexPage() {
+  const router = useRouter();
+  const [boards, setBoards] = useState<Board[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [filters, setFilters] = useState({
-    status: [] as string[],
-    category: '',
-  });
-  const [viewMode, setViewMode] = useState<'timeline' | 'list'>('timeline');
-  const [votedItems, setVotedItems] = useState<Set<string>>(new Set());
-
-  // Get boardSlug from params - don't default to 'general'
-  const boardSlug = params?.boardSlug as string;
 
   useEffect(() => {
-    if (boardSlug) {
-      loadRoadmap();
-    } else {
-      setError('No board specified. Please navigate from a feedback board.');
-      setLoading(false);
-    }
-  }, [boardSlug, filters]);
+    loadBoards();
+  }, []);
 
-  useEffect(() => {
-    if (user) {
-      loadUserVotes();
-    }
-  }, [user, items]);
-
-  const loadRoadmap = async () => {
+  const loadBoards = async () => {
     try {
       setLoading(true);
-      setError(null);
-      const [itemsRes, statsRes] = await Promise.all([
-        roadmapService.getPublicRoadmap(boardSlug, filters),
-        roadmapService.getRoadmapStats(boardSlug),
-      ]);
-      setItems(itemsRes.data.items);
-      setStats(statsRes.data);
+      const response = await api.get('/api/public/boards');
+      const boardList = response.data.data.boards || [];
+      setBoards(boardList);
+      
+      // If there's only one board, auto-redirect to it
+      if (boardList.length === 1) {
+        router.push(`/roadmap/${boardList[0].slug}`);
+      } else if (boardList.length === 0) {
+        setError('No boards available');
+      }
     } catch (error: any) {
-      console.error('Error loading roadmap:', error);
-      const errorMessage = error.response?.data?.message || error.message || 'Failed to load roadmap';
-      setError(errorMessage);
-      toast({
-        title: 'Error',
-        description: errorMessage,
-        variant: 'destructive',
-      });
+      console.error('Error loading boards:', error);
+      setError('Failed to load boards');
     } finally {
       setLoading(false);
     }
   };
 
-  const loadUserVotes = async () => {
-    if (!user) return;
-    
-    try {
-      const voted = new Set<string>();
-      for (const item of items) {
-        const res = await roadmapService.hasUserVoted(item.id);
-        if (res.data.hasVoted) {
-          voted.add(item.id);
-        }
-      }
-      setVotedItems(voted);
-    } catch (error) {
-      console.error('Error loading votes:', error);
-    }
-  };
+  if (loading) {
+    return (
+      <div className="container py-8">
+        <LoadingAnimation />
+      </div>
+    );
+  }
+
+  if (error || boards.length === 0) {
+    return (
+      <div className="container py-8">
+        <Card>
+          <CardHeader>
+            <CardTitle>No Roadmaps Available</CardTitle>
+            <CardDescription>
+              There are no public roadmaps to display at this time.
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      </div>
+    );
+  }
+
+  // Show board selection if multiple boards exist
+  return (
+    <div className="container py-8">
+      <div className="mb-8">
+        <h1 className="text-4xl font-bold mb-2">Product Roadmap</h1>
+        <p className="text-muted-foreground">
+          Choose a board to view its roadmap
+        </p>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {boards.map((board) => (
+          <Card key={board.id} className="hover:shadow-lg transition-shadow">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <TrendingUp className="h-5 w-5 text-primary" />
+                {board.name}
+              </CardTitle>
+              <CardDescription>{board.description}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button 
+                onClick={() => router.push(`/roadmap/${board.slug}`)}
+                className="w-full"
+              >
+                View Roadmap
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+}
 
   const handleVote = async (itemId: string) => {
     if (!user) {

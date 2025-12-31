@@ -2,76 +2,339 @@
 @tailwind components;
 @tailwind utilities;
 
+/* =============================================================================
+   PROFESSIONAL THEME SYSTEM
+   A carefully calibrated color system for optimal readability and hierarchy
+   across light and dark modes.
+============================================================================= */
+
+/* -----------------------------------------------------------------------------
+   Utilities Layer
+   Custom utilities for advanced effects
+----------------------------------------------------------------------------- */
 @layer utilities {
-    .backdrop-blur-sm {
-        backdrop-filter: blur(8px);
-    }
-    .backdrop-blur-xl {
-        backdrop-filter: blur(20px);
-    }
+  /* Backdrop blur utilities */
+  .backdrop-blur-sm {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+  
+  .backdrop-blur-md {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+  
+  .backdrop-blur-lg {
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+  
+  .backdrop-blur-xl {
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+  }
+
+  /* Text balance for headlines */
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Smooth scrolling */
+  .scroll-smooth {
+    scroll-behavior: smooth;
+  }
 }
 
+/* -----------------------------------------------------------------------------
+   Base Theme Variables
+   Uses HSL for easier manipulation and consistent lightness/saturation
+----------------------------------------------------------------------------- */
 @layer base {
-    :root {
-        --background: 219 22% 96%;
-        --foreground: 222.2 86.5% 17.5%;
-        --card: 0 0% 100%;
-        --card-foreground: 222.2 86.5% 17.5%;
-        --popover: 0 0% 100%;
-        --popover-foreground: 222.2 86.5% 17.5%;
-        --primary: 221.2 83.2% 53.3%;
-        --primary-foreground: 210 40% 98%;
-        --secondary: 220 14.3% 95.9%;
-        --secondary-foreground: 222.2 86.5% 17.5%;
-        --muted: 220 14.3% 95.9%;
-        --muted-foreground: 215.4 16.3% 46.9%;
-        --accent: 184 55% 45%;
-        --accent-foreground: 210 40% 98%;
-        --destructive: 0 84.2% 60.2%;
-        --destructive-foreground: 210 40% 98%;
-        --border: 214.3 31.8% 91.4%;
-        --input: 214.3 31.8% 91.4%;
-        --ring: 221.2 83.2% 53.3%;
-        --radius: 0.5rem;
-        --chart-1: 12 76% 61%;
-        --chart-2: 173 58% 39%;
-        --chart-3: 197 37% 24%;
-        --chart-4: 43 74% 66%;
-        --chart-5: 27 87% 67%;
-    }
-    .dark {
-        --background: 222.2 84% 4.9%;
-        --foreground: 210 40% 98%;
-        --card: 215.2 28.2% 17.1%;
-        --card-foreground: 210 40% 98%;
-        --popover: 215.2 28.2% 17.1%;
-        --popover-foreground: 210 40% 98%;
-        --primary: 217.2 91.2% 59.8%;
-        --primary-foreground: 210 40% 98%;
-        --secondary: 215.2 28.2% 17.1%;
-        --secondary-foreground: 210 40% 98%;
-        --muted: 215.2 28.2% 17.1%;
-        --muted-foreground: 215 20.2% 65.1%;
-        --accent: 184 55% 45%;
-        --accent-foreground: 210 40% 98%;
-        --destructive: 0 62.8% 30.6%;
-        --destructive-foreground: 210 40% 98%;
-        --border: 217.2 32.6% 17.5%;
-        --input: 217.2 32.6% 17.5%;
-        --ring: 217.2 91.2% 59.8%;
-        --chart-1: 220 70% 50%;
-        --chart-2: 160 60% 45%;
-        --chart-3: 30 80% 55%;
-        --chart-4: 280 65% 60%;
-        --chart-5: 340 75% 55%;
-    }
+  :root {
+    /* -------------------------
+       LIGHT MODE PALETTE
+    ------------------------- */
+    
+    /* Neutrals - High contrast for excellent readability */
+    --background: 0 0% 100%;              /* Pure white base */
+    --foreground: 0 0% 3.9%;            /* Deep blue-black text (#0A1628) */
+    
+    /* Surface colors */
+    --card: 0 0% 100%;                    /* White cards */
+    --card-foreground: 0 0% 3.9%;       /* Matches foreground */
+    
+    --popover: 0 0% 100%;                 /* White popovers */
+    --popover-foreground: 0 0% 3.9%;    /* Matches foreground */
+    
+    /* Primary brand color - Refined blue */
+    --primary: 0 0% 9%;               /* Vibrant blue (#2563EB) */
+    --primary-foreground: 0 0% 98%;      /* White text on primary */
+    
+    /* Secondary surfaces - Subtle gray */
+    --secondary: 0 0% 96.1%;             /* Very light gray (#F5F6F7) */
+    --secondary-foreground: 0 0% 9%;  /* Dark text */
+    
+    /* Muted elements - Reduced emphasis */
+    --muted: 0 0% 96.1%;                 /* Light gray background */
+    --muted-foreground: 0 0% 45.1%;      /* Medium gray text (#6B7280) */
+    
+    /* Accent - Complementary teal */
+    --accent: 0 0% 96.1%;                /* Refined teal (#1FA89E) */
+    --accent-foreground: 0 0% 9%;       /* White text on accent */
+    
+    /* Destructive - Balanced red */
+    --destructive: 0 84.2% 60.2%;             /* Clear red (#DC2626) */
+    --destructive-foreground: 0 0% 98%;  /* White text on red */
+    
+    /* Borders and inputs - Subtle but visible */
+    --border: 0 0% 89.8%;                /* Light gray border (#E5E7EB) */
+    --input: 0 0% 89.8%;                 /* Matches border */
+    --ring: 0 0% 3.9%;                  /* Focus ring matches primary */
+    
+    /* Border radius */
+    --radius: 0.5rem;                     /* 8px - Modern but not excessive */
+    
+    /* Chart colors - Harmonious and accessible */
+    --chart-1: 12 76% 61%;               /* Blue */
+    --chart-2: 173 58% 39%;               /* Green */
+    --chart-3: 197 37% 24%;               /* Purple */
+    --chart-4: 43 74% 66%;                /* Orange */
+    --chart-5: 27 87% 67%;               /* Pink */
+    
+    /* Semantic colors */
+    --success: 142 71% 45%;               /* Green */
+    --success-foreground: 0 0% 100%;      /* White */
+    
+    --warning: 32 95% 50%;                /* Orange */
+    --warning-foreground: 0 0% 100%;      /* White */
+    
+    --info: 199 89% 48%;                  /* Cyan */
+    --info-foreground: 0 0% 100%;         /* White */
+  }
+
+  .dark {
+    /* -------------------------
+       DARK MODE PALETTE
+       Pure black background matching profile page (gray-950)
+       Consistent dark theme across all pages
+    ------------------------- */
+    
+    /* Neutrals - Pure black background like profile page */
+    --background: 0 0% 3.9%;             /* Very dark black (gray-950 equivalent) */
+    --foreground: 0 0% 98%;            /* Light gray text (gray-100) */
+    
+    /* Surface colors - Slightly elevated from black */
+    --card: 0 0% 3.9%;                   /* gray-900 equivalent */
+    --card-foreground: 0 0% 98%;       /* gray-100 */
+    
+    --popover: 0 0% 3.9%;                /* gray-900 */
+    --popover-foreground: 0 0% 98%;    /* gray-100 */
+    
+    /* Primary brand - Bright blue for contrast */
+    --primary: 0 0% 98%;               /* blue-500 (#3B82F6) */
+    --primary-foreground: 0 0% 9%;      /* Pure white */
+    
+    /* Secondary surfaces - gray-800 */
+    --secondary: 0 0% 14.9%;             /* gray-800 equivalent */
+    --secondary-foreground: 0 0% 98%;  /* gray-100 */
+    
+    /* Muted elements - gray-800 background, gray-500 text */
+    --muted: 0 0% 14.9%;                 /* gray-800 */
+    --muted-foreground: 0 0% 63.9%;      /* gray-500 */
+    
+    /* Accent - Teal accent */
+    --accent: 0 0% 14.9%;                /* Teal (#14B8A6) */
+    --accent-foreground: 0 0% 98%;       /* Pure white */
+    
+    /* Destructive - Red for errors */
+    --destructive: 0 62.8% 30.6%;             /* red-500 (#EF4444) */
+    --destructive-foreground: 0 0% 98%;  /* Pure white */
+    
+    /* Borders and inputs - gray-700/800 */
+    --border: 0 0% 14.9%;                /* gray-700 */
+    --input: 0 0% 14.9%;                 /* gray-700 */
+    --ring: 0 0% 83.1%;                  /* blue-500 focus ring */
+    
+    /* Chart colors - Vibrant for dark backgrounds */
+    --chart-1: 220 70% 50%;               /* Blue */
+    --chart-2: 160 60% 45%;               /* Green */
+    --chart-3: 30 80% 55%;               /* Purple */
+    --chart-4: 280 65% 60%;                /* Orange */
+    --chart-5: 340 75% 55%;               /* Pink */
+    
+    /* Semantic colors - Dark mode variants */
+    --success: 142 76% 48%;               /* Green */
+    --success-foreground: 0 0% 100%;      /* White */
+    
+    --warning: 32 98% 55%;                /* Orange */
+    --warning-foreground: 0 0% 100%;      /* White */
+    
+    --info: 199 89% 55%;                  /* Cyan */
+    --info-foreground: 0 0% 100%;         /* White */
+  }
+
+  /* -------------------------
+     GLOBAL BASE STYLES
+  ------------------------- */
+  * {
+    @apply border-border;
+  }
+
+  html {
+    @apply scroll-smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "kern", "liga", "clig", "calt";
+  }
+
+  /* Improved focus styles for accessibility */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+
+  /* Selection colors */
+  ::selection {
+    @apply bg-primary/20 text-foreground;
+  }
+
+  /* Smooth transitions for theme switching */
+  * {
+    transition-property: color, background-color, border-color, 
+                         text-decoration-color, fill, stroke;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
+  }
 }
 
-@layer base {
-    * {
-        @apply border-border;
-    }
-    body {
-        @apply bg-background text-foreground;
-    }
+/* -----------------------------------------------------------------------------
+   COMPONENT LAYER
+   Reusable component patterns
+----------------------------------------------------------------------------- */
+@layer components {
+  /* Glass morphism effect */
+  .glass {
+    @apply bg-background/80 backdrop-blur-md border border-border/50;
+  }
+
+  /* Elevated surface */
+  .surface-elevated {
+    @apply bg-card border border-border shadow-sm;
+  }
+
+  /* Subtle hover effect */
+  .hover-lift {
+    @apply transition-all duration-200 hover:translate-y-[-2px] hover:shadow-md;
+  }
+
+  /* Text gradient */
+  .text-gradient {
+    @apply bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent;
+  }
+
+  /* Smooth gradient backgrounds */
+  .gradient-subtle {
+    @apply bg-gradient-to-br from-background via-background to-muted;
+  }
+}
+
+/* -----------------------------------------------------------------------------
+   DARK MODE IMAGE ADJUSTMENTS
+   Reduce image brightness in dark mode for better visual comfort
+----------------------------------------------------------------------------- */
+.dark img:not([data-no-dark-adjust]) {
+  filter: brightness(0.9);
+}
+
+.dark img:hover:not([data-no-dark-adjust]) {
+  filter: brightness(1);
+  transition: filter 200ms ease;
+}
+
+/* -----------------------------------------------------------------------------
+   ACCESSIBILITY IMPROVEMENTS
+----------------------------------------------------------------------------- */
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  :root {
+    --border: 220 13% 70%;
+  }
+  
+  .dark {
+    --border: 217 33% 30%;
+  }
+}
+
+/* -----------------------------------------------------------------------------
+   PRINT STYLES
+   Optimize for printing
+----------------------------------------------------------------------------- */
+@media print {
+  * {
+    background: white !important;
+    color: black !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+  
+  a,
+  a:visited {
+    text-decoration: underline;
+  }
+  
+  a[href]::after {
+    content: " (" attr(href) ")";
+  }
+  
+  abbr[title]::after {
+    content: " (" attr(title) ")";
+  }
+  
+  pre,
+  blockquote {
+    border: 1px solid #999;
+    page-break-inside: avoid;
+  }
+  
+  thead {
+    display: table-header-group;
+  }
+  
+  tr,
+  img {
+    page-break-inside: avoid;
+  }
+  
+  img {
+    max-width: 100% !important;
+  }
+  
+  p,
+  h2,
+  h3 {
+    orphans: 3;
+    widows: 3;
+  }
+  
+  h2,
+  h3 {
+    page-break-after: avoid;
+  }
 }

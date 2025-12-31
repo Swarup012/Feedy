@@ -13,6 +13,8 @@ import { LeftSidebar } from "@/components/feedback/LeftSidebar";
 import { PostsList } from "@/components/feedback/PostsList";
 import { PostDetails } from "@/components/feedback/PostDetails";
 import { CreatePostDialog } from "@/components/feedback/CreatePostDialog";
+import { UpgradeDialog } from "@/components/UpgradeDialog";
+import usageService from "@/services/usageService";
 
 // 🔥 GLOBAL in-memory cache (persists across navigation!)
 const postsCache: Record<string, Post[]> = {};
@@ -51,7 +53,24 @@ export default function BoardPage() {
   };
   
   const [showCreatePost, setShowCreatePost] = useState(false);
+  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
   const [selectedBoards, setSelectedBoards] = useState<string[]>([]); // Board filter
+  
+  // Pre-load post creation limits for instant popup
+  const [canCreatePost, setCanCreatePost] = useState(true);
+  const [postLimitReason, setPostLimitReason] = useState<string>("");
+
+  // Pre-load usage data on component mount
+  useEffect(() => {
+    const loadUsage = async () => {
+      const { allowed, reason } = await usageService.canCreatePost();
+      setCanCreatePost(allowed);
+      if (!allowed && reason) {
+        setPostLimitReason(reason);
+      }
+    };
+    loadUsage();
+  }, [posts.length]); // Re-check when posts change
 
   // 🚀 INSTANT LOAD: Populate from cache on mount (before any useEffect!)
   useEffect(() => {
@@ -483,7 +502,14 @@ export default function BoardPage() {
           loading={loading}
           currentBoard={currentBoard}
           onPostSelect={handlePostSelect}
-          onCreatePost={() => setShowCreatePost(true)}
+          onCreatePost={() => {
+            // Check post limit instantly using pre-loaded data
+            if (!canCreatePost) {
+              setShowUpgradeDialog(true);
+            } else {
+              setShowCreatePost(true);
+            }
+          }}
           onSearchChange={(search) => setFilters({ ...filters, search })}
         />
 
@@ -501,6 +527,14 @@ export default function BoardPage() {
           onOpenChange={setShowCreatePost}
           boardSlug={slug}
           onPostCreated={handlePostCreated}
+        />
+
+        {/* Upgrade Dialog for Post Limit */}
+        <UpgradeDialog
+          open={showUpgradeDialog}
+          onOpenChange={setShowUpgradeDialog}
+          limitType="posts"
+          message={postLimitReason || "You've reached your monthly post limit. Upgrade to Pro for unlimited posts."}
         />
       </div>
     </ProtectedRoute>

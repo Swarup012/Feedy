@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth"; // ← ADD THIS
+import usageService from "@/services/usageService";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -46,8 +47,10 @@ import { Plus, Filter, CalendarIcon, Lock, Globe, MoreVertical, Edit2, Trash2 } 
 import { Board, boardService } from "@/services/boardService";
 import { cn } from "@/lib/utils";
 import { CreateBoardDialog } from "./CreateBoardDialog";
+import { UpgradeDialog } from "@/components/UpgradeDialog";
 import { toast, useToast } from "@/hooks/use-toast";
 import { IconPicker, IconDisplay } from "@/components/ui/icon-picker";
+import { useEffect } from "react"; // Add useEffect
 
 interface LeftSidebarProps {
   boards: Board[];
@@ -75,11 +78,13 @@ export function LeftSidebar({
   const { toast } = useToast();
   const [showFilters, setShowFilters] = useState(false);
   const [showoCreateDialog, setShowCreateDialog] = useState(false);
+  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [selectedBoard, setSelectedBoard] = useState<Board | null>(null);
   const [showAllBoards, setShowAllBoards] = useState(false); // View All toggle
   const [showIconPicker, setShowIconPicker] = useState(false); // Icon picker state
+  const [canCreateBoard, setCanCreateBoard] = useState(true); // Pre-load this
   const [editFormData, setEditFormData] = useState({
     name: '',
     description: '',
@@ -87,6 +92,20 @@ export function LeftSidebar({
     color: '#3B82F6',
     icon: 'Lightbulb', // Default to Lucide icon name
   });
+
+  // Pre-load usage data for instant popup
+  useEffect(() => {
+    const loadUsage = async () => {
+      try {
+        const response = await usageService.canCreateBoard();
+        setCanCreateBoard(response.allowed);
+      } catch (error) {
+        console.error('Error loading usage:', error);
+        setCanCreateBoard(true); // Default to allowed on error
+      }
+    };
+    loadUsage();
+  }, [boards.length]); // Re-check when boards change
 
   // Show first 5 boards by default, all if "View All" is clicked
   const INITIAL_BOARDS_LIMIT = 2;
@@ -100,7 +119,18 @@ export function LeftSidebar({
     if (isAllSelected) {
       onBoardSelectionChange?.([]);
     } else {
-      onBoardSelectionChange?.(boards.map((b) => b.id));
+      onBoardSelectionChange?.(boards.map(b => b.id));
+    }
+  };
+
+  // Handle create board button click - use pre-loaded data for instant response
+  const handleCreateBoardClick = async () => {
+    if (!canCreateBoard) {
+      // Instantly show upgrade dialog
+      setShowUpgradeDialog(true);
+    } else {
+      // User can create board
+      setShowCreateDialog(true);
     }
   };
 
@@ -205,7 +235,7 @@ export function LeftSidebar({
         {/* ✅ SHOW FOR OWNERS AND ADMINS */}
         {(user?.organization_role === "owner" || user?.organization_role === "admin") && (
           <Button
-            onClick={() => setShowCreateDialog(true)}
+            onClick={handleCreateBoardClick}
             size="sm"
             className="w-full"
           >
@@ -552,6 +582,13 @@ export function LeftSidebar({
         onOpenChange={setShowIconPicker}
         onSelectIcon={(iconName) => setEditFormData({ ...editFormData, icon: iconName })}
         currentIcon={editFormData.icon}
+      />
+
+      {/* Upgrade Dialog */}
+      <UpgradeDialog
+        open={showUpgradeDialog}
+        onOpenChange={setShowUpgradeDialog}
+        feature="boards"
       />
     </div>
   );
