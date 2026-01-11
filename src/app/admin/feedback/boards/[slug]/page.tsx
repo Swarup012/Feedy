@@ -534,7 +534,7 @@ export default function BoardPage() {
           open={showUpgradeDialog}
           onOpenChange={setShowUpgradeDialog}
           limitType="posts"
-          message={postLimitReason || "You've reached your monthly post limit. Upgrade to Pro for unlimited posts."}
+          message={postLimitReason || "You've reached your post limit for this board. Upgrade to Starter for unlimited posts."}
         />
       </div>
     </ProtectedRoute>

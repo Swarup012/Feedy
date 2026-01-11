@@ -98,6 +98,8 @@ export function LeftSidebar({
     const loadUsage = async () => {
       try {
         const response = await usageService.canCreateBoard();
+        console.log('🔍 LeftSidebar - canCreateBoard response:', response);
+        console.log('🔍 LeftSidebar - Current boards count:', boards.length);
         setCanCreateBoard(response.allowed);
       } catch (error) {
         console.error('Error loading usage:', error);

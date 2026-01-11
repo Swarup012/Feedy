@@ -2,7 +2,7 @@
 import api from '@/lib/api';
 
 export interface UsageData {
-  plan: 'free' | 'pro';
+  plan: 'free' | 'starter';
   usage: {
     boards: {
       current: number;
@@ -40,19 +40,33 @@ const usageService = {
       const response = await this.getUsage();
       const { plan, usage } = response.data;
 
-      if (plan === 'pro') {
+      console.log('🔍 usageService.canCreateBoard - Full response:', {
+        plan,
+        boardsUsage: usage.boards,
+      });
+
+      if (plan === 'starter') {
+        console.log('✅ User has starter plan - unlimited boards allowed');
         return { allowed: true };
       }
 
       // Check board limit
       const { current, limit } = usage.boards;
+      console.log('🔍 usageService.canCreateBoard - Board check:', {
+        current,
+        limit,
+        allowed: !(typeof limit === 'number' && current >= limit),
+      });
+
       if (typeof limit === 'number' && current >= limit) {
+        console.log(`🚫 Board limit reached: ${current}/${limit}`);
         return {
           allowed: false,
-          reason: `Board limit reached. Free plan allows ${limit} board(s). Upgrade to Pro for unlimited boards.`,
+          reason: `Board limit reached. Free plan allows ${limit} board(s). Upgrade to Starter for unlimited boards.`,
         };
       }
 
+      console.log('✅ Board creation allowed');
       return { allowed: true };
     } catch (error) {
       console.error('Error checking board limit:', error);
@@ -68,7 +82,7 @@ const usageService = {
       const response = await this.getUsage();
       const { plan, usage } = response.data;
 
-      if (plan === 'pro') {
+      if (plan === 'starter') {
         return { allowed: true };
       }
 
@@ -77,7 +91,7 @@ const usageService = {
       if (typeof limit === 'number' && current >= limit) {
         return {
           allowed: false,
-          reason: `Post limit reached. Free plan allows ${limit} posts per month. Upgrade to Pro for unlimited posts.`,
+          reason: `Post limit reached. Free plan allows ${limit} posts per month. Upgrade to Starter for unlimited posts.`,
           resetsAt: resets_at,
         };
       }

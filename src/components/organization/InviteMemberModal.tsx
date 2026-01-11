@@ -22,6 +22,7 @@ import {
 } from '@/components/ui/select';
 import { invitationService } from '@/services/invitationService';
 import { Mail, UserPlus, Loader2 } from 'lucide-react';
+import { UpgradeDialog } from '@/components/UpgradeDialog';
 
 interface InviteMemberModalProps {
   open: boolean;
@@ -41,6 +42,7 @@ export function InviteMemberModal({
   const [email, setEmail] = useState('');
   const [role, setRole] = useState<'member' | 'admin'>('member');
   const [loading, setLoading] = useState(false);
+  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -87,9 +89,18 @@ export function InviteMemberModal({
       }
     } catch (error: any) {
       console.error('Failed to send invitation:', error);
+      
+      // Check if it's a team member limit error
+      if (error.response?.data?.error === 'TEAM_MEMBER_LIMIT_REACHED' || 
+          error.response?.data?.error === 'INVITATION_LIMIT_REACHED') {
+        onClose(); // Close invite modal first
+        setShowUpgradeDialog(true); // Show upgrade dialog
+        return;
+      }
+      
       toast({
         title: 'Failed to send invitation',
-        description: error.response?.data?.error || 'Something went wrong. Please try again.',
+        description: error.response?.data?.message || 'Something went wrong. Please try again.',
         variant: 'destructive',
       });
     } finally {
@@ -98,6 +109,7 @@ export function InviteMemberModal({
   };
 
   return (
+    <>
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
@@ -187,5 +199,15 @@ export function InviteMemberModal({
         </form>
       </DialogContent>
     </Dialog>
+
+    {/* Upgrade Dialog */}
+    <UpgradeDialog
+      open={showUpgradeDialog}
+      onOpenChange={setShowUpgradeDialog}
+      title="Upgrade to Add More Team Members"
+      description="You've reached the team member limit for the Free plan (3 members). Upgrade to Starter for 5 team members."
+      feature="team_members"
+    />
+  </>
   );
 }

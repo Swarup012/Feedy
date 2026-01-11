@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useRef } from "react";
@@ -9,15 +10,16 @@ import { Label } from "@/components/ui/label";
 import { Logo } from "@/components/logo";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { Eye, EyeOff, User, Mail, Lock, ArrowRight, Sparkles } from "lucide-react";
+import { Eye, EyeOff, User, Mail, Lock, ArrowRight } from "lucide-react";
 import { LoadingAnimation } from "@/components/LoadingAnimation";
 import gsap from "gsap";
+import { getPublicReturnUrl, clearReturnUrl } from "@/lib/returnUrl";
 
 export default function SignupPage() {
   const router = useRouter();
   const { signup } = useAuth();
   const { toast } = useToast();
-  const containerRef = useRef(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -28,14 +30,15 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  // Entrance Animation
+  // Entrance animation (matched to login)
   useEffect(() => {
     const ctx = gsap.context(() => {
       gsap.from(".signup-reveal", {
-        y: 30,
+        y: 12,
         opacity: 0,
+        scale: 0.98,
         duration: 0.8,
-        stagger: 0.1,
+        stagger: 0.08,
         ease: "power3.out",
       });
     }, containerRef);
@@ -43,38 +46,18 @@ export default function SignupPage() {
   }, []);
 
   const validateForm = () => {
-    const newErrors: Record<string, string> = {};
-
-    if (!formData.name.trim()) {
-      newErrors.name = "Name is required";
-    } else if (formData.name.length < 2) {
-      newErrors.name = "Name must be at least 2 characters";
-    }
-
-    if (!formData.email.trim()) {
-      newErrors.email = "Email is required";
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = "Please enter a valid email";
-    }
-
-    if (!formData.password) {
-      newErrors.password = "Password is required";
-    } else if (formData.password.length < 8) {
-      newErrors.password = "Password must be at least 8 characters";
-    } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(formData.password)) {
-      newErrors.password = "Needs uppercase, lowercase, and a number";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    const e: Record<string, string> = {};
+    if (!formData.name.trim()) e.name = "Name is required";
+    if (!formData.email.trim()) e.email = "Email is required";
+    if (!formData.password) e.password = "Password is required";
+    setErrors(e);
+    return Object.keys(e).length === 0;
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
-    setFormData((prev) => ({ ...prev, [id]: value }));
-    if (errors[id]) {
-      setErrors((prev) => ({ ...prev, [id]: "" }));
-    }
+    setFormData(p => ({ ...p, [id]: value }));
+    if (errors[id]) setErrors(p => ({ ...p, [id]: "" }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -91,180 +74,191 @@ export default function SignupPage() {
 
       if (emailConfirmationRequired) {
         toast({
-          title: "Account created!",
-          description: "Please check your email to verify your account.",
+          title: "Account created",
+          description: "Check your email to verify your account.",
         });
         setTimeout(() => router.push("/login"), 2000);
       } else {
-        router.push("/onboarding");
+        const returnUrl = getPublicReturnUrl();
+        if (returnUrl) {
+          clearReturnUrl();
+          router.push(returnUrl);
+        } else {
+          router.push("/onboarding");
+        }
       }
     } catch (error: any) {
-      if (error.message?.includes('already registered')) {
-        toast({
-          title: "Account Exists",
-          description: "Redirecting to login...",
-          variant: "destructive",
-        });
-        setTimeout(() => router.push('/login'), 2000);
-      } else {
-        toast({
-          title: "Signup failed",
-          description: error.message || "Something went wrong.",
-          variant: "destructive",
-        });
-      }
+      toast({
+        title: "Signup failed",
+        description: error.message || "Something went wrong.",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div ref={containerRef} className="min-h-screen bg-white flex flex-col items-center justify-center p-6 relative overflow-hidden">
-      {/* Background Pattern */}
-      <div className="fixed inset-0 z-0 opacity-[0.03] pointer-events-none">
-        <div className="absolute inset-0" style={{ backgroundImage: `radial-gradient(#000 1px, transparent 1px)`, backgroundSize: '32px 32px' }}></div>
-      </div>
-      
-      {/* Soft Glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-blue-50/60 rounded-full blur-[120px] -z-10" />
+    <div
+      ref={containerRef}
+      className="min-h-screen flex items-center justify-center px-6 relative overflow-hidden"
+      style={{
+        background:
+          "radial-gradient(1200px 600px at 50% -10%, rgba(79,124,255,0.14), transparent 60%), var(--bg)",
+      }}
+    >
+      {/* Subtle noise */}
+      <div
+        className="absolute inset-0 opacity-[0.035] pointer-events-none"
+        style={{
+          backgroundImage:
+            "radial-gradient(rgba(255,255,255,0.4) 1px, transparent 1px)",
+          backgroundSize: "28px 28px",
+        }}
+      />
 
-      <div className="w-full max-w-[480px] relative z-10">
+      <div className="w-full max-w-[420px] relative z-10">
         {/* Logo */}
-        <div className="text-center mb-8 signup-reveal">
-          <Link href="/" className="inline-flex items-center gap-3 group">
-            <div className="transition-transform duration-500 group-hover:rotate-12">
-              <Logo width={40} height={40} />
-            </div>
-            <span className="text-2xl font-black tracking-tighter text-slate-900">Faddy</span>
+        <div className="signup-reveal text-center mb-10">
+          <Link href="/" className="inline-flex items-center gap-3">
+            <Logo width={40} height={40} />
+            <span className="text-xl font-semibold tracking-tight">
+              Faddy
+            </span>
           </Link>
         </div>
 
-        {/* Signup Card */}
-        <div className="bg-white/70 backdrop-blur-2xl rounded-[32px] p-8 md:p-12 border border-slate-100 shadow-2xl shadow-slate-200/50 signup-reveal">
-          <div className="mb-8">
-            <div className="flex items-center gap-2 mb-2">
-               <Sparkles className="w-4 h-4 text-blue-600" />
-               <span className="text-xs font-black uppercase tracking-widest text-blue-600">Free forever for small teams</span>
-            </div>
-            <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">
-              Create your account
-            </h1>
-          </div>
+        {/* Card */}
+        <div
+          className="signup-reveal rounded-2xl p-8 border shadow-2xl"
+          style={{
+            background: "var(--panel)",
+            borderColor: "var(--panel-border)",
+            backdropFilter: "blur(18px)",
+          }}
+        >
+          <h1 className="text-2xl font-semibold tracking-tight">
+            Create your account.
+          </h1>
+          <p className="mt-2 text-sm text-[var(--muted)]">
+            Start collecting feedback in minutes.
+          </p>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Name Field */}
-            <div className="space-y-2">
-              <Label htmlFor="name" className="text-sm font-bold text-slate-700 ml-1">Full Name</Label>
-              <div className="relative">
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
-                  <User size={18} />
-                </div>
+          <form onSubmit={handleSubmit} className="mt-8 space-y-6">
+            {/* Name */}
+            <div>
+              <Label className="text-xs uppercase tracking-wide text-[var(--muted)]">
+                Full name
+              </Label>
+              <div className="relative mt-2">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--muted)]" size={16} />
                 <Input
                   id="name"
-                  placeholder="John Doe"
                   value={formData.name}
                   onChange={handleChange}
                   disabled={loading}
-                  className={`h-12 pl-11 rounded-2xl border-slate-200 bg-white/50 text-slate-900 placeholder:text-slate-400 focus:ring-4 focus:ring-blue-600/5 focus:border-blue-600 transition-all ${
-                    errors.name ? "border-red-500" : ""
-                  }`}
+                  placeholder="Jane Doe"
+                  className="pl-10 h-11 bg-transparent border border-white/10 
+                  text-[var(--ink)] placeholder:text-[var(--muted)]
+                  focus:border-[var(--accent)] focus:ring-0 rounded-xl"
                 />
               </div>
-              {errors.name && <p className="text-xs font-bold text-red-500 ml-1">{errors.name}</p>}
+              {errors.name && (
+                <p className="text-xs mt-1 text-[var(--danger)]">
+                  {errors.name}
+                </p>
+              )}
             </div>
 
-            {/* Email Field */}
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm font-bold text-slate-700 ml-1">Work Email</Label>
-              <div className="relative">
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
-                  <Mail size={18} />
-                </div>
+            {/* Email */}
+            <div>
+              <Label className="text-xs uppercase tracking-wide text-[var(--muted)]">
+                Email
+              </Label>
+              <div className="relative mt-2">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--muted)]" size={16} />
                 <Input
                   id="email"
                   type="email"
-                  placeholder="name@company.com"
                   value={formData.email}
                   onChange={handleChange}
                   disabled={loading}
-                  className={`h-12 pl-11 rounded-2xl border-slate-200 bg-white/50 text-slate-900 placeholder:text-slate-400 focus:ring-4 focus:ring-blue-600/5 focus:border-blue-600 transition-all ${
-                    errors.email ? "border-red-500" : ""
-                  }`}
+                  placeholder="you@company.com"
+                  className="pl-10 h-11 bg-transparent border border-white/10 
+                  text-[var(--ink)] placeholder:text-[var(--muted)]
+                  focus:border-[var(--accent)] focus:ring-0 rounded-xl"
                 />
               </div>
-              {errors.email && <p className="text-xs font-bold text-red-500 ml-1">{errors.email}</p>}
+              {errors.email && (
+                <p className="text-xs mt-1 text-[var(--danger)]">
+                  {errors.email}
+                </p>
+              )}
             </div>
 
-            {/* Password Field */}
-            <div className="space-y-2">
-              <Label htmlFor="password" className="text-sm font-bold text-slate-700 ml-1">Password</Label>
-              <div className="relative">
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
-                  <Lock size={18} />
-                </div>
+            {/* Password */}
+            <div>
+              <Label className="text-xs uppercase tracking-wide text-[var(--muted)]">
+                Password
+              </Label>
+              <div className="relative mt-2">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--muted)]" size={16} />
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
-                  placeholder="••••••••"
                   value={formData.password}
                   onChange={handleChange}
                   disabled={loading}
-                  className={`h-12 pl-11 pr-12 rounded-2xl border-slate-200 bg-white/50 text-slate-900 placeholder:text-slate-400 focus:ring-4 focus:ring-blue-600/5 focus:border-blue-600 transition-all ${
-                    errors.password ? "border-red-500" : ""
-                  }`}
+                  placeholder="••••••••"
+                  className="pl-10 pr-12 h-11 bg-transparent border border-white/10 
+                  text-[var(--ink)] placeholder:text-[var(--muted)]
+                  focus:border-[var(--accent)] focus:ring-0 rounded-xl"
                 />
                 <button
                   type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  onClick={() => setShowPassword(p => !p)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--muted)] hover:text-white"
                 >
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
               {errors.password ? (
-                 <p className="text-xs font-bold text-red-500 ml-1">{errors.password}</p>
+                <p className="text-xs mt-1 text-[var(--danger)]">
+                  {errors.password}
+                </p>
               ) : (
-                <p className="text-[10px] uppercase tracking-wider font-black text-slate-400 ml-1">
-                  8+ chars • Uppercase • Number
+                <p className="text-[11px] mt-1 text-[var(--muted)]">
+                  8+ characters • uppercase • number
                 </p>
               )}
             </div>
 
-            <Button 
-              type="submit" 
-              className="w-full h-12 mt-4 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-lg shadow-blue-100 transition-all group"
+            <Button
+              type="submit"
               disabled={loading}
+              className="w-full h-11 rounded-xl bg-[var(--accent)] 
+              hover:bg-[#3f6ae0] transition-all duration-300"
             >
               {loading ? (
-                <div className="flex items-center gap-2">
-                  <LoadingAnimation width={18} height={18} />
-                  <span>Creating...</span>
-                </div>
+                <LoadingAnimation width={18} height={18} />
               ) : (
-                <div className="flex items-center gap-2">
-                  <span>Get Started Free</span>
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                </div>
+                <span className="flex items-center gap-2">
+                  Create account <ArrowRight size={16} />
+                </span>
               )}
             </Button>
           </form>
 
-          <div className="mt-8 pt-6 border-t border-slate-50 text-center signup-reveal">
-            <p className="text-slate-500 font-medium">
-              Already have an account?{" "}
-              <Link href="/login" className="text-blue-600 font-bold hover:underline underline-offset-4">
-                Log in
-              </Link>
-            </p>
-          </div>
+          <p className="text-sm text-center mt-8 text-[var(--muted)]">
+            Already have an account?{" "}
+            <Link href="/login" className="text-[var(--accent)] hover:underline">
+              Sign in
+            </Link>
+          </p>
         </div>
 
-        {/* Legal Footer */}
-        <p className="mt-8 text-center text-[11px] text-slate-400 font-bold uppercase tracking-widest signup-reveal">
-          By signing up, you agree to our{" "}
-          <Link href="#" className="text-slate-600 hover:text-blue-600">Terms</Link>
-          {" "}&{" "}
-          <Link href="#" className="text-slate-600 hover:text-blue-600">Privacy</Link>
+        <p className="mt-8 text-center text-[11px] text-[var(--muted)] uppercase tracking-widest signup-reveal">
+          By signing up, you agree to our Terms & Privacy
         </p>
       </div>
     </div>

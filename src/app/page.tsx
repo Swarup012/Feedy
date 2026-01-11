@@ -20,6 +20,8 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
 import LandingButton from '../components/ui/LandingButton.tsx';
 import {LayoutTextFlip} from '../components/ui/layout-text-flip.tsx'
+import Eyes from '../components/Eyes.tsx'
+import {ThinkingBubble} from '../components/ThinkingBubble.tsx'
 
 if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger);
@@ -62,35 +64,38 @@ export default function LandingPage() {
     setHasSubdomain(!!subdomain);
     
     const redirectLogic = async () => {
-      // If user is authenticated, always go to admin dashboard
-      if (!loading && user) {
-        router.push('/admin');
-        return;
-      }
-
-      // If NO subdomain (root domain), show landing page
-      if (!loading && !user && !subdomain) {
-        setCheckingBoards(false);
-        return;
-      }
-
-      // If HAS subdomain and not authenticated, redirect to company's board
-      if (!loading && !user && subdomain) {
+      // If HAS subdomain, redirect to that organization's public feedback
+      // This allows users to view ANY organization's public pages
+      if (!loading && subdomain) {
         try {
           const { boardService } = await import('@/services/boardService');
           const response = await boardService.getPublicBoards();
           const publicBoards = response.data.boards;
           
           if (publicBoards.length > 0) {
-            const firstBoard = publicBoards[0];
-            router.push(`/feedback/boards/${firstBoard.slug}`);
+            router.push('/feedback');
+            return;
           } else {
             setCheckingBoards(false);
+            return;
           }
         } catch (error) {
           console.error('Error loading public boards:', error);
           setCheckingBoards(false);
+          return;
         }
+      }
+
+      // If NO subdomain and user is authenticated, go to their admin dashboard
+      if (!loading && user && !subdomain) {
+        router.push('/admin');
+        return;
+      }
+
+      // If NO subdomain and not authenticated, show landing page
+      if (!loading && !user && !subdomain) {
+        setCheckingBoards(false);
+        return;
       }
     };
 
@@ -212,6 +217,35 @@ export default function LandingPage() {
       <main className="relative z-10 pt-20">
         {/* Hero Section */}
         <section ref={heroRef} className="relative overflow-hidden pt-24 pb-40 px-6">
+<div style={{display:'flex', alignItems:'center', justifyContent:'center',margin:'10px'}}>
+<div style={{position: 'relative',width: 160 , height:160}}>
+<div style={{position:'absolute',top: -50, left:'50%',transform:"translateX(-50%)"}}><ThinkingBubble/></div>
+<div
+  style={{
+    width: 140,
+    height: 140,
+    borderRadius: "50%",
+    background: "#2a9df4", // emoji yellow
+    position: "relative",
+    display: "flex",
+    justifyContent: "center",
+  }}
+>
+  {/* Eyes container */}
+  <div
+    style={{
+      position: "absolute",
+      top: "28%",           // 👈 controls how high the eyes are
+      left: "50%",
+      transform: "translateX(-50%)",
+    }}
+  >
+    <Eyes
+      eyeColor="#0F2854"
+      pupilColor="#fff"
+    />
+  </div>
+</div> </div> </div>
           <div className="max-w-7xl mx-auto text-center">
             {/* Floating Badge */}
             <div className="hero-reveal inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 border border-blue-100 mb-10">
@@ -362,7 +396,7 @@ export default function LandingPage() {
                   <span className="text-slate-400 font-bold">/mo</span>
                 </div>
                 <ul className="space-y-4 mb-10">
-                  {['100 feedback items', 'Public roadmap', 'Community support'].map(item => (
+                  {['3 boards', '5 posts per board', 'Public roadmap', 'Community support'].map(item => (
                     <li key={item} className="flex items-center gap-3 text-slate-600 font-medium">
                       <CheckCircle className="w-5 h-5 text-blue-500" /> {item}
                     </li>

@@ -4,13 +4,17 @@ import { Post } from "@/services/postService";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ArrowUp, MessageSquare } from "lucide-react";
+import { ArrowUp, MessageSquare, TrendingUp } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { IconDisplay } from "@/components/ui/icon-picker";
 
 interface FeedbackCardProps {
   feedback: Post;
+  onUpvote?: (postId: string) => Promise<void>;
+  isUpvoted?: boolean;
 }
 
 const STATUS_COLORS: Record<string, string> = {
@@ -31,93 +35,125 @@ const STATUS_LABELS: Record<string, string> = {
   closed: "Closed",
 };
 
-export function FeedbackCard({ feedback }: FeedbackCardProps) {
+export function FeedbackCard({ feedback, onUpvote, isUpvoted = false }: FeedbackCardProps) {
   const router = useRouter();
+  const [isVoting, setIsVoting] = useState(false);
+  
+  // Check if post is trending (created in last 7 days with high engagement)
+  const isTrending = () => {
+    const daysOld = (Date.now() - new Date(feedback.created_at).getTime()) / (1000 * 60 * 60 * 24);
+    const engagementScore = feedback.upvotes * 2 + feedback.comment_count * 3;
+    return daysOld <= 7 && engagementScore > 10;
+  };
 
   const handleClick = () => {
-    if (feedback.board) {
-      // Navigate to post detail page (you can create this later)
-      router.push(`/feedback/${feedback.board.slug}/${feedback.id}`);
+    router.push(`/feedback/${feedback.id}`);
+  };
+
+  const handleUpvote = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!onUpvote || isVoting) return;
+    
+    setIsVoting(true);
+    try {
+      await onUpvote(feedback.id);
+    } catch (error) {
+      console.error('Upvote error:', error);
+    } finally {
+      setIsVoting(false);
     }
   };
 
   return (
     <Card
-      className="hover:shadow-lg transition-shadow cursor-pointer"
+      className="hover:shadow-md transition-all duration-200 hover:border-primary/20 cursor-pointer group"
       onClick={handleClick}
     >
-      <CardContent className="p-6">
-        <div className="space-y-4">
-          {/* Header */}
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex-1">
-              <h3 className="font-semibold text-lg mb-2">{feedback.title}</h3>
-              {feedback.description && (
-                <p className="text-sm text-gray-600 line-clamp-2">
-                  {feedback.description}
-                </p>
-              )}
-            </div>
-
-            {/* Upvote Button */}
+      <CardContent className="p-0">
+        <div className="flex gap-4">
+          {/* Large Upvote Button - Canny Style */}
+          <div className="flex items-start p-4 pr-0">
             <Button
-              variant="outline"
+              variant={isUpvoted ? "default" : "outline"}
               size="sm"
-              className="flex-col h-auto px-3 py-2"
-              onClick={(e) => {
-                e.stopPropagation();
-                // TODO: Implement upvote (requires authentication)
-              }}
+              className={cn(
+                "flex-col h-auto min-w-[60px] px-3 py-3 gap-1",
+                "hover:scale-105 transition-transform",
+                isUpvoted && "bg-primary text-primary-foreground"
+              )}
+              onClick={handleUpvote}
+              disabled={isVoting}
             >
-              <ArrowUp className="h-4 w-4 mb-1" />
-              <span className="text-xs font-semibold">{feedback.upvotes}</span>
+              <ArrowUp className={cn(
+                "h-5 w-5",
+                isUpvoted && "fill-current"
+              )} />
+              <span className="text-sm font-bold">{feedback.upvotes}</span>
             </Button>
           </div>
 
-          {/* Meta Info */}
-          <div className="flex items-center gap-3 text-sm text-gray-500 flex-wrap">
-            {/* Board Badge */}
-            {feedback.board && (
-              <div
-                className="flex items-center gap-1 px-2 py-1 rounded text-xs font-medium"
-                style={{
-                  backgroundColor: feedback.board.color + "20",
-                  color: feedback.board.color,
-                }}
-              >
-                <span>{feedback.board.icon}</span>
-                <span>{feedback.board.name}</span>
-              </div>
+          {/* Content */}
+          <div className="flex-1 py-4 pr-4 space-y-3">
+            {/* Title and Trending Badge */}
+            <div className="flex items-start gap-2">
+              <h3 className="font-semibold text-lg group-hover:text-primary transition-colors flex-1">
+                {feedback.title}
+              </h3>
+              {isTrending() && (
+                <Badge variant="secondary" className="bg-orange-100 text-orange-700 flex items-center gap-1">
+                  <TrendingUp className="h-3 w-3" />
+                  Trending
+                </Badge>
+              )}
+            </div>
+
+            {/* Description */}
+            {feedback.description && (
+              <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
+                {feedback.description}
+              </p>
             )}
 
-            {/* Status Badge */}
-            <Badge
-              variant="secondary"
-              className={cn("text-xs", STATUS_COLORS[feedback.status])}
-            >
-              {STATUS_LABELS[feedback.status]}
-            </Badge>
+            {/* Meta Info */}
+            <div className="flex items-center gap-3 text-sm text-muted-foreground flex-wrap">
+              {/* Status Badge */}
+              <Badge
+                variant="secondary"
+                className={cn("text-xs font-medium", STATUS_COLORS[feedback.status])}
+              >
+                {STATUS_LABELS[feedback.status]}
+              </Badge>
 
-            {/* Comments */}
-            <div className="flex items-center gap-1">
-              <MessageSquare className="h-4 w-4" />
-              <span>{feedback.comment_count} comments</span>
+              {/* Board Badge */}
+              {feedback.board && (
+                <div
+                  className="flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium"
+                  style={{
+                    backgroundColor: feedback.board.color + "15",
+                    color: feedback.board.color,
+                  }}
+                >
+                  <IconDisplay iconName={feedback.board.icon} className="h-3 w-3" />
+                  <span>{feedback.board.name}</span>
+                </div>
+              )}
+
+              {/* Comments */}
+              <div className="flex items-center gap-1.5 hover:text-primary transition-colors">
+                <MessageSquare className="h-4 w-4" />
+                <span>{feedback.comment_count}</span>
+              </div>
+
+              {/* Author & Time */}
+              <span className="ml-auto text-xs">
+                {feedback.author && <span className="font-medium">{feedback.author.name}</span>}
+                {feedback.author && " · "}
+                {formatDistanceToNow(new Date(feedback.created_at), {
+                  addSuffix: true,
+                })}
+              </span>
             </div>
-
-            {/* Time */}
-            <span className="ml-auto">
-              {formatDistanceToNow(new Date(feedback.created_at), {
-                addSuffix: true,
-              })}
-            </span>
           </div>
-
-          {/* Author */}
-          {feedback.author && (
-            <div className="text-xs text-gray-500 pt-2 border-t">
-              Posted by {feedback.author.name}
-            </div>
-          )}
         </div>
       </CardContent>
     </Card>

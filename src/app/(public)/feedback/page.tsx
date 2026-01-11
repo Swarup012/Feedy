@@ -8,6 +8,35 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { FeedbackCard } from "./components/feedback-card";
 import { Button } from "@/components/ui/button";
+import { TokenManager } from "@/lib/tokenManager";
+import { saveReturnUrl } from "@/lib/returnUrl";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+
+// Helper to get subdomain for multi-tenancy
+const getSubdomain = () => {
+  if (typeof window === 'undefined') return null;
+  
+  const hostname = window.location.hostname;
+  const parts = hostname.split(".");
+  
+  // Handle production domains (e.g., acme.fady.com)
+  if (parts.length >= 3 && !hostname.includes("localhost")) {
+    const subdomain = parts[0];
+    if (subdomain === "www" || subdomain === "api" || subdomain === "admin") {
+      return null;
+    }
+    return subdomain;
+  }
+  
+  // Handle development (localhost with subdomain simulation)
+  if (hostname.includes("localhost") && parts.length > 1 && parts[0] !== "localhost") {
+    return parts[0];
+  }
+  
+  return null;
+};
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
@@ -21,6 +50,7 @@ import {
 } from "@/components/ui/select";
 import { List, LayoutGrid, Loader2, ArrowLeft } from "lucide-react";
 import { SubmitFeedback } from "./components/submit-feedback";
+import { IconDisplay } from "@/components/ui/icon-picker";
 
 const feedbackStatuses = [
   "open",
@@ -47,6 +77,108 @@ export default function FeedbackPage() {
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<string>("most-votes");
   const [viewMode, setViewMode] = useState<"grid" | "list">("list");
+  const [upvotedPosts, setUpvotedPosts] = useState<Set<string>>(new Set());
+
+  // Handle upvote
+  const handleUpvote = async (postId: string) => {
+    if (!isAuthenticated) {
+      toast({
+        title: "Login Required",
+        description: "Please log in to upvote posts.",
+        variant: "default",
+      });
+      saveReturnUrl(); // Save current page before redirecting
+      router.push("/login");
+      return;
+    }
+
+    const wasUpvoted = upvotedPosts.has(postId);
+
+    try {
+      // Optimistic update
+      setUpvotedPosts((prev) => {
+        const newSet = new Set(prev);
+        if (wasUpvoted) {
+          newSet.delete(postId);
+        } else {
+          newSet.add(postId);
+        }
+        return newSet;
+      });
+
+      // Update post count optimistically
+      setAllPosts((prev) =>
+        prev.map((post) =>
+          post.id === postId
+            ? {
+                ...post,
+                upvotes: wasUpvoted ? post.upvotes - 1 : post.upvotes + 1,
+              }
+            : post
+        )
+      );
+
+      // Call backend API (uses public route with auth required)
+      const token = TokenManager.getAccessToken();
+      const subdomain = getSubdomain();
+      const response = await fetch(`${API_URL}/api/public/posts/${postId}/upvote`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` }),
+          ...(subdomain && { 'x-subdomain': subdomain }),
+        },
+      });
+
+      if (!response.ok) {
+        if (response.status === 401 || response.status === 403) {
+          throw new Error("Please log in to upvote");
+        }
+        throw new Error("Failed to upvote");
+      }
+      
+      toast({
+        title: "Success",
+        description: wasUpvoted
+          ? "Vote removed successfully"
+          : "Vote added successfully",
+      });
+    } catch (error: any) {
+      // Revert on error
+      setUpvotedPosts((prev) => {
+        const newSet = new Set(prev);
+        if (wasUpvoted) {
+          newSet.add(postId);
+        } else {
+          newSet.delete(postId);
+        }
+        return newSet;
+      });
+
+      setAllPosts((prev) =>
+        prev.map((post) =>
+          post.id === postId
+            ? {
+                ...post,
+                upvotes: wasUpvoted ? post.upvotes + 1 : post.upvotes - 1,
+              }
+            : post
+        )
+      );
+
+      toast({
+        title: "Login Required",
+        description: error.message || "Please log in to upvote posts",
+        variant: "destructive",
+      });
+
+      if (error.message?.includes("log in")) {
+        saveReturnUrl(); // Save current page before redirecting
+        router.push("/login");
+      }
+    }
+  };
 
   // Fetch public boards and posts
   const fetchPublicData = async () => {
@@ -190,22 +322,38 @@ export default function FeedbackPage() {
   }
 
   return (
-    <div className="container mx-auto py-8">
-      {/* Back to Dashboard Button - Only for logged-in users */}
-      {isAuthenticated && (
-        <div className="mb-6">
-          <Button
-            variant="ghost"
-            onClick={() => router.push("/dashboard")}
-            className="gap-2"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Dashboard
-          </Button>
+    <div className="min-h-screen bg-gradient-to-b from-muted/30 to-background">
+      {/* Hero Section - Canny Style */}
+      <div className="bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5 border-b">
+        <div className="container mx-auto py-12 px-4">
+          <div className="max-w-4xl mx-auto text-center space-y-4">
+            <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
+              Product Feedback
+            </h1>
+            <p className="text-xl text-muted-foreground">
+              Share your ideas and help us build better products
+            </p>
+            
+            {/* CTA Buttons */}
+            <div className="flex items-center justify-center gap-4 pt-4">
+              <SubmitFeedback boards={boards} />
+              {isAuthenticated && (
+                <Button
+                  variant="outline"
+                  onClick={() => router.push("/dashboard")}
+                  className="gap-2"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  Back to Dashboard
+                </Button>
+              )}
+            </div>
+          </div>
         </div>
-      )}
+      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+      <div className="container mx-auto py-8 px-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
         {/* Sidebar - Filters */}
         <aside className="md:col-span-1">
           <Card>
@@ -225,7 +373,7 @@ export default function FeedbackPage() {
                     {boards.map((board) => (
                       <SelectItem key={board.id} value={board.slug}>
                         <div className="flex items-center gap-2">
-                          <span>{board.icon}</span>
+                          <IconDisplay iconName={board.icon} className="h-4 w-4" />
                           <span>{board.name}</span>
                         </div>
                       </SelectItem>
@@ -336,9 +484,14 @@ export default function FeedbackPage() {
               </div>
             </Card>
           ) : (
-            <div className="grid grid-cols-1 gap-6">
+            <div className="grid grid-cols-1 gap-4">
               {filteredPosts.map((feedback) => (
-                <FeedbackCard key={feedback.id} feedback={feedback} />
+                <FeedbackCard
+                  key={feedback.id}
+                  feedback={feedback}
+                  onUpvote={handleUpvote}
+                  isUpvoted={upvotedPosts.has(feedback.id)}
+                />
               ))}
             </div>
           )}
@@ -352,6 +505,7 @@ export default function FeedbackPage() {
             </div>
           )}
         </main>
+      </div>
       </div>
     </div>
   );

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { roadmapService, RoadmapItem } from '@/services/roadmapService';
 import { boardService } from '@/services/boardService';
 import { useAuthContext } from '@/context/AuthContext';
+import api from '@/lib/api';
 import RoadmapStats from '@/components/roadmap/RoadmapStats';
 import { LoadingAnimation } from '@/components/LoadingAnimation';
 import { Card, CardContent } from '@/components/ui/card';
@@ -38,6 +39,7 @@ import {
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
+import { UpgradeDialog } from '@/components/UpgradeDialog';
 import {
   Plus,
   MoreVertical,
@@ -59,11 +61,18 @@ export default function AdminRoadmapPage() {
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
+  const [showCreateRoadmapDialog, setShowCreateRoadmapDialog] = useState(false);
+  const [showEditRoadmapDialog, setShowEditRoadmapDialog] = useState(false);
   const [editingItem, setEditingItem] = useState<RoadmapItem | null>(null);
   const [selectedView, setSelectedView] = useState('all');
   const [boardSlug, setBoardSlug] = useState<string | null>(null);
   const [allBoards, setAllBoards] = useState<any[]>([]);
   const [selectedBoardFilter, setSelectedBoardFilter] = useState<string>('all');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [roadmaps, setRoadmaps] = useState<any[]>([]);
+  const [selectedRoadmap, setSelectedRoadmap] = useState<string | null>(null);
+  const [loadingRoadmaps, setLoadingRoadmaps] = useState(false);
   const { toast } = useToast();
   
   // Check if user is admin or owner
@@ -78,6 +87,8 @@ export default function AdminRoadmapPage() {
           setAllBoards(response.data.boards);
           setBoardSlug(response.data.boards[0].slug);
         } else {
+          setAllBoards([]);
+          setLoading(false);
           toast({
             title: 'No boards found',
             description: 'Please create a board first',
@@ -85,6 +96,7 @@ export default function AdminRoadmapPage() {
           });
         }
       } catch (error: any) {
+        setLoading(false);
         toast({
           title: 'Error',
           description: 'Failed to load boards',
@@ -92,14 +104,36 @@ export default function AdminRoadmapPage() {
         });
       }
     };
+    
+    const fetchRoadmaps = async () => {
+      try {
+        setLoadingRoadmaps(true);
+        const response = await api.get('/api/roadmaps');
+        
+        const roadmapsList = response.data.data?.roadmaps || [];
+        setRoadmaps(roadmapsList);
+        
+        // Select first roadmap or default roadmap
+        if (roadmapsList.length > 0) {
+          const defaultRoadmap = roadmapsList.find((r: any) => r.is_default);
+          setSelectedRoadmap(defaultRoadmap?.id || roadmapsList[0].id);
+        }
+      } catch (error) {
+        console.error('Failed to fetch roadmaps:', error);
+      } finally {
+        setLoadingRoadmaps(false);
+      }
+    };
+    
     fetchBoards();
-  }, []);
+    fetchRoadmaps();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    if (allBoards.length > 0) {
+    if (allBoards.length > 0 && boardSlug) {
       loadData();
     }
-  }, [selectedBoardFilter, boardSlug, isAdminOrOwner]);
+  }, [selectedBoardFilter, boardSlug, isAdminOrOwner, allBoards.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadData = async () => {
     try {
@@ -155,6 +189,7 @@ export default function AdminRoadmapPage() {
     }
     
     try {
+      setIsSubmitting(true);
       // Remove boardSlug from data before sending to API
       const { boardSlug: _, ...itemData } = data;
       await roadmapService.createRoadmapItem(targetBoardSlug, itemData);
@@ -165,16 +200,26 @@ export default function AdminRoadmapPage() {
       setShowCreateDialog(false);
       loadData();
     } catch (error: any) {
+      // Check if it's a roadmap limit error
+      if (error.response?.data?.error === 'ROADMAP_LIMIT_REACHED') {
+        setShowCreateDialog(false);
+        setShowUpgradeDialog(true);
+        return;
+      }
+      
       toast({
         title: 'Error',
-        description: error.message || 'Failed to create item',
+        description: error.response?.data?.message || error.message || 'Failed to create item',
         variant: 'destructive',
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleUpdate = async (itemId: string, updates: Partial<RoadmapItem>) => {
     try {
+      setIsSubmitting(true);
       await roadmapService.updateRoadmapItem(itemId, updates);
       toast({
         title: 'Success',
@@ -187,6 +232,8 @@ export default function AdminRoadmapPage() {
         description: error.message || 'Failed to update item',
         variant: 'destructive',
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -213,6 +260,85 @@ export default function AdminRoadmapPage() {
     await handleUpdate(itemId, { status: newStatus as any });
   };
 
+  const handleCreateRoadmap = async (data: { name: string; description: string }) => {
+    try {
+      setIsSubmitting(true);
+      const response = await api.post('/api/roadmaps', data);
+
+      const result = response.data;
+
+      toast({
+        title: 'Success',
+        description: 'Roadmap created successfully',
+      });
+
+      // Refresh roadmaps list
+      const roadmapsRes = await api.get('/api/roadmaps');
+      const roadmapsList = roadmapsRes.data.data?.roadmaps || [];
+      setRoadmaps(roadmapsList);
+      
+      // Select the newly created roadmap
+      const newRoadmap = result.data?.roadmap;
+      if (newRoadmap) {
+        setSelectedRoadmap(newRoadmap.id);
+      }
+
+      setShowCreateRoadmapDialog(false);
+    } catch (error: any) {
+      // Check for limit error
+      if (error.response?.data?.error === 'ROADMAP_LIMIT_REACHED') {
+        setShowCreateRoadmapDialog(false);
+        setShowUpgradeDialog(true);
+        return;
+      }
+      
+      toast({
+        title: 'Error',
+        description: error.response?.data?.message || error.message || 'Failed to create roadmap',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleEditRoadmap = async (data: { name: string; description: string }) => {
+    try {
+      setIsSubmitting(true);
+      
+      if (!selectedRoadmap) {
+        toast({
+          title: 'Error',
+          description: 'No roadmap selected',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      await api.put(`/api/roadmaps/${selectedRoadmap}`, data);
+
+      toast({
+        title: 'Success',
+        description: 'Roadmap updated successfully',
+      });
+
+      // Refresh roadmaps list
+      const roadmapsRes = await api.get('/api/roadmaps');
+      const roadmapsList = roadmapsRes.data.data?.roadmaps || [];
+      setRoadmaps(roadmapsList);
+
+      setShowEditRoadmapDialog(false);
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.response?.data?.message || error.message || 'Failed to update roadmap',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const filteredItems = items.filter((item) => {
     if (selectedView === 'all') return true;
     return item.status === selectedView;
@@ -234,6 +360,26 @@ export default function AdminRoadmapPage() {
     );
   }
 
+  // If no boards exist, show message
+  if (allBoards.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <Card className="max-w-md">
+          <CardContent className="pt-6 text-center space-y-4">
+            <div className="text-6xl">📋</div>
+            <h2 className="text-2xl font-bold text-gray-900">No Boards Found</h2>
+            <p className="text-gray-600">
+              Please create a board first before managing roadmap items.
+            </p>
+            <Button onClick={() => window.location.href = '/admin/feedback'}>
+              Go to Boards
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto p-6 space-y-6">
       {/* Header */}
@@ -242,11 +388,84 @@ export default function AdminRoadmapPage() {
           <h1 className="text-3xl font-bold text-gray-900">Roadmap Management</h1>
           <p className="text-gray-500 mt-1">Manage your product roadmap like Canny</p>
         </div>
-        <Button onClick={() => setShowCreateDialog(true)} size="lg">
-          <Plus className="h-4 w-4 mr-2" />
-          Create Item
-        </Button>
+        <div className="flex items-center gap-2">
+          {/* Roadmap Selector */}
+          {isAdminOrOwner && roadmaps.length > 0 && (
+            <>
+              <Select value={selectedRoadmap || ''} onValueChange={setSelectedRoadmap}>
+                <SelectTrigger className="w-[220px]">
+                  <SelectValue placeholder="Select Roadmap" />
+                </SelectTrigger>
+                <SelectContent>
+                  {roadmaps.map((roadmap: any) => (
+                    <SelectItem key={roadmap.id} value={roadmap.id}>
+                      <div className="flex items-center gap-2">
+                        {roadmap.is_default && (
+                          <Badge variant="secondary" className="text-xs">Default</Badge>
+                        )}
+                        {roadmap.name}
+                        <span className="text-xs text-gray-500">({roadmap.item_count || 0})</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              
+              {/* Edit Roadmap Button */}
+              {selectedRoadmap && (
+                <Button
+                  onClick={() => setShowEditRoadmapDialog(true)}
+                  variant="ghost"
+                  size="icon"
+                  title="Edit Roadmap"
+                >
+                  <Edit2 className="h-4 w-4" />
+                </Button>
+              )}
+            </>
+          )}
+          
+          {/* Create Roadmap Button - Only for admin/owner */}
+          {isAdminOrOwner && (
+            <Button 
+              onClick={() => setShowCreateRoadmapDialog(true)} 
+              variant="outline"
+              size="lg"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              New Roadmap
+            </Button>
+          )}
+          
+          <Button onClick={() => setShowCreateDialog(true)} size="lg">
+            <Plus className="h-4 w-4 mr-2" />
+            Create Item
+          </Button>
+        </div>
       </div>
+
+      {/* Show message if no roadmaps exist */}
+      {roadmaps.length === 0 && !loadingRoadmaps && (
+        <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
+          <CardContent className="pt-6">
+            <div className="text-center space-y-3">
+              <div className="text-4xl">🗺️</div>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                No Roadmaps Yet
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400">
+                Create your first roadmap to start organizing your product development timeline.
+              </p>
+              {isAdminOrOwner && (
+                <Button onClick={() => setShowCreateRoadmapDialog(true)}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create First Roadmap
+                </Button>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Stats */}
       {stats && <RoadmapStats stats={stats} />}
@@ -403,6 +622,7 @@ export default function AdminRoadmapPage() {
         title="Create Roadmap Item"
         boards={allBoards}
         defaultBoardSlug={boardSlug}
+        isSubmitting={isSubmitting}
       />
 
       {/* Edit Dialog */}
@@ -417,6 +637,152 @@ export default function AdminRoadmapPage() {
         }}
         title="Edit Roadmap Item"
         initialData={editingItem || undefined}
+        isSubmitting={isSubmitting}
+      />
+
+      {/* Create Roadmap Dialog */}
+      <Dialog open={showCreateRoadmapDialog} onOpenChange={setShowCreateRoadmapDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create New Roadmap</DialogTitle>
+            <DialogDescription>
+              Create a new roadmap to organize your product development timeline
+            </DialogDescription>
+          </DialogHeader>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              const formData = new FormData(e.currentTarget);
+              handleCreateRoadmap({
+                name: formData.get('name') as string,
+                description: formData.get('description') as string,
+              });
+            }}
+            className="space-y-4"
+          >
+            <div>
+              <Label htmlFor="roadmap-name">Roadmap Name *</Label>
+              <Input
+                id="roadmap-name"
+                name="name"
+                placeholder="E.g., Q1 2026 Roadmap"
+                required
+                disabled={isSubmitting}
+              />
+            </div>
+            <div>
+              <Label htmlFor="roadmap-description">Description (Optional)</Label>
+              <Textarea
+                id="roadmap-description"
+                name="description"
+                placeholder="Brief description of this roadmap..."
+                rows={3}
+                disabled={isSubmitting}
+              />
+            </div>
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowCreateRoadmapDialog(false)}
+                disabled={isSubmitting}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? (
+                  <>
+                    <LoadingAnimation width={16} height={16} className="mr-2" />
+                    Creating...
+                  </>
+                ) : (
+                  <>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create Roadmap
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Roadmap Dialog */}
+      <Dialog open={showEditRoadmapDialog} onOpenChange={setShowEditRoadmapDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Roadmap</DialogTitle>
+            <DialogDescription>
+              Update the name and description of your roadmap
+            </DialogDescription>
+          </DialogHeader>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              const formData = new FormData(e.currentTarget);
+              handleEditRoadmap({
+                name: formData.get('name') as string,
+                description: formData.get('description') as string,
+              });
+            }}
+            className="space-y-4"
+          >
+            <div>
+              <Label htmlFor="edit-roadmap-name">Roadmap Name *</Label>
+              <Input
+                id="edit-roadmap-name"
+                name="name"
+                placeholder="E.g., Q1 2026 Roadmap"
+                defaultValue={roadmaps.find(r => r.id === selectedRoadmap)?.name || ''}
+                required
+                disabled={isSubmitting}
+              />
+            </div>
+            <div>
+              <Label htmlFor="edit-roadmap-description">Description (Optional)</Label>
+              <Textarea
+                id="edit-roadmap-description"
+                name="description"
+                placeholder="Brief description of this roadmap..."
+                defaultValue={roadmaps.find(r => r.id === selectedRoadmap)?.description || ''}
+                rows={3}
+                disabled={isSubmitting}
+              />
+            </div>
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowEditRoadmapDialog(false)}
+                disabled={isSubmitting}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? (
+                  <>
+                    <LoadingAnimation width={16} height={16} className="mr-2" />
+                    Updating...
+                  </>
+                ) : (
+                  <>
+                    <Edit2 className="h-4 w-4 mr-2" />
+                    Update Roadmap
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Upgrade Dialog */}
+      <UpgradeDialog
+        open={showUpgradeDialog}
+        onOpenChange={setShowUpgradeDialog}
+        title="Upgrade to Create More Roadmaps"
+        description="You've reached the roadmap limit for the Free plan (1 roadmap). Upgrade to Starter for 1 roadmap."
+        feature="roadmap_items"
       />
     </div>
   );
@@ -492,7 +858,6 @@ function ItemsList({ items, onStatusChange, onEdit, onDelete, onUpdate, showBoar
 function RoadmapCard({ item, onStatusChange, onEdit, onDelete, onUpdate, isListView, showBoardBadge }: any) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedTitle, setEditedTitle] = useState(item.title);
-  const [editedProgress, setEditedProgress] = useState(item.progress);
 
   const statusColors: any = {
     planned: 'bg-gray-500',
@@ -502,18 +867,10 @@ function RoadmapCard({ item, onStatusChange, onEdit, onDelete, onUpdate, isListV
     cancelled: 'bg-red-500',
   };
 
-  const priorityColors: any = {
-    low: 'bg-gray-200 text-gray-700',
-    medium: 'bg-blue-200 text-blue-700',
-    high: 'bg-orange-200 text-orange-700',
-    critical: 'bg-red-200 text-red-700',
-  };
-
   const handleQuickUpdate = async () => {
-    if (editedTitle !== item.title || editedProgress !== item.progress) {
+    if (editedTitle !== item.title) {
       await onUpdate(item.id, {
         title: editedTitle,
-        progress: editedProgress,
       });
     }
     setIsEditing(false);
@@ -568,35 +925,6 @@ function RoadmapCard({ item, onStatusChange, onEdit, onDelete, onUpdate, isListV
                     {item.board.name}
                   </div>
                 </Badge>
-              </div>
-            )}
-
-            {/* Metadata */}
-            <div className="flex flex-wrap gap-2 mb-3">
-              <Badge variant="outline" className={`text-xs ${priorityColors[item.priority]}`}>
-                {item.priority}
-              </Badge>
-              {item.category && (
-                <Badge variant="outline" className="text-xs">
-                  {item.category}
-                </Badge>
-              )}
-              {item.target_quarter && (
-                <Badge variant="outline" className="text-xs">
-                  <Calendar className="h-3 w-3 mr-1" />
-                  {item.target_quarter}
-                </Badge>
-              )}
-            </div>
-
-            {/* Progress Bar */}
-            {item.progress > 0 && (
-              <div className="mb-3">
-                <div className="flex items-center justify-between text-xs text-gray-500 mb-1">
-                  <span>Progress</span>
-                  <span>{item.progress}%</span>
-                </div>
-                <Progress value={item.progress} className="h-2" />
               </div>
             )}
 
@@ -679,7 +1007,7 @@ function RoadmapCard({ item, onStatusChange, onEdit, onDelete, onUpdate, isListV
 }
 
 // Create/Edit Dialog Component
-function CreateEditDialog({ open, onClose, onSave, title, initialData, boards = [], defaultBoardSlug = null }: any) {
+function CreateEditDialog({ open, onClose, onSave, title, initialData, boards = [], defaultBoardSlug = null, isSubmitting = false }: any) {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -784,6 +1112,7 @@ function CreateEditDialog({ open, onClose, onSave, title, initialData, boards = 
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               required
               placeholder="E.g., Dark Mode Support"
+              disabled={isSubmitting}
             />
           </div>
 
@@ -796,13 +1125,18 @@ function CreateEditDialog({ open, onClose, onSave, title, initialData, boards = 
               required
               rows={4}
               placeholder="Describe what this roadmap item is about..."
+              disabled={isSubmitting}
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="status">Status</Label>
-              <Select value={formData.status} onValueChange={(v) => setFormData({ ...formData, status: v })}>
+              <Select 
+                value={formData.status} 
+                onValueChange={(v) => setFormData({ ...formData, status: v })}
+                disabled={isSubmitting}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -815,56 +1149,6 @@ function CreateEditDialog({ open, onClose, onSave, title, initialData, boards = 
                 </SelectContent>
               </Select>
             </div>
-
-            <div>
-              <Label htmlFor="priority">Priority</Label>
-              <Select value={formData.priority} onValueChange={(v) => setFormData({ ...formData, priority: v })}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="low">Low</SelectItem>
-                  <SelectItem value="medium">Medium</SelectItem>
-                  <SelectItem value="high">High</SelectItem>
-                  <SelectItem value="critical">Critical</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="category">Category</Label>
-              <Input
-                id="category"
-                value={formData.category}
-                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                placeholder="E.g., Feature, Bug Fix"
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="target_quarter">Target Quarter</Label>
-              <Input
-                id="target_quarter"
-                value={formData.target_quarter}
-                onChange={(e) => setFormData({ ...formData, target_quarter: e.target.value })}
-                placeholder="E.g., Q1 2025"
-              />
-            </div>
-          </div>
-
-          <div>
-            <Label htmlFor="progress">Progress ({formData.progress}%)</Label>
-            <input
-              type="range"
-              id="progress"
-              min="0"
-              max="100"
-              value={formData.progress}
-              onChange={(e) => setFormData({ ...formData, progress: parseInt(e.target.value) })}
-              className="w-full"
-            />
           </div>
 
           <div className="flex items-center space-x-2">
@@ -872,16 +1156,24 @@ function CreateEditDialog({ open, onClose, onSave, title, initialData, boards = 
               id="is_public"
               checked={formData.is_public}
               onCheckedChange={(checked) => setFormData({ ...formData, is_public: checked })}
+              disabled={isSubmitting}
             />
             <Label htmlFor="is_public">Make this item public</Label>
           </div>
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={onClose}>
+            <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting}>
               Cancel
             </Button>
-            <Button type="submit">
-              {initialData ? 'Save Changes' : 'Create Item'}
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? (
+                <>
+                  <LoadingAnimation width={16} height={16} className="mr-2" />
+                  {initialData ? 'Saving...' : 'Creating...'}
+                </>
+              ) : (
+                <>{initialData ? 'Save Changes' : 'Create Item'}</>
+              )}
             </Button>
           </DialogFooter>
         </form>

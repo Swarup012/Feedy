@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
+import api from '@/lib/api';
 import { roadmapService, RoadmapItem } from '@/services/roadmapService';
 import RoadmapStats from '@/components/roadmap/RoadmapStats';
 import RoadmapFilters from '@/components/roadmap/RoadmapFilters';
@@ -61,12 +62,48 @@ export default function RoadmapPage() {
     try {
       setLoading(true);
       setError(null);
-      const [itemsRes, statsRes] = await Promise.all([
-        roadmapService.getPublicRoadmap(boardSlug, filters),
-        roadmapService.getRoadmapStats(boardSlug),
-      ]);
-      setItems(itemsRes.data.items);
-      setStats(statsRes.data);
+      
+      // Fetch posts from the specific board with roadmap statuses
+      const postsResponse = await api.get(`/api/public/boards/${boardSlug}/posts`, {
+        params: {
+          status: filters.status.length > 0 ? filters.status.join(',') : 'planned,in-progress,under-review,completed',
+          category: filters.category || undefined,
+        }
+      });
+
+      const posts = postsResponse.data.data || [];
+
+      // Calculate stats from posts
+      const calculatedStats = {
+        total: posts.length,
+        planned: posts.filter((p: any) => p.status === 'planned').length,
+        in_progress: posts.filter((p: any) => p.status === 'in-progress').length,
+        in_review: posts.filter((p: any) => p.status === 'under-review').length,
+        completed: posts.filter((p: any) => p.status === 'completed').length,
+      };
+      setStats(calculatedStats);
+
+      // Transform posts to roadmap items format
+      const transformedItems: RoadmapItem[] = posts.map((post: any) => ({
+        id: post.id,
+        title: post.title,
+        description: post.description || '',
+        status: post.status === 'under-review' ? 'in_review' : post.status.replace('-', '_'),
+        priority: 'medium' as any,
+        category: post.category,
+        target_quarter: '',
+        target_date: '',
+        progress: post.status === 'completed' ? 100 : post.status === 'in-progress' ? 50 : 0,
+        order_index: 0,
+        is_public: true,
+        board_id: post.board_id,
+        vote_count: post.upvotes || 0,
+        comment_count: post.comment_count || 0,
+        created_at: post.created_at,
+        updated_at: post.updated_at,
+      }));
+
+      setItems(transformedItems);
     } catch (error: any) {
       console.error('Error loading roadmap:', error);
       const errorMessage = error.response?.data?.message || error.message || 'Failed to load roadmap';

@@ -12,6 +12,7 @@ import { authService, User, ApiError } from "@/services/authService";
 import { TokenManager } from "@/lib/tokenManager";
 import { AxiosError } from "axios";
 import { initSocket, disconnectSocket } from "@/lib/socket";
+import { getPublicReturnUrl, clearReturnUrl } from "@/lib/returnUrl";
 
 interface AuthContextType {
   user: User | null;
@@ -184,6 +185,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
+      // 🔙 PRIORITY 2: Check for return URL (user clicked login from a specific page)
+      const returnUrl = getPublicReturnUrl();
+      if (returnUrl) {
+        console.log('🔙 Returning to saved URL:', returnUrl);
+        clearReturnUrl();
+        router.push(returnUrl);
+        return;
+      }
+
       // Check if user is on a public subdomain page (feedback/roadmap/changelog)
       const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
       const isOnPublicPage = currentPath.startsWith('/feedback') || 
@@ -209,7 +219,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
-      // Otherwise, redirect based on organization_role (NOT user.role which is job role)
+      // Check if user has an organization
+      const hasOrganization = !!response.data.user.current_organization_id;
+      
+      if (!hasOrganization) {
+        // External user with no organization - send to onboarding to create one
+        console.log('🆕 New user without organization - redirecting to onboarding');
+        router.push("/onboarding");
+        return;
+      }
+
+      // User has organization - redirect based on role
       const orgRole = response.data.user.organization_role;
       if (orgRole === "owner" || orgRole === "admin") {
         console.log('🔄 Redirecting to /admin');

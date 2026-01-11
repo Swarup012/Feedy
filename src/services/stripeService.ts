@@ -47,13 +47,21 @@ const stripeService = {
    * Create checkout session for subscription
    */
   async createCheckoutSession(
-    priceId?: string
+    options?: {
+      priceId?: string;
+      plan?: 'starter' | 'pro';
+      billingCycle?: 'monthly' | 'yearly';
+      skipTrial?: boolean;
+    }
   ): Promise<{ success: boolean; data: { sessionId: string; url: string } }> {
     const successUrl = `${window.location.origin}/admin/profile?session_id={CHECKOUT_SESSION_ID}&success=true`;
     const cancelUrl = `${window.location.origin}/admin/profile?canceled=true`;
 
     const response = await api.post('/api/stripe/create-checkout-session', {
-      priceId,
+      priceId: options?.priceId,
+      plan: options?.plan || 'starter',
+      billingCycle: options?.billingCycle || 'monthly',
+      skipTrial: options?.skipTrial || false,
       successUrl,
       cancelUrl,
     });

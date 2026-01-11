@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PostDetailsSkeleton } from "./PostsListSkeleton";
+import AddToRoadmapModal from "@/components/roadmap/AddToRoadmapModal";
 import {
   Select,
   SelectContent,
@@ -41,6 +42,7 @@ import { Post, Comment, postService } from "@/services/postService";
 import { Board } from "@/services/boardService";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import { useOrganization } from "@/context/OrganizationContext";
 import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
 import { usePostRealtime } from "@/hooks/usePostRealtime";
@@ -57,12 +59,6 @@ interface PostDetailsProps {
 }
 
 const STATUS_OPTIONS = [
-  { value: "open", label: "Open", color: "bg-gray-100 text-gray-800" },
-  {
-    value: "under-review",
-    label: "Under Review",
-    color: "bg-blue-100 text-blue-800",
-  },
   {
     value: "planned",
     label: "Planned",
@@ -74,11 +70,15 @@ const STATUS_OPTIONS = [
     color: "bg-yellow-100 text-yellow-800",
   },
   {
+    value: "under-review",
+    label: "In Review",
+    color: "bg-blue-100 text-blue-800",
+  },
+  {
     value: "completed",
     label: "Completed",
     color: "bg-green-100 text-green-800",
   },
-  { value: "closed", label: "Closed", color: "bg-red-100 text-red-800" },
 ];
 
 // Recursive CommentItem component
@@ -286,6 +286,7 @@ export function PostDetails({
 }: PostDetailsProps) {
   const { toast } = useToast();
   const { user } = useAuth();
+  const { organization } = useOrganization();
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState("");
   const [loadingComments, setLoadingComments] = useState(false);
@@ -294,6 +295,7 @@ export function PostDetails({
   const [upvoted, setUpvoted] = useState(false);
   const [upvoting, setUpvoting] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showRoadmapModal, setShowRoadmapModal] = useState(false);
   const [editFormData, setEditFormData] = useState({
     title: '',
     description: '',
@@ -982,6 +984,34 @@ export function PostDetails({
               <label className="text-sm text-gray-600 dark:text-gray-400 block mb-2">Category</label>
               <button className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">Comming soon</button>
             </div>
+
+            {/* Add to Roadmap Button */}
+            {(user?.organization_role === "admin" || user?.organization_role === "owner") && (
+              <div>
+                <label className="text-sm text-gray-600 dark:text-gray-400 block mb-2">Roadmap</label>
+                <Button
+                  onClick={() => setShowRoadmapModal(true)}
+                  variant="outline"
+                  className="w-full justify-start gap-2 dark:border-gray-700 dark:hover:bg-gray-800"
+                  size="sm"
+                >
+                  <svg
+                    className="h-4 w-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
+                    />
+                  </svg>
+                  Add to Roadmap
+                </Button>
+              </div>
+            )}
           </div>
 
           {/* Tags Section */}
@@ -1043,6 +1073,15 @@ export function PostDetails({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Add to Roadmap Modal */}
+      <AddToRoadmapModal
+        isOpen={showRoadmapModal}
+        onClose={() => setShowRoadmapModal(false)}
+        postId={post.id}
+        postTitle={post.title}
+        organizationId={organization?.id || ''}
+      />
     </div>
   );
 }

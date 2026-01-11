@@ -13,7 +13,18 @@ import {
   CreditCard,
   AlertTriangle,
   Loader2,
+  Zap,
+  Shield,
 } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { Switch } from '@/components/ui/switch';
 import stripeService, { SubscriptionInfo, Invoice } from '@/services/stripeService';
 import { useToast } from '@/hooks/use-toast';
 
@@ -22,6 +33,8 @@ export function BillingSection() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
+  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
+  const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
   const { toast } = useToast();
 
   useEffect(() => {
@@ -54,10 +67,14 @@ export function BillingSection() {
     }
   };
 
-  const handleUpgrade = async () => {
+  const handleUpgrade = async (skipTrial: boolean = false) => {
     try {
       setActionLoading(true);
-      const response = await stripeService.createCheckoutSession();
+      const response = await stripeService.createCheckoutSession({
+        plan: 'starter',
+        billingCycle,
+        skipTrial,
+      });
       
       if (response.success && response.data.url) {
         // Redirect to Stripe Checkout
@@ -224,23 +241,134 @@ export function BillingSection() {
           {/* Action Buttons */}
           <div className="flex gap-3">
             {!subscription || subscription.status === 'free' ? (
-              <Button 
-                onClick={handleUpgrade} 
-                disabled={actionLoading}
-                className="flex-1"
-              >
-                {actionLoading ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Processing...
-                  </>
-                ) : (
-                  <>
-                    <CreditCard className="h-4 w-4 mr-2" />
-                    Upgrade to Pro
-                  </>
-                )}
-              </Button>
+              <Dialog open={showUpgradeDialog} onOpenChange={setShowUpgradeDialog}>
+                <DialogTrigger asChild>
+                  <Button className="flex-1">
+                    <Zap className="h-4 w-4 mr-2" />
+                    Upgrade to Starter
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[500px]">
+                  <DialogHeader>
+                    <DialogTitle>Choose Your Plan</DialogTitle>
+                    <DialogDescription>
+                      Select a billing cycle and start your 14-day free trial
+                    </DialogDescription>
+                  </DialogHeader>
+                  
+                  <div className="space-y-6 py-4">
+                    {/* Billing Cycle Toggle */}
+                    <div className="flex items-center justify-center gap-4">
+                      <span className={`text-sm font-medium ${billingCycle === 'monthly' ? 'text-gray-900 dark:text-white' : 'text-gray-500'}`}>
+                        Monthly
+                      </span>
+                      <Switch
+                        checked={billingCycle === 'yearly'}
+                        onCheckedChange={(checked) => setBillingCycle(checked ? 'yearly' : 'monthly')}
+                      />
+                      <span className={`text-sm font-medium ${billingCycle === 'yearly' ? 'text-gray-900 dark:text-white' : 'text-gray-500'}`}>
+                        Yearly
+                      </span>
+                      {billingCycle === 'yearly' && (
+                        <Badge variant="default" className="bg-green-500">
+                          Save $48/year
+                        </Badge>
+                      )}
+                    </div>
+
+                    {/* Plan Details */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-xl">Starter Plan</CardTitle>
+                        <CardDescription>
+                          Perfect for growing teams collecting feedback
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div>
+                          {billingCycle === 'monthly' ? (
+                            <div className="flex items-baseline gap-1">
+                              <span className="text-3xl font-bold">$19</span>
+                              <span className="text-gray-600 dark:text-gray-400">/month</span>
+                            </div>
+                          ) : (
+                            <div>
+                              <div className="flex items-baseline gap-1">
+                                <span className="text-3xl font-bold">$15</span>
+                                <span className="text-gray-600 dark:text-gray-400">/month</span>
+                              </div>
+                              <div className="text-sm text-gray-500 mt-1">
+                                Billed yearly ($180/year)
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="space-y-2 text-sm">
+                          <div className="flex items-center gap-2">
+                            <CheckCircle className="h-4 w-4 text-green-500" />
+                            <span>125+ tracked users included</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Shield className="h-4 w-4 text-blue-500" />
+                            <span>+25 grace buffer (150 total)</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <CheckCircle className="h-4 w-4 text-green-500" />
+                            <span>$6 per 50 additional users</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <CheckCircle className="h-4 w-4 text-green-500" />
+                            <span>1 roadmap</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <CheckCircle className="h-4 w-4 text-green-500" />
+                            <span>5 team members</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <CheckCircle className="h-4 w-4 text-green-500" />
+                            <span>Unlimited boards & posts</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <CheckCircle className="h-4 w-4 text-green-500" />
+                            <span>Advanced analytics</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <CheckCircle className="h-4 w-4 text-green-500" />
+                            <span>Custom branding</span>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Action Buttons */}
+                    <div className="space-y-2">
+                      <Button 
+                        className="w-full bg-blue-600 hover:bg-blue-700"
+                        onClick={() => handleUpgrade(false)}
+                        disabled={actionLoading}
+                      >
+                        {actionLoading ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            Processing...
+                          </>
+                        ) : (
+                          'Start 14-Day Free Trial'
+                        )}
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        className="w-full"
+                        onClick={() => handleUpgrade(true)}
+                        disabled={actionLoading}
+                      >
+                        Skip Trial & Subscribe Now
+                      </Button>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
             ) : (
               <Button 
                 onClick={handleManageSubscription} 

@@ -42,6 +42,8 @@ import {
 } from 'recharts';
 
 import { DashboardSkeleton } from '@/components/admin/DashboardSkeleton';
+import { TrackedUsersWidget } from '@/components/TrackedUsersWidget';
+import { TrackedUsersLimitBanner } from '@/components/TrackedUsersLimitBanner';
 
 /* ======================================================
    MAIN PAGE
@@ -249,12 +251,20 @@ export default function AdminPage() {
 
         </section>
 
+        {/* TRACKED USERS LIMIT WARNING */}
+        <TrackedUsersLimitBanner />
+
         {/* PRIMARY METRICS */}
         <section className="grid grid-cols-1 md:grid-cols-4 gap-6 ">
           <Metric title="Needs Review" value={stats.pendingPosts} icon={Clock} />
           <Metric title="New This Week" value={stats.newThisWeek} icon={TrendingUp} />
           <Metric title="Active Contributors" value={stats.activeUsers} icon={Users} />
           <Metric title="Trending Feedback" value={trending.length} icon={ThumbsUp} />
+        </section>
+
+        {/* TRACKED USERS WIDGET */}
+        <section>
+          <TrackedUsersWidget onUsageClick={() => router.push('/admin/tracked-users')} />
         </section>
 
         {/* ACTION FEED */}

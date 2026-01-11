@@ -26,6 +26,7 @@ export default function AdminLayout({
 
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [viewMode, setViewMode] = useState<"admin" | "public">("admin");
+  const [feedbackPath, setFeedbackPath] = useState('/admin/feedback'); // Start with default
 
   useEffect(() => {
     const savedTheme = localStorage.getItem("theme") as "light" | "dark";
@@ -36,6 +37,12 @@ export default function AdminLayout({
     const initialTheme = savedTheme || systemTheme;
     setTheme(initialTheme);
     document.documentElement.className = initialTheme;
+
+    // Update feedback path after hydration
+    const lastBoard = localStorage.getItem('lastVisitedBoard');
+    if (lastBoard) {
+      setFeedbackPath(`/admin/feedback/boards/${lastBoard}`);
+    }
   }, []);
 
   const toggleTheme = () => {
@@ -54,19 +61,8 @@ export default function AdminLayout({
     }
   };
 
-  // 🚀 Smart Feedback link - goes directly to last visited board
-  const getFeedbackPath = () => {
-    if (typeof window !== 'undefined') {
-      const lastBoard = localStorage.getItem('lastVisitedBoard');
-      if (lastBoard) {
-        return `/admin/feedback/boards/${lastBoard}`;
-      }
-    }
-    return '/admin/feedback'; // Fallback for first time
-  };
-
   const navItems = [
-    { name: "Feedback", path: getFeedbackPath() },
+    { name: "Feedback", path: feedbackPath }, // Use state instead of function
     { name: "Changelog", path: "/admin/changelog" },
     { name: "Roadmap", path: "/admin/roadmap" },
     { name: "Profile", path: "/admin/profile" },
@@ -92,7 +88,7 @@ export default function AdminLayout({
             <div className="hidden md:flex items-center gap-6">
               {/* Feedback link - dynamically uses last visited board */}
               <Link
-                href={getFeedbackPath()}
+                href={feedbackPath}
                 className={cn(
                   "text-sm font-medium transition-colors hover:text-blue-600 dark:hover:text-blue-400",
                   pathname?.startsWith('/admin/feedback')

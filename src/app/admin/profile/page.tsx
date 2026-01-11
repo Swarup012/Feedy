@@ -201,7 +201,7 @@ export default function ProfilePage() {
           
           {activeTab === "profile" && (
             <div className="max-w-2xl space-y-12">
-              <section>
+              <section> 
                 <div className="flex justify-between items-end mb-8">
                   <div>
                     <h1 className="text-2xl font-black tracking-tighter dark:text-gray-100">General</h1>

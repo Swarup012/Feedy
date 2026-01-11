@@ -26,6 +26,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { boardService, Board, BoardCategory } from "@/services/boardService";
 import { useToast } from "@/hooks/use-toast";
 import { IconPicker, IconDisplay } from "@/components/ui/icon-picker";
+import { UpgradeDialog } from "@/components/UpgradeDialog";
 
 interface CreateBoardDialogProps {
   open: boolean;
@@ -69,6 +70,7 @@ export function CreateBoardDialog({
   const [customCategory, setCustomCategory] = useState("");
   const [showCustomCategory, setShowCustomCategory] = useState(false);
   const [showIconPicker, setShowIconPicker] = useState(false); // Icon picker state
+  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false); // Upgrade dialog state
 
   // Form state
   const [formData, setFormData] = useState({
@@ -289,9 +291,20 @@ export function CreateBoardDialog({
 
       onOpenChange(false);
     } catch (error: any) {
+      console.error('Board creation error:', error);
+      
+      // Check if it's a board limit error
+      const errorData = error.response?.data;
+      if (errorData?.error === 'BOARD_LIMIT_REACHED' || errorData?.upgrade_required) {
+        // Close the create dialog and show upgrade dialog
+        onOpenChange(false);
+        setShowUpgradeDialog(true);
+        return;
+      }
+      
       toast({
         title: "Error",
-        description: error.message || "Failed to create board",
+        description: error.response?.data?.message || error.message || "Failed to create board",
         variant: "destructive",
       });
     } finally {
@@ -616,6 +629,15 @@ export function CreateBoardDialog({
         onOpenChange={setShowIconPicker}
         onSelectIcon={(iconName) => setFormData({ ...formData, icon: iconName })}
         currentIcon={formData.icon}
+      />
+
+      {/* Upgrade Dialog */}
+      <UpgradeDialog
+        open={showUpgradeDialog}
+        onOpenChange={setShowUpgradeDialog}
+        feature="boards"
+        title="Upgrade to Starter for Unlimited Boards"
+        description="You've reached the 3 board limit on the Free plan. Upgrade to Starter for unlimited boards and more features."
       />
     </Dialog>
   );
