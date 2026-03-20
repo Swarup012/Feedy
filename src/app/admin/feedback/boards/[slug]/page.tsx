@@ -62,15 +62,17 @@ export default function BoardPage() {
 
   // Pre-load usage data on component mount
   useEffect(() => {
+    if (!slug) return; // Skip if no slug
+    
     const loadUsage = async () => {
-      const { allowed, reason } = await usageService.canCreatePost();
+      const { allowed, reason } = await usageService.canCreatePost(slug);
       setCanCreatePost(allowed);
       if (!allowed && reason) {
         setPostLimitReason(reason);
       }
     };
     loadUsage();
-  }, [posts.length]); // Re-check when posts change
+  }, [posts.length, slug]); // Re-check when posts change or slug changes
 
   // 🚀 INSTANT LOAD: Populate from cache on mount (before any useEffect!)
   useEffect(() => {
@@ -467,7 +469,7 @@ export default function BoardPage() {
 
   return (
     <ProtectedRoute allowedRoles={["owner", "admin", "member"]}>
-      <div className="flex h-screen overflow-hidden bg-white">
+      <div className="flex h-full overflow-hidden bg-white">
         {/* LEFT SIDEBAR - Boards & Filters */}
         <LeftSidebar
           boards={boards}

@@ -42,6 +42,44 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Check if user is logged in on mount
   const checkAuth = useCallback(async () => {
     try {
+      // Skip auth check for public pages that don't need authentication
+      const isPublicPage = typeof window !== 'undefined' && (
+        window.location.pathname.startsWith('/policy') ||
+        window.location.pathname.startsWith('/docs') ||
+        window.location.pathname === '/login' ||
+        window.location.pathname === '/signup' ||
+        window.location.pathname === '/forgot-password' ||
+        window.location.pathname === '/reset-password' ||
+        window.location.pathname === '/pricing' ||
+        window.location.pathname === '/contact' ||
+        window.location.pathname === '/changelog' ||
+        window.location.pathname === '/feedback' ||
+        window.location.pathname === '/collect-feedback' ||
+        window.location.pathname === '/analyze-feedback' ||
+        window.location.pathname === '/share-updates' ||
+        window.location.pathname === '/role-based-access' ||
+        window.location.pathname === '/public-roadmap'
+      );
+      
+      if (isPublicPage) {
+        console.log('📄 Public page detected:', window.location.pathname);
+        
+        // Still check for cached user/token on public pages
+        const token = TokenManager.getAccessToken();
+        const cachedUser = TokenManager.getUser();
+        
+        if (token && cachedUser) {
+          console.log('✅ Using cached user data on public page:', cachedUser.email);
+          setUser(cachedUser);
+          initSocket(token);
+        } else {
+          console.log('📄 No cached auth on public page, continuing as guest');
+        }
+        
+        setLoading(false);
+        return;
+      }
+
       const token = TokenManager.getAccessToken();
       const cachedUser = TokenManager.getUser();
 
@@ -81,16 +119,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const isPublicPage = typeof window !== 'undefined' && (
         window.location.pathname === '/' ||
         window.location.pathname.startsWith('/feedback/boards/') ||
-        window.location.pathname.startsWith('/roadmap')
+        window.location.pathname.startsWith('/roadmap') ||
+        window.location.pathname.startsWith('/docs') ||
+        window.location.pathname === '/pricing' ||
+        window.location.pathname === '/contact' ||
+        window.location.pathname === '/changelog' ||
+        window.location.pathname === '/feedback' ||
+        window.location.pathname.startsWith('/auth/callback') ||
+        window.location.pathname.startsWith('/login') ||
+        window.location.pathname.startsWith('/signup') ||
+        window.location.pathname.startsWith('/onboarding')
       );
       
       if (!isPublicPage) {
         console.error("Auth check failed:", error);
+        console.log('🚨 Auth failed on non-public page, clearing tokens:', window.location.pathname);
+        TokenManager.clearTokens();
+        setUser(null);
+        disconnectSocket();
+      } else {
+        console.log('ℹ️ Auth check failed on public/auth page (expected, not clearing tokens):', window.location.pathname);
+        // Don't clear tokens on public/auth pages - user might be mid-authentication
       }
-      
-      TokenManager.clearTokens();
-      setUser(null);
-      disconnectSocket();
     } finally {
       setLoading(false);
     }
@@ -100,7 +150,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // 🔧 FIX: Handle cross-subdomain auth transfer via URL hash
     if (typeof window !== 'undefined') {
       const hash = window.location.hash;
-      if (hash && hash.includes('access_token')) {
+      const isCallbackPage = window.location.pathname.startsWith('/auth/callback');
+      
+      // Skip auto-storing tokens on callback page - let callback page handle it
+      if (hash && hash.includes('access_token') && !isCallbackPage) {
         console.log('🔐 Detected auth tokens in URL hash - transferring to localStorage');
         
         // Parse tokens from hash
@@ -120,6 +173,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           checkAuth();
           return; // Don't run checkAuth again below
         }
+      } else if (isCallbackPage) {
+        console.log('⏭️ Skipping auto-token storage on callback page');
+        // Still need to run checkAuth, but don't store hash tokens
+        checkAuth();
+        return;
       }
     }
     

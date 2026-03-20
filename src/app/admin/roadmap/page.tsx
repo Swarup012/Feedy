@@ -5,8 +5,6 @@ import { roadmapService, RoadmapItem } from '@/services/roadmapService';
 import { boardService } from '@/services/boardService';
 import { useAuthContext } from '@/context/AuthContext';
 import api from '@/lib/api';
-import RoadmapStats from '@/components/roadmap/RoadmapStats';
-import { LoadingAnimation } from '@/components/LoadingAnimation';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -58,7 +56,6 @@ import {
 export default function AdminRoadmapPage() {
   const { user } = useAuthContext();
   const [items, setItems] = useState<RoadmapItem[]>([]);
-  const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
@@ -156,14 +153,11 @@ export default function AdminRoadmapPage() {
         }
         
         const itemsRes = await roadmapService.getRoadmapItems(boardSlug);
+        console.log('🔍 Items fetched:', itemsRes.data.items);
+        console.log('🔍 Items count:', itemsRes.data.items.length);
         setItems(itemsRes.data.items);
       }
       
-      // Get stats for currently selected board (for stats display)
-      if (boardSlug) {
-        const statsRes = await roadmapService.getRoadmapStats(boardSlug);
-        setStats(statsRes.data);
-      }
     } catch (error: any) {
       toast({
         title: 'Error',
@@ -200,12 +194,9 @@ export default function AdminRoadmapPage() {
       setShowCreateDialog(false);
       loadData();
     } catch (error: any) {
-      // Check if it's a roadmap limit error
-      if (error.response?.data?.error === 'ROADMAP_LIMIT_REACHED') {
-        setShowCreateDialog(false);
-        setShowUpgradeDialog(true);
-        return;
-      }
+      // NOTE: Backend should NOT check roadmap limit when creating roadmap ITEMS
+      // Only check when creating ROADMAPS (containers)
+      // If you get ROADMAP_LIMIT_REACHED here, it's a backend bug
       
       toast({
         title: 'Error',
@@ -340,22 +331,48 @@ export default function AdminRoadmapPage() {
   };
 
   const filteredItems = items.filter((item) => {
+    // Filter by board first
+    if (selectedBoardFilter !== 'all') {
+      if (item.board?.slug !== selectedBoardFilter) return false;
+    }
+    // Then filter by status
     if (selectedView === 'all') return true;
     return item.status === selectedView;
   });
 
+  console.log('🔍 Total items:', items.length);
+  console.log('🔍 Selected board filter:', selectedBoardFilter);
+  console.log('🔍 Selected view:', selectedView);
+  console.log('🔍 Filtered items:', filteredItems.length);
+  console.log('🔍 Items sample:', items[0]);
+
   const groupedByStatus = {
-    planned: items.filter((i) => i.status === 'planned'),
-    in_progress: items.filter((i) => i.status === 'in_progress'),
-    in_review: items.filter((i) => i.status === 'in_review'),
-    completed: items.filter((i) => i.status === 'completed'),
-    cancelled: items.filter((i) => i.status === 'cancelled'),
+    planned: items.filter((i) => {
+      if (selectedBoardFilter !== 'all' && i.board?.slug !== selectedBoardFilter) return false;
+      return i.status === 'planned';
+    }),
+    in_progress: items.filter((i) => {
+      if (selectedBoardFilter !== 'all' && i.board?.slug !== selectedBoardFilter) return false;
+      return i.status === 'in_progress';
+    }),
+    in_review: items.filter((i) => {
+      if (selectedBoardFilter !== 'all' && i.board?.slug !== selectedBoardFilter) return false;
+      return i.status === 'in_review';
+    }),
+    completed: items.filter((i) => {
+      if (selectedBoardFilter !== 'all' && i.board?.slug !== selectedBoardFilter) return false;
+      return i.status === 'completed';
+    }),
+    cancelled: items.filter((i) => {
+      if (selectedBoardFilter !== 'all' && i.board?.slug !== selectedBoardFilter) return false;
+      return i.status === 'cancelled';
+    }),
   };
 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-96">
-        <LoadingAnimation width={64} height={64} />
+        <div className="h-16 w-16 border-4 border-slate-200 dark:border-gray-700 border-t-blue-600 rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -386,7 +403,7 @@ export default function AdminRoadmapPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Roadmap Management</h1>
-          <p className="text-gray-500 mt-1">Manage your product roadmap like Canny</p>
+          <p className="text-gray-500 mt-1">Manage your product roadmap </p>
         </div>
         <div className="flex items-center gap-2">
           {/* Roadmap Selector */}
@@ -467,12 +484,10 @@ export default function AdminRoadmapPage() {
         </Card>
       )}
 
-      {/* Stats */}
-      {stats && <RoadmapStats stats={stats} />}
 
       {/* Board Selector for Members */}
       {!isAdminOrOwner && boardSlug && (
-        <div className="flex items-center gap-4 bg-white dark:bg-gray-900 p-4 rounded-lg border dark:border-gray-700">
+        <div className="flex items-center gap-4 bg-white dark:bg-background p-4 rounded-lg border dark:border-border">
           <Label htmlFor="boardSelector" className="text-sm font-medium whitespace-nowrap dark:text-gray-100">
             Select Board:
           </Label>
@@ -499,7 +514,7 @@ export default function AdminRoadmapPage() {
 
       {/* Board Filter - Only show for Admin/Owner */}
       {isAdminOrOwner && (
-        <div className="flex items-center gap-4 bg-white dark:bg-gray-900 p-4 rounded-lg border dark:border-gray-700">
+        <div className="flex items-center gap-4 bg-white dark:bg-background p-4 rounded-lg border dark:border-border">
           <Label htmlFor="boardFilter" className="text-sm font-medium whitespace-nowrap dark:text-gray-100">
             Filter by Board:
           </Label>
@@ -692,7 +707,7 @@ export default function AdminRoadmapPage() {
               <Button type="submit" disabled={isSubmitting}>
                 {isSubmitting ? (
                   <>
-                    <LoadingAnimation width={16} height={16} className="mr-2" />
+                    <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></div>
                     Creating...
                   </>
                 ) : (
@@ -761,7 +776,7 @@ export default function AdminRoadmapPage() {
               <Button type="submit" disabled={isSubmitting}>
                 {isSubmitting ? (
                   <>
-                    <LoadingAnimation width={16} height={16} className="mr-2" />
+                    <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></div>
                     Updating...
                   </>
                 ) : (
@@ -780,8 +795,8 @@ export default function AdminRoadmapPage() {
       <UpgradeDialog
         open={showUpgradeDialog}
         onOpenChange={setShowUpgradeDialog}
-        title="Upgrade to Create More Roadmaps"
-        description="You've reached the roadmap limit for the Free plan (1 roadmap). Upgrade to Starter for 1 roadmap."
+        title="Upgrade to Create More Roadmap Items"
+        description="You've reached the roadmap item limit for your current plan. Upgrade to create more roadmap items."
         feature="roadmap_items"
       />
     </div>
@@ -1168,7 +1183,7 @@ function CreateEditDialog({ open, onClose, onSave, title, initialData, boards = 
             <Button type="submit" disabled={isSubmitting}>
               {isSubmitting ? (
                 <>
-                  <LoadingAnimation width={16} height={16} className="mr-2" />
+                  <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></div>
                   {initialData ? 'Saving...' : 'Creating...'}
                 </>
               ) : (

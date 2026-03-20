@@ -6,7 +6,7 @@ import { OrganizationProvider } from "@/context/OrganizationContext";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "FeedbackFlow",
+  title: "Faddy",
   description: "A comprehensive customer feedback management platform.",
 };
 

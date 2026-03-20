@@ -93,7 +93,8 @@ export function saveReturnUrl(): void {
   };
   
   try {
-    sessionStorage.setItem(RETURN_URL_KEY, JSON.stringify(context));
+    // Use localStorage instead of sessionStorage to persist across OAuth redirects
+    localStorage.setItem(RETURN_URL_KEY, JSON.stringify(context));
     console.log('💾 Saved return URL:', { 
       path, 
       search, 
@@ -113,8 +114,8 @@ export function getReturnUrl(): string | null {
   if (typeof window === 'undefined') return null;
   
   try {
-    const stored = sessionStorage.getItem(RETURN_URL_KEY);
-    console.log('🔍 getReturnUrl - checking sessionStorage:', { stored });
+    const stored = localStorage.getItem(RETURN_URL_KEY);
+    console.log('🔍 getReturnUrl - checking localStorage:', { stored });
     
     if (!stored) {
       console.log('❌ No return URL found in sessionStorage');
@@ -162,21 +163,52 @@ export function getReturnUrl(): string | null {
 
 /**
  * Get return URL specifically for public pages
- * Returns the URL only if it's a public page
+ * Returns the FULL URL including subdomain if it's a public page
  */
 export function getPublicReturnUrl(): string | null {
-  const returnUrl = getReturnUrl();
-  if (!returnUrl) return null;
+  if (typeof window === 'undefined') return null;
   
-  // Extract path (remove query params for check)
-  const path = returnUrl.split('?')[0];
-  
-  if (isPublicPage(path)) {
-    return returnUrl;
+  try {
+    const stored = localStorage.getItem(RETURN_URL_KEY);
+    if (!stored) return null;
+    
+    const context: ReturnUrlContext = JSON.parse(stored);
+    
+    // Check if URL is stale
+    if (Date.now() - context.timestamp > MAX_AGE_MS) {
+      console.log('⏰ Return URL expired');
+      clearReturnUrl();
+      return null;
+    }
+    
+    // Check if it's a public page
+    if (!isPublicPage(context.path)) {
+      console.log('🚫 Return URL is not a public page:', context.path);
+      return null;
+    }
+    
+    // Build full URL with subdomain if it exists
+    let fullUrl;
+    if (context.subdomain) {
+      const protocol = window.location.protocol;
+      const hostname = window.location.hostname;
+      const port = window.location.port;
+      
+      // Build subdomain URL
+      const baseHost = hostname.includes('localhost') ? 'localhost' : hostname.split('.').slice(-2).join('.');
+      const portPart = port ? `:${port}` : '';
+      fullUrl = `${protocol}//${context.subdomain}.${baseHost}${portPart}${context.path}${context.search}`;
+    } else {
+      fullUrl = context.path + context.search;
+    }
+    
+    console.log('✅ Built public return URL:', { fullUrl, context });
+    return fullUrl;
+    
+  } catch (error) {
+    console.error('Failed to get public return URL:', error);
+    return null;
   }
-  
-  console.log('🚫 Return URL is not a public page:', path);
-  return null;
 }
 
 /**
@@ -205,7 +237,7 @@ export function clearReturnUrl(): void {
   if (typeof window === 'undefined') return;
   
   try {
-    sessionStorage.removeItem(RETURN_URL_KEY);
+    localStorage.removeItem(RETURN_URL_KEY);
     console.log('🗑️ Cleared return URL');
   } catch (error) {
     console.error('Failed to clear return URL:', error);

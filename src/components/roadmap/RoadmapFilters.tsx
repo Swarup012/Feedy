@@ -40,7 +40,7 @@ export default function RoadmapFilters({ filters, onFilterChange }: RoadmapFilte
             className={`px-3 py-2 rounded-lg text-sm font-medium transition ${
               filters.status.includes(status)
                 ? 'bg-blue-600 text-white'
-                : 'bg-white text-gray-700 hover:bg-gray-50 border'
+                : 'bg-white dark:bg-card text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border dark:border-border'
             }`}
           >
             {status.replace('_', ' ')}

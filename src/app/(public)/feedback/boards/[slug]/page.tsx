@@ -18,6 +18,7 @@ import usageService from "@/services/usageService";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { LogIn, UserPlus } from "lucide-react";
+import { saveReturnUrl } from "@/lib/returnUrl";
 
 // 🔥 GLOBAL in-memory cache
 const postsCache: Record<string, Post[]> = {};
@@ -56,17 +57,17 @@ export default function PublicBoardPage() {
 
   // Pre-load usage data on component mount (only if user is authenticated)
   useEffect(() => {
-    if (!user) return; // Skip if not logged in
+    if (!user || !slug) return; // Skip if not logged in or no slug
     
     const loadUsage = async () => {
-      const { allowed, reason } = await usageService.canCreatePost();
+      const { allowed, reason } = await usageService.canCreatePost(slug);
       setCanCreatePost(allowed);
       if (!allowed && reason) {
         setPostLimitReason(reason);
       }
     };
     loadUsage();
-  }, [posts.length, user]); // Re-check when posts change or user logs in
+  }, [posts.length, user, slug]); // Re-check when posts change, user logs in, or slug changes
 
   // Filters
   const [filters, setFilters] = useState({
@@ -194,6 +195,7 @@ export default function PublicBoardPage() {
           description: "Please login to access this board",
           variant: "destructive",
         });
+        saveReturnUrl(); // Save current page before redirecting
         router.push('/login');
         return;
       }
@@ -350,7 +352,7 @@ export default function PublicBoardPage() {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-50 dark:bg-gray-900">
+    <div className="flex h-screen overflow-hidden bg-gray-50 dark:bg-background">
       {/* Left Sidebar */}
       <LeftSidebar
         boards={boards}
@@ -413,9 +415,9 @@ export default function PublicBoardPage() {
 
       {/* Auth Modal for Guests */}
       <Dialog open={showAuthModal} onOpenChange={setShowAuthModal}>
-        <DialogContent className="sm:max-w-md dark:bg-gray-900 dark:border-gray-700">
+        <DialogContent className="sm:max-w-md dark:bg-background dark:border-border">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold text-center dark:text-white">
+            <DialogTitle className="text-2xl font-switzer font-medium text-center dark:text-white">
               Join the Conversation
             </DialogTitle>
             <DialogDescription className="text-center text-base dark:text-gray-400">
@@ -425,7 +427,10 @@ export default function PublicBoardPage() {
           
           <div className="flex flex-col gap-3 py-4">
             <Button
-              onClick={() => router.push('/signup')}
+              onClick={() => {
+                saveReturnUrl(); // Save current page before redirecting
+                router.push('/signup');
+              }}
               size="lg"
               className="w-full text-lg h-12"
             >
@@ -434,10 +439,13 @@ export default function PublicBoardPage() {
             </Button>
             
             <Button
-              onClick={() => router.push('/login')}
+              onClick={() => {
+                saveReturnUrl(); // Save current page before redirecting
+                router.push('/login');
+              }}
               variant="outline"
               size="lg"
-              className="w-full text-lg h-12 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:bg-gray-700"
+              className="w-full text-lg h-12 dark:bg-card dark:border-border dark:text-white dark:hover:bg-gray-700"
             >
               <LogIn className="mr-2 h-5 w-5" />
               Sign In

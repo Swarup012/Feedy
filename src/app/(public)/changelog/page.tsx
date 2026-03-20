@@ -81,7 +81,7 @@ export default function ChangelogPage() {
   return (
     <div className="container mx-auto py-8 max-w-4xl">
       <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold font-headline tracking-tight">Changelog</h1>
+        <h1 className="text-4xl font-switzer font-medium tracking-tight">Changelog</h1>
         <p className="mt-2 text-lg text-muted-foreground">
           Discover the latest features, improvements, and bug fixes.
         </p>
@@ -110,7 +110,7 @@ export default function ChangelogPage() {
 
                 {/* Title & Date */}
                 <div>
-                  <h2 className="text-3xl font-bold mb-2">{changelog.title}</h2>
+                  <h2 className="text-3xl font-switzer font-medium mb-2">{changelog.title}</h2>
                   <time className="text-sm text-muted-foreground">
                     {changelog.published_at
                       ? format(new Date(changelog.published_at), "MMMM d, yyyy")

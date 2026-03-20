@@ -239,7 +239,7 @@ export default function FeaturesRequestPage() {
             </form>
 
             {/* Alternative Actions */}
-            <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+            <div className="mt-6 pt-6 border-t border-gray-200 dark:border-border">
               <p className="text-sm text-gray-600 dark:text-gray-400 text-center mb-4">
                 Already have an invitation?
               </p>

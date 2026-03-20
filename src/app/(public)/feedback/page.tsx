@@ -2,45 +2,15 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { ArrowLeft, Loader2 } from "lucide-react";
 import { boardService, Board } from "@/services/boardService";
 import { postService, Post } from "@/services/postService";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { FeedbackCard } from "./components/feedback-card";
 import { Button } from "@/components/ui/button";
-import { TokenManager } from "@/lib/tokenManager";
-import { saveReturnUrl } from "@/lib/returnUrl";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
-
-// Helper to get subdomain for multi-tenancy
-const getSubdomain = () => {
-  if (typeof window === 'undefined') return null;
-  
-  const hostname = window.location.hostname;
-  const parts = hostname.split(".");
-  
-  // Handle production domains (e.g., acme.fady.com)
-  if (parts.length >= 3 && !hostname.includes("localhost")) {
-    const subdomain = parts[0];
-    if (subdomain === "www" || subdomain === "api" || subdomain === "admin") {
-      return null;
-    }
-    return subdomain;
-  }
-  
-  // Handle development (localhost with subdomain simulation)
-  if (hostname.includes("localhost") && parts.length > 1 && parts[0] !== "localhost") {
-    return parts[0];
-  }
-  
-  return null;
-};
-
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
 import {
   Select,
   SelectContent,
@@ -48,9 +18,42 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { List, LayoutGrid, Loader2, ArrowLeft } from "lucide-react";
-import { SubmitFeedback } from "./components/submit-feedback";
+import { TokenManager } from "@/lib/tokenManager";
+import { saveReturnUrl } from "@/lib/returnUrl";
+import { cn } from "@/lib/utils";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+
+// Helper to get subdomain for multi-tenancy
+const getSubdomain = () => {
+  if (typeof window === "undefined") return null;
+
+  const hostname = window.location.hostname;
+  const parts = hostname.split(".");
+
+  // Handle production domains (e.g., acme.faddy.site)
+  if (parts.length >= 3 && !hostname.includes("localhost")) {
+    const subdomain = parts[0];
+    if (subdomain === "www" || subdomain === "api" || subdomain === "admin") {
+      return null;
+    }
+    return subdomain;
+  }
+
+  // Handle development (localhost with subdomain simulation)
+  if (
+    hostname.includes("localhost") &&
+    parts.length > 1 &&
+    parts[0] !== "localhost"
+  ) {
+    return parts[0];
+  }
+
+  return null;
+};
+
 import { IconDisplay } from "@/components/ui/icon-picker";
+import { SubmitFeedback } from "./components/submit-feedback";
 
 const feedbackStatuses = [
   "open",
@@ -114,22 +117,25 @@ export default function FeedbackPage() {
                 ...post,
                 upvotes: wasUpvoted ? post.upvotes - 1 : post.upvotes + 1,
               }
-            : post
-        )
+            : post,
+        ),
       );
 
       // Call backend API (uses public route with auth required)
       const token = TokenManager.getAccessToken();
       const subdomain = getSubdomain();
-      const response = await fetch(`${API_URL}/api/public/posts/${postId}/upvote`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token && { 'Authorization': `Bearer ${token}` }),
-          ...(subdomain && { 'x-subdomain': subdomain }),
+      const response = await fetch(
+        `${API_URL}/api/public/posts/${postId}/upvote`,
+        {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token && { Authorization: `Bearer ${token}` }),
+            ...(subdomain && { "x-subdomain": subdomain }),
+          },
         },
-      });
+      );
 
       if (!response.ok) {
         if (response.status === 401 || response.status === 403) {
@@ -137,7 +143,7 @@ export default function FeedbackPage() {
         }
         throw new Error("Failed to upvote");
       }
-      
+
       toast({
         title: "Success",
         description: wasUpvoted
@@ -163,8 +169,8 @@ export default function FeedbackPage() {
                 ...post,
                 upvotes: wasUpvoted ? post.upvotes + 1 : post.upvotes - 1,
               }
-            : post
-        )
+            : post,
+        ),
       );
 
       toast({
@@ -304,7 +310,7 @@ export default function FeedbackPage() {
         <div className="flex items-center justify-center h-[60vh]">
           <div className="text-center">
             <div className="text-6xl mb-4">📋</div>
-            <h2 className="text-2xl font-bold mb-2">
+            <h2 className="text-2xl font-switzer font-medium mb-2">
               No Public Boards Available
             </h2>
             <p className="text-gray-500 mb-4">
@@ -322,71 +328,85 @@ export default function FeedbackPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-muted/30 to-background">
-      {/* Hero Section - Canny Style */}
-      <div className="bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5 border-b">
-        <div className="container mx-auto py-12 px-4">
-          <div className="max-w-4xl mx-auto text-center space-y-4">
-            <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
-              Product Feedback
-            </h1>
-            <p className="text-xl text-muted-foreground">
-              Share your ideas and help us build better products
-            </p>
-            
-            {/* CTA Buttons */}
-            <div className="flex items-center justify-center gap-4 pt-4">
-              <SubmitFeedback boards={boards} />
-              {isAuthenticated && (
-                <Button
-                  variant="outline"
-                  onClick={() => router.push("/dashboard")}
-                  className="gap-2"
-                >
-                  <ArrowLeft className="h-4 w-4" />
-                  Back to Dashboard
-                </Button>
-              )}
-            </div>
+    <div className="min-h-screen bg-white dark:bg-slate-950">
+      {/* Top Bar for Authenticated Users */}
+      {isAuthenticated && (
+        <div className="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-3">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => router.push("/dashboard")}
+              className="gap-2 hover:bg-slate-200 dark:hover:bg-slate-800"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to Dashboard
+            </Button>
           </div>
         </div>
-      </div>
+      )}
 
-      <div className="container mx-auto py-8 px-4">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-        {/* Sidebar - Filters */}
-        <aside className="md:col-span-1">
-          <Card>
-            <CardHeader>
-              <CardTitle>Filters</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
+          {/* Sidebar - Filters */}
+          <aside className="lg:col-span-3">
+            <div className="sticky top-20 space-y-6">
               {/* Board Filter */}
-              <div>
-                <h3 className="text-sm font-medium mb-2">Board</h3>
-                <Select value={selectedBoard} onValueChange={setSelectedBoard}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Boards</SelectItem>
-                    {boards.map((board) => (
-                      <SelectItem key={board.id} value={board.slug}>
+              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-6">
+                <h3 className="text-sm font-switzer font-semibold mb-4 text-slate-700 dark:text-slate-300 uppercase tracking-wide">
+                  Boards
+                </h3>
+                <div className="space-y-1">
+                  <button
+                    onClick={() => setSelectedBoard("all")}
+                    className={cn(
+                      "w-full text-left px-3 py-2.5 rounded-md text-sm font-switzer font-medium transition-colors",
+                      selectedBoard === "all"
+                        ? "bg-primary text-primary-foreground"
+                        : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800",
+                    )}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span>All Boards</span>
+                      <span className="text-xs opacity-70">
+                        {allPosts.length}
+                      </span>
+                    </div>
+                  </button>
+                  {boards.map((board) => {
+                    const count = allPosts.filter(
+                      (p) => p.board?.slug === board.slug,
+                    ).length;
+                    return (
+                      <button
+                        key={board.id}
+                        onClick={() => setSelectedBoard(board.slug)}
+                        className={cn(
+                          "w-full text-left px-3 py-2.5 rounded-md text-sm font-switzer font-medium transition-colors",
+                          selectedBoard === board.slug
+                            ? "bg-primary text-primary-foreground"
+                            : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800",
+                        )}
+                      >
                         <div className="flex items-center gap-2">
-                          <IconDisplay iconName={board.icon} className="h-4 w-4" />
-                          <span>{board.name}</span>
+                          <IconDisplay
+                            iconName={board.icon}
+                            className="h-4 w-4"
+                          />
+                          <span className="flex-1">{board.name}</span>
+                          <span className="text-xs opacity-70">{count}</span>
                         </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
 
-              <Separator />
-
               {/* Status Filter */}
-              <div>
-                <h3 className="text-sm font-medium mb-2">Status</h3>
+              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-6">
+                <h3 className="text-sm font-switzer font-semibold mb-4 text-slate-700 dark:text-slate-300 uppercase tracking-wide">
+                  Status
+                </h3>
                 <div className="space-y-2">
                   {feedbackStatuses.map((status) => (
                     <div key={status} className="flex items-center space-x-2">
@@ -397,7 +417,7 @@ export default function FeedbackPage() {
                       />
                       <Label
                         htmlFor={`status-${status}`}
-                        className="capitalize font-normal cursor-pointer"
+                        className="capitalize font-normal cursor-pointer text-sm text-slate-700 dark:text-slate-300"
                       >
                         {status.replace("-", " ")}
                       </Label>
@@ -405,107 +425,91 @@ export default function FeedbackPage() {
                   ))}
                 </div>
               </div>
-
-              <Separator />
-
-              <Button variant="ghost" className="w-full" onClick={clearFilters}>
-                Clear all filters
-              </Button>
-            </CardContent>
-          </Card>
-        </aside>
-
-        {/* Main Content */}
-        <main className="md:col-span-3">
-          <div className="flex flex-col sm:flex-row items-center justify-between mb-6 gap-4">
-            <div>
-              <h1 className="text-2xl font-bold font-headline">
-                Feedback Board
-              </h1>
-              <p className="text-sm text-gray-500 mt-1">
-                {filteredPosts.length}{" "}
-                {filteredPosts.length === 1 ? "post" : "posts"}
-              </p>
             </div>
+          </aside>
 
-            <div className="flex items-center gap-4">
-              {/* Sort */}
-              <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Sort by" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="most-votes">Most Votes</SelectItem>
-                  <SelectItem value="trending">Trending</SelectItem>
-                  <SelectItem value="newest">Newest</SelectItem>
-                  <SelectItem value="oldest">Oldest</SelectItem>
-                </SelectContent>
-              </Select>
-
-              {/* View Mode Toggle */}
-              <div className="flex items-center gap-2">
-                <Button
-                  variant={viewMode === "grid" ? "outline" : "ghost"}
-                  size="icon"
-                  onClick={() => setViewMode("grid")}
-                >
-                  <LayoutGrid className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant={viewMode === "list" ? "outline" : "ghost"}
-                  size="icon"
-                  onClick={() => setViewMode("list")}
-                >
-                  <List className="h-4 w-4" />
-                </Button>
-              </div>
-
-              {/* Submit Feedback - pass real data */}
-              <SubmitFeedback boards={boards} />
-            </div>
-          </div>
-
-          {/* Posts */}
-          {filteredPosts.length === 0 ? (
-            <Card className="p-12">
-              <div className="text-center">
-                <div className="text-6xl mb-4">📝</div>
-                <h3 className="text-xl font-semibold mb-2">No feedback yet</h3>
-                <p className="text-gray-500 mb-4">
-                  {selectedStatuses.length > 0 || selectedBoard !== "all"
-                    ? "No posts match your filters. Try adjusting your selection."
-                    : "Be the first to submit feedback!"}
+          {/* Main Content */}
+          <main className="lg:col-span-9">
+            {/* Header with Sort and Create Post */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
+              <div>
+                <h1 className="text-3xl font-switzer font-semibold text-slate-900 dark:text-white tracking-tight">
+                  {selectedBoard === "all"
+                    ? "All Feedback"
+                    : boards.find((b) => b.slug === selectedBoard)?.name}
+                </h1>
+                <p className="text-sm text-slate-600 dark:text-slate-400 mt-2">
+                  {filteredPosts.length}{" "}
+                  {filteredPosts.length === 1 ? "post" : "posts"}
                 </p>
-                {(selectedStatuses.length > 0 || selectedBoard !== "all") && (
-                  <Button onClick={clearFilters} variant="outline">
-                    Clear Filters
-                  </Button>
-                )}
               </div>
-            </Card>
-          ) : (
-            <div className="grid grid-cols-1 gap-4">
-              {filteredPosts.map((feedback) => (
-                <FeedbackCard
-                  key={feedback.id}
-                  feedback={feedback}
-                  onUpvote={handleUpvote}
-                  isUpvoted={upvotedPosts.has(feedback.id)}
-                />
-              ))}
+              <div className="flex items-center gap-3">
+                <Select value={sortBy} onValueChange={setSortBy}>
+                  <SelectTrigger className="w-[180px] bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800">
+                    <SelectValue placeholder="Sort by" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="most-votes">Most Votes</SelectItem>
+                    <SelectItem value="trending">Trending</SelectItem>
+                    <SelectItem value="newest">Newest</SelectItem>
+                    <SelectItem value="oldest">Oldest</SelectItem>
+                  </SelectContent>
+                </Select>
+                <SubmitFeedback boards={boards} buttonText="Create Post" variant="outline" />
+              </div>
             </div>
-          )}
 
-          {/* Load More - can be implemented later */}
-          {filteredPosts.length > 0 && (
-            <div className="flex items-center justify-center mt-8">
-              <Button variant="outline" disabled>
-                Load more (Coming soon)
-              </Button>
-            </div>
-          )}
-        </main>
-      </div>
+            {/* Feedback List */}
+            {loading ? (
+              <div className="space-y-4">
+                {[1, 2, 3].map((i) => (
+                  <div
+                    key={i}
+                    className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-6 animate-pulse"
+                  >
+                    <div className="h-6 bg-slate-200 dark:bg-slate-700 rounded w-3/4 mb-3"></div>
+                    <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-full mb-2"></div>
+                    <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-5/6"></div>
+                  </div>
+                ))}
+              </div>
+            ) : filteredPosts.length === 0 ? (
+              <div className="text-center py-16">
+                <div className="text-6xl mb-4">💬</div>
+                <h3 className="text-xl font-switzer font-semibold text-slate-900 dark:text-white mb-2">
+                  No feedback yet
+                </h3>
+                <p className="text-slate-600 dark:text-slate-400">
+                  Be the first to share your ideas!
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {filteredPosts.map((feedback) => (
+                  <FeedbackCard
+                    key={feedback.id}
+                    feedback={feedback}
+                    onUpvote={handleUpvote}
+                    isUpvoted={upvotedPosts.has(feedback.id)}
+                  />
+                ))}
+              </div>
+            )}
+
+            {/* Load More */}
+            {filteredPosts.length > 0 && (
+              <div className="flex items-center justify-center mt-12">
+                <Button
+                  variant="outline"
+                  disabled
+                  className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800"
+                >
+                  No more
+                </Button>
+              </div>
+            )}
+          </main>
+        </div>
       </div>
     </div>
   );

@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { BillingSection } from "@/components/BillingSection";
 import { useToast } from "@/hooks/use-toast";
@@ -16,7 +17,7 @@ import {
   User, Mail, Shield, Settings, Activity, LogOut, Edit2, Save, X,
   Camera, Calendar, MapPin, Link2, Github, Twitter, Globe,
   Briefcase, Rocket, Palette, Code, TrendingUp, UserCircle,
-  CreditCard, ExternalLink, ChevronRight, Bell, AlertTriangle
+  CreditCard, ExternalLink, ChevronRight, Bell, AlertTriangle, Lock, Check
 } from "lucide-react";
 import { RoleSelectionModal } from "@/components/RoleSelectionModal";
 import gsap from "gsap";
@@ -124,205 +125,381 @@ export default function ProfilePage() {
     { id: "profile", label: "General", icon: User },
     { id: "settings", label: "Preferences", icon: Settings },
     { id: "billing", label: "Billing", icon: CreditCard },
-    { id: "activity", label: "Activity", icon: Activity },
   ];
 
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-950 text-slate-900 dark:text-gray-100 selection:bg-blue-100 dark:selection:bg-blue-900">
-      {/* Top Border Accent */}
-      <div className="h-[1px] bg-slate-100 dark:bg-gray-800 w-full fixed top-0 z-50" />
+    <div className="min-h-screen bg-slate-50 dark:bg-background">
 
-      <div className="max-w-[1100px] mx-auto pt-16 pb-20 px-6 lg:px-10 grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-16">
-        
-        {/* SIDEBAR */}
-        <aside className="space-y-8">
-          <div className="flex flex-col items-center lg:items-start space-y-4">
-            <div className="relative group">
-              <Avatar className="h-20 w-20 border border-slate-200 dark:border-gray-700 shadow-sm transition-all duration-300 group-hover:border-slate-300 dark:group-hover:border-gray-600 overflow-hidden">
-                <AvatarImage src={profileData.avatar_url} className="object-cover" />
-                <AvatarFallback className="bg-slate-50 dark:bg-gray-800 text-slate-400 dark:text-gray-400 font-bold text-xl">
-                  {user.name?.charAt(0) || "U"}
-                </AvatarFallback>
-              </Avatar>
-              
-              <input 
-                type="file" 
-                id="avatar-input" 
-                className="hidden" 
-                onChange={handleAvatarUpload} 
-                accept="image/*" 
-              />
-              <label 
-                htmlFor="avatar-input"
-                className="absolute -bottom-1 -right-1 p-1.5 bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-full shadow-sm text-slate-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer"
-              >
-                {uploadingAvatar ? <div className="h-3 w-3 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" /> : <Camera size={14} />}
-              </label>
-            </div>
-            
-            <div className="text-center lg:text-left">
-              <h2 className="font-bold text-lg tracking-tight dark:text-gray-100">{user.name}</h2>
-              <p className="text-[10px] text-slate-400 dark:text-gray-500 font-black uppercase tracking-[0.12em] mt-1">
-                {user.job_role?.replace('_', ' ') || 'New Member'}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header Section */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
+                Account Settings
+              </h1>
+              <p className="mt-1 text-sm text-slate-600 dark:text-gray-400">
+                Manage your profile, preferences, and account settings
               </p>
             </div>
           </div>
+        </div>
 
-          <nav className="flex flex-col gap-1">
-            {navItems.map((item) => (
-              <button
-                key={item.id}
-                onClick={() => { setActiveTab(item.id); setIsEditing(false); }}
-                className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-bold transition-all ${
-                  activeTab === item.id 
-                    ? "bg-slate-50 dark:bg-gray-800 text-slate-900 dark:text-gray-100" 
-                    : "text-slate-400 dark:text-gray-500 hover:text-slate-600 dark:hover:text-gray-300 hover:bg-slate-50/50 dark:hover:bg-gray-800/50"
-                }`}
-              >
-                <item.icon size={16} strokeWidth={activeTab === item.id ? 2.5 : 2} />
-                {item.label}
-              </button>
-            ))}
-            <div className="my-4 h-px bg-slate-100 dark:bg-gray-800 w-full" />
-            <button 
-              onClick={() => logout()}
-              className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-bold text-red-400 dark:text-red-400 hover:text-red-500 dark:hover:text-red-300 hover:bg-red-50/50 dark:hover:bg-red-950/50 transition-all"
-            >
-              <LogOut size={16} strokeWidth={2.5} />
-              Sign Out
-            </button>
-          </nav>
-        </aside>
-
-        {/* CONTENT */}
-        <main ref={mainContentRef} className="animate-content min-h-[500px]">
-          
-          {activeTab === "profile" && (
-            <div className="max-w-2xl space-y-12">
-              <section> 
-                <div className="flex justify-between items-end mb-8">
-                  <div>
-                    <h1 className="text-2xl font-black tracking-tighter dark:text-gray-100">General</h1>
-                    <p className="text-slate-500 dark:text-gray-400 text-sm font-medium">Manage your public profile and identity.</p>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* SIDEBAR */}
+          <aside className="lg:col-span-3">
+            <Card className="border-slate-200/60 dark:border-border shadow-sm overflow-hidden">
+              <CardContent className="p-6">
+                {/* Profile Avatar Section */}
+                <div className="flex flex-col items-center space-y-4 mb-6">
+                  <div className="relative group">
+                    <Avatar className="relative h-24 w-24 border-4 border-white dark:border-gray-800 shadow-lg">
+                      <AvatarImage src={profileData.avatar_url} className="object-cover" />
+                      <AvatarFallback className="bg-blue-600 text-white font-bold text-2xl">
+                        {user.name?.charAt(0) || "U"}
+                      </AvatarFallback>
+                    </Avatar>
+                    
+                    <input 
+                      type="file" 
+                      id="avatar-input" 
+                      className="hidden" 
+                      onChange={handleAvatarUpload} 
+                      accept="image/*" 
+                    />
+                    <label 
+                      htmlFor="avatar-input"
+                      className="absolute bottom-0 right-0 p-2 bg-white dark:bg-gray-800 border-2 border-white dark:border-gray-800 rounded-full shadow-lg text-slate-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950 transition-all cursor-pointer"
+                    >
+                      {uploadingAvatar ? (
+                        <div className="h-4 w-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <Camera size={16} />
+                      )}
+                    </label>
                   </div>
-                  {!isEditing ? (
-                    <Button variant="outline" size="sm" className="font-bold rounded-lg border-slate-200 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700 h-9" onClick={() => setIsEditing(true)}>
-                      <Edit2 className="mr-2 h-3.5 w-3.5" /> Edit
-                    </Button>
-                  ) : (
-                    <div className="flex gap-2">
-                      <Button variant="ghost" size="sm" className="font-bold h-9 text-slate-400 dark:text-gray-400 dark:hover:bg-gray-800" onClick={() => setIsEditing(false)}>Cancel</Button>
-                      <Button size="sm" className="font-bold h-9 bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700 transition-all" onClick={handleSave} disabled={loading}>
-                        {loading ? "Saving..." : "Save Changes"}
-                      </Button>
-                    </div>
-                  )}
+                  
+                  <div className="text-center">
+                    <h2 className="font-bold text-lg text-slate-900 dark:text-white">{user.name}</h2>
+                    <Badge variant="secondary" className="mt-1.5 text-xs font-semibold bg-slate-100 dark:bg-gray-800 text-slate-600 dark:text-gray-300">
+                      {user.job_role?.replace('_', ' ') || 'New Member'}
+                    </Badge>
+                  </div>
                 </div>
 
-                <div className="space-y-8">
-                  {/* Name Input - Force text color to Slate-900 */}
-                  <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-start">
-                    <Label className="text-[11px] font-black uppercase tracking-widest text-slate-400 dark:text-gray-500 pt-3">Full Name</Label>
+                <Separator className="my-6" />
+
+                {/* Navigation */}
+                <nav className="space-y-1">
+                  {navItems.map((item) => (
+                    <button
+                      key={item.id}
+                      onClick={() => { setActiveTab(item.id); setIsEditing(false); }}
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 ${
+                        activeTab === item.id 
+                          ? "bg-blue-600 text-white shadow-md shadow-blue-600/20" 
+                          : "text-slate-600 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-gray-800"
+                      }`}
+                    >
+                      <item.icon size={18} strokeWidth={2} />
+                      <span>{item.label}</span>
+                      {activeTab === item.id && (
+                        <ChevronRight size={16} className="ml-auto" />
+                      )}
+                    </button>
+                  ))}
+                </nav>
+
+                <Separator className="my-6" />
+
+                {/* Logout Button */}
+                <button 
+                  onClick={() => logout()}
+                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition-all"
+                >
+                  <LogOut size={18} strokeWidth={2} />
+                  <span>Sign Out</span>
+                </button>
+              </CardContent>
+            </Card>
+          </aside>
+
+        {/* CONTENT */}
+        <main ref={mainContentRef} className="lg:col-span-9 space-y-6">
+          
+          {activeTab === "profile" && (
+            <div className="space-y-6">
+              {/* Profile Information Card */}
+              <Card className="border-slate-200/60 dark:border-border shadow-sm">
+                <CardHeader className="border-b border-slate-100 dark:border-border bg-slate-50/50 dark:bg-gray-800/50">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="text-xl font-bold text-slate-900 dark:text-white">Profile Information</CardTitle>
+                      <CardDescription className="mt-1">Update your personal details and how others see you</CardDescription>
+                    </div>
+                    {!isEditing ? (
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => setIsEditing(true)}
+                        className="gap-2 hover:bg-blue-50 dark:hover:bg-blue-950 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-300 dark:hover:border-blue-700 transition-all"
+                      >
+                        <Edit2 size={16} />
+                        <span>Edit Profile</span>
+                      </Button>
+                    ) : (
+                      <div className="flex gap-2">
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => setIsEditing(false)}
+                          className="text-slate-600 dark:text-gray-400"
+                        >
+                          <X size={16} className="mr-2" />
+                          Cancel
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          onClick={handleSave} 
+                          disabled={loading}
+                          className="bg-blue-600 hover:bg-blue-700 text-white gap-2 shadow-md shadow-blue-600/20"
+                        >
+                          <Save size={16} />
+                          {loading ? "Saving..." : "Save Changes"}
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </CardHeader>
+
+                <CardContent className="p-6 space-y-6">
+                  {/* Full Name */}
+                  <div className="space-y-2">
+                    <Label className="text-sm font-semibold text-slate-700 dark:text-gray-300 flex items-center gap-2">
+                      <User size={16} className="text-slate-400 dark:text-gray-500" />
+                      Full Name
+                    </Label>
                     <Input 
                       disabled={!isEditing} 
                       value={profileData.name} 
                       onChange={(e) => setProfileData({...profileData, name: e.target.value})}
-                      className="border-slate-200 dark:border-gray-700 bg-slate-50/30 dark:bg-gray-800/50 h-11 rounded-xl text-slate-900 dark:text-gray-100 font-bold focus:ring-4 focus:ring-blue-500/5 dark:focus:ring-blue-500/20 transition-all" 
+                      placeholder="Enter your full name"
+                      className="h-11 border-slate-200 dark:border-border focus:border-blue-500 dark:focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all disabled:bg-slate-50 dark:disabled:bg-gray-800 disabled:cursor-not-allowed" 
                     />
                   </div>
 
-                  {/* Email Read-only */}
-                  <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
-                    <Label className="text-[11px] font-black uppercase tracking-widest text-slate-400 dark:text-gray-500">Email Address</Label>
-                    <div className="flex items-center justify-between h-11 px-4 rounded-xl bg-slate-50 dark:bg-gray-800/50 border border-slate-100 dark:border-gray-700 text-slate-500 dark:text-gray-400 font-medium text-sm">
-                      <div className="flex items-center gap-2">
-                        <Mail size={14} className="text-slate-300 dark:text-gray-600" />
-                        {user.email}
-                      </div>
-                      <Badge className="bg-white dark:bg-gray-700 text-slate-400 dark:text-gray-400 border-slate-200 dark:border-gray-600 shadow-none text-[9px] font-black uppercase">Verified</Badge>
+                  {/* Email (Read-only) */}
+                  <div className="space-y-2">
+                    <Label className="text-sm font-semibold text-slate-700 dark:text-gray-300 flex items-center gap-2">
+                      <Mail size={16} className="text-slate-400 dark:text-gray-500" />
+                      Email Address
+                    </Label>
+                    <div className="relative">
+                      <Input 
+                        disabled
+                        value={user.email}
+                        className="h-11 border-slate-200 dark:border-border bg-slate-50 dark:bg-gray-800 cursor-not-allowed pr-24" 
+                      />
+                      <Badge className="absolute right-3 top-1/2 -translate-y-1/2 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800 gap-1">
+                        <Check size={12} />
+                        Verified
+                      </Badge>
                     </div>
+                    <p className="text-xs text-slate-500 dark:text-gray-500">Your email is verified and cannot be changed</p>
                   </div>
 
                   {/* Bio */}
-                  <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-start">
-                    <Label className="text-[11px] font-black uppercase tracking-widest text-slate-400 dark:text-gray-500 pt-3">About You</Label>
+                  <div className="space-y-2">
+                    <Label className="text-sm font-semibold text-slate-700 dark:text-gray-300 flex items-center gap-2">
+                      <User size={16} className="text-slate-400 dark:text-gray-500" />
+                      Bio
+                    </Label>
                     <Textarea 
                       disabled={!isEditing} 
                       value={profileData.bio}
                       onChange={(e) => setProfileData({...profileData, bio: e.target.value})}
-                      placeholder="Write a short bio..."
-                      className="border-slate-200 dark:border-gray-700 bg-slate-50/30 dark:bg-gray-800/50 min-h-[120px] rounded-xl text-slate-900 dark:text-gray-100 font-medium focus:ring-4 focus:ring-blue-500/5 dark:focus:ring-blue-500/20 transition-all resize-none" 
+                      placeholder="Tell us about yourself..."
+                      className="min-h-[120px] border-slate-200 dark:border-border focus:border-blue-500 dark:focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all resize-none disabled:bg-slate-50 dark:disabled:bg-gray-800 disabled:cursor-not-allowed" 
                     />
+                    <p className="text-xs text-slate-500 dark:text-gray-500">Brief description for your profile. Max 160 characters.</p>
                   </div>
+                </CardContent>
+              </Card>
 
-                  {/* Role Selection UI */}
-                  <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-start pt-4">
-                    <Label className="text-[11px] font-black uppercase tracking-widest text-slate-400 dark:text-gray-500 pt-3">Work Role</Label>
-                    <div className="flex items-center justify-between p-4 rounded-2xl border border-slate-100 dark:border-gray-700 bg-white dark:bg-gray-800/50 shadow-sm hover:border-slate-200 dark:hover:border-gray-600 transition-all">
-                      <div className="flex items-center gap-4">
-                        <div className="p-2.5 bg-slate-50 dark:bg-gray-700 text-slate-900 dark:text-gray-100 rounded-xl border border-slate-100 dark:border-gray-600">
-                          {user.job_role === 'developer' ? <Code size={18} /> : <Briefcase size={18} />}
-                        </div>
-                        <div>
-                          <p className="text-sm font-bold text-slate-900 dark:text-gray-100 capitalize">{user.job_role?.replace('_', ' ') || 'Not specified'}</p>
-                          <p className="text-xs text-slate-400 dark:text-gray-500 font-medium">Click change to update role</p>
-                        </div>
+              {/* Role Card */}
+              <Card className="border-slate-200/60 dark:border-border shadow-sm">
+                <CardHeader className="border-b border-slate-100 dark:border-border bg-slate-50/50 dark:bg-gray-800/50">
+                  <CardTitle className="text-xl font-bold text-slate-900 dark:text-white">Professional Role</CardTitle>
+                  <CardDescription>Your role helps us personalize your experience</CardDescription>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between p-5 rounded-xl border-2 border-slate-100 dark:border-border bg-white dark:bg-gray-800 hover:border-blue-200 dark:hover:border-blue-800 transition-all group">
+                    <div className="flex items-center gap-4">
+                      <div className="p-3 bg-blue-600 text-white rounded-xl shadow-md">
+                        {user.job_role === 'developer' ? <Code size={24} /> : <Briefcase size={24} />}
                       </div>
-                      <Button variant="ghost" size="sm" className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/50" onClick={() => setShowRoleModal(true)}>
-                        Change
-                      </Button>
+                      <div>
+                        <p className="text-base font-bold text-slate-900 dark:text-white capitalize">
+                          {user.job_role?.replace('_', ' ') || 'Not specified'}
+                        </p>
+                        <p className="text-sm text-slate-500 dark:text-gray-400">
+                          {user.job_role ? 'Current role' : 'Select your professional role'}
+                        </p>
+                      </div>
                     </div>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => setShowRoleModal(true)}
+                      className="gap-2 hover:bg-blue-50 dark:hover:bg-blue-950 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-300 dark:hover:border-blue-700 transition-all"
+                    >
+                      Change Role
+                      <ChevronRight size={16} />
+                    </Button>
                   </div>
-                </div>
-              </section>
+                </CardContent>
+              </Card>
 
-              {/* Security Snapshot */}
-              <section className="pt-12 border-t border-slate-100 dark:border-gray-800">
-                 <h3 className="text-[11px] font-black uppercase tracking-widest text-slate-400 dark:text-gray-500 mb-6">Security</h3>
-                 <div className="flex flex-col gap-3">
-                   <div className="flex items-center justify-between p-4 rounded-xl border border-slate-100 dark:border-gray-700 bg-slate-50/30 dark:bg-gray-800/30 group cursor-pointer hover:bg-slate-50 dark:hover:bg-gray-800/50 transition-all">
-                      <div className="flex items-center gap-3">
-                        <Shield size={16} className="text-slate-400 dark:text-gray-500" />
-                        <span className="text-sm font-bold dark:text-gray-100">Password</span>
+              {/* Security Card */}
+              <Card className="border-slate-200/60 dark:border-border shadow-sm">
+                <CardHeader className="border-b border-slate-100 dark:border-border bg-slate-50/50 dark:bg-gray-800/50">
+                  <CardTitle className="text-xl font-bold text-slate-900 dark:text-white">Security</CardTitle>
+                  <CardDescription>Manage your account security and authentication</CardDescription>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <button className="w-full flex items-center justify-between p-4 rounded-xl border border-slate-200 dark:border-border bg-white dark:bg-gray-800 hover:bg-slate-50 dark:hover:bg-gray-700 hover:border-slate-300 dark:hover:border-gray-600 transition-all group">
+                    <div className="flex items-center gap-4">
+                      <div className="p-3 bg-slate-100 dark:bg-gray-700 rounded-lg">
+                        <Lock size={20} className="text-slate-600 dark:text-gray-300" />
                       </div>
-                      <ChevronRight size={14} className="text-slate-300 dark:text-gray-600 group-hover:translate-x-1 transition-transform" />
-                   </div>
-                 </div>
-              </section>
+                      <div className="text-left">
+                        <p className="text-sm font-semibold text-slate-900 dark:text-white">Password</p>
+                        <p className="text-xs text-slate-500 dark:text-gray-400">Last updated 30 days ago</p>
+                      </div>
+                    </div>
+                    <ChevronRight size={20} className="text-slate-400 dark:text-gray-500 group-hover:translate-x-1 transition-transform" />
+                  </button>
+                </CardContent>
+              </Card>
             </div>
           )}
 
           {activeTab === "billing" && (
-            <div className="animate-content space-y-8">
-              <div>
-                <h1 className="text-2xl font-black tracking-tighter dark:text-gray-100">Billing</h1>
-                <p className="text-slate-500 dark:text-gray-400 text-sm font-medium">Manage your subscription plans.</p>
-              </div>
-              <BillingSection />
+            <div className="space-y-6">
+              {/* Subscription Card */}
+              <Card className="border-slate-200/60 dark:border-border shadow-sm overflow-hidden">
+                <CardHeader className="border-b border-slate-100 dark:border-border bg-blue-50 dark:bg-blue-950/20">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="text-xl font-bold text-slate-900 dark:text-white">Subscription Plan</CardTitle>
+                      <CardDescription className="mt-1">Manage your current plan and billing</CardDescription>
+                    </div>
+                    <div className="p-3 bg-white dark:bg-gray-800 rounded-xl shadow-md">
+                      <Rocket size={24} className="text-blue-600 dark:text-blue-400" />
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between p-5 rounded-xl border-2 border-slate-100 dark:border-border bg-white dark:bg-gray-800">
+                    <div>
+                      <p className="text-sm text-slate-500 dark:text-gray-400 mb-1">Current Plan</p>
+                      <p className="text-2xl font-bold text-slate-900 dark:text-white capitalize">
+                        {user.plan || 'Free'}
+                      </p>
+                    </div>
+                    <Badge className="bg-blue-600 text-white border-none shadow-md text-sm px-4 py-2">
+                      Active
+                    </Badge>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Billing Section */}
+              <Card className="border-slate-200/60 dark:border-border shadow-sm">
+                <CardHeader className="border-b border-slate-100 dark:border-border bg-slate-50/50 dark:bg-gray-800/50">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-white dark:bg-gray-700 rounded-lg">
+                      <CreditCard size={20} className="text-slate-600 dark:text-gray-300" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-xl font-bold text-slate-900 dark:text-white">Billing & Payments</CardTitle>
+                      <CardDescription>Manage your payment methods and invoices</CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <BillingSection />
+                </CardContent>
+              </Card>
             </div>
           )}
 
           {activeTab === "settings" && (
-            <div className="animate-content space-y-8">
-              <div>
-                <h1 className="text-2xl font-black tracking-tighter dark:text-gray-100">Preferences</h1>
-                <p className="text-slate-500 dark:text-gray-400 text-sm font-medium">Configure notifications and app behavior.</p>
-              </div>
-              <div className="flex items-center justify-between p-5 rounded-2xl border border-slate-100 dark:border-gray-700 bg-slate-50/20 dark:bg-gray-800/20">
-                <div className="flex gap-4">
-                  <div className="p-2 bg-white dark:bg-gray-800 rounded-lg border border-slate-100 dark:border-gray-700 shadow-sm"><Bell size={18} className="dark:text-gray-300" /></div>
-                  <div>
-                    <p className="text-sm font-bold dark:text-gray-100">Activity Notifications</p>
-                    <p className="text-xs text-slate-400 dark:text-gray-500">Receive emails for new updates</p>
+            <div className="space-y-6">
+              <Card className="border-slate-200/60 dark:border-border shadow-sm">
+                <CardHeader className="border-b border-slate-100 dark:border-border bg-slate-50/50 dark:bg-gray-800/50">
+                  <CardTitle className="text-xl font-bold text-slate-900 dark:text-white">Preferences</CardTitle>
+                  <CardDescription>Configure your notification and app preferences</CardDescription>
+                </CardHeader>
+                <CardContent className="p-6 space-y-4">
+                  {/* Email Notifications */}
+                  <div className="flex items-center justify-between p-5 rounded-xl border border-slate-200 dark:border-border bg-white dark:bg-gray-800 hover:bg-slate-50 dark:hover:bg-gray-700 transition-all group">
+                    <div className="flex items-center gap-4">
+                      <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                        <Bell size={20} className="text-blue-600 dark:text-blue-400" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-slate-900 dark:text-white">Email Notifications</p>
+                        <p className="text-xs text-slate-500 dark:text-gray-400 mt-0.5">Receive email updates for activity</p>
+                      </div>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" className="sr-only peer" defaultChecked />
+                      <div className="w-11 h-6 bg-slate-200 dark:bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                    </label>
                   </div>
-                </div>
-                <input type="checkbox" className="w-10 h-5 bg-slate-200 dark:bg-gray-700 rounded-full appearance-none checked:bg-blue-600 dark:checked:bg-blue-600 transition-all cursor-pointer relative after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:w-4 after:h-4 after:rounded-full after:transition-all checked:after:left-[22px]" defaultChecked />
-              </div>
+
+                  {/* Push Notifications */}
+                  <div className="flex items-center justify-between p-5 rounded-xl border border-slate-200 dark:border-border bg-white dark:bg-gray-800 hover:bg-slate-50 dark:hover:bg-gray-700 transition-all group">
+                    <div className="flex items-center gap-4">
+                      <div className="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                        <Bell size={20} className="text-purple-600 dark:text-purple-400" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-slate-900 dark:text-white">Push Notifications</p>
+                        <p className="text-xs text-slate-500 dark:text-gray-400 mt-0.5">Get browser notifications</p>
+                      </div>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" className="sr-only peer" />
+                      <div className="w-11 h-6 bg-slate-200 dark:bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                    </label>
+                  </div>
+
+                  {/* Weekly Summary */}
+                  <div className="flex items-center justify-between p-5 rounded-xl border border-slate-200 dark:border-border bg-white dark:bg-gray-800 hover:bg-slate-50 dark:hover:bg-gray-700 transition-all group">
+                    <div className="flex items-center gap-4">
+                      <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                        <TrendingUp size={20} className="text-green-600 dark:text-green-400" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-slate-900 dark:text-white">Weekly Summary</p>
+                        <p className="text-xs text-slate-500 dark:text-gray-400 mt-0.5">Receive weekly activity digest</p>
+                      </div>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" className="sr-only peer" defaultChecked />
+                      <div className="w-11 h-6 bg-slate-200 dark:bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                    </label>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           )}
         </main>
+      </div>
       </div>
 
       <RoleSelectionModal

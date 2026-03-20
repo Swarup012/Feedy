@@ -32,7 +32,7 @@ api.interceptors.request.use(
       const parts = hostname.split(".");
       let subdomain: string | null = null;
       
-      // Handle production domains (e.g., acme.fady.com)
+      // Handle production domains (e.g., acme.faddy.site)
       if (parts.length >= 3 && !hostname.includes("localhost")) {
         subdomain = parts[0];
         // Ignore www and common subdomains
@@ -65,10 +65,23 @@ api.interceptors.response.use(
   async (error: AxiosError) => {
     const originalRequest = error.config as InternalAxiosRequestConfig & {
       _retry?: boolean;
+      skipAuthRedirect?: boolean;  // Allow marking requests that shouldn't redirect
     };
 
-    // If error is 401 and we haven't retried yet
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // Check if this is an expected 401 (checking if user exists, etc.)
+    // These endpoints should NOT trigger a redirect
+    const expected401Endpoints = [
+      '/api/auth/me',
+      '/api/auth/login',
+      '/api/auth/signup',
+      '/api/auth/google',
+    ];
+
+    const requestUrl = originalRequest.url || '';
+    const isExpected401 = expected401Endpoints.some(endpoint => requestUrl.includes(endpoint));
+
+    // If error is 401, not a retry, not marked to skip redirect, and not an expected 401 endpoint
+    if (error.response?.status === 401 && !originalRequest._retry && !isExpected401) {
       originalRequest._retry = true;
 
       try {
@@ -78,21 +91,22 @@ api.interceptors.response.use(
           // No refresh token - check if we're on a public/auth page or if request is public
           if (typeof window !== 'undefined') {
             const currentPath = window.location.pathname;
-            const requestUrl = originalRequest.url || '';
-            
-            const isAuthPage = currentPath.includes('/login') || 
-                             currentPath.includes('/signup') || 
+
+            const isAuthPage = currentPath.includes('/login') ||
+                             currentPath.includes('/signup') ||
                              currentPath.includes('/forgot-password') ||
-                             currentPath.includes('/invite');
-            
-            const isPublicPage = currentPath === '/' || 
+                             currentPath.includes('/invite') ||
+                             currentPath.includes('/auth/callback') ||
+                             currentPath.includes('/onboarding');
+
+            const isPublicPage = currentPath === '/' ||
                                currentPath.startsWith('/feedback/boards/') ||
                                currentPath.startsWith('/roadmap');
-            
+
             const isPublicEndpoint = requestUrl.includes('/api/public/') ||
                                     requestUrl.includes('/api/organizations/subdomain/') ||
                                     requestUrl.includes('/api/invitations/');
-            
+
             // Only redirect if NOT on an auth/public page AND NOT a public endpoint
             if (!isAuthPage && !isPublicPage && !isPublicEndpoint) {
               TokenManager.clearTokens();
@@ -122,21 +136,22 @@ api.interceptors.response.use(
         // Refresh failed - check if we're on a public/auth page or if request is public
         if (typeof window !== 'undefined') {
           const currentPath = window.location.pathname;
-          const requestUrl = originalRequest.url || '';
-          
-          const isAuthPage = currentPath.includes('/login') || 
-                           currentPath.includes('/signup') || 
+
+          const isAuthPage = currentPath.includes('/login') ||
+                           currentPath.includes('/signup') ||
                            currentPath.includes('/forgot-password') ||
-                           currentPath.includes('/invite');
-          
-          const isPublicPage = currentPath === '/' || 
+                           currentPath.includes('/invite') ||
+                           currentPath.includes('/auth/callback') ||
+                           currentPath.includes('/onboarding');
+
+          const isPublicPage = currentPath === '/' ||
                              currentPath.startsWith('/feedback/boards/') ||
                              currentPath.startsWith('/roadmap');
-          
+
           const isPublicEndpoint = requestUrl.includes('/api/public/') ||
                                   requestUrl.includes('/api/organizations/subdomain/') ||
                                   requestUrl.includes('/api/invitations/');
-          
+
           // Only redirect if NOT on an auth/public page AND NOT a public endpoint
           if (!isAuthPage && !isPublicPage && !isPublicEndpoint) {
             TokenManager.clearTokens();

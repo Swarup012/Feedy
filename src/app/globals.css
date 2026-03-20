@@ -3,6 +3,25 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ---------------------------------------------------------------------------
+   CUSTOM FONTS - Switzer
+--------------------------------------------------------------------------- */
+@font-face {
+  font-family: 'Switzer';
+  src: url('/fonts/switzer/Switzer-Variable.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Switzer';
+  src: url('/fonts/switzer/Switzer-VariableItalic.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: italic;
+  font-display: swap;
+}
+
 /* ============================================================================
    DESIGN TOKEN SYSTEM — FADDY
    Dark-first, product-focused, shadcn-compatible
@@ -34,71 +53,84 @@
 --------------------------------------------------------------------------- */
 @layer base {
   :root {
-    /* LIGHT MODE (dashboard / admin only) */
-    --background: 0 0% 100%;
-    --foreground: 222 47% 11%;
+    /* 60% - Main Content & Background (Canny uses clean, breathable surfaces) */
+    --background: 171 27% 96%;        /* Lightest Mint (#f1f8f7) */
+    --foreground: 174 43% 12%;        /* Deepest Teal for text readability */
 
-    --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card: 0 0% 100%;                /* Pure White for posts/cards */
+    --card-foreground: 174 43% 12%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
+    --popover-foreground: 174 43% 12%;
 
-    --primary: 224 90% 65%;              /* maps to brand accent */
+    /* 10% - Action Color (Your new Blue: #2c68ec) */
+    --primary: 221 83% 55%;           /* The vibrant blue for upvotes/buttons */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 220 14% 96%;
-    --secondary-foreground: 222 47% 11%;
+    /* 30% - Sidebar & Supporting UI (#d9ece9 / #368981) */
+    --secondary: 171 27% 89%;         /* Your Mint (#d9ece9) for Sidebars */
+    --secondary-foreground: 174 43% 25%;
 
-    --muted: 220 14% 96%;
-    --muted-foreground: 220 9% 46%;
+    --muted: 171 20% 92%;             /* Soft wash for input backgrounds */
+    --muted-foreground: 174 20% 45%;
 
-    --accent: 220 14% 96%;
-    --accent-foreground: 222 47% 11%;
+    --accent: 221 83% 94%;            /* Very light blue tint for hover states */
+    --accent-foreground: 221 83% 45%;
+
+    /* Borders & Inputs */
+    --border: 174 20% 88%;            /* Subtle Teal-Gray border */
+    --input: 174 20% 88%;
+    --ring: 221 83% 55%;              /* Your Blue for focus states */
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 224 90% 65%;
-
-    --radius: 0.75rem;
+    --radius: 0.5rem;                 /* Canny uses a slightly more professional 8px radius */
   }
-
   /* -------------------------------------------------------------------------
      DARK MODE — PRIMARY PRODUCT EXPERIENCE
   ------------------------------------------------------------------------- */
-  .dark {
-    --background: 220 26% 7%;            /* ~ brand-bg */
-    --foreground: 220 20% 92%;
-
-    --card: 220 26% 9%;
-    --card-foreground: 220 20% 92%;
-
-    --popover: 220 26% 9%;
-    --popover-foreground: 220 20% 92%;
-
-    --primary: 224 90% 65%;
-    --primary-foreground: 0 0% 100%;
-
-    --secondary: 220 18% 14%;
-    --secondary-foreground: 220 20% 92%;
-
-    --muted: 220 18% 14%;
-    --muted-foreground: 220 10% 65%;
-
-    --accent: 220 18% 14%;
-    --accent-foreground: 220 20% 92%;
-
-    --destructive: 0 62% 50%;
-    --destructive-foreground: 0 0% 100%;
-
-    --border: 220 18% 18%;
-    --input: 220 18% 18%;
-    --ring: 224 90% 65%;
-  }
-
+.dark {
+    /* Base Colors - Rich, modern dark theme */
+    --background: 222 47% 11%;           /* #0f1419 - Deep slate background */
+    --foreground: 210 40% 98%;           /* #f8fafc - Soft white, easier on eyes */
+    
+    /* Card & Surface Colors */
+    --card: 217 33% 17%;                 /* #1a2332 - Elevated surface */
+    --card-foreground: 210 40% 98%;      /* #f8fafc - Consistent text */
+    
+    /* Popover */
+    --popover: 217 33% 17%;              /* #1a2332 - Matches card */
+    --popover-foreground: 210 40% 98%;   /* #f8fafc - Clear text */
+    
+    /* Primary - Modern blue accent */
+    --primary: 217 91% 60%;              /* #3b82f6 - Vibrant blue */
+    --primary-foreground: 0 0% 100%;     /* Pure white for contrast */
+    
+    /* Secondary - Subtle contrast */
+    --secondary: 215 25% 27%;            /* #2d3748 - Muted slate */
+    --secondary-foreground: 210 40% 98%; /* #f8fafc - Consistent text */
+    
+    /* Muted - Background variations */
+    --muted: 215 25% 27%;                /* #2d3748 - Subtle backgrounds */
+    --muted-foreground: 217 10% 64%;     /* #94a3b8 - De-emphasized text */
+    
+    /* Accent - Highlight color */
+    --accent: 217 33% 17%;               /* #1a2332 - Elevated accent */
+    --accent-foreground: 217 91% 60%;    /* #3b82f6 - Blue accent text */
+    
+    /* Destructive - Error states */
+    --destructive: 0 84% 60%;            /* #ef4444 - Modern red */
+    --destructive-foreground: 0 0% 100%; /* Pure white */
+    
+    /* Borders & Inputs */
+    --border: 215 20% 35%;               /* #3f4a5c - Subtle separation */
+    --input: 215 25% 27%;                /* #2d3748 - Input background */
+    --ring: 217 91% 60%;                 /* #3b82f6 - Focus ring */
+    
+    /* Additional utility colors */
+    --radius: 0.5rem;                    /* Consistent border radius */
+}
   /* -------------------------------------------------------------------------
      GLOBAL BASE STYLES
   ------------------------------------------------------------------------- */
@@ -125,6 +157,31 @@
 
   *:focus-visible {
     @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+
+  /* Custom thin slate scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: rgb(148 163 184 / 0.5); /* slate-400 with 50% opacity */
+    border-radius: 3px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgb(100 116 139 / 0.7); /* slate-500 with 70% opacity */
+  }
+
+  /* Firefox scrollbar */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(148 163 184 / 0.5) transparent;
   }
 }
 

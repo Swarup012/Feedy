@@ -11,6 +11,9 @@ import {
 } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { OnboardingData } from '../OnboardingFlow';
+import { useState, useEffect, useCallback } from 'react';
+import { Check, X, Loader2 } from 'lucide-react';
+import api from '@/lib/api';
 import { Building2 } from 'lucide-react';
 
 interface CompanyInfoStepProps {
@@ -41,80 +44,171 @@ const industries = [
 ];
 
 export function CompanyInfoStep({ data, onUpdate }: CompanyInfoStepProps) {
+  const [subdomainStatus, setSubdomainStatus] = useState<{
+    checking: boolean;
+    available: boolean | null;
+    suggestedSubdomain: string | null;
+  }>({
+    checking: false,
+    available: null,
+    suggestedSubdomain: null,
+  });
+
+  // Debounced subdomain check
+  const checkSubdomain = useCallback(async (companyName: string) => {
+    if (!companyName || companyName.trim().length === 0) {
+      setSubdomainStatus({ checking: false, available: null, suggestedSubdomain: null });
+      return;
+    }
+
+    const baseSubdomain = companyName
+      .toLowerCase()
+      .replace(/\s+/g, '-')
+      .replace(/[^a-z0-9-]/g, '');
+
+    if (!baseSubdomain) {
+      setSubdomainStatus({ checking: false, available: null, suggestedSubdomain: null });
+      return;
+    }
+
+    setSubdomainStatus({ checking: true, available: null, suggestedSubdomain: null });
+
+    try {
+      const response = await api.get(`/api/organizations/subdomain/${baseSubdomain}/availability`);
+      const { available } = response.data.data; // Fixed: response.data.data.available
+
+      if (available) {
+        setSubdomainStatus({ checking: false, available: true, suggestedSubdomain: null });
+      } else {
+        // Generate suggested subdomain with random suffix
+        const randomSuffix = Math.random().toString(36).substring(2, 8);
+        const suggestedSubdomain = `${baseSubdomain}-${randomSuffix}`;
+        setSubdomainStatus({ 
+          checking: false, 
+          available: false, 
+          suggestedSubdomain 
+        });
+      }
+    } catch (error) {
+      console.error('Error checking subdomain:', error);
+      setSubdomainStatus({ checking: false, available: null, suggestedSubdomain: null });
+    }
+  }, []);
+
+  // Debounce effect (500ms delay)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      checkSubdomain(data.companyName || '');
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [data.companyName, checkSubdomain]);
+
   return (
-    <div className="space-y-6">
-      <div className="text-center mb-8">
-        <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <Building2 className="h-8 w-8 text-blue-600" />
-        </div>
-        <h2 className="text-3xl font-bold text-gray-900 mb-2">
-          Let's set up your workspace! 🚀
+    <div className="space-y-8">
+      <div>
+        <h2 className="text-2xl font-semibold text-foreground">
+          Set up your workspace
         </h2>
-        <p className="text-gray-600">
-          Tell us about your company to get started
-        </p>
       </div>
 
-      <div className="space-y-5">
+      <div className="space-y-6">
         {/* Company Name */}
         <div>
-          <Label htmlFor="company-name" className="text-base font-medium">
-            Company Name <span className="text-red-500">*</span>
+          <Label htmlFor="company-name" className="text-sm font-medium mb-2 block">
+            Company Name <span className="text-destructive">*</span>
           </Label>
           <Input
             id="company-name"
             placeholder="Acme Inc."
             value={data.companyName || ''}
             onChange={(e) => onUpdate({ companyName: e.target.value })}
-            className="mt-2"
+            className="h-11"
           />
-          <p className="text-sm text-gray-500 mt-1">
-            We'll create your workspace:{' '}
-            <span className="font-mono text-blue-600">
-              {data.companyName
-                ? `${data.companyName.toLowerCase().replace(/\s+/g, '-')}.fady.com`
-                : 'your-company.fady.com'}
-            </span>
-          </p>
+          
+          {/* Subdomain Status */}
+          {data.companyName && (
+            <div className="mt-2">
+              {subdomainStatus.checking ? (
+                <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                  Checking availability...
+                </p>
+              ) : subdomainStatus.available === true ? (
+                <p className="text-xs text-green-600 flex items-center gap-1.5">
+                  <Check className="h-3 w-3" />
+                  Available: {' '}
+                  <span className="font-mono font-medium">
+                    {data.companyName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')}.faddy.site
+                  </span>
+                </p>
+              ) : subdomainStatus.available === false && subdomainStatus.suggestedSubdomain ? (
+                <p className="text-xs text-orange-600 flex items-center gap-1.5">
+                  <X className="h-3 w-3" />
+                  Taken. You'll get: {' '}
+                  <span className="font-mono font-medium">
+                    {subdomainStatus.suggestedSubdomain}.faddy.site
+                  </span>
+                </p>
+              ) : (
+                <p className="text-xs text-muted-foreground">
+                  Your workspace: {' '}
+                  <span className="font-mono text-primary font-medium">
+                    {data.companyName
+                      ? `${data.companyName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')}.faddy.site`
+                      : 'your-company.faddy.site'}
+                  </span>
+                </p>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Company Size */}
         <div>
-          <Label className="text-base font-medium mb-3 block">
+          <Label className="text-sm font-medium mb-3 block">
             Company Size
           </Label>
           <RadioGroup
             value={data.companySize}
             onValueChange={(value) => onUpdate({ companySize: value })}
-            className="grid grid-cols-2 gap-3"
+            className="grid grid-cols-2 gap-2"
           >
-            {companySizes.map((size) => (
-              <div
-                key={size.value}
-                className="flex items-center space-x-2 border rounded-lg p-3 hover:bg-gray-50"
-              >
-                <RadioGroupItem value={size.value} id={`size-${size.value}`} />
-                <Label
-                  htmlFor={`size-${size.value}`}
-                  className="cursor-pointer flex-1 text-sm"
+            {companySizes.map((size) => {
+              const isSelected = data.companySize === size.value;
+              return (
+                <div
+                  key={size.value}
+                  className={`relative flex items-center space-x-3 border rounded-lg p-3 cursor-pointer transition-all ${
+                    isSelected
+                      ? 'border-primary bg-primary/5'
+                      : 'border-border hover:border-primary/50 hover:bg-accent'
+                  }`}
+                  onClick={() => onUpdate({ companySize: size.value })}
                 >
-                  {size.label}
-                </Label>
-              </div>
-            ))}
+                  <RadioGroupItem value={size.value} id={`size-${size.value}`} className="shrink-0" />
+                  <Label
+                    htmlFor={`size-${size.value}`}
+                    className="cursor-pointer flex-1 text-sm font-medium"
+                  >
+                    {size.label}
+                  </Label>
+                </div>
+              );
+            })}
           </RadioGroup>
         </div>
 
         {/* Industry */}
         <div>
-          <Label htmlFor="industry" className="text-base font-medium">
+          <Label htmlFor="industry" className="text-sm font-medium mb-2 block">
             Industry
           </Label>
           <Select
             value={data.industry}
             onValueChange={(value) => onUpdate({ industry: value })}
           >
-            <SelectTrigger className="mt-2">
+            <SelectTrigger className="h-11">
               <SelectValue placeholder="Select your industry" />
             </SelectTrigger>
             <SelectContent>
@@ -129,9 +223,9 @@ export function CompanyInfoStep({ data, onUpdate }: CompanyInfoStepProps) {
 
         {/* Company Website (Optional) */}
         <div>
-          <Label htmlFor="website" className="text-base font-medium">
+          <Label htmlFor="website" className="text-sm font-medium mb-2 block">
             Company Website{' '}
-            <span className="text-gray-400 font-normal">(optional)</span>
+            <span className="text-muted-foreground font-normal text-xs">(optional)</span>
           </Label>
           <Input
             id="website"
@@ -139,7 +233,7 @@ export function CompanyInfoStep({ data, onUpdate }: CompanyInfoStepProps) {
             placeholder="https://acme.com"
             value={data.companyWebsite || ''}
             onChange={(e) => onUpdate({ companyWebsite: e.target.value })}
-            className="mt-2"
+            className="h-11"
           />
         </div>
       </div>

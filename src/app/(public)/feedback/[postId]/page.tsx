@@ -36,7 +36,7 @@ const getSubdomain = () => {
   const hostname = window.location.hostname;
   const parts = hostname.split(".");
   
-  // Handle production domains (e.g., acme.fady.com)
+  // Handle production domains (e.g., acme.faddy.site)
   if (parts.length >= 3 && !hostname.includes("localhost")) {
     const subdomain = parts[0];
     if (subdomain === "www" || subdomain === "api" || subdomain === "admin") {
@@ -555,7 +555,7 @@ export default function PostDetailPage() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center space-y-4">
-          <h2 className="text-2xl font-bold">Post Not Found</h2>
+          <h2 className="text-2xl font-switzer font-medium">Post Not Found</h2>
           <p className="text-muted-foreground">
             The post you're looking for doesn't exist or has been removed.
           </p>
@@ -601,7 +601,7 @@ export default function PostDetailPage() {
                       <ArrowBigUp
                         className={`h-6 w-6 ${isUpvoted ? "fill-current" : ""}`}
                       />
-                      <span className="text-sm font-bold">{post.upvotes}</span>
+                      <span className="text-sm font-switzer font-medium">{post.upvotes}</span>
                     </>
                   )}
                 </Button>
@@ -622,7 +622,7 @@ export default function PostDetailPage() {
                     )}
                   </div>
 
-                  <h1 className="text-3xl font-bold">{post.title}</h1>
+                  <h1 className="text-3xl font-switzer font-medium">{post.title}</h1>
                 </div>
 
                 {post.description && (

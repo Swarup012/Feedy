@@ -9,13 +9,37 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  experimental: {
-    turbo: {
-      rules: {
-        '*.svg': {
-          loaders: ['@svgr/webpack'],
-          as: '*.js',
-        },
+  webpack(config) {
+    // Handle SVG imports
+    config.module.rules.push({
+      test: /\.svg$/,
+      use: ['@svgr/webpack'],
+    });
+    
+    // Handle video files (mp4, webm, ogg)
+    config.module.rules.push({
+      test: /\.(mp4|webm|ogg)$/,
+      type: 'asset/resource',
+      generator: {
+        filename: 'static/videos/[name].[hash][ext]',
+      },
+    });
+    
+    return config;
+  },
+  turbopack: {
+    rules: {
+      '*.svg': {
+        loaders: ['@svgr/webpack'],
+        as: '*.js',
+      },
+      '*.mp4': {
+        loaders: ['file-loader'],
+        as: '*.js',
+      },
+      '*.webm': {
+        loaders: ['file-loader'],
+        as: '*.js',
       },
     },
   },
@@ -40,6 +64,16 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
     ],
+  },
+  // Proxy API requests to backend server
+  async rewrites() {
+    const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+    return [
+      {
+        source: '/api/:path*',
+        destination: `${backendUrl}/api/:path*`,
+      },
+    ];
   },
 };
 

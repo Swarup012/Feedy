@@ -127,7 +127,7 @@ export default function FeedbackClient() {
   return (
     <div className="flex h-screen bg-gray-50">
       {/* Sidebar */}
-      <div className="w-64 bg-white border-r border-gray-200 p-6 overflow-y-auto">
+      <div className="w-64 bg-white dark:bg-background border-r border-gray-200 dark:border-border p-6 overflow-y-auto">
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-lg font-bold text-gray-900">Portal</h1>
           <button className="p-2 hover:bg-gray-100 rounded-lg">
@@ -159,7 +159,7 @@ export default function FeedbackClient() {
               VOTES
             </button>
           </div>
-          <button className="w-full mt-3 px-4 py-2 bg-white text-gray-900 border border-gray-200 rounded-lg text-sm font-medium text-left flex items-center justify-between hover:bg-gray-50">
+          <button className="w-full mt-3 px-4 py-2 bg-white dark:bg-card text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-border rounded-lg text-sm font-medium text-left flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700">
             All time
             <ChevronDown className="w-4 h-4" />
           </button>
@@ -233,7 +233,7 @@ export default function FeedbackClient() {
             <button className="flex-1 px-3 py-2 bg-gray-100 text-gray-900 rounded text-xs font-medium">
               BY NAME
             </button>
-            <button className="flex-1 px-3 py-2 bg-white text-gray-600 border border-gray-200 rounded text-xs font-medium">
+            <button className="flex-1 px-3 py-2 bg-white dark:bg-card text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-border rounded text-xs font-medium">
               BY ACCOUNT OWNER
             </button>
           </div>
@@ -261,11 +261,11 @@ export default function FeedbackClient() {
                 <span>Default</span>
                 <ChevronDown className="w-3 h-3" />
               </button>
-              <button className="flex-1 px-3 py-2 bg-white border border-gray-200 text-gray-600 rounded text-xs font-medium flex items-center justify-center gap-2 hover:bg-gray-50">
+              <button className="flex-1 px-3 py-2 bg-white dark:bg-card border border-gray-200 dark:border-border text-gray-600 dark:text-gray-300 rounded text-xs font-medium flex items-center justify-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-700">
                 <TrendingUp className="w-4 h-4" />
                 <span>Trending</span>
               </button>
-              <button className="px-3 py-2 bg-white border border-gray-200 text-gray-600 rounded text-xs font-medium hover:bg-gray-50">
+              <button className="px-3 py-2 bg-white dark:bg-card border border-gray-200 dark:border-border text-gray-600 dark:text-gray-300 rounded text-xs font-medium hover:bg-gray-50 dark:hover:bg-gray-700">
                 <Download className="w-4 h-4" />
               </button>
             </div>

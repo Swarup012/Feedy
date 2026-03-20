@@ -1,7 +1,8 @@
 'use client';
 
 import { use, useEffect, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { invitationService, InvitationDetails } from '@/services/invitationService';
@@ -246,7 +247,7 @@ export default function InvitePage({ params }: { params: Promise<{ token: string
           {/* Organization Info */}
           <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6">
             <div className="flex items-start gap-4">
-              <div className="p-3 bg-white dark:bg-gray-800 rounded-lg">
+              <div className="p-3 bg-white dark:bg-card rounded-lg">
                 <Building2 className="h-8 w-8 text-blue-600" />
               </div>
               <div className="flex-1">
@@ -374,12 +375,22 @@ export default function InvitePage({ params }: { params: Promise<{ token: string
           </div>
 
           {/* Footer Info */}
-          <div className="text-center text-xs text-gray-500 dark:text-gray-400">
+          <div className="text-center text-xs text-gray-500 dark:text-gray-400 space-y-2">
             <p>This invitation will expire on {new Date(invitation.expires_at).toLocaleDateString('en-US', {
               month: 'long',
               day: 'numeric',
               year: 'numeric'
             })}</p>
+            <p className="pt-2 border-t">
+              By joining, you agree to our{' '}
+              <Link href="/policy/privacy" className="text-blue-600 hover:underline">
+                Privacy Policy
+              </Link>{' '}
+              and{' '}
+              <Link href="/policy/terms" className="text-blue-600 hover:underline">
+                Terms of Service
+              </Link>
+            </p>
           </div>
         </CardContent>
       </Card>

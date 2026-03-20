@@ -117,9 +117,9 @@ export default function AddToRoadmapModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="relative w-full max-w-md rounded-lg bg-white shadow-xl dark:bg-gray-800">
+      <div className="relative w-full max-w-md rounded-lg bg-white shadow-xl dark:bg-card">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-gray-200 p-6 dark:border-gray-700">
+        <div className="flex items-center justify-between border-b border-gray-200 p-6 dark:border-border">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
             Add to Roadmap
           </h2>
@@ -167,7 +167,7 @@ export default function AddToRoadmapModal({
                     className={`w-full rounded-lg border p-4 text-left transition-all ${
                       isLinked
                         ? 'border-indigo-500 bg-indigo-50 dark:border-indigo-400 dark:bg-indigo-900/20'
-                        : 'border-gray-200 bg-white hover:border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:hover:border-gray-600'
+                        : 'border-gray-200 bg-white hover:border-gray-300 dark:border-border dark:bg-card dark:hover:border-gray-600'
                     } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
                     <div className="flex items-start justify-between">
@@ -213,7 +213,7 @@ export default function AddToRoadmapModal({
         </div>
 
         {/* Footer */}
-        <div className="border-t border-gray-200 p-6 dark:border-gray-700">
+        <div className="border-t border-gray-200 p-6 dark:border-border">
           <button
             onClick={onClose}
             className="w-full rounded-lg bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700 transition-colors"

@@ -61,7 +61,7 @@ export default function ForgotPasswordPage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 via-blue-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-4">
         <div className="w-full max-w-md">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 space-y-6">
+          <div className="bg-white dark:bg-card rounded-2xl shadow-2xl p-8 space-y-6">
             <div className="text-center space-y-4">
               <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto">
                 <Mail className="w-8 h-8 text-green-600 dark:text-green-400" />
@@ -116,7 +116,7 @@ export default function ForgotPasswordPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 via-blue-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-4">
       <div className="w-full max-w-md">
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 space-y-6">
+        <div className="bg-white dark:bg-card rounded-2xl shadow-2xl p-8 space-y-6">
           {/* Logo */}
           <div className="flex justify-center mb-8">
             <Logo />
@@ -179,7 +179,7 @@ export default function ForgotPasswordPage() {
           </div>
 
           {/* Security Note */}
-          <div className="bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-lg p-4 text-xs text-gray-600 dark:text-gray-400">
+          <div className="bg-gray-50 dark:bg-background/50 border border-gray-200 dark:border-border rounded-lg p-4 text-xs text-gray-600 dark:text-gray-400">
             <p>
               🔒 For security reasons, we'll always show a success message regardless of whether the email exists in our system.
             </p>

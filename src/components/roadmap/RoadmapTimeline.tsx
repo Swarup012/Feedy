@@ -61,7 +61,7 @@ function TimelineCard({ item, onVote, onRemoveVote, user }: any) {
   };
 
   return (
-    <div className={`bg-white rounded-lg border-l-4 ${statusColors[item.status]} p-4 hover:shadow-md transition`}>
+    <div className={`bg-white dark:bg-background rounded-lg border-l-4 ${statusColors[item.status]} p-4 hover:shadow-md dark:hover:shadow-lg transition`}>
       <div className="flex items-start justify-between mb-2">
         <h4 className="font-semibold text-gray-900">{item.title}</h4>
         <span className="text-lg">{priorityIcons[item.priority]}</span>

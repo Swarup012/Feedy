@@ -9,6 +9,7 @@ export interface SubscriptionInfo {
   currentPeriodEnd: string | null;
   cancelAtPeriodEnd: boolean;
   hasActiveSubscription: boolean;
+  billingProvider?: 'stripe' | 'paddle'; // Added to detect which gateway is used
 }
 
 export interface Invoice {

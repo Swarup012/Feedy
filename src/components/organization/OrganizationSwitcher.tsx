@@ -35,6 +35,35 @@ export function OrganizationSwitcher() {
     }
   };
 
+  // Check organization limit based on user's plan
+  const getOrganizationLimit = () => {
+    // Check if user has any starter/pro plan
+    const hasStarterPlan = organizations.some(org => 
+      org.subscription_plan === 'starter' || org.subscription_plan === 'pro'
+    );
+    return hasStarterPlan ? 2 : 1;
+  };
+
+  // Count organizations owned by user
+  const ownedOrganizations = organizations.filter(org => org.role === 'owner');
+  const organizationLimit = getOrganizationLimit();
+  const canCreateOrganization = ownedOrganizations.length < organizationLimit;
+
+  const handleCreateOrganization = () => {
+    if (!canCreateOrganization) {
+      const hasStarterPlan = organizationLimit === 2;
+      toast({
+        title: 'Organization Limit Reached',
+        description: hasStarterPlan 
+          ? `You've reached the maximum of ${organizationLimit} organizations for the Starter plan.`
+          : `You've reached the limit of ${organizationLimit} organization on the Free plan. Upgrade to Starter for 2 organizations.`,
+        variant: 'destructive',
+      });
+      return;
+    }
+    window.location.href = '/create-organization';
+  };
+
   if (!organization || organizations.length === 0) {
     return null;
   }
@@ -76,11 +105,17 @@ export function OrganizationSwitcher() {
         
         <DropdownMenuSeparator />
         <DropdownMenuItem
-          onClick={() => window.location.href = '/create-organization'}
+          onClick={handleCreateOrganization}
           className="flex items-center gap-2 cursor-pointer text-primary"
+          disabled={!canCreateOrganization}
         >
           <Plus className="h-4 w-4" />
-          <span>Create New Organization</span>
+          <div className="flex flex-col">
+            <span>Create New Organization</span>
+            <span className="text-xs text-muted-foreground">
+              {ownedOrganizations.length}/{organizationLimit} organizations
+            </span>
+          </div>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

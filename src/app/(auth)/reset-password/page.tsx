@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff, Loader2, CheckCircle2, XCircle } from "lucide-react";
 import api from "@/lib/api";
 
-export default function ResetPasswordPage() {
+function ResetPasswordForm() {
   const { toast } = useToast();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -41,15 +41,25 @@ export default function ResetPasswordPage() {
         variant: "destructive",
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
   const verifyToken = async (resetToken: string) => {
+    console.log('🔍 Starting token verification');
+    console.log('📝 Token (first 20 chars):', resetToken.substring(0, 20) + '...');
+    console.log('📝 Token length:', resetToken.length);
+    
     try {
+      console.log('📡 Making API call to verify token...');
       const response = await api.get(`/api/auth/verify-reset-token?token=${resetToken}`);
       
+      console.log('✅ API Response received:', response.data);
+      
       if (response.data.success) {
+        console.log('✅ Token is VALID - showing password reset form');
         setTokenValid(true);
       } else {
+        console.log('❌ Token is INVALID:', response.data.message);
         setTokenValid(false);
         toast({
           title: "Invalid Token",
@@ -58,7 +68,11 @@ export default function ResetPasswordPage() {
         });
       }
     } catch (error: any) {
-      console.error("Token verification error:", error);
+      console.error('❌ Token verification FAILED:', error);
+      console.error('Response status:', error.response?.status);
+      console.error('Response data:', error.response?.data);
+      console.error('Error message:', error.message);
+      
       setTokenValid(false);
       toast({
         title: "Invalid Token",
@@ -66,6 +80,7 @@ export default function ResetPasswordPage() {
         variant: "destructive",
       });
     } finally {
+      console.log('✅ Token verification complete. tokenValid will be set.');
       setVerifyingToken(false);
     }
   };
@@ -141,7 +156,7 @@ export default function ResetPasswordPage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 via-blue-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-4">
         <div className="w-full max-w-md">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 space-y-6 text-center">
+          <div className="bg-white dark:bg-card rounded-2xl shadow-2xl p-8 space-y-6 text-center">
             <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto">
               <CheckCircle2 className="w-8 h-8 text-green-600 dark:text-green-400" />
             </div>
@@ -171,7 +186,7 @@ export default function ResetPasswordPage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 via-blue-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-4">
         <div className="w-full max-w-md">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 space-y-6 text-center">
+          <div className="bg-white dark:bg-card rounded-2xl shadow-2xl p-8 space-y-6 text-center">
             <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto">
               <XCircle className="w-8 h-8 text-red-600 dark:text-red-400" />
             </div>
@@ -210,7 +225,7 @@ export default function ResetPasswordPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 via-blue-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-4">
       <div className="w-full max-w-md">
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 space-y-6">
+        <div className="bg-white dark:bg-card rounded-2xl shadow-2xl p-8 space-y-6">
           {/* Logo */}
           <div className="flex justify-center mb-8">
             <Logo />
@@ -323,8 +338,34 @@ export default function ResetPasswordPage() {
               Back to Login
             </Link>
           </div>
+
+          {/* Policy Links */}
+          <div className="text-center text-xs text-gray-500 dark:text-gray-400 pt-4 border-t">
+            <p>
+              By resetting your password, you agree to our{' '}
+              <Link href="/policy/privacy" className="text-[var(--accent)] hover:underline">
+                Privacy Policy
+              </Link>{' '}
+              and{' '}
+              <Link href="/policy/terms" className="text-[var(--accent)] hover:underline">
+                Terms of Service
+              </Link>
+            </p>
+          </div>
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-purple-600" />
+      </div>
+    }>
+      <ResetPasswordForm />
+    </Suspense>
   );
 }

@@ -139,7 +139,7 @@ export default function CreateOrganizationPage() {
                   maxLength={63}
                 />
                 <span className="text-sm text-muted-foreground whitespace-nowrap">
-                  .fady.com
+                  .faddy.site
                 </span>
               </div>
               <p className="text-xs text-muted-foreground mt-1">

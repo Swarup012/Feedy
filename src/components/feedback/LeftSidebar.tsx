@@ -229,9 +229,9 @@ export function LeftSidebar({
   };
 
   return (
-    <div className="w-70 border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 overflow-y-auto" style={{ width: '280px' }}>
+    <div className="w-70 border-r border-gray-200 dark:border-border bg-white dark:bg-background overflow-y-auto" style={{ width: '280px' }}>
       {/* Header */}
-      <div className="p-4 border-b border-gray-200 dark:border-gray-700 sticky top-0 bg-white dark:bg-gray-900 z-10">
+      <div className="p-4 border-b border-gray-200 dark:border-border sticky top-0 bg-white dark:bg-background z-10">
         <h2 className="font-semibold text-lg mb-2 text-gray-900 dark:text-white">Boards</h2>
 
         {/* ✅ SHOW FOR OWNERS AND ADMINS */}
@@ -239,7 +239,8 @@ export function LeftSidebar({
           <Button
             onClick={handleCreateBoardClick}
             size="sm"
-            className="w-full"
+            variant="outline"
+            className="w-full bg-background text-primary hover:bg-accent border-border"
           >
             <Plus className="mr-2 h-4 w-4" />
             New Board
@@ -251,7 +252,7 @@ export function LeftSidebar({
       <div className="p-2">
         {/* Select All Option */}
         {onBoardSelectionChange && boards.length > 0 && (
-          <div className="flex items-center gap-2 px-3 py-2 mb-2 border-b border-gray-200 dark:border-gray-700">
+          <div className="flex items-center gap-2 px-3 py-2 mb-2 border-b border-gray-200 dark:border-border">
             <Checkbox
               id="select-all"
               checked={isAllSelected}
@@ -328,7 +329,7 @@ export function LeftSidebar({
                     <MoreVertical className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                <DropdownMenuContent align="end" className="bg-white dark:bg-card border-gray-200 dark:border-border">
                   <DropdownMenuItem onClick={() => openEditDialog(board)} className="dark:text-white dark:hover:bg-gray-700">
                     <Edit2 className="mr-2 h-4 w-4" />
                     Edit Board
@@ -364,7 +365,7 @@ export function LeftSidebar({
       </div>
 
       {/* Filters Section - Available to all users */}
-      <div className="p-4 border-t border-gray-200 dark:border-gray-700 mt-4">
+      <div className="p-4 border-t border-gray-200 dark:border-border mt-4">
         <button
           onClick={() => setShowFilters(!showFilters)}
           className="flex items-center justify-between w-full mb-3 text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300"
@@ -392,10 +393,10 @@ export function LeftSidebar({
                   })
                 }
               >
-                <SelectTrigger className="h-9 text-sm dark:bg-gray-800 dark:border-gray-700 dark:text-white">
+                <SelectTrigger className="h-9 text-sm dark:bg-card dark:border-border dark:text-white">
                   <SelectValue placeholder="All statuses" />
                 </SelectTrigger>
-                <SelectContent className="dark:bg-gray-800 dark:border-gray-700">
+                <SelectContent className="dark:bg-card dark:border-border">
                   <SelectItem value="all" className="dark:text-white dark:hover:bg-gray-700">All statuses</SelectItem>
                   <SelectItem value="open" className="dark:text-white dark:hover:bg-gray-700">Open</SelectItem>
                   <SelectItem value="under-review" className="dark:text-white dark:hover:bg-gray-700">Under Review</SelectItem>
@@ -417,7 +418,7 @@ export function LeftSidebar({
                   onChange={(e) =>
                     onFilterChange({ ...filters, startDate: e.target.value })
                   }
-                  className="h-9 text-sm dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+                  className="h-9 text-sm dark:bg-card dark:border-border dark:text-white"
                   placeholder="Start date"
                 />
                 <Input
@@ -426,7 +427,7 @@ export function LeftSidebar({
                   onChange={(e) =>
                     onFilterChange({ ...filters, endDate: e.target.value })
                   }
-                  className="h-9 text-sm dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+                  className="h-9 text-sm dark:bg-card dark:border-border dark:text-white"
                   placeholder="End date"
                 />
               </div>
@@ -441,10 +442,10 @@ export function LeftSidebar({
                   onFilterChange({ ...filters, sortBy: value })
                 }
               >
-                <SelectTrigger className="h-9 text-sm dark:bg-gray-800 dark:border-gray-700 dark:text-white">
+                <SelectTrigger className="h-9 text-sm dark:bg-card dark:border-border dark:text-white">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="dark:bg-gray-800 dark:border-gray-700">
+                <SelectContent className="dark:bg-card dark:border-border">
                   <SelectItem value="created_at" className="dark:text-white dark:hover:bg-gray-700">Newest First</SelectItem>
                   <SelectItem value="upvotes" className="dark:text-white dark:hover:bg-gray-700">Most Upvoted</SelectItem>
                   <SelectItem value="comments" className="dark:text-white dark:hover:bg-gray-700">Most Commented</SelectItem>
@@ -487,7 +488,7 @@ export function LeftSidebar({
 
       {/* Edit Board Dialog */}
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent className="dark:bg-gray-900 dark:border-gray-700">
+        <DialogContent className="dark:bg-background dark:border-border">
           <DialogHeader>
             <DialogTitle className="dark:text-white">Edit Board</DialogTitle>
             <DialogDescription className="dark:text-gray-400">
@@ -502,7 +503,7 @@ export function LeftSidebar({
                 value={editFormData.name}
                 onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })}
                 placeholder="Board name"
-                className="mt-1 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+                className="mt-1 dark:bg-card dark:border-border dark:text-white"
               />
             </div>
             <div>
@@ -513,32 +514,22 @@ export function LeftSidebar({
                 onChange={(e) => setEditFormData({ ...editFormData, description: e.target.value })}
                 placeholder="Board description"
                 rows={3}
-                className="mt-1 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+                className="mt-1 dark:bg-card dark:border-border dark:text-white"
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="edit-color" className="dark:text-gray-300">Color</Label>
-                <Input
-                  id="edit-color"
-                  type="color"
-                  value={editFormData.color}
-                  onChange={(e) => setEditFormData({ ...editFormData, color: e.target.value })}
-                  className="mt-1 h-10 dark:bg-gray-800 dark:border-gray-700"
-                />
-              </div>
-              <div>
-                <Label htmlFor="edit-icon" className="dark:text-gray-300">Icon</Label>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setShowIconPicker(true)}
-                  className="w-full mt-1 justify-start dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:bg-gray-700"
-                >
-                  <IconDisplay iconName={editFormData.icon} className="h-4 w-4 mr-2" />
-                  {editFormData.icon || "Choose Icon"}
-                </Button>
-              </div>
+            <div>
+              <Label htmlFor="edit-icon" className="dark:text-gray-300">Icon</Label>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowIconPicker(true)}
+                className="w-full mt-1 justify-start dark:bg-card dark:border-border dark:text-white dark:hover:bg-gray-700"
+              >
+                <div className="h-6 w-6 rounded-lg bg-primary/10 flex items-center justify-center mr-2">
+                  <IconDisplay iconName={editFormData.icon} className="h-4 w-4 text-primary" />
+                </div>
+                {editFormData.icon || "Choose Icon"}
+              </Button>
             </div>
             <div className="flex items-center space-x-2">
               <Switch
@@ -550,7 +541,7 @@ export function LeftSidebar({
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowEditDialog(false)} className="dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:bg-gray-700">
+            <Button variant="outline" onClick={() => setShowEditDialog(false)} className="dark:bg-card dark:border-border dark:text-white dark:hover:bg-gray-700">
               Cancel
             </Button>
             <Button onClick={handleEdit}>
@@ -562,7 +553,7 @@ export function LeftSidebar({
 
       {/* Delete Board Dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent className="dark:bg-gray-900 dark:border-gray-700">
+        <AlertDialogContent className="dark:bg-background dark:border-border">
           <AlertDialogHeader>
             <AlertDialogTitle className="dark:text-white">Delete Board?</AlertDialogTitle>
             <AlertDialogDescription className="dark:text-gray-400">
@@ -570,7 +561,7 @@ export function LeftSidebar({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:bg-gray-700">Cancel</AlertDialogCancel>
+            <AlertDialogCancel className="dark:bg-card dark:border-border dark:text-white dark:hover:bg-gray-700">Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800">
               Delete
             </AlertDialogAction>

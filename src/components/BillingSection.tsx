@@ -25,7 +25,8 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Switch } from '@/components/ui/switch';
-import stripeService, { SubscriptionInfo, Invoice } from '@/services/stripeService';
+import paddleService, { SubscriptionInfo, Invoice } from '@/services/paddleService';
+import api from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
 
 export function BillingSection() {
@@ -34,7 +35,10 @@ export function BillingSection() {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
+  const [showUpgradeToProDialog, setShowUpgradeToProDialog] = useState(false);
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
+  const [selectedPlan, setSelectedPlan] = useState<'starter' | 'pro'>('starter');
+  const [upgradeProBillingCycle, setUpgradeProBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
   const { toast } = useToast();
 
   useEffect(() => {
@@ -45,22 +49,48 @@ export function BillingSection() {
     try {
       setLoading(true);
       const [subResponse, invoicesResponse] = await Promise.all([
-        stripeService.getSubscription(),
-        stripeService.getInvoices(),
+        paddleService.getSubscription(),
+        paddleService.getInvoices(),
       ]);
 
       if (subResponse.success) {
         setSubscription(subResponse.data);
+      } else {
+        // If API call fails, set default free plan state
+        console.warn('Subscription API returned unsuccessful response, defaulting to free plan');
+        setSubscription({
+          status: 'free',
+          plan: 'free',
+          trialEndsAt: null,
+          currentPeriodStart: null,
+          currentPeriodEnd: null,
+          cancelAtPeriodEnd: false,
+          hasActiveSubscription: false,
+          billingProvider: 'paddle',
+        });
       }
       if (invoicesResponse.success && invoicesResponse.data.invoices) {
         setInvoices(invoicesResponse.data.invoices);
       }
     } catch (error) {
       console.error('Error loading subscription data:', error);
+      
+      // Set default free plan state on error to prevent infinite loading
+      setSubscription({
+        status: 'free',
+        plan: 'free',
+        trialEndsAt: null,
+        currentPeriodStart: null,
+        currentPeriodEnd: null,
+        cancelAtPeriodEnd: false,
+        hasActiveSubscription: false,
+        billingProvider: 'paddle',
+      });
+      
       toast({
-        title: 'Error',
-        description: 'Failed to load subscription data',
-        variant: 'destructive',
+        title: 'Warning',
+        description: 'Could not load subscription data. Showing free plan status.',
+        variant: 'default',
       });
     } finally {
       setLoading(false);
@@ -70,15 +100,68 @@ export function BillingSection() {
   const handleUpgrade = async (skipTrial: boolean = false) => {
     try {
       setActionLoading(true);
-      const response = await stripeService.createCheckoutSession({
-        plan: 'starter',
+      const response = await paddleService.createCheckoutSession({
+        plan: selectedPlan,
         billingCycle,
         skipTrial,
       });
       
       if (response.success && response.data.url) {
-        // Redirect to Stripe Checkout
-        window.location.href = response.data.url;
+        // Check if we have a transactionId (Paddle Billing with overlay)
+        if (response.data.transactionId) {
+          console.log('🔵 Opening Paddle overlay checkout...', response.data.transactionId);
+          
+          try {
+            // Load Paddle.js dynamically if not already loaded
+            if (!(window as any).Paddle) {
+              console.log('📦 Loading Paddle.js SDK...');
+              const script = document.createElement('script');
+              script.src = 'https://cdn.paddle.com/paddle/v2/paddle.js';
+              script.async = true;
+              document.body.appendChild(script);
+              
+              await new Promise((resolve, reject) => {
+                script.onload = () => {
+                  console.log('✅ Paddle.js loaded successfully');
+                  resolve(true);
+                };
+                script.onerror = () => reject(new Error('Failed to load Paddle SDK'));
+                setTimeout(() => reject(new Error('Paddle SDK load timeout')), 10000);
+              });
+            }
+            
+            // Initialize Paddle with your client-side token
+            const Paddle = (window as any).Paddle;
+            if (!Paddle) throw new Error('Paddle SDK not available');
+            
+            console.log('⚙️ Initializing Paddle with client token...');
+            Paddle.Environment.set('sandbox');
+            Paddle.Setup({ 
+              token: 'test_67753ae11c6f27e94e5909861a5' // Your real client-side token
+            });
+            
+            console.log('🚀 Opening Paddle overlay...');
+            Paddle.Checkout.open({
+              transactionId: response.data.transactionId,
+              settings: {
+                displayMode: 'overlay',
+                theme: 'light',
+                successUrl: window.location.origin + '/admin/profile?checkout=success'
+              }
+            });
+            
+            console.log('✅ Overlay opened successfully!');
+            setShowUpgradeDialog(false);
+            setActionLoading(false);
+          } catch (overlayError) {
+            console.error('⚠️ Overlay failed, falling back to redirect:', overlayError);
+            window.location.href = response.data.url;
+          }
+        } else {
+          // Fallback: Redirect to checkout URL
+          console.log('🔄 Redirecting to checkout page...');
+          window.location.href = response.data.url;
+        }
       } else {
         throw new Error('Failed to create checkout session');
       }
@@ -94,23 +177,113 @@ export function BillingSection() {
   };
 
   const handleManageSubscription = async () => {
+    // For Paddle, we don't have a customer portal like Stripe
+    // Instead, users can cancel directly or contact support
+    toast({
+      title: 'Paddle Subscription',
+      description: 'You can cancel your subscription below or contact support for changes.',
+    });
+  };
+
+  const handleUpgradeToPro = async (selectedBillingCycle: 'monthly' | 'yearly') => {
     try {
       setActionLoading(true);
-      const response = await stripeService.createPortalSession();
       
-      if (response.success && response.data.url) {
-        // Redirect to Stripe Customer Portal
-        window.location.href = response.data.url;
+      // Call the update-plan endpoint using the api client (has auth built-in)
+      const response = await api.post('/api/paddle/subscription/update-plan', {
+        newPlan: 'pro',
+        billingCycle: selectedBillingCycle
+      });
+
+      if (response.data.success) {
+        toast({
+          title: 'Upgraded to Pro!',
+          description: response.data.data?.message || 'You now have access to 15 team members and priority support.',
+        });
+        setShowUpgradeToProDialog(false);
+        // Reload subscription data
+        await loadSubscriptionData();
       } else {
-        throw new Error('Failed to create portal session');
+        throw new Error(response.data.message || 'Failed to upgrade subscription');
       }
-    } catch (error) {
-      console.error('Error creating portal session:', error);
+    } catch (error: any) {
+      console.error('Error upgrading subscription:', error);
       toast({
         title: 'Error',
-        description: 'Failed to open billing portal',
+        description: error.response?.data?.message || 'Failed to upgrade subscription. Please try again.',
         variant: 'destructive',
       });
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleDowngradeToStarter = async () => {
+    // Confirm downgrade
+    if (!window.confirm('Downgrade to Starter plan? You will lose access to 15 team members (reduced to 5) and priority support. The difference will be credited to your account.')) {
+      return;
+    }
+
+    try {
+      setActionLoading(true);
+      
+      // Call the update-plan endpoint
+      const response = await api.post('/api/paddle/subscription/update-plan', {
+        newPlan: 'starter',
+        billingCycle: subscription?.billingCycle || 'monthly'
+      });
+
+      if (response.data.success) {
+        toast({
+          title: 'Downgraded to Starter',
+          description: response.data.data?.message || 'Your plan has been changed to Starter.',
+        });
+        // Reload subscription data
+        await loadSubscriptionData();
+      } else {
+        throw new Error(response.data.message || 'Failed to downgrade subscription');
+      }
+    } catch (error: any) {
+      console.error('Error downgrading subscription:', error);
+      toast({
+        title: 'Error',
+        description: error.response?.data?.message || 'Failed to downgrade subscription. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleCancelSubscription = async () => {
+    // Confirm before cancelling
+    if (!window.confirm('Are you sure you want to cancel your subscription? You will lose access at the end of your billing period.')) {
+      return;
+    }
+
+    try {
+      setActionLoading(true);
+      
+      const response = await paddleService.cancelSubscription();
+
+      if (response.success) {
+        toast({
+          title: 'Subscription Cancelled',
+          description: 'Your subscription will be cancelled at the end of the billing period.',
+        });
+        // Reload subscription data
+        await loadSubscriptionData();
+      } else {
+        throw new Error(response.message || 'Failed to cancel subscription');
+      }
+    } catch (error) {
+      console.error('Error cancelling subscription:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to cancel subscription. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
       setActionLoading(false);
     }
   };
@@ -197,10 +370,19 @@ export function BillingSection() {
                     : 'Upgrade to access premium features'}
                 </p>
               </div>
-              {subscription?.status === 'active' && subscription?.plan === 'pro' && (
+              {subscription?.status === 'active' && (subscription?.plan === 'pro' || subscription?.plan === 'starter') && (
                 <div className="text-right">
-                  <p className="text-2xl font-bold">$29</p>
+                  <p className="text-2xl font-bold">
+                    {subscription.plan === 'pro' 
+                      ? (subscription.billingCycle === 'yearly' ? '$45' : '$49')
+                      : (subscription.billingCycle === 'yearly' ? '$15' : '$19')}
+                  </p>
                   <p className="text-sm text-gray-500">per month</p>
+                  {subscription.billingCycle === 'yearly' && (
+                    <p className="text-xs text-gray-400">
+                      Billed yearly (${subscription.plan === 'pro' ? '540' : '180'}/year)
+                    </p>
+                  )}
                 </div>
               )}
             </div>
@@ -240,12 +422,12 @@ export function BillingSection() {
 
           {/* Action Buttons */}
           <div className="flex gap-3">
-            {!subscription || subscription.status === 'free' ? (
+            {!subscription || (subscription.status === 'free' && !subscription.hasActiveSubscription && subscription.plan === 'free') ? (
               <Dialog open={showUpgradeDialog} onOpenChange={setShowUpgradeDialog}>
                 <DialogTrigger asChild>
                   <Button className="flex-1">
                     <Zap className="h-4 w-4 mr-2" />
-                    Upgrade to Starter
+                    Choose Your Plan
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-[500px]">
@@ -257,6 +439,27 @@ export function BillingSection() {
                   </DialogHeader>
                   
                   <div className="space-y-6 py-4">
+                    {/* Plan Selector */}
+                    <div className="flex items-center justify-center gap-2">
+                      <Button
+                        variant={selectedPlan === 'starter' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setSelectedPlan('starter')}
+                        className={selectedPlan === 'starter' ? 'bg-blue-500 hover:bg-blue-600' : ''}
+                      >
+                        Starter $19/mo
+                      </Button>
+                      <Button
+                        variant={selectedPlan === 'pro' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setSelectedPlan('pro')}
+                        className={selectedPlan === 'pro' ? 'bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700' : ''}
+                      >
+                        Pro $49/mo
+                        <Badge className="ml-2 bg-yellow-500 text-xs">15 Members</Badge>
+                      </Button>
+                    </div>
+
                     {/* Billing Cycle Toggle */}
                     <div className="flex items-center justify-center gap-4">
                       <span className={`text-sm font-medium ${billingCycle === 'monthly' ? 'text-gray-900 dark:text-white' : 'text-gray-500'}`}>
@@ -271,72 +474,105 @@ export function BillingSection() {
                       </span>
                       {billingCycle === 'yearly' && (
                         <Badge variant="default" className="bg-green-500">
-                          Save $48/year
+                          Save ${selectedPlan === 'pro' ? '48' : '48'}/year
                         </Badge>
                       )}
                     </div>
 
                     {/* Plan Details */}
-                    <Card>
+                    <Card className={selectedPlan === 'pro' ? 'border-purple-500 border-2' : 'border-blue-500 border-2'}>
                       <CardHeader>
-                        <CardTitle className="text-xl">Starter Plan</CardTitle>
+                        <CardTitle className="text-xl">{selectedPlan === 'pro' ? 'Pro Plan' : 'Starter Plan'}</CardTitle>
                         <CardDescription>
-                          Perfect for growing teams collecting feedback
+                          {selectedPlan === 'pro' 
+                            ? 'For teams that need more collaboration' 
+                            : 'Perfect for growing teams collecting feedback'}
                         </CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div>
                           {billingCycle === 'monthly' ? (
                             <div className="flex items-baseline gap-1">
-                              <span className="text-3xl font-bold">$19</span>
+                              <span className={`text-3xl font-bold ${selectedPlan === 'pro' ? 'text-purple-600 dark:text-purple-400' : ''}`}>
+                                ${selectedPlan === 'pro' ? '49' : '19'}
+                              </span>
                               <span className="text-gray-600 dark:text-gray-400">/month</span>
                             </div>
                           ) : (
                             <div>
                               <div className="flex items-baseline gap-1">
-                                <span className="text-3xl font-bold">$15</span>
+                                <span className={`text-3xl font-bold ${selectedPlan === 'pro' ? 'text-purple-600 dark:text-purple-400' : ''}`}>
+                                  ${selectedPlan === 'pro' ? '45' : '15'}
+                                </span>
                                 <span className="text-gray-600 dark:text-gray-400">/month</span>
                               </div>
                               <div className="text-sm text-gray-500 mt-1">
-                                Billed yearly ($180/year)
+                                Billed yearly (${selectedPlan === 'pro' ? '540' : '180'}/year)
                               </div>
                             </div>
                           )}
                         </div>
 
                         <div className="space-y-2 text-sm">
-                          <div className="flex items-center gap-2">
-                            <CheckCircle className="h-4 w-4 text-green-500" />
-                            <span>125+ tracked users included</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Shield className="h-4 w-4 text-blue-500" />
-                            <span>+25 grace buffer (150 total)</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <CheckCircle className="h-4 w-4 text-green-500" />
-                            <span>$6 per 50 additional users</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <CheckCircle className="h-4 w-4 text-green-500" />
-                            <span>1 roadmap</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <CheckCircle className="h-4 w-4 text-green-500" />
-                            <span>5 team members</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <CheckCircle className="h-4 w-4 text-green-500" />
-                            <span>Unlimited boards & posts</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <CheckCircle className="h-4 w-4 text-green-500" />
-                            <span>Advanced analytics</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <CheckCircle className="h-4 w-4 text-green-500" />
-                            <span>Custom branding</span>
-                          </div>
+                          {selectedPlan === 'pro' ? (
+                            <>
+                              <div className="flex items-center gap-2">
+                                <CheckCircle className="h-4 w-4 text-purple-500" />
+                                <span className="font-semibold text-purple-600 dark:text-purple-400">15 team members</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <CheckCircle className="h-4 w-4 text-purple-500" />
+                                <span className="font-semibold text-purple-600 dark:text-purple-400">Priority support</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <CheckCircle className="h-4 w-4 text-green-500" />
+                                <span>125+ tracked users included</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Shield className="h-4 w-4 text-blue-500" />
+                                <span>+25 grace buffer (150 total)</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <CheckCircle className="h-4 w-4 text-green-500" />
+                                <span>Unlimited boards & posts</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <CheckCircle className="h-4 w-4 text-green-500" />
+                                <span>Advanced analytics</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <CheckCircle className="h-4 w-4 text-green-500" />
+                                <span>Custom branding</span>
+                              </div>
+                            </>
+                          ) : (
+                            <>
+                              <div className="flex items-center gap-2">
+                                <CheckCircle className="h-4 w-4 text-green-500" />
+                                <span>5 team members</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <CheckCircle className="h-4 w-4 text-green-500" />
+                                <span>125+ tracked users included</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Shield className="h-4 w-4 text-blue-500" />
+                                <span>+25 grace buffer (150 total)</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <CheckCircle className="h-4 w-4 text-green-500" />
+                                <span>Unlimited boards & posts</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <CheckCircle className="h-4 w-4 text-green-500" />
+                                <span>Advanced analytics</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <CheckCircle className="h-4 w-4 text-green-500" />
+                                <span>Custom branding</span>
+                              </div>
+                            </>
+                          )}
                         </div>
                       </CardContent>
                     </Card>
@@ -344,7 +580,10 @@ export function BillingSection() {
                     {/* Action Buttons */}
                     <div className="space-y-2">
                       <Button 
-                        className="w-full bg-blue-600 hover:bg-blue-700"
+                        className={`w-full ${selectedPlan === 'pro' 
+                          ? 'bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700' 
+                          : 'bg-blue-600 hover:bg-blue-700'
+                        }`}
                         onClick={() => handleUpgrade(false)}
                         disabled={actionLoading}
                       >
@@ -354,7 +593,7 @@ export function BillingSection() {
                             Processing...
                           </>
                         ) : (
-                          'Start 14-Day Free Trial'
+                          `Start ${selectedPlan === 'pro' ? 'Pro' : 'Starter'} Trial`
                         )}
                       </Button>
                       <Button 
@@ -370,24 +609,206 @@ export function BillingSection() {
                 </DialogContent>
               </Dialog>
             ) : (
-              <Button 
-                onClick={handleManageSubscription} 
-                disabled={actionLoading}
-                variant="outline"
-                className="flex-1"
-              >
-                {actionLoading ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Loading...
-                  </>
-                ) : (
-                  <>
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    Manage Subscription
-                  </>
+              <>
+                {/* Upgrade to Pro button for Starter users */}
+                {subscription?.plan === 'starter' && !subscription?.cancelAtPeriodEnd && (
+                  <Dialog open={showUpgradeToProDialog} onOpenChange={setShowUpgradeToProDialog}>
+                    <DialogTrigger asChild>
+                      <Button 
+                        className="flex-1 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                      >
+                        <Zap className="h-4 w-4 mr-2" />
+                        Upgrade to Pro
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[500px]">
+                      <DialogHeader>
+                        <DialogTitle>Upgrade to Pro Plan</DialogTitle>
+                        <DialogDescription>
+                          Choose your billing cycle for the Pro plan
+                        </DialogDescription>
+                      </DialogHeader>
+                      
+                      <div className="space-y-6 py-4">
+                        {/* Billing Cycle Toggle */}
+                        <div className="flex items-center justify-center gap-4">
+                          <span className={`text-sm font-medium ${upgradeProBillingCycle === 'monthly' ? 'text-gray-900 dark:text-white' : 'text-gray-500'}`}>
+                            Monthly
+                          </span>
+                          <Switch
+                            checked={upgradeProBillingCycle === 'yearly'}
+                            onCheckedChange={(checked) => setUpgradeProBillingCycle(checked ? 'yearly' : 'monthly')}
+                          />
+                          <span className={`text-sm font-medium ${upgradeProBillingCycle === 'yearly' ? 'text-gray-900 dark:text-white' : 'text-gray-500'}`}>
+                            Yearly
+                          </span>
+                          {upgradeProBillingCycle === 'yearly' && (
+                            <Badge variant="default" className="bg-green-500">
+                              Save $48/year
+                            </Badge>
+                          )}
+                        </div>
+
+                        {/* Plan Details */}
+                        <Card className="border-purple-500 border-2">
+                          <CardHeader>
+                            <CardTitle className="text-xl">Pro Plan</CardTitle>
+                            <CardDescription>
+                              For teams that need more collaboration
+                            </CardDescription>
+                          </CardHeader>
+                          <CardContent className="space-y-4">
+                            <div>
+                              {upgradeProBillingCycle === 'monthly' ? (
+                                <div className="flex items-baseline gap-1">
+                                  <span className="text-3xl font-bold text-purple-600 dark:text-purple-400">
+                                    $49
+                                  </span>
+                                  <span className="text-gray-600 dark:text-gray-400">/month</span>
+                                </div>
+                              ) : (
+                                <div>
+                                  <div className="flex items-baseline gap-1">
+                                    <span className="text-3xl font-bold text-purple-600 dark:text-purple-400">
+                                      $45
+                                    </span>
+                                    <span className="text-gray-600 dark:text-gray-400">/month</span>
+                                  </div>
+                                  <div className="text-sm text-gray-500 mt-1">
+                                    Billed yearly ($540/year)
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+
+                            <div className="space-y-2 text-sm">
+                              <div className="flex items-center gap-2">
+                                <CheckCircle className="h-4 w-4 text-purple-500" />
+                                <span className="font-semibold text-purple-600 dark:text-purple-400">15 team members</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <CheckCircle className="h-4 w-4 text-purple-500" />
+                                <span className="font-semibold text-purple-600 dark:text-purple-400">Priority support</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <CheckCircle className="h-4 w-4 text-green-500" />
+                                <span>125+ tracked users included</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Shield className="h-4 w-4 text-blue-500" />
+                                <span>+25 grace buffer (150 total)</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <CheckCircle className="h-4 w-4 text-green-500" />
+                                <span>Unlimited boards & posts</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <CheckCircle className="h-4 w-4 text-green-500" />
+                                <span>Advanced analytics</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <CheckCircle className="h-4 w-4 text-green-500" />
+                                <span>Custom branding</span>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+
+                        {/* Action Button */}
+                        <Button 
+                          className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                          onClick={() => handleUpgradeToPro(upgradeProBillingCycle)}
+                          disabled={actionLoading}
+                        >
+                          {actionLoading ? (
+                            <>
+                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                              Upgrading...
+                            </>
+                          ) : (
+                            `Upgrade to Pro (${upgradeProBillingCycle === 'monthly' ? '$49/mo' : '$45/mo'})`
+                          )}
+                        </Button>
+                        <p className="text-xs text-center text-gray-500">
+                          The difference will be prorated immediately
+                        </p>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
                 )}
-              </Button>
+
+                {/* Downgrade to Starter button for Pro users */}
+                {subscription?.plan === 'pro' && !subscription?.cancelAtPeriodEnd && (
+                  <Button 
+                    onClick={() => handleDowngradeToStarter()}
+                    disabled={actionLoading}
+                    variant="outline"
+                    className="flex-1"
+                  >
+                    {actionLoading ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Downgrading...
+                      </>
+                    ) : (
+                      <>
+                        Downgrade to Starter
+                      </>
+                    )}
+                  </Button>
+                )}
+
+                {/* Cancel button for Paddle subscription */}
+                {!subscription?.cancelAtPeriodEnd && (
+                  <Button 
+                    onClick={handleCancelSubscription}
+                    disabled={actionLoading}
+                    variant="destructive"
+                    className="flex-1"
+                  >
+                    {actionLoading ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Cancelling...
+                      </>
+                    ) : (
+                      <>
+                        <XCircle className="h-4 w-4 mr-2" />
+                        Cancel Subscription
+                      </>
+                    )}
+                  </Button>
+                )}
+                
+                {/* Already cancelled */}
+                {subscription?.cancelAtPeriodEnd && (
+                  <div className="flex-1">
+                    <Button 
+                      disabled
+                      variant="outline"
+                        className="w-full"
+                      >
+                        {actionLoading ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            Cancelling...
+                          </>
+                        ) : (
+                          'Cancel Subscription'
+                        )}
+                      </Button>
+                    )}
+                    
+                    {subscription?.cancelAtPeriodEnd && (
+                      <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+                        <p className="text-sm text-yellow-900 dark:text-yellow-100">
+                          Your subscription will be cancelled at the end of the current billing period.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </>
             )}
           </div>
         </CardContent>

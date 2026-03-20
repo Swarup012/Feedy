@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import {
   Dialog,
   DialogContent,
@@ -13,9 +13,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2 } from "lucide-react";
+import { Loader2, Paperclip, X } from "lucide-react";
 import { postService, Post } from "@/services/postService";
 import { useToast } from "@/hooks/use-toast";
+import { TokenManager } from "@/lib/tokenManager";
 
 interface CreatePostDialogProps {
   open: boolean;
@@ -31,10 +32,13 @@ export function CreatePostDialog({
   onPostCreated,
 }: CreatePostDialogProps) {
   const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [creating, setCreating] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
+    images: [] as string[],
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -73,7 +77,7 @@ export function CreatePostDialog({
       onPostCreated(response.data.post);
 
       // Reset form
-      setFormData({ title: "", description: "" });
+      setFormData({ title: "", description: "", images: [] });
       setErrors({});
     } catch (error: any) {
       toast({
@@ -94,6 +98,69 @@ export function CreatePostDialog({
     if (errors[field]) {
       setErrors({ ...errors, [field]: "" });
     }
+  };
+
+  // Handle file upload
+  const handleFileUpload = async (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+
+    if (formData.images.length + files.length > 5) {
+      toast({
+        title: "Too many images",
+        description: "Maximum 5 images allowed",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setUploading(true);
+
+    try {
+      const newImageUrls: string[] = [];
+
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+
+        if (!file.type.startsWith("image/")) {
+          toast({ title: "Invalid file", description: `${file.name} is not an image`, variant: "destructive" });
+          continue;
+        }
+
+        if (file.size > 5 * 1024 * 1024) {
+          toast({ title: "File too large", description: `${file.name} exceeds 5MB`, variant: "destructive" });
+          continue;
+        }
+
+        const uploadFormData = new FormData();
+        uploadFormData.append("file", file);
+        uploadFormData.append("folder", "posts");
+
+        const token = TokenManager.getAccessToken();
+        if (!token) throw new Error("Not authenticated");
+
+        const response = await fetch("http://localhost:3000/api/upload/image", {
+          method: "POST",
+          body: uploadFormData,
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (!response.ok) throw new Error("Upload failed");
+
+        const data = await response.json();
+        newImageUrls.push(data.data.url);
+      }
+
+      setFormData({ ...formData, images: [...formData.images, ...newImageUrls] });
+      toast({ title: "Success", description: `${newImageUrls.length} image(s) uploaded` });
+    } catch (error: any) {
+      toast({ title: "Upload failed", description: error.message, variant: "destructive" });
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const removeImage = (index: number) => {
+    setFormData({ ...formData, images: formData.images.filter((_, i) => i !== index) });
   };
 
   return (
@@ -132,22 +199,80 @@ export function CreatePostDialog({
             {/* Description */}
             <div className="space-y-2">
               <Label htmlFor="description">Description (optional)</Label>
-              <Textarea
-                id="description"
-                placeholder="Provide more details about your feedback..."
-                value={formData.description}
-                onChange={(e) => handleChange("description", e.target.value)}
-                rows={6}
-                maxLength={5000}
-                className={errors.description ? "border-red-500" : ""}
-              />
+              <div className="relative">
+                <Textarea
+                  id="description"
+                  placeholder="Provide more details about your feedback..."
+                  value={formData.description}
+                  onChange={(e) => handleChange("description", e.target.value)}
+                  rows={4}
+                  maxLength={5000}
+                  className={errors.description ? "border-red-500 pr-12" : "pr-12"}
+                />
+                {/* Attachment Button */}
+                <div className="absolute bottom-2 right-2">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    className="hidden"
+                    onChange={(e) => handleFileUpload(e.target.files)}
+                  />
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    className="h-8 w-8 p-0"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploading || formData.images.length >= 5}
+                  >
+                    {uploading ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Paperclip className="h-4 w-4 text-muted-foreground hover:text-primary" />
+                    )}
+                  </Button>
+                </div>
+              </div>
               {errors.description && (
                 <p className="text-sm text-red-500">{errors.description}</p>
               )}
-              <p className="text-xs text-gray-500">
-                {formData.description.length}/5000 characters
-              </p>
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
+                <span>{formData.description.length}/5000 characters</span>
+                {formData.images.length > 0 && (
+                  <span>{formData.images.length}/5 images attached</span>
+                )}
+              </div>
             </div>
+
+            {/* Image Previews */}
+            {formData.images.length > 0 && (
+              <div className="space-y-2">
+                <Label>Attached Images</Label>
+                <div className="grid grid-cols-4 gap-2">
+                  {formData.images.map((url, index) => (
+                    <div
+                      key={index}
+                      className="relative group aspect-square rounded-lg overflow-hidden border border-border"
+                    >
+                      <img
+                        src={url}
+                        alt={`Attachment ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeImage(index)}
+                        className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Tips */}
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">

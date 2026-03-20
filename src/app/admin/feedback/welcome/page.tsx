@@ -310,7 +310,7 @@ export default function FirstBoardWelcomePage() {
                   {slug && (
                     <div className="flex items-center gap-2 text-sm">
                       <span className="text-gray-500">URL:</span>
-                      <code className="bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded text-gray-700 dark:text-gray-300">
+                      <code className="bg-gray-100 dark:bg-card px-2 py-1 rounded text-gray-700 dark:text-gray-300">
                         /board/{slug}
                       </code>
                       {checkingSlug && (
@@ -718,7 +718,7 @@ export default function FirstBoardWelcomePage() {
 
         {/* Pro Tip */}
         <div className="max-w-3xl mx-auto mb-12">
-          <Card className="border-2 border-dashed border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+          <Card className="border-2 border-dashed border-gray-300 dark:border-border bg-gray-50 dark:bg-card/50">
             <CardContent className="p-6 text-center">
               <BarChart3 className="h-8 w-8 mx-auto mb-3 text-gray-600 dark:text-gray-400" />
               <p className="text-gray-700 dark:text-gray-300">

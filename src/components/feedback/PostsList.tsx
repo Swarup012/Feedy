@@ -49,9 +49,9 @@ export function PostsList({
   onSearchChange,
 }: PostsListProps) {
   return (
-    <div className="flex flex-col bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700" style={{ width: '360px', minWidth: '360px' }}>
+    <div className="flex flex-col bg-white dark:bg-background border-r border-gray-200 dark:border-border" style={{ width: '360px', minWidth: '360px' }}>
       {/* Header */}
-      <div className="p-4 border-b border-gray-200 dark:border-gray-700 space-y-3 sticky top-0 bg-white dark:bg-gray-900 z-10">
+      <div className="p-4 border-b border-gray-200 dark:border-border space-y-3 sticky top-0 bg-white dark:bg-background z-10">
         <div className="flex items-center justify-between">
           <div>
             {currentBoard && (
@@ -70,7 +70,11 @@ export function PostsList({
               </div>
             )}
           </div>
-          <Button onClick={onCreatePost}>
+          <Button 
+            onClick={onCreatePost}
+            variant="outline"
+            className="bg-background text-primary hover:bg-accent border-border"
+          >
             <Plus className="mr-2 h-4 w-4" />
             New Post
           </Button>
@@ -81,7 +85,7 @@ export function PostsList({
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500" />
           <Input
             placeholder="Search posts..."
-            className="pl-10 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:placeholder:text-gray-500"
+            className="pl-10 dark:bg-card dark:border-border dark:text-white dark:placeholder:text-gray-500"
             onChange={(e) => onSearchChange(e.target.value)}
           />
         </div>
@@ -96,7 +100,11 @@ export function PostsList({
             <div className="text-6xl mb-4">📝</div>
             <h3 className="font-semibold text-lg mb-2 text-gray-900 dark:text-white">No posts yet</h3>
             <p className="text-gray-500 dark:text-gray-400 mb-4">Be the first to create a post!</p>
-            <Button onClick={onCreatePost}>
+            <Button 
+              onClick={onCreatePost}
+              variant="outline"
+              className="bg-background text-primary hover:bg-accent border-border"
+            >
               <Plus className="mr-2 h-4 w-4" />
               Create Post
             </Button>

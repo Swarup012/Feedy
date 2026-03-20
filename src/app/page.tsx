@@ -22,6 +22,22 @@ import LandingButton from '../components/ui/LandingButton.tsx';
 import {LayoutTextFlip} from '../components/ui/layout-text-flip.tsx'
 import Eyes from '../components/Eyes.tsx'
 import {ThinkingBubble} from '../components/ThinkingBubble.tsx'
+import {
+  Navbar,
+  NavBody,
+  NavItems,
+  MobileNav,
+  NavbarLogo,
+  NavbarButton,
+  MobileNavHeader,
+  MobileNavToggle,
+  MobileNavMenu,
+} from "@/components/ui/resizable-navbar"
+import { ThemeToggle } from '@/components/theme-toggle';
+import { ThemeToggleDebug } from '@/components/theme-toggle-debug';
+import FaddyLandingImage from '@/assets/images/Faddy_Landing.png'
+import {PointerHighlight} from '../components/ui/pointer-highlight.tsx'
+import { LandingFooter } from '@/components/ui/landing-footer';
 
 if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger);
@@ -32,10 +48,70 @@ export default function LandingPage() {
   const { user, loading } = useAuth();
   const [checkingBoards, setCheckingBoards] = useState(true);
   const [hasSubdomain, setHasSubdomain] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   const handleClick = () => {
     router.push("/signup");
   }
+
+  // Navbar Actions Component with visible prop
+  const NavbarActions = ({ visible }: { visible?: boolean }) => (
+    <div className="flex items-center gap-3">
+      <ThemeToggleDebug />
+      {!visible && (
+        <NavbarButton 
+          variant="secondary"
+          onClick={() => router.push('/login')}
+        >
+          Login
+        </NavbarButton>
+      )}
+      <NavbarButton 
+        variant="primary"
+        onClick={() => router.push('/signup')}
+      >
+        Sign Up
+      </NavbarButton>
+    </div>
+  );
+  
+  const navItems = [
+    {
+      name: "Product",
+      link: "/feedback",
+      dropdown: [
+        {
+          section: "Features",
+          items: [
+            { name: "Collect Feedback", link: "/collect-feedback" },
+            { name: "Analyze Feedback", link: "/analyze-feedback" },
+            { name: "Share Updates", link: "/share-updates" },
+          ]
+        },
+        {
+          section: "Use Cases",
+          items: [
+            { name: "Feature Request Management", link: "/collect-feedback" },
+            { name: "Role-Based Access Control", link: "/role-based-access" },
+            { name: "Public Roadmap", link: "/public-roadmap" },
+          ]
+        }
+      ]
+    },
+    {
+      name: "Documentation",
+      link: "/docs",
+    },
+    {
+      name: "Pricing",
+      link: "/pricing",
+    },
+    {
+      name: "Contact",
+      link: "/contact",
+    },
+  ];
+  
   // Refs for GSAP
   const heroRef = useRef(null);
   const featuresRef = useRef(null);
@@ -168,119 +244,159 @@ export default function LandingPage() {
 
   if (loading || checkingBoards) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
         <div className="flex flex-col items-center gap-4">
           <div className="relative w-16 h-16">
             <div className="absolute inset-0 border-4 border-blue-100 rounded-full"></div>
             <div className="absolute inset-0 border-4 border-blue-600 rounded-full border-t-transparent animate-spin"></div>
           </div>
-          <p className="text-slate-500 font-medium animate-pulse">Initializing Faddy...</p>
+          <p className="text-slate-500 dark:text-slate-400 font-medium animate-pulse">Initializing Faddy...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-white font-sans text-slate-900 antialiased selection:bg-blue-100 selection:text-blue-900">
+    <div className="min-h-screen bg-white dark:bg-slate-950 font-sans text-slate-900 dark:text-slate-100 antialiased selection:bg-blue-100 dark:selection:bg-blue-900 selection:text-blue-900 dark:selection:text-blue-100">
       {/* Visual background texture */}
       <div className="fixed inset-0 z-0 opacity-[0.03] pointer-events-none">
         <div className="absolute inset-0" style={{ backgroundImage: `radial-gradient(#000 1px, transparent 1px)`, backgroundSize: '40px 40px' }}></div>
       </div>
 
-      {/* Header */}
-      <header className="fixed top-0 w-full z-[100] bg-white/70 backdrop-blur-xl border-b border-slate-100">
-        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-3 group">
-            <div className="transition-transform duration-300 group-hover:rotate-12">
-              <Logo width={36} height={36} />
-            </div>
-            <span className="text-2xl font-bold tracking-tighter text-slate-900">Faddy</span>
-          </div>
-          
-          <nav className="hidden md:flex items-center gap-10">
-            {['Feedback', 'Roadmap', 'Changelog'].map((item) => (
-              <a key={item} href={`/${item.toLowerCase()}`} className="text-sm font-semibold text-slate-500 hover:text-blue-600 transition-colors">
-                {item}
-              </a>
-            ))}
-          </nav>
-          
-          <div className="flex items-center gap-6">
-            <a href="/login" className="text-sm font-bold text-slate-600 hover:text-slate-900 transition-colors">Log In</a>
-            <a href="/signup" className="px-6 py-2.5 bg-slate-900 text-white text-sm font-bold rounded-full hover:bg-blue-600 hover:shadow-lg hover:shadow-blue-200 transition-all duration-300">
-              Sign Up Free
-            </a>
-          </div>
-        </div>
-      </header>
+      {/* Resizable Navbar */}
+      <Navbar>
+        {/* Desktop Navigation */}
+        <NavBody>
+          <NavbarLogo />
+          <NavItems items={navItems} />
+          <NavbarActions visible={undefined} />
+        </NavBody>
 
-      <main className="relative z-10 pt-20">
+        {/* Mobile Navigation */}
+        <MobileNav>
+          <MobileNavHeader>
+            <NavbarLogo />
+            <MobileNavToggle
+              isOpen={isMobileMenuOpen}
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            />
+          </MobileNavHeader>
+
+          <MobileNavMenu
+            isOpen={isMobileMenuOpen}
+            onClose={() => setIsMobileMenuOpen(false)}
+          >
+            {navItems.map((item, idx) => (
+              <div key={`mobile-link-${idx}`} className="mb-4">
+                {item.dropdown ? (
+                  <div>
+                    <span className="block text-lg font-medium text-neutral-600 dark:text-neutral-300 mb-2">
+                      {item.name}
+                    </span>
+                    {item.dropdown.map((section, sectionIdx) => (
+                      <div key={`mobile-section-${sectionIdx}`} className="ml-4 mt-3">
+                        <div className="text-xs font-bold text-slate-400 dark:text-gray-500 uppercase tracking-wider mb-2">
+                          {section.section}
+                        </div>
+                        <div className="space-y-2">
+                          {section.items.map((dropdownItem, itemIdx) => (
+                            <a
+                              key={`mobile-dropdown-${itemIdx}`}
+                              href={dropdownItem.link}
+                              onClick={() => setIsMobileMenuOpen(false)}
+                              className="block text-sm text-neutral-600 dark:text-neutral-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors py-1"
+                            >
+                              {dropdownItem.name}
+                            </a>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <a
+                    href={item.link}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="relative text-neutral-600 dark:text-neutral-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                  >
+                    <span className="block text-lg font-medium">{item.name}</span>
+                  </a>
+                )}
+              </div>
+            ))}
+            <div className="flex w-full flex-col gap-3 mt-4">
+              <div className="flex items-center gap-2 pb-2 border-b border-neutral-200 dark:border-neutral-800">
+                <span className="text-sm font-medium text-neutral-600 dark:text-neutral-300">Theme:</span>
+                <ThemeToggleDebug />
+              </div>
+              <NavbarButton
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  router.push('/login');
+                }}
+                variant="secondary"
+                className="w-full"
+              >
+                Login
+              </NavbarButton>
+              <NavbarButton
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  router.push('/signup');
+                }}
+                variant="primary"
+                className="w-full"
+              >
+                Sign Up
+              </NavbarButton>
+            </div>
+          </MobileNavMenu>
+        </MobileNav>
+      </Navbar>
+
+      <main className="relative z-10">
         {/* Hero Section */}
         <section ref={heroRef} className="relative overflow-hidden pt-24 pb-40 px-6">
-<div style={{display:'flex', alignItems:'center', justifyContent:'center',margin:'10px'}}>
-<div style={{position: 'relative',width: 160 , height:160}}>
-<div style={{position:'absolute',top: -50, left:'50%',transform:"translateX(-50%)"}}><ThinkingBubble/></div>
-<div
-  style={{
-    width: 140,
-    height: 140,
-    borderRadius: "50%",
-    background: "#2a9df4", // emoji yellow
-    position: "relative",
-    display: "flex",
-    justifyContent: "center",
-  }}
->
-  {/* Eyes container */}
-  <div
-    style={{
-      position: "absolute",
-      top: "28%",           // 👈 controls how high the eyes are
-      left: "50%",
-      transform: "translateX(-50%)",
-    }}
-  >
-    <Eyes
-      eyeColor="#0F2854"
-      pupilColor="#fff"
-    />
-  </div>
-</div> </div> </div>
           <div className="max-w-7xl mx-auto text-center">
-            {/* Floating Badge */}
-            <div className="hero-reveal inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 border border-blue-100 mb-10">
-              <Star className="w-4 h-4 text-blue-600 fill-blue-600" />
-              <span className="text-xs font-black uppercase tracking-widest text-blue-700">Trusted by 10k+ teams</span>
-            </div>
-            
-            <h1 className="hero-reveal text-6xl md:text-[92px] font-extrabold tracking-tight leading-[0.9] text-slate-900 mb-10">
-              The feedback loop <br />
-              <LayoutTextFlip words={["Done Right","Get Better"]} />
+            <h1 className="hero-reveal text-4xl md:text-[70px] font-switzer font-medium tracking-tight leading-tight text-slate-900 dark:text-white mb-10 text-center">
+              Stop Guessing What to<br />
+              <span className="inline-block"><PointerHighlight>Build Next</PointerHighlight></span>
+             {/* <LayoutTextFlip words={["What to","Build Next"]} /> */}
             </h1>
             
-            <p className="hero-reveal text-xl md:text-2xl text-slate-500 max-w-3xl mx-auto mb-14 leading-relaxed">
-              Faddy centralizes customer requests and turns them into 
-              actionable insights. Build what users actually want, faster.
+            <p className="hero-reveal text-xl md:text-2xl text-slate-500 dark:text-slate-400 max-w-3xl mx-auto mb-8 leading-relaxed">
+                Faddy centralizes customer feedback and turns it into a clear product roadmap. Ship features users actually want—faster and with confidence.
             </p>
             
-            <div className="hero-reveal flex flex-col sm:flex-row justify-center gap-5">
-              <LandingButton onClick={handleClick} />
-              <a href="/feedback" className="px-10 py-5 bg-white text-slate-900 font-bold rounded-2xl border-2 border-slate-100 hover:border-blue-200 hover:bg-slate-50 transition-all flex items-center justify-center gap-2">
+            <div className="hero-reveal flex flex-col sm:flex-row justify-center gap-8">
+              <button 
+                onClick={handleClick}
+                className="px-10 py-4 bg-blue-600 hover:bg-blue-700 text-white font-switzer font-bold rounded-2xl border border-black transition-all flex items-center justify-center gap-2 text-base"
+              >
+                Get Started
+              </button>
+              <a href="/feedback" className="px-10 py-4 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-switzer font-bold rounded-2xl border border-black dark:border-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all flex items-center justify-center gap-2 text-base">
                 Explore Demo Board
-                <ExternalLink className="w-4 h-4 text-slate-400" />
               </a>
             </div>
 
+            <div className="mt-16 w-full max-w-6xl mx-auto">
+              <img
+                src="/images/Faddy_Landnding_hero.png"
+                alt="Faddy Dashboard"
+                className="w-full h-auto rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 object-contain"
+              />
+            </div>
             {/* Social Proof / Stats */}
-            <div className="hero-stats mt-24 grid grid-cols-2 md:grid-cols-3 gap-12 max-w-4xl mx-auto border-t border-slate-100 pt-16">
+            <div className="hero-stats mt-8 grid grid-cols-2 md:grid-cols-3 gap-12 max-w-4xl mx-auto border-t border-slate-100 pt-8">
               {[
-                { label: 'Active Users', value: '10k+' },
-                { label: 'Feedback Items', value: '500k+' },
-                { label: 'CSAT Score', value: '99%' },
+                { label: 'Join our first 50 Founding Users', value: 'Early Access' },
+                { label: 'Be part of the cmmunity shaping the future', value: 'V1.0' },
+                { label: 'Setup fees or hidden credit card requirements', value: 'Zero' },
               ].map((stat, i) => (
                 <div key={i} className="text-center">
-                  <div className="text-4xl font-black text-slate-900 mb-2">{stat.value}</div>
-                  <div className="text-sm font-bold uppercase tracking-widest text-slate-400">{stat.label}</div>
+                  <div className="text-4xl font-switzer font-medium font-black text-slate-900 dark:text-white mb-2">{stat.value}</div>
+                  <div className="text-sm font-switzer font-bold uppercase tracking-widest text-slate-400">{stat.label}</div>
                 </div>
               ))}
             </div>
@@ -292,14 +408,14 @@ export default function LandingPage() {
         </section>
 
         {/* Features Section */}
-        <section ref={featuresRef} className="py-32 px-6 bg-slate-50/50 border-y border-slate-100">
+        <section ref={featuresRef} className="py-32 px-6 bg-slate-50/50 dark:bg-slate-900/50 border-y border-slate-100 dark:border-slate-800">
           <div className="max-w-7xl mx-auto">
             <div className="max-w-3xl mb-24">
-              <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-slate-900 mb-6">
+              <h2 className="text-4xl md:text-5xl font-switzer font-medium tracking-wide text-slate-900 dark:text-white mb-6">
                 Everything you need to <br />manage product feedback
               </h2>
-              <p className="text-lg text-slate-500 leading-relaxed">
-                Powerful features designed to replace your messy spreadsheets and scattered Slack messages.
+              <p className="text-lg text-slate-500 dark:text-slate-400 leading-relaxed">
+Organize all your feedback in one place, prioritize what to build next, and keep everyone updated
               </p>
             </div>
             
@@ -307,13 +423,13 @@ export default function LandingPage() {
               {[
                 { 
                   icon: <Lightbulb className="w-8 h-8" />, 
-                  title: "Centralize Inputs", 
-                  desc: "Connect your support tools, Slack, and email to one unified feedback inbox." 
+                  title: "Less time managing , more time building", 
+                  desc: "Faddy  transforms raw user requests into actionable data points in seconds, not hours." 
                 },
                 { 
                   icon: <Zap className="w-8 h-8" />, 
-                  title: "AI-Categorization", 
-                  desc: "Let our AI analyze sentiment and tag features so you can see trends instantly." 
+                  title: "Easy to use", 
+                  desc: "Faddy eliminates the complexity of user research with an interface designed for immediate clarity and high-velocity workflows." 
                 },
                 { 
                   icon: <MessageSquare className="w-8 h-8" />, 
@@ -321,12 +437,12 @@ export default function LandingPage() {
                   desc: "Keep users engaged with public roadmaps and automated release notes." 
                 }
               ].map((f, i) => (
-                <div key={i} className="feature-card group p-10 bg-white border border-slate-200 rounded-[32px] hover:border-blue-400 hover:shadow-2xl hover:shadow-blue-500/5 transition-all duration-500">
-                  <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 group-hover:bg-blue-600 group-hover:text-white transition-all duration-500">
+                <div key={i} className="feature-card group p-10 bg-blue-600 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-[32px] hover:border-blue-400 hover:shadow-2xl hover:shadow-blue-500/5 transition-all duration-500">
+                  <div className="w-16 h-16 bg-blue-50 text-blue-500 rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 group-hover:bg-blue-500 group-hover:text-white transition-all duration-500">
                     {f.icon}
                   </div>
-                  <h3 className="text-2xl font-bold text-slate-900 mb-4">{f.title}</h3>
-                  <p className="text-slate-500 leading-relaxed text-lg">{f.desc}</p>
+                  <h3 className="text-2xl font-switzer font-medium text-white dark:text-white mb-4">{f.title}</h3>
+                  <p className="text-white dark:text-slate-400 leading-relaxed text-lg">{f.desc}</p>
                 </div>
               ))}
             </div>
@@ -338,7 +454,7 @@ export default function LandingPage() {
           <div className="max-w-7xl mx-auto relative z-10">
             <div className="grid md:grid-cols-2 gap-20 items-center">
               <div className="benefit-content text-white">
-                <h2 className="text-4xl md:text-6xl font-bold tracking-tight mb-8">
+                <h2 className="text-4xl md:text-6xl font-switzer font-bold tracking-tight mb-8">
                   Focus on building, <br />not sorting.
                 </h2>
                 <div className="space-y-8">
@@ -360,15 +476,15 @@ export default function LandingPage() {
               
               <div className="grid gap-6">
                 {[
-                  { label: "Engagement", value: "+187%", icon: <Users /> },
-                  { label: "Adoption", value: "+243%", icon: <TrendingUp /> }
+                  { label: "Engagement", value: "Up to 3x", icon: <Users /> },
+                  { label: "Adoption", value: "+100%", icon: <TrendingUp /> }
                 ].map((stat, i) => (
                   <div key={i} className="benefit-stat-card p-10 bg-white/10 backdrop-blur-2xl rounded-[40px] border border-white/20">
                     <div className="flex items-center gap-4 mb-6 text-white/80">
                       {stat.icon}
                       <span className="font-bold uppercase tracking-widest text-sm">{stat.label}</span>
                     </div>
-                    <div className="text-6xl font-black text-white">{stat.value}</div>
+                    <div className="text-6xl font-switzer font-black text-white">{stat.value}</div>
                     <p className="text-blue-100 mt-4 font-medium italic">Average increase observed by teams</p>
                   </div>
                 ))}
@@ -379,81 +495,18 @@ export default function LandingPage() {
           <div className="absolute top-0 right-0 w-full h-full bg-[radial-gradient(circle_at_70%_50%,rgba(255,255,255,0.1),transparent)]" />
         </section>
 
-        {/* Pricing Section */}
-        <section className="py-32 px-6">
-          <div className="max-w-7xl mx-auto">
-            <div className="text-center mb-24">
-              <h2 className="text-4xl md:text-5xl font-bold text-slate-900 mb-6 tracking-tight">Simple, scale-ready pricing</h2>
-              <p className="text-xl text-slate-500">No hidden fees. Start for free, upgrade when you’re ready.</p>
-            </div>
-
-            <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-              {/* Plan Card */}
-              <div className="p-10 rounded-[32px] border-2 border-slate-100 bg-white hover:border-slate-200 transition-all group">
-                <h3 className="text-xl font-bold mb-2">Free</h3>
-                <div className="flex items-baseline gap-1 mb-6">
-                  <span className="text-5xl font-black">$0</span>
-                  <span className="text-slate-400 font-bold">/mo</span>
-                </div>
-                <ul className="space-y-4 mb-10">
-                  {['3 boards', '5 posts per board', 'Public roadmap', 'Community support'].map(item => (
-                    <li key={item} className="flex items-center gap-3 text-slate-600 font-medium">
-                      <CheckCircle className="w-5 h-5 text-blue-500" /> {item}
-                    </li>
-                  ))}
-                </ul>
-                <a href="/signup" className="block w-full py-4 bg-slate-100 text-slate-900 text-center font-bold rounded-2xl group-hover:bg-slate-900 group-hover:text-white transition-all">Get Started</a>
-              </div>
-
-              {/* Pro Plan Card */}
-              <div className="p-10 rounded-[32px] border-2 border-blue-600 bg-white shadow-2xl shadow-blue-200 relative scale-105 z-10">
-                <div className="absolute -top-5 left-1/2 -translate-x-1/2 bg-blue-600 text-white px-5 py-1 rounded-full text-xs font-black uppercase tracking-widest">Most Popular</div>
-                <h3 className="text-xl font-bold mb-2">Pro</h3>
-                <div className="flex items-baseline gap-1 mb-6">
-                  <span className="text-5xl font-black text-blue-600">$29</span>
-                  <span className="text-slate-400 font-bold">/mo</span>
-                </div>
-                <ul className="space-y-4 mb-10">
-                  {['Unlimited items', 'AI Insights', 'Custom Branding', 'Advanced Integrations'].map(item => (
-                    <li key={item} className="flex items-center gap-3 text-slate-600 font-medium">
-                      <CheckCircle className="w-5 h-5 text-blue-600" /> {item}
-                    </li>
-                  ))}
-                </ul>
-                <a href="/signup" className="block w-full py-4 bg-blue-600 text-white text-center font-bold rounded-2xl shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all">Start Free Trial</a>
-              </div>
-
-              {/* Enterprise Card */}
-              <div className="p-10 rounded-[32px] border-2 border-slate-100 bg-white hover:border-slate-200 transition-all group">
-                <h3 className="text-xl font-bold mb-2">Enterprise</h3>
-                <div className="flex items-baseline gap-1 mb-6">
-                  <span className="text-5xl font-black">Custom</span>
-                </div>
-                <ul className="space-y-4 mb-10">
-                  {['SSO Security', 'SLA Guarantee', 'Dedicated Manager', 'Custom Contracts'].map(item => (
-                    <li key={item} className="flex items-center gap-3 text-slate-600 font-medium">
-                      <CheckCircle className="w-5 h-5 text-blue-500" /> {item}
-                    </li>
-                  ))}
-                </ul>
-                <a href="/contact" className="block w-full py-4 bg-slate-100 text-slate-900 text-center font-bold rounded-2xl group-hover:bg-slate-900 group-hover:text-white transition-all">Contact Sales</a>
-              </div>
-            </div>
-          </div>
-        </section>
-
         {/* CTA Section */}
         <section className="py-32 px-6">
-          <div className="max-w-5xl mx-auto rounded-[48px] bg-slate-900 p-16 md:p-24 overflow-hidden relative text-center">
+          <div className="max-w-5xl mx-auto rounded-[48px] bg-slate-900 dark:bg-slate-800 p-16 md:p-24 overflow-hidden relative text-center">
             <div className="relative z-10">
-              <h2 className="text-4xl md:text-6xl font-bold text-white mb-8 tracking-tighter leading-tight">
+              <h2 className="text-4xl md:text-6xl font-switzer font-bold text-white mb-8 tracking-tighter leading-tight">
                 Stop guessing. <br />Start building.
               </h2>
               <p className="text-xl text-slate-400 mb-12 max-w-2xl mx-auto leading-relaxed">
-                Join the 10,000+ teams that use Faddy to ship better products. 
+                Join the teams that use Faddy to ship better products. 
                 Free forever plan available.
               </p>
-              <a href="/signup" className="inline-flex items-center gap-3 px-10 py-5 bg-white text-slate-900 font-black rounded-2xl hover:scale-105 transition-all shadow-xl shadow-white/10">
+              <a href="/signup" className="inline-flex items-center gap-3 px-10 py-5 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-switzer font-black rounded-2xl hover:scale-105 transition-all shadow-xl shadow-white/10">
                 Get Started Now
                 <ArrowRight className="w-5 h-5" />
               </a>
@@ -465,47 +518,7 @@ export default function LandingPage() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-slate-50 border-t border-slate-200 py-20 px-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-12">
-            <div>
-              <div className="flex items-center gap-2 mb-4">
-                <Logo width={28} height={28} />
-                <span className="text-xl font-bold tracking-tighter">Faddy</span>
-              </div>
-              <p className="text-slate-500 max-w-xs font-medium">
-                The modern way to manage customer feedback and ship better products.
-              </p>
-            </div>
-            
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-16">
-              <div>
-                <h4 className="font-bold text-slate-900 mb-6 uppercase tracking-widest text-xs">Product</h4>
-                <ul className="space-y-4 text-sm font-bold text-slate-500">
-                  <li><a href="/feedback" className="hover:text-blue-600">Boards</a></li>
-                  <li><a href="/roadmap/testing" className="hover:text-blue-600">Roadmap</a></li>
-                  <li><a href="/changelog" className="hover:text-blue-600">Changelog</a></li>
-                </ul>
-              </div>
-              <div>
-                <h4 className="font-bold text-slate-900 mb-6 uppercase tracking-widest text-xs">Support</h4>
-                <ul className="space-y-4 text-sm font-bold text-slate-500">
-                  <li><a href="#" className="hover:text-blue-600">Help Center</a></li>
-                  <li><a href="#" className="hover:text-blue-600">Privacy</a></li>
-                  <li><a href="#" className="hover:text-blue-600">Terms</a></li>
-                </ul>
-              </div>
-            </div>
-          </div>
-          <div className="mt-20 pt-10 border-t border-slate-200 flex flex-col md:flex-row justify-between text-slate-400 text-xs font-bold uppercase tracking-widest">
-            <span>© 2025 Faddy Inc.</span>
-            <div className="flex gap-8 mt-4 md:mt-0">
-              <a href="#" className="hover:text-slate-900 transition-colors">Twitter</a>
-              <a href="#" className="hover:text-slate-900 transition-colors">LinkedIn</a>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <LandingFooter showCTA={true} />
     </div>
   );
 }

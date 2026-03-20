@@ -8,14 +8,14 @@ export function middleware(request: NextRequest) {
   
   // Get subdomain from hostname
   // Examples:
-  // - acme.fady.com -> subdomain: acme
+  // - acme.faddy.site -> subdomain: acme
   // - localhost:5173 -> subdomain: null
-  // - www.fady.com -> subdomain: null
+  // - www.faddy.site -> subdomain: null
   
   const parts = hostname.split(".");
   let subdomain: string | null = null;
   
-  // Handle production domains (e.g., acme.fady.com)
+  // Handle production domains (e.g., acme.faddy.site)
   if (parts.length >= 3 && !hostname.includes("localhost")) {
     subdomain = parts[0];
     

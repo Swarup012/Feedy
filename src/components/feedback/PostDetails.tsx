@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PostDetailsSkeleton } from "./PostsListSkeleton";
 import AddToRoadmapModal from "@/components/roadmap/AddToRoadmapModal";
+import { CompletionChangelogDialog } from "./CompletionChangelogDialog";
 import {
   Select,
   SelectContent,
@@ -53,12 +54,18 @@ const commentsCache: Record<string, Comment[]> = {};
 interface PostDetailsProps {
   post: Post | null;
   currentBoard: Board | null;
+  boards?: Board[]; // Optional: array of all boards for fallback
   onPostUpdated: (post: Post) => void;
   onPostDeleted: (postId: string) => void;
   onAuthRequired?: () => void; // Optional callback for when auth is required
 }
 
 const STATUS_OPTIONS = [
+  {
+    value: "open",
+    label: "Open",
+    color: "bg-gray-100 text-gray-800",
+  },
   {
     value: "planned",
     label: "Planned",
@@ -78,6 +85,11 @@ const STATUS_OPTIONS = [
     value: "completed",
     label: "Completed",
     color: "bg-green-100 text-green-800",
+  },
+  {
+    value: "closed",
+    label: "Closed",
+    color: "bg-red-100 text-red-800",
   },
 ];
 
@@ -116,31 +128,38 @@ function CommentItem({
 
   return (
     <div className={depth > 0 ? "ml-8 mt-2" : ""}>
-      <Card
+      <div
         className={cn(
-          "p-3 dark:bg-gray-800 dark:border-gray-700",
-          comment.is_admin && "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700",
+          "flex gap-3 py-3 border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900/30 transition-colors",
+          comment.is_admin && "bg-blue-50/30 dark:bg-blue-900/10",
         )}
       >
-        <div className="flex items-start gap-3 mb-2 flex-1">
-          <Avatar className="h-8 w-8 flex-shrink-0">
-            <AvatarImage src={comment.author?.avatar_url || ""} alt={comment.author?.name || "User"} />
-            <AvatarFallback className="text-xs">
-              {comment.author?.name?.charAt(0)?.toUpperCase() || "U"}
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2 min-w-0">
-                <p className="font-medium text-sm truncate text-gray-900 dark:text-white">
-                  {comment.author?.name}
-                </p>
-                {comment.is_admin && (
-                  <Badge variant="secondary" className="text-xs flex-shrink-0 dark:bg-blue-900 dark:text-blue-300">
-                    Admin
-                  </Badge>
-                )}
-              </div>
+        {/* Avatar */}
+        <Avatar className="h-9 w-9 flex-shrink-0 mt-0.5">
+          <AvatarImage src={comment.author?.avatar_url || ""} alt={comment.author?.name || "User"} />
+          <AvatarFallback className="text-xs">
+            {comment.author?.name?.charAt(0)?.toUpperCase() || "U"}
+          </AvatarFallback>
+        </Avatar>
+
+        {/* Comment Content */}
+        <div className="flex-1 min-w-0">
+          {/* Header: Name, Badge, Time, Delete */}
+          <div className="flex items-center gap-2 mb-1 flex-wrap">
+            <span className="font-semibold text-sm text-foreground">
+              {comment.author?.name}
+            </span>
+            {comment.is_admin && (
+              <Badge variant="secondary" className="text-xs px-1.5 py-0 h-4 bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300">
+                Admin
+              </Badge>
+            )}
+            <span className="text-xs text-muted-foreground">
+              {formatDistanceToNow(new Date(comment.created_at), {
+                addSuffix: true,
+              })}
+            </span>
+            <div className="ml-auto">
               {(user?.id === comment.author_id ||
                 user?.organization_role === "admin" ||
                 user?.organization_role === "owner") && (
@@ -148,67 +167,65 @@ function CommentItem({
                   variant="ghost"
                   size="sm"
                   onClick={() => handleDeleteComment(comment.id)}
-                  className="text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 h-6 w-6 p-0 flex-shrink-0"
+                  className="h-7 w-7 p-0 text-gray-400 hover:text-red-500 dark:hover:text-red-400"
                 >
-                  <Trash2 className="h-3 w-3" />
+                  <Trash2 className="h-3.5 w-3.5" />
                 </Button>
               )}
             </div>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              {formatDistanceToNow(new Date(comment.created_at), {
-                addSuffix: true,
-              })}
-            </p>
           </div>
-        </div>
-        <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap mb-3">
-          {comment.content}
-        </p>
-        {/* Like, Reply, and Show Replies buttons */}
-        <div className="flex items-center gap-3">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleToggleCommentLike(comment.id)}
-            className={cn(
-              "h-7 px-2 gap-1",
-              comment.user_has_liked && "text-red-500 hover:text-red-600"
-            )}
-          >
-            <Heart 
-              className={cn(
-                "h-3.5 w-3.5",
-                comment.user_has_liked && "fill-current"
-              )}
-            />
-            <span className="text-xs">
-              {comment.like_count || 0}
-            </span>
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setReplyingTo(comment.id)}
-            className="h-7 px-2 gap-1"
-          >
-            <Reply className="h-3.5 w-3.5" />
-            <span className="text-xs">Reply</span>
-          </Button>
-          {hasReplies && (
+
+          {/* Comment Text */}
+          <p className="text-sm text-foreground whitespace-pre-wrap mb-2 leading-relaxed">
+            {comment.content}
+          </p>
+
+          {/* Actions: Like, Reply, Show Replies */}
+          <div className="flex items-center gap-1">
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => setShowReplies(!showReplies)}
-              className="h-7 px-2 gap-1 text-blue-600 hover:text-blue-700"
+              onClick={() => handleToggleCommentLike(comment.id)}
+              className={cn(
+                "h-7 px-2 gap-1.5 hover:bg-red-50 dark:hover:bg-red-900/20",
+                comment.user_has_liked && "text-red-500 hover:text-red-600"
+              )}
             >
-              <MessageSquare className="h-3.5 w-3.5" />
-              <span className="text-xs">
-                {showReplies ? 'Hide' : 'Show'} {comment.replies!.length} {comment.replies!.length === 1 ? 'reply' : 'replies'}
+              <Heart 
+                className={cn(
+                  "h-3.5 w-3.5",
+                  comment.user_has_liked && "fill-current"
+                )}
+              />
+              <span className="text-xs font-medium">
+                {comment.like_count || 0}
               </span>
             </Button>
-          )}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setReplyingTo(comment.id)}
+              className="h-7 px-2 gap-1.5 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600"
+            >
+              <Reply className="h-3.5 w-3.5" />
+              <span className="text-xs font-medium">Reply</span>
+            </Button>
+            {hasReplies && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowReplies(!showReplies)}
+                className="h-7 px-2 gap-1.5 text-primary hover:bg-primary/10"
+              >
+                <MessageSquare className="h-3.5 w-3.5" />
+                <span className="text-xs font-medium">
+                  {showReplies ? 'Hide' : 'Show'} {comment.replies!.length} {comment.replies!.length === 1 ? 'reply' : 'replies'}
+                </span>
+              </Button>
+            )}
+          </div>
         </div>
-      </Card>
+      </div>
 
       {/* Reply input */}
       {replyingTo === comment.id && (
@@ -218,7 +235,7 @@ function CommentItem({
             value={replyContent}
             onChange={(e) => setReplyContent(e.target.value)}
             rows={2}
-            className="resize-none text-sm dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+            className="resize-none text-sm dark:bg-card dark:border-border dark:text-white"
           />
           <div className="flex gap-2">
             <Button
@@ -280,6 +297,7 @@ function CommentItem({
 export function PostDetails({
   post,
   currentBoard,
+  boards,
   onPostUpdated,
   onPostDeleted,
   onAuthRequired,
@@ -302,6 +320,8 @@ export function PostDetails({
   });
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyContent, setReplyContent] = useState("");
+  const [showChangelogDialog, setShowChangelogDialog] = useState(false);
+  const [pendingStatus, setPendingStatus] = useState<string | null>(null);
 
   // Real-time Socket.io updates
   usePostRealtime({
@@ -439,6 +459,21 @@ export function PostDetails({
   const handleStatusChange = async (newStatus: string) => {
     if (!post) return;
 
+    // If changing to "completed", show changelog dialog first
+    if (newStatus === "completed" && post.status !== "completed") {
+      setPendingStatus(newStatus);
+      setShowChangelogDialog(true);
+      return;
+    }
+
+    // Otherwise, update status directly
+    await updatePostStatus(newStatus);
+  };
+
+  // Update post status (called directly or after changelog dialog)
+  const updatePostStatus = async (newStatus: string) => {
+    if (!post) return;
+
     try {
       const response = await postService.updatePostStatus(post.id, newStatus);
       onPostUpdated(response.data.post);
@@ -453,6 +488,29 @@ export function PostDetails({
         variant: "destructive",
       });
     }
+  };
+
+  // Handle changelog created (after completion)
+  const handleChangelogCreated = async (changelogId: string) => {
+    if (!pendingStatus) return;
+    
+    // Update the post status now
+    await updatePostStatus(pendingStatus);
+    setPendingStatus(null);
+    
+    toast({
+      title: "Success!",
+      description: "Post marked as completed and changelog published",
+    });
+  };
+
+  // Handle skip changelog
+  const handleSkipChangelog = async () => {
+    if (!pendingStatus) return;
+    
+    // Still update the post status
+    await updatePostStatus(pendingStatus);
+    setPendingStatus(null);
   };
 
   // Handle upvote toggle
@@ -690,17 +748,53 @@ export function PostDetails({
     }
   };
 
-  // Get public link
+  // Get public link - Links to individual public post page
   const getPublicLink = () => {
-    if (!post || !currentBoard) return "";
-    return `${window.location.origin}/board/${currentBoard.slug}/${post.id}`;
+    // Safety check: only run on client side
+    if (typeof window === 'undefined') {
+      return "";
+    }
+    
+    if (!post) {
+      return "";
+    }
+    
+    try {
+      // Strategy 1: Use currentBoard.slug with post.id
+      if (currentBoard && currentBoard.slug && post.id) {
+        const link = `${window.location.origin}/board/${currentBoard.slug}/${post.id}`;
+        return link;
+      }
+      
+      // Strategy 2: Find board from boards array using post.board_id
+      if (Array.isArray(boards) && boards.length > 0 && post.board_id && post.id) {
+        const board = boards.find((b: any) => b && b.id === post.board_id);
+        if (board && board.slug) {
+          const link = `${window.location.origin}/board/${board.slug}/${post.id}`;
+          return link;
+        }
+      }
+      
+      // Strategy 3: Extract slug from current URL
+      const pathSegments = window.location.pathname.split('/');
+      const slugIndex = pathSegments.indexOf('boards');
+      if (slugIndex !== -1 && pathSegments[slugIndex + 1] && post.id) {
+        const urlSlug = pathSegments[slugIndex + 1];
+        const link = `${window.location.origin}/board/${urlSlug}/${post.id}`;
+        return link;
+      }
+    } catch (error) {
+      console.error('Error generating public link:', error);
+    }
+    
+    return "";
   };
 
   // Show skeleton while loading
   if (loadingPost && post) {
     return (
-      <div className="flex-1 border-l border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex">
-        <div className="flex-1 bg-white dark:bg-gray-900">
+      <div className="flex-1 border-l border-gray-200 dark:border-border bg-gray-50 dark:bg-background flex">
+        <div className="flex-1 bg-white dark:bg-background">
           <PostDetailsSkeleton />
         </div>
       </div>
@@ -709,7 +803,7 @@ export function PostDetails({
 
   if (!post) {
     return (
-      <div className="flex-1 border-l border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+      <div className="flex-1 border-l border-gray-200 dark:border-border bg-gray-50 dark:bg-background flex items-center justify-center">
         <div className="text-center text-gray-500 dark:text-gray-400">
           <MessageSquare className="h-12 w-12 mx-auto mb-3 text-gray-300 dark:text-gray-600" />
           <p>Select a post to view details</p>
@@ -719,11 +813,11 @@ export function PostDetails({
   }
 
   return (
-    <div className="flex-1 border-l border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex">
+    <div className="flex-1 border-l border-gray-200 dark:border-border bg-gray-50 dark:bg-background flex overflow-hidden" style={{ height: 'calc(100vh - 64px)' }}>
       {/* Main Content - Left Side */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden" style={{ height: '100%' }}>
         {/* Post Header with Upvote */}
-        <div className="bg-white dark:bg-gray-900 p-6 border-b border-gray-200 dark:border-gray-700">
+        <div className="bg-white dark:bg-background p-6 border-b border-gray-200 dark:border-border flex-shrink-0 overflow-y-auto" style={{ maxHeight: 'calc(40vh - 64px)' }}>
           <div className="flex gap-4">
             {/* Upvote Button - Left Side */}
             <div className="flex flex-col items-center gap-1">
@@ -812,13 +906,45 @@ export function PostDetails({
                   {post.description}
                 </p>
               )}
+
+              {/* Images Gallery */}
+              {post.images && post.images.length > 0 && (
+                <div className="mt-4 space-y-2">
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                    Attachments ({post.images.length})
+                  </p>
+                  <div className={cn(
+                    "grid gap-3",
+                    post.images.length === 1 && "grid-cols-1 max-w-md",
+                    post.images.length === 2 && "grid-cols-2",
+                    post.images.length >= 3 && "grid-cols-3"
+                  )}>
+                    {post.images.map((url, index) => (
+                      <div
+                        key={index}
+                        className="relative group aspect-video rounded-lg overflow-hidden border border-border bg-muted cursor-pointer hover:opacity-90 transition-opacity"
+                        onClick={() => window.open(url, '_blank')}
+                      >
+                        <img
+                          src={url}
+                          alt={`Attachment ${index + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                          <Eye className="h-6 w-6 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
 
         {/* Activity Feed Section */}
-        <div className="flex-1 flex flex-col overflow-hidden bg-white dark:bg-gray-900">
-          <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+        <div className="flex-1 flex flex-col bg-white dark:bg-background min-h-0">
+          <div className="p-3 border-b border-gray-200 dark:border-border flex items-center justify-between flex-shrink-0 bg-white dark:bg-background">
             <h3 className="font-semibold text-base text-gray-900 dark:text-white">Activity Feed</h3>
             <Select defaultValue="all">
               <SelectTrigger className="w-40 h-9">
@@ -833,7 +959,7 @@ export function PostDetails({
           </div>
 
         {/* Comments List */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0">
           {loadingComments ? (
             <div className="flex justify-center py-8">
               <Loader2 className="h-6 w-6 animate-spin text-gray-400 dark:text-gray-500" />
@@ -862,32 +988,26 @@ export function PostDetails({
           )}
         </div>
 
-        {/* Add Comment */}
-        <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
-          <div className="space-y-2">
+        {/* Add Comment - Sticky at bottom */}
+        <div className="p-3 border-t-2 border-gray-300 dark:border-border bg-white dark:bg-card flex-shrink-0 shadow-lg">
+          <div className="flex gap-2 items-end">
             <Textarea
               placeholder="Write a comment..."
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
-              rows={3}
-              className="resize-none dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+              rows={1}
+              className="resize-none dark:bg-card dark:border-border dark:text-white flex-1"
             />
             <Button
               onClick={handleAddComment}
               disabled={!newComment.trim() || submittingComment}
-              className="w-full"
               size="sm"
+              className="shrink-0"
             >
               {submittingComment ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Posting...
-                </>
+                <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
-                <>
-                  <Send className="mr-2 h-4 w-4" />
-                  Post Comment
-                </>
+                <Send className="h-4 w-4" />
               )}
             </Button>
           </div>
@@ -898,20 +1018,23 @@ export function PostDetails({
       {/* End of Main Content */}
 
       {/* Details Sidebar - Right Side */}
-      <div className="w-80 bg-white dark:bg-gray-900 border-l border-gray-200 dark:border-gray-700 flex-shrink-0 overflow-y-auto">
+      <div className="w-80 bg-white dark:bg-gray-900 border-l border-gray-200 dark:border-gray-800 flex-shrink-0 overflow-y-auto min-h-screen">
         <div className="p-6 space-y-6">
           <h3 className="font-semibold text-lg text-gray-900 dark:text-white">Details</h3>
 
           <div className="space-y-4">
             {/* Public Link */}
             <div>
-              <label className="text-sm text-gray-600 dark:text-gray-400 block mb-2">Public link</label>
+              <label className="text-sm font-bold text-gray-900 dark:text-white block mb-3">
+                🔗 Public Board Link
+              </label>
               <div className="flex gap-2">
                 <input
                   type="text"
                   value={getPublicLink()}
                   readOnly
-                  className="flex-1 text-sm bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded px-3 py-2 truncate text-gray-900 dark:text-white"
+                  placeholder="Loading link..."
+                  className="flex-1 text-sm bg-gray-100 dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-700 rounded-lg px-4 py-3 truncate text-primary font-medium"
                 />
                 <Button
                   size="sm"
@@ -941,7 +1064,9 @@ export function PostDetails({
             {/* Board */}
             <div>
               <label className="text-sm text-gray-600 dark:text-gray-400 block mb-2">Board</label>
-              <div className="text-sm font-medium text-gray-900 dark:text-white">{currentBoard?.name || "—"}</div>
+              <div className="text-sm font-medium text-gray-900 dark:text-white">
+                {currentBoard?.name || post.board?.name || "—"}
+              </div>
             </div>
 
             {/* Status */}
@@ -979,10 +1104,12 @@ export function PostDetails({
               <div className="text-sm text-gray-500 dark:text-gray-400">Comming soon</div>
             </div>
 
-            {/* Category - Placeholder */}
+            {/* Category */}
             <div>
               <label className="text-sm text-gray-600 dark:text-gray-400 block mb-2">Category</label>
-              <button className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">Comming soon</button>
+              <div className="text-sm font-medium text-gray-900 dark:text-white">
+                {post.category || currentBoard?.category || "N/A"}
+              </div>
             </div>
 
             {/* Add to Roadmap Button */}
@@ -992,7 +1119,7 @@ export function PostDetails({
                 <Button
                   onClick={() => setShowRoadmapModal(true)}
                   variant="outline"
-                  className="w-full justify-start gap-2 dark:border-gray-700 dark:hover:bg-gray-800"
+                  className="w-full justify-start gap-2 dark:border-border dark:hover:bg-gray-800"
                   size="sm"
                 >
                   <svg
@@ -1033,7 +1160,7 @@ export function PostDetails({
 
       {/* Edit Post Dialog */}
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent className="dark:bg-gray-900 dark:border-gray-700">
+        <DialogContent className="dark:bg-background dark:border-border">
           <DialogHeader>
             <DialogTitle className="dark:text-white">Edit Post</DialogTitle>
             <DialogDescription className="dark:text-gray-400">
@@ -1048,7 +1175,7 @@ export function PostDetails({
                 value={editFormData.title}
                 onChange={(e) => setEditFormData({ ...editFormData, title: e.target.value })}
                 placeholder="Enter post title"
-                className="mt-1 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+                className="mt-1 dark:bg-card dark:border-border dark:text-white"
               />
             </div>
             <div>
@@ -1059,12 +1186,12 @@ export function PostDetails({
                 onChange={(e) => setEditFormData({ ...editFormData, description: e.target.value })}
                 placeholder="Enter post description"
                 rows={6}
-                className="mt-1 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+                className="mt-1 dark:bg-card dark:border-border dark:text-white"
               />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowEditDialog(false)} className="dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:bg-gray-700">
+            <Button variant="outline" onClick={() => setShowEditDialog(false)} className="dark:bg-card dark:border-border dark:text-white dark:hover:bg-gray-700">
               Cancel
             </Button>
             <Button onClick={handleEditPost}>
@@ -1081,6 +1208,17 @@ export function PostDetails({
         postId={post.id}
         postTitle={post.title}
         organizationId={organization?.id || ''}
+      />
+
+      {/* Completion Changelog Dialog */}
+      <CompletionChangelogDialog
+        open={showChangelogDialog}
+        onOpenChange={setShowChangelogDialog}
+        postTitle={post.title}
+        postDescription={post.description}
+        postId={post.id}
+        onChangelogCreated={handleChangelogCreated}
+        onSkip={handleSkipChangelog}
       />
     </div>
   );

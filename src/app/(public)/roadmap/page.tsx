@@ -219,7 +219,7 @@ export default function RoadmapIndexPage() {
         <Card className="max-w-md">
           <CardContent className="pt-6 text-center space-y-4">
             <div className="text-6xl">📋</div>
-            <h2 className="text-2xl font-bold text-gray-900">No Roadmap Available</h2>
+            <h2 className="text-2xl font-switzer font-medium text-gray-900">No Roadmap Available</h2>
             <p className="text-gray-600">
               There are no public roadmap items to display at this time.
             </p>
@@ -253,7 +253,7 @@ export default function RoadmapIndexPage() {
         <div className="text-center space-y-2 mb-8">
           <div className="flex items-center justify-center gap-2 mb-2">
             <Sparkles className="h-8 w-8 text-primary" />
-            <h1 className="text-4xl font-bold text-gray-900">{organizationName} Roadmap</h1>
+            <h1 className="text-4xl font-switzer font-medium text-gray-900">{organizationName} Roadmap</h1>
           </div>
           <p className="text-lg text-gray-600">
             See what we're working on and what's coming next

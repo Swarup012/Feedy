@@ -31,9 +31,11 @@ import { IconDisplay } from "@/components/ui/icon-picker";
 
 interface SubmitFeedbackProps {
   boards?: Board[];
+  buttonText?: string;
+  variant?: "default" | "outline";
 }
 
-export function SubmitFeedback({ boards = [] }: SubmitFeedbackProps) {
+export function SubmitFeedback({ boards = [], buttonText = "Submit Feedback", variant = "default" }: SubmitFeedbackProps) {
   const { isAuthenticated } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
@@ -113,9 +115,9 @@ export function SubmitFeedback({ boards = [] }: SubmitFeedbackProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>
+        <Button variant={variant} className={variant === "outline" ? "bg-white dark:bg-slate-900 text-primary hover:bg-slate-50 dark:hover:bg-slate-800 border-slate-300 dark:border-slate-700" : ""}>
           <Plus className="mr-2 h-4 w-4" />
-          Submit Feedback
+          {buttonText}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[525px]">

@@ -15,7 +15,7 @@ import { CreditCard, Check, X, Zap } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import stripeService from '@/services/stripeService';
+import paddleService from '@/services/paddleService';
 
 interface UpgradeDialogProps {
   open: boolean;
@@ -29,22 +29,27 @@ const FEATURE_LIMITS = {
   boards: {
     free: '3 boards',
     starter: 'Unlimited boards',
+    pro: 'Unlimited boards',
   },
   posts: {
     free: '5 posts per board',
     starter: 'Unlimited posts',
+    pro: 'Unlimited posts',
   },
   team_members: {
     free: '3 team members',
     starter: '5 team members',
+    pro: '15 team members',
   },
   roadmap_items: {
     free: '1 roadmap',
     starter: '1 roadmap',
+    pro: '1 roadmap',
   },
 };
 
 const FREE_PLAN_FEATURES = [
+  '1 Organization',
   '3 feedback boards',
   '5 posts per board',
   '20 tracked users',
@@ -54,11 +59,26 @@ const FREE_PLAN_FEATURES = [
 ];
 
 const STARTER_PLAN_FEATURES = [
+  '1 Organization',
   'Unlimited boards',
   'Unlimited posts',
   '125+ tracked users',
   '5 team members',
   '1 roadmap',
+  'Advanced analytics',
+  'Custom branding',
+  '$6 per 50 additional users',
+  '14-day free trial',
+];
+
+const PRO_PLAN_FEATURES = [
+  '1 Organization',
+  'Unlimited boards',
+  'Unlimited posts',
+  '125+ tracked users',
+  '15 team members',
+  '1 roadmap',
+  'Priority support',
   'Advanced analytics',
   'Custom branding',
   '$6 per 50 additional users',
@@ -76,19 +96,73 @@ export function UpgradeDialog({
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
+  const [selectedPlan, setSelectedPlan] = useState<'starter' | 'pro'>('starter');
 
-  const handleUpgrade = async () => {
+  const handleUpgrade = async (skipTrial: boolean = false) => {
     try {
       setLoading(true);
-      const response = await stripeService.createCheckoutSession({
-        plan: 'starter',
+      const response = await paddleService.createCheckoutSession({
+        plan: selectedPlan,
         billingCycle: billingCycle,
-        skipTrial: false,
+        skipTrial,
       });
       
       if (response.success && response.data.url) {
-        // Redirect to Stripe Checkout
-        window.location.href = response.data.url;
+        // Check if we have a transactionId (Paddle Billing with overlay)
+        if (response.data.transactionId) {
+          console.log('🔵 Opening Paddle overlay checkout...', response.data.transactionId);
+          
+          try {
+            // Load Paddle.js dynamically if not already loaded
+            if (!(window as any).Paddle) {
+              console.log('📦 Loading Paddle.js SDK...');
+              const script = document.createElement('script');
+              script.src = 'https://cdn.paddle.com/paddle/v2/paddle.js';
+              script.async = true;
+              document.body.appendChild(script);
+              
+              await new Promise((resolve, reject) => {
+                script.onload = () => {
+                  console.log('✅ Paddle.js loaded successfully');
+                  resolve(true);
+                };
+                script.onerror = () => reject(new Error('Failed to load Paddle SDK'));
+                setTimeout(() => reject(new Error('Paddle SDK load timeout')), 10000);
+              });
+            }
+            
+            // Initialize Paddle with your client-side token
+            const Paddle = (window as any).Paddle;
+            if (!Paddle) throw new Error('Paddle SDK not available');
+            
+            console.log('⚙️ Initializing Paddle with client token...');
+            Paddle.Environment.set('sandbox');
+            Paddle.Setup({ 
+              token: 'test_67753ae11c6f27e94e5909861a5' // Your client-side token
+            });
+            
+            console.log('🚀 Opening Paddle overlay...');
+            Paddle.Checkout.open({
+              transactionId: response.data.transactionId,
+              settings: {
+                displayMode: 'overlay',
+                theme: 'light',
+                successUrl: window.location.origin + '/admin?checkout=success'
+              }
+            });
+            
+            console.log('✅ Overlay opened successfully!');
+            onOpenChange(false); // Close the dialog
+            setLoading(false);
+          } catch (overlayError) {
+            console.error('⚠️ Overlay failed, falling back to redirect:', overlayError);
+            window.location.href = response.data.url;
+          }
+        } else {
+          // Fallback: Redirect to checkout URL
+          console.log('🔄 Redirecting to checkout page...');
+          window.location.href = response.data.url;
+        }
       } else {
         throw new Error('Failed to create checkout session');
       }
@@ -114,10 +188,17 @@ export function UpgradeDialog({
 
   const defaultDescription = description || `You've reached the limit for ${featureTitle.toLowerCase()}s on the Free plan. Upgrade to Starter for more access.`;
 
-  const monthlyPrice = 19;
-  const yearlyPrice = 180;
-  const effectiveMonthlyYearly = 15;
-  const savings = 48;
+  const starterMonthlyPrice = 19;
+  const starterYearlyPrice = 180;
+  const starterEffectiveMonthly = 15; // $180/year ÷ 12 months = $15/month
+  const proMonthlyPrice = 49;
+  const proYearlyPrice = 540;
+  const proEffectiveMonthly = 45; // $540/year ÷ 12 months = $45/month
+  
+  const monthlyPrice = selectedPlan === 'pro' ? proMonthlyPrice : starterMonthlyPrice;
+  const yearlyPrice = selectedPlan === 'pro' ? proYearlyPrice : starterYearlyPrice;
+  const effectiveMonthlyYearly = selectedPlan === 'pro' ? proEffectiveMonthly : starterEffectiveMonthly;
+  const savings = selectedPlan === 'pro' ? 48 : 48; // Both save $48/year
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -134,8 +215,29 @@ export function UpgradeDialog({
           </DialogDescription>
         </DialogHeader>
 
+        {/* Plan Selector */}
+        <div className="flex items-center justify-center gap-2 py-3 border-b">
+          <Button
+            variant={selectedPlan === 'starter' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setSelectedPlan('starter')}
+            className={selectedPlan === 'starter' ? 'bg-blue-500 hover:bg-blue-600' : ''}
+          >
+            Starter ${starterMonthlyPrice}/mo
+          </Button>
+          <Button
+            variant={selectedPlan === 'pro' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setSelectedPlan('pro')}
+            className={selectedPlan === 'pro' ? 'bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700' : ''}
+          >
+            Pro ${proMonthlyPrice}/mo
+            <Badge className="ml-2 bg-yellow-500 text-xs">15 Members</Badge>
+          </Button>
+        </div>
+
         {/* Billing Cycle Toggle */}
-        <div className="flex items-center justify-center gap-4 py-4 border-y">
+        <div className="flex items-center justify-center gap-4 py-4 border-b">
           <span className={`text-sm font-medium ${billingCycle === 'monthly' ? 'text-gray-900 dark:text-white' : 'text-gray-500'}`}>
             Monthly
           </span>
@@ -156,7 +258,7 @@ export function UpgradeDialog({
         {/* Plan Comparison */}
         <div className="grid grid-cols-2 gap-4 my-6">
           {/* Free Plan */}
-          <div className="border rounded-lg p-4 bg-gray-50 dark:bg-gray-800">
+          <div className="border rounded-lg p-4 bg-gray-50 dark:bg-card">
             <div className="flex items-center justify-between mb-3">
               <h3 className="font-semibold text-gray-900 dark:text-white">Free Plan</h3>
               <Badge variant="outline">Current</Badge>
@@ -183,20 +285,31 @@ export function UpgradeDialog({
             </div>
           </div>
 
-          {/* Starter Plan */}
-          <div className="border-2 border-blue-500 rounded-lg p-4 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950 dark:to-purple-950 relative">
+          {/* Selected Plan */}
+          <div className={`border-2 rounded-lg p-4 relative ${
+            selectedPlan === 'pro' 
+              ? 'border-purple-500 bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-950 dark:to-blue-950' 
+              : 'border-blue-500 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950 dark:to-purple-950'
+          }`}>
             <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-              <Badge className="bg-gradient-to-r from-blue-500 to-purple-600 text-white">
-                Recommended
+              <Badge className={selectedPlan === 'pro' 
+                ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white' 
+                : 'bg-gradient-to-r from-blue-500 to-purple-600 text-white'
+              }>
+                {selectedPlan === 'pro' ? 'Pro Plan' : 'Recommended'}
               </Badge>
             </div>
             <div className="flex items-center justify-between mb-3">
-              <h3 className="font-semibold text-gray-900 dark:text-white">Starter Plan</h3>
+              <h3 className="font-semibold text-gray-900 dark:text-white">
+                {selectedPlan === 'pro' ? 'Pro Plan' : 'Starter Plan'}
+              </h3>
             </div>
             <div className="mb-3">
               {billingCycle === 'monthly' ? (
                 <>
-                  <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                  <div className={`text-2xl font-bold ${
+                    selectedPlan === 'pro' ? 'text-purple-600 dark:text-purple-400' : 'text-blue-600 dark:text-blue-400'
+                  }`}>
                     ${monthlyPrice}
                     <span className="text-sm font-normal text-gray-600 dark:text-gray-400">/month</span>
                   </div>
@@ -204,7 +317,9 @@ export function UpgradeDialog({
                 </>
               ) : (
                 <>
-                  <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                  <div className={`text-2xl font-bold ${
+                    selectedPlan === 'pro' ? 'text-purple-600 dark:text-purple-400' : 'text-blue-600 dark:text-blue-400'
+                  }`}>
                     ${effectiveMonthlyYearly}
                     <span className="text-sm font-normal text-gray-600 dark:text-gray-400">/month</span>
                   </div>
@@ -213,11 +328,15 @@ export function UpgradeDialog({
               )}
             </div>
             <div className="space-y-2 text-sm">
-              {STARTER_PLAN_FEATURES.map((feat, idx) => (
+              {(selectedPlan === 'pro' ? PRO_PLAN_FEATURES : STARTER_PLAN_FEATURES).map((feat, idx) => (
                 <div key={idx} className="flex items-start gap-2">
-                  <Check className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                  <Check className={`h-4 w-4 mt-0.5 flex-shrink-0 ${
+                    selectedPlan === 'pro' ? 'text-purple-500' : 'text-green-500'
+                  }`} />
                   <span className={`font-medium ${
-                    feat.includes('trial') ? 'text-green-600 dark:text-green-400' : 'text-gray-900 dark:text-white'
+                    feat.includes('trial') ? 'text-green-600 dark:text-green-400' : 
+                    feat.includes('15 team') || feat.includes('Priority') ? 'text-purple-600 dark:text-purple-400 font-semibold' :
+                    'text-gray-900 dark:text-white'
                   }`}>
                     {feat}
                   </span>
@@ -236,12 +355,15 @@ export function UpgradeDialog({
             Maybe Later
           </Button>
           <Button
-            onClick={handleUpgrade}
+            onClick={() => handleUpgrade(false)}
             disabled={loading}
-            className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
+            className={selectedPlan === 'pro' 
+              ? 'bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700'
+              : 'bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700'
+            }
           >
             <CreditCard className="mr-2 h-4 w-4" />
-            {loading ? 'Loading...' : 'Upgrade to Starter'}
+            {loading ? 'Loading...' : `Start ${selectedPlan === 'pro' ? 'Pro' : 'Starter'} Trial`}
           </Button>
         </DialogFooter>
       </DialogContent>

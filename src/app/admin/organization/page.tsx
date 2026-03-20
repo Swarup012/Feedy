@@ -25,10 +25,18 @@ import {
   Copy,
   Check,
   Mail,
+  Webhook,
+  CreditCard,
+  Globe,
 } from 'lucide-react';
 import { OrganizationSkeleton, MembersTableSkeleton } from '@/components/admin/OrganizationSkeleton';
 import { InviteMemberModal } from '@/components/organization/InviteMemberModal';
 import { PendingInvitations } from '@/components/organization/PendingInvitations';
+import dynamic from 'next/dynamic';
+const WebhooksPage = dynamic(() => import('@/app/admin/webhooks/page'), { ssr: false });
+import { BillingSection } from '@/components/BillingSection';
+import PricingContent from '@/components/PricingContent';
+import { CustomDomainSettings } from '@/components/organization/CustomDomainSettings';
 
 interface Member {
   id: string;
@@ -387,6 +395,14 @@ export default function OrganizationSettingsPage() {
             <ExternalLink className="h-4 w-4 mr-2" />
             Subdomain
           </TabsTrigger>
+          <TabsTrigger value="webhooks">
+            <Webhook className="h-4 w-4 mr-2" />
+            Webhooks
+          </TabsTrigger>
+          <TabsTrigger value="billing">
+            <CreditCard className="h-4 w-4 mr-2" />
+            Billing
+          </TabsTrigger>
         </TabsList>
 
         {/* General Settings */}
@@ -552,54 +568,78 @@ export default function OrganizationSettingsPage() {
 
         {/* Subdomain Tab */}
         <TabsContent value="subdomain">
-          <Card>
-            <CardHeader>
-              <CardTitle>Organization Subdomain</CardTitle>
-              <CardDescription>
-                Your unique subdomain for accessing your organization
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <Label>Current Subdomain</Label>
-                <div className="flex items-center gap-2 mt-2">
-                  <code className="px-4 py-2 bg-muted rounded-md flex-1">
-                    {organization.subdomain}.fady.com
-                  </code>
-                  <Button variant="outline" size="icon" onClick={copySubdomain}>
-                    {copiedSubdomain ? (
-                      <Check className="h-4 w-4 text-green-500" />
-                    ) : (
-                      <Copy className="h-4 w-4" />
-                    )}
-                  </Button>
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Organization Subdomain</CardTitle>
+                <CardDescription>
+                  Your unique subdomain for accessing your organization
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label>Current Subdomain</Label>
+                  <div className="flex items-center gap-2 mt-2">
+                    <code className="px-4 py-2 bg-muted rounded-md flex-1">
+                      {organization.subdomain}.fady.com
+                    </code>
+                    <Button variant="outline" size="icon" onClick={copySubdomain}>
+                      {copiedSubdomain ? (
+                        <Check className="h-4 w-4 text-green-500" />
+                      ) : (
+                        <Copy className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
                 </div>
-              </div>
 
-              <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                <p className="text-sm text-yellow-800">
-                  <strong>Note:</strong> Changing your subdomain will affect all existing links and integrations. This action cannot be undone.
-                </p>
-              </div>
-
-              <div>
-                <Label>Public Access URL</Label>
-                <div className="flex items-center gap-2 mt-2">
-                  <Input
-                    value={`https://${organization.subdomain}.fady.com`}
-                    readOnly
-                    className="flex-1"
-                  />
-                  <Button variant="outline" asChild>
-                    <a href={`https://${organization.subdomain}.fady.com`} target="_blank" rel="noopener noreferrer">
-                      <ExternalLink className="h-4 w-4" />
-                    </a>
-                  </Button>
+                <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                  <p className="text-sm text-yellow-800">
+                    <strong>Note:</strong> Changing your subdomain will affect all existing links and integrations. This action cannot be undone.
+                  </p>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+
+                <div>
+                  <Label>Public Access URL</Label>
+                  <div className="flex items-center gap-2 mt-2">
+                    <Input
+                      value={`https://${organization.subdomain}.fady.com`}
+                      readOnly
+                      className="flex-1"
+                    />
+                    <Button variant="outline" asChild>
+                      <a href={`https://${organization.subdomain}.fady.com`} target="_blank" rel="noopener noreferrer">
+                        <ExternalLink className="h-4 w-4" />
+                      </a>
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Custom Domain Settings */}
+            <CustomDomainSettings organizationId={organization.id} />
+          </div>
         </TabsContent>
+
+        {/* Webhooks Tab */}
+        <TabsContent value="webhooks">
+          <WebhooksPage />
+        </TabsContent>
+
+        {/* Billing Tab */}
+        <TabsContent value="billing">
+          <div className="space-y-8">
+            {/* Current subscription status + cancel */}
+            <BillingSection />
+            {/* Full pricing cards to upgrade/downgrade */}
+            <div className="border-t pt-6">
+              <h3 className="text-xl font-semibold mb-6">Plans & Pricing</h3>
+              <PricingContent />
+            </div>
+          </div>
+        </TabsContent>
+
       </Tabs>
 
       {/* Invitation Modal */}

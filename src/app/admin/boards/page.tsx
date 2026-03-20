@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { boardService, Board } from '@/services/boardService';
 import { useToast } from '@/hooks/use-toast';
+import { useErrorHandler, useFormHandler } from '@/hooks/useErrorHandler';
 import { useAuthContext } from '@/context/AuthContext';
 import {
   Card,
@@ -62,6 +63,8 @@ export default function BoardsManagementPage() {
   const router = useRouter();
   const { user } = useAuthContext();
   const { toast } = useToast();
+  const handleLoadError = useErrorHandler({ context: 'loadBoards', showToast: true, logError: true });
+  const handleBoardError = useFormHandler({ context: 'boardOperation', showToast: true, logError: true });
   
   const [boards, setBoards] = useState<Board[]>([]);
   const [loading, setLoading] = useState(true);
@@ -91,12 +94,8 @@ export default function BoardsManagementPage() {
       setLoading(true);
       const response = await boardService.getAllBoards();
       setBoards(response.data.boards);
-    } catch (error: any) {
-      toast({
-        title: 'Error',
-        description: error.message || 'Failed to load boards',
-        variant: 'destructive',
-      });
+    } catch (error) {
+      handleLoadError(error);
     } finally {
       setLoading(false);
     }
@@ -121,12 +120,8 @@ export default function BoardsManagementPage() {
       setShowCreateDialog(false);
       resetForm();
       loadBoards();
-    } catch (error: any) {
-      toast({
-        title: 'Error',
-        description: error.message || 'Failed to create board',
-        variant: 'destructive',
-      });
+    } catch (error) {
+      handleBoardError(error);
     }
   };
 
@@ -152,12 +147,8 @@ export default function BoardsManagementPage() {
       setSelectedBoard(null);
       resetForm();
       loadBoards();
-    } catch (error: any) {
-      toast({
-        title: 'Error',
-        description: error.message || 'Failed to update board',
-        variant: 'destructive',
-      });
+    } catch (error) {
+      handleBoardError(error);
     }
   };
 
@@ -173,12 +164,8 @@ export default function BoardsManagementPage() {
       setShowDeleteDialog(false);
       setSelectedBoard(null);
       loadBoards();
-    } catch (error: any) {
-      toast({
-        title: 'Error',
-        description: error.message || 'Failed to delete board',
-        variant: 'destructive',
-      });
+    } catch (error) {
+      handleBoardError(error);
     }
   };
 
@@ -453,31 +440,22 @@ export default function BoardsManagementPage() {
                 rows={3}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="edit-icon">Icon</Label>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => {
-                    setIconPickerMode('edit');
-                    setShowIconPicker(true);
-                  }}
-                  className="w-full justify-start"
-                >
-                  <IconDisplay iconName={formData.icon} className="h-4 w-4 mr-2" />
-                  {formData.icon || "Choose Icon"}
-                </Button>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="edit-color">Color</Label>
-                <Input
-                  id="edit-color"
-                  type="color"
-                  value={formData.color}
-                  onChange={(e) => handleInputChange('color', e.target.value)}
-                />
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-icon">Icon</Label>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setIconPickerMode('edit');
+                  setShowIconPicker(true);
+                }}
+                className="w-full justify-start"
+              >
+                <div className="h-6 w-6 rounded-lg bg-primary/10 flex items-center justify-center mr-2">
+                  <IconDisplay iconName={formData.icon} className="h-4 w-4 text-primary" />
+                </div>
+                {formData.icon || "Choose Icon"}
+              </Button>
             </div>
             <div className="flex items-center justify-between p-4 rounded-lg border">
               <div>

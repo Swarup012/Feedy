@@ -3,12 +3,13 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
-import trackedUsersService, { 
-  TrackedUsersUsage, 
+import trackedUsersService, {
+  TrackedUsersUsage,
   TrackedUser,
-  HistoricalData 
+  HistoricalData
 } from '@/services/trackedUsersService';
 import { useToast } from '@/hooks/use-toast';
+import { useErrorHandler } from '@/hooks/useErrorHandler';
 import {
   Card,
   CardContent,
@@ -68,6 +69,8 @@ const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444'];
 export default function TrackedUsersPage() {
   const router = useRouter();
   const { toast } = useToast();
+  const handleLoadError = useErrorHandler({ context: 'loadTrackedUsers', showToast: true, logError: true });
+  const handleUsersError = useErrorHandler({ context: 'loadUsersList', showToast: false, logError: true });
 
   const [usage, setUsage] = useState<TrackedUsersUsage | null>(null);
   const [users, setUsers] = useState<TrackedUser[]>([]);
@@ -107,12 +110,7 @@ export default function TrackedUsersPage() {
 
       await loadUsers();
     } catch (error) {
-      console.error('Error loading data:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to load tracked users data',
-        variant: 'destructive',
-      });
+      handleLoadError(error);
     } finally {
       setLoading(false);
     }
@@ -129,10 +127,14 @@ export default function TrackedUsersPage() {
 
       if (response.success) {
         setUsers(response.data.users);
-        setTotalPages(response.data.pagination.pages);
+        setTotalPages(response.data.pagination?.pages ? response.data.pagination.pages : 1);
       }
     } catch (error) {
-      console.error('Error loading users:', error);
+      // Silent error for users list - don't show toast, just log
+      handleUsersError(error);
+      // Still set empty arrays to prevent errors in rendering
+      setUsers([]);
+      setTotalPages(1);
     }
   };
 

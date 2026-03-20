@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Users, TrendingUp, AlertTriangle, CheckCircle, DollarSign, Shield } from 'lucide-react';
+import { Users, TrendingUp, AlertTriangle, CheckCircle, DollarSign, Shield, ChevronRight } from 'lucide-react';
 import trackedUsersService, { TrackedUsersUsage } from '@/services/trackedUsersService';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -19,9 +19,10 @@ interface OverageStatus {
 
 interface TrackedUsersWidgetProps {
   onUsageClick?: () => void;
+  variant?: 'basic' | 'expert';
 }
 
-export function TrackedUsersWidget({ onUsageClick }: TrackedUsersWidgetProps) {
+export function TrackedUsersWidget({ onUsageClick, variant = 'basic' }: TrackedUsersWidgetProps) {
   const [usage, setUsage] = useState<TrackedUsersUsage | null>(null);
   const [overageStatus, setOverageStatus] = useState<OverageStatus | null>(null);
   const [loading, setLoading] = useState(true);
@@ -200,6 +201,138 @@ export function TrackedUsersWidget({ onUsageClick }: TrackedUsersWidgetProps) {
     );
   }
 
+  // Render basic view (compact, original design)
+  if (variant === 'basic') {
+    return (
+      <Card 
+        className={`cursor-pointer transition-all hover:shadow-md ${
+          overageStatus?.overageCost > 0 ? 'border-red-500' :
+          overageStatus?.inGracePeriod ? 'border-yellow-500' :
+          usage.status === 'exceeded' ? 'border-red-500' : 
+          usage.status === 'critical' ? 'border-orange-500' : 
+          usage.status === 'warning' ? 'border-yellow-500' : ''
+        }`}
+        onClick={onUsageClick}
+      >
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <div className="flex items-center gap-2">
+            <CardTitle className="text-sm font-medium">Tracked Users</CardTitle>
+            <div className={getStatusColor(usage.status, overageStatus?.overageCost! > 0)}>
+              {getStatusIcon(usage.status, overageStatus?.warningLevel)}
+            </div>
+          </div>
+          {getStatusBadge(usage.status, usage.usage_percent, overageStatus)}
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            {/* Count Display */}
+            <div className="flex items-baseline gap-2">
+              <div className="text-2xl font-bold">
+                {usage.count.toLocaleString()}
+              </div>
+              <div className="text-sm text-muted-foreground">
+                / {usage.plan_type === 'starter' ? '125' : usage.limit.toLocaleString()}
+                {usage.plan_type === 'starter' && <span className="text-xs ml-1">(+25 grace)</span>}
+              </div>
+            </div>
+
+            {/* Overage Status - Starter Plan Only */}
+            {usage.plan_type === 'starter' && overageStatus && (
+              <div className="space-y-2">
+                {/* Grace Period Warning */}
+                {overageStatus.inGracePeriod && (
+                  <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3">
+                    <div className="flex items-start gap-2">
+                      <Shield className="h-4 w-4 text-yellow-600 flex-shrink-0 mt-0.5" />
+                      <div className="text-xs">
+                        <div className="font-semibold text-yellow-900 dark:text-yellow-100">
+                          Grace Period Active
+                        </div>
+                        <div className="text-yellow-800 dark:text-yellow-200 mt-0.5">
+                          {overageStatus.graceRemaining} users remaining before overage charges
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Overage Charges */}
+                {overageStatus.overageCost > 0 && (
+                  <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3">
+                    <div className="flex items-start gap-2">
+                      <DollarSign className="h-4 w-4 text-red-600 flex-shrink-0 mt-0.5" />
+                      <div className="text-xs">
+                        <div className="font-semibold text-red-900 dark:text-red-100">
+                          Overage This Month: ${overageStatus.overageCost}
+                        </div>
+                        <div className="text-red-800 dark:text-red-200 mt-0.5">
+                          {overageStatus.overageUsers} users over limit ({overageStatus.overageBlocks} block{overageStatus.overageBlocks > 1 ? 's' : ''} × $6)
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Next Bill Preview */}
+                <div className="bg-gray-50 dark:bg-card rounded-lg p-2 text-xs">
+                  <div className="flex justify-between items-center">
+                    <span className="text-muted-foreground">Next bill estimate:</span>
+                    <span className="font-semibold">
+                      ${(19 + (overageStatus.overageCost || 0)).toFixed(2)}
+                    </span>
+                  </div>
+                  {overageStatus.overageCost > 0 && (
+                    <div className="text-[10px] text-muted-foreground mt-1">
+                      $19 base + ${overageStatus.overageCost} overage
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Progress Bar */}
+            <div className="space-y-1">
+              <Progress 
+                value={Math.min(usage.usage_percent, 100)} 
+                className={
+                  overageStatus?.overageCost > 0 ? 'bg-red-100 [&>div]:bg-red-600' :
+                  overageStatus?.inGracePeriod ? 'bg-yellow-100 [&>div]:bg-yellow-600' :
+                  usage.status === 'exceeded' ? 'bg-red-100 [&>div]:bg-red-600' :
+                  usage.status === 'critical' ? 'bg-orange-100 [&>div]:bg-orange-600' :
+                  usage.status === 'warning' ? 'bg-yellow-100 [&>div]:bg-yellow-600' :
+                  ''
+                }
+              />
+              <div className="flex justify-between text-xs text-muted-foreground">
+                <span>{usage.current_period}</span>
+                <span>{usage.days_remaining} days left</span>
+              </div>
+            </div>
+
+            {/* Breakdown (optional - shown if expanded or on hover) */}
+            {usage.breakdown && (
+              <div className="grid grid-cols-3 gap-2 pt-2 border-t">
+                <div className="text-center">
+                  <div className="text-xs text-muted-foreground">Posts</div>
+                  <div className="text-sm font-medium">{usage.breakdown.posts}</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-xs text-muted-foreground">Votes</div>
+                  <div className="text-sm font-medium">{usage.breakdown.votes}</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-xs text-muted-foreground">Comments</div>
+                  <div className="text-sm font-medium">{usage.breakdown.comments}</div>
+                </div>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Render expert view (same as basic for now)
   return (
     <Card 
       className={`cursor-pointer transition-all hover:shadow-md ${
@@ -214,27 +347,15 @@ export function TrackedUsersWidget({ onUsageClick }: TrackedUsersWidgetProps) {
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <div className="flex items-center gap-2">
           <CardTitle className="text-sm font-medium">Tracked Users</CardTitle>
-          <div className={getStatusColor(usage.status, overageStatus?.overageCost! > 0)}>
-            {getStatusIcon(usage.status, overageStatus?.warningLevel)}
-          </div>
+          <ChevronRight className="h-4 w-4 text-muted-foreground" />
         </div>
         {getStatusBadge(usage.status, usage.usage_percent, overageStatus)}
       </CardHeader>
       <CardContent>
-        <div className="space-y-3">
-          {/* Count Display */}
-          <div className="flex items-baseline gap-2">
-            <div className="text-2xl font-bold">
-              {usage.count.toLocaleString()}
-            </div>
-            <div className="text-sm text-muted-foreground">
-              / {usage.plan_type === 'starter' ? '125' : usage.limit.toLocaleString()}
-              {usage.plan_type === 'starter' && <span className="text-xs ml-1">(+25 grace)</span>}
-            </div>
-          </div>
-
-          {/* Overage Status - Starter Plan Only */}
-          {usage.plan_type === 'starter' && overageStatus && (
+        {/* Top Section - Overage Status (Full Width if exists) */}
+        {usage.plan_type === 'starter' && overageStatus && (
+          <div className="mb-3">
+            {/* Overage Status - Starter Plan Only */}
             <div className="space-y-2">
               {/* Grace Period Warning */}
               {overageStatus.inGracePeriod && (
@@ -271,7 +392,7 @@ export function TrackedUsersWidget({ onUsageClick }: TrackedUsersWidgetProps) {
               )}
 
               {/* Next Bill Preview */}
-              <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-2 text-xs">
+              <div className="bg-gray-50 dark:bg-card rounded-lg p-2 text-xs">
                 <div className="flex justify-between items-center">
                   <span className="text-muted-foreground">Next bill estimate:</span>
                   <span className="font-semibold">
@@ -285,30 +406,47 @@ export function TrackedUsersWidget({ onUsageClick }: TrackedUsersWidgetProps) {
                 )}
               </div>
             </div>
-          )}
+          </div>
+        )}
 
-          {/* Progress Bar */}
-          <div className="space-y-1">
-            <Progress 
-              value={Math.min(usage.usage_percent, 100)} 
-              className={
-                overageStatus?.overageCost > 0 ? 'bg-red-100 [&>div]:bg-red-600' :
-                overageStatus?.inGracePeriod ? 'bg-yellow-100 [&>div]:bg-yellow-600' :
-                usage.status === 'exceeded' ? 'bg-red-100 [&>div]:bg-red-600' :
-                usage.status === 'critical' ? 'bg-orange-100 [&>div]:bg-orange-600' :
-                usage.status === 'warning' ? 'bg-yellow-100 [&>div]:bg-yellow-600' :
-                ''
-              }
-            />
-            <div className="flex justify-between text-xs text-muted-foreground">
-              <span>{usage.current_period}</span>
-              <span>{usage.days_remaining} days left</span>
+        {/* Bottom Section - Progress Bar (80%) + Breakdown (20%) */}
+        <div className="flex gap-4 items-center">
+          {/* Left Section - Progress Bar (80%) */}
+          <div className="w-[80%] space-y-2">
+          {/* Count and Progress Bar */}
+          <div className="flex items-center gap-3">
+            {/* Count Display - Left */}
+            <div className="flex items-baseline gap-1 text-sm font-medium whitespace-nowrap">
+              <span className="text-foreground">{usage.count.toLocaleString()}</span>
+              <span className="text-muted-foreground">/ {usage.plan_type === 'starter' ? '125' : usage.limit.toLocaleString()}</span>
+            </div>
+            
+            {/* Progress Bar */}
+            <div className="flex-1">
+              <Progress 
+                value={Math.min(usage.usage_percent, 100)} 
+                className={
+                  overageStatus?.overageCost > 0 ? 'bg-red-100 [&>div]:bg-red-600' :
+                  overageStatus?.inGracePeriod ? 'bg-yellow-100 [&>div]:bg-yellow-600' :
+                  usage.status === 'exceeded' ? 'bg-red-100 [&>div]:bg-red-600' :
+                  usage.status === 'critical' ? 'bg-orange-100 [&>div]:bg-orange-600' :
+                  usage.status === 'warning' ? 'bg-yellow-100 [&>div]:bg-yellow-600' :
+                  ''
+                }
+              />
             </div>
           </div>
+          
+          {/* Period Info - Bottom */}
+          <div className="flex justify-between text-xs text-muted-foreground">
+            <span>{usage.current_period}</span>
+            <span>{usage.days_remaining} days left</span>
+          </div>
+          </div>
 
-          {/* Breakdown (optional - shown if expanded or on hover) */}
+          {/* Right Section - 20% - Breakdown */}
           {usage.breakdown && (
-            <div className="grid grid-cols-3 gap-2 pt-2 border-t">
+            <div className="w-[20%] flex flex-col justify-center gap-3">
               <div className="text-center">
                 <div className="text-xs text-muted-foreground">Posts</div>
                 <div className="text-sm font-medium">{usage.breakdown.posts}</div>

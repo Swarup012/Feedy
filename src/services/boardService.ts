@@ -8,7 +8,6 @@ export interface Board {
   is_private: boolean;
   category?: string;
   owner_id: string;
-  color: string;
   icon: string;
   visible_to_roles?: string[]; // ✅ Job roles that can see this board
   post_count: number;
@@ -22,7 +21,6 @@ export interface BoardCategory {
   slug: string;
   description?: string;
   icon: string;
-  color: string;
 }
 
 export const boardService = {
@@ -74,7 +72,6 @@ export const boardService = {
     description?: string;
     is_private?: boolean;
     category?: string;
-    color?: string;
     icon?: string;
     visible_to_roles?: string[]; // ✅ Job role targeting
   }): Promise<{ success: boolean; data: { board: Board } }> {

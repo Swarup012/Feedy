@@ -22,40 +22,43 @@ const roles = [
 
 export function WelcomeStep({ data, onUpdate }: WelcomeStepProps) {
   return (
-    <div className="space-y-6">
-      <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold text-gray-900 mb-2">
-          Welcome to Fady! 👋
+    <div className="space-y-8">
+      <div className="space-y-2">
+        <h2 className="text-2xl font-semibold text-foreground">
+          Welcome to Faddy
         </h2>
-        <p className="text-gray-600">
+        <p className="text-muted-foreground">
           Let's get you set up in just a few steps
         </p>
       </div>
 
-      <div>
-        <Label className="text-lg font-semibold mb-4 block">
+      <div className="space-y-4">
+        <Label className="text-sm font-medium">
           What's your role?
         </Label>
         <RadioGroup
           value={data.role}
           onValueChange={(value) => onUpdate({ role: value })}
-          className="space-y-3"
+          className="space-y-2"
         >
           {roles.map((role) => {
             const Icon = role.icon;
+            const isSelected = data.role === role.value;
             return (
               <div
                 key={role.value}
-                className="flex items-center space-x-3 border rounded-lg p-4 hover:bg-gray-50 cursor-pointer transition-colors"
+                className={`flex items-center space-x-3 border rounded-lg p-4 cursor-pointer transition-all ${
+                  isSelected 
+                    ? 'border-primary bg-primary/5' 
+                    : 'border-border hover:border-primary/50 hover:bg-accent'
+                }`}
               >
                 <RadioGroupItem value={role.value} id={role.value} />
                 <div className="flex items-center gap-3 flex-1">
-                  <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <Icon className="h-5 w-5 text-blue-600" />
-                  </div>
+                  <Icon className={`h-5 w-5 ${isSelected ? 'text-primary' : 'text-muted-foreground'}`} />
                   <Label
                     htmlFor={role.value}
-                    className="text-base font-medium cursor-pointer flex-1"
+                    className="text-sm font-medium cursor-pointer flex-1"
                   >
                     {role.label}
                   </Label>

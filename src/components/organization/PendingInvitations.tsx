@@ -250,7 +250,7 @@ export function PendingInvitations({ organizationId, refreshTrigger }: PendingIn
                 {otherInvitations.slice(0, 5).map((invitation) => (
                   <div
                     key={invitation.id}
-                    className="flex items-center justify-between p-3 text-sm bg-gray-50 dark:bg-gray-800 rounded-lg"
+                    className="flex items-center justify-between p-3 text-sm bg-gray-50 dark:bg-card rounded-lg"
                   >
                     <div className="flex items-center gap-2 flex-1 min-w-0">
                       <span className="truncate text-gray-700 dark:text-gray-300">{invitation.email}</span>

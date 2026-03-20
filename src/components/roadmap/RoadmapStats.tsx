@@ -16,7 +16,7 @@ export default function RoadmapStats({ stats }: RoadmapStatsProps) {
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
       {items.map(item => (
-        <div key={item.label} className="bg-white rounded-lg border p-4">
+        <div key={item.label} className="bg-white dark:bg-background rounded-lg border dark:border-border p-4">
           <div className="text-sm text-gray-600 mb-1">{item.label}</div>
           <div className="text-3xl font-bold text-gray-900">{item.value}</div>
         </div>

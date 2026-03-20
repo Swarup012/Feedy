@@ -170,7 +170,7 @@ export function FirstBoardWelcomeDialog({
                 </div>
               </div>
 
-              <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 mt-6">
+              <div className="bg-gray-50 dark:bg-card rounded-lg p-4 mt-6">
                 <p className="text-sm text-gray-600 dark:text-gray-400 text-center">
                   💡 <strong>Pro tip:</strong> You can create multiple boards for different products, features, or teams!
                 </p>

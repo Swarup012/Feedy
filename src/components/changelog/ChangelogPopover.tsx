@@ -103,12 +103,12 @@ export function ChangelogPopover() {
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className="w-[400px] p-0 shadow-xl border-gray-200 dark:border-gray-700"
+        className="w-[400px] p-0 shadow-xl border-gray-200 dark:border-border"
         align="end"
         sideOffset={8}
       >
         {/* Header */}
-        <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
+        <div className="px-4 py-3 border-b border-gray-200 dark:border-border">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Sparkles className="h-5 w-5 text-blue-600" />
@@ -208,7 +208,7 @@ export function ChangelogPopover() {
         </ScrollArea>
 
         {/* Footer */}
-        <div className="border-t border-gray-200 dark:border-gray-700 px-4 py-3">
+        <div className="border-t border-gray-200 dark:border-border px-4 py-3">
           <Button
             variant="outline"
             size="sm"

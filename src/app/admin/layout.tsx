@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { OrganizationSwitcher } from "@/components/organization/OrganizationSwitcher";
 import { ChangelogPopover } from "@/components/changelog/ChangelogPopover";
+import { LayoutDashboard, Sun, Moon, CreditCard } from "lucide-react";
 import {useState,useEffect} from "react"
 
 export default function AdminLayout({
@@ -63,40 +64,51 @@ export default function AdminLayout({
 
   const navItems = [
     { name: "Feedback", path: feedbackPath }, // Use state instead of function
-    { name: "Changelog", path: "/admin/changelog" },
     { name: "Roadmap", path: "/admin/roadmap" },
+    { name: "Changelog", path: "/admin/changelog" },
     { name: "Profile", path: "/admin/profile" },
-    { name: "Explore", path: "/feedback"}
+    { name: "Explore", path: "/feedback"},
+    { name: "Contact Us", path: "/contact"}
   ];
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
+    <div className="h-screen flex flex-col bg-gray-50 dark:bg-background overflow-hidden">
       {/* 🔹 Navbar */}
 
 
-<nav className="fixed top-0 left-0 right-0 bg-white dark:bg-gray-800 border-b shadow-sm z-50">
-        <div className="container mx-auto flex items-center justify-between px-6 py-4">
+<nav className="fixed top-0 left-0 right-0 bg-primary backdrop-blur-xl border-b border-primary shadow-sm z-50 flex-shrink-0">
+        <div className="max-w-[1600px] mx-auto flex items-center justify-between px-4 sm:px-6 lg:px-8 py-3.5">
           {/* Left side - Brand + Org Switcher + Nav */}
-          <div className="flex items-center gap-6">
-            <Link href="/admin" className="text-xl font-bold tracking-tight text-gray-900 dark:text-white">
-              Dashboard
+          <div className="flex items-center gap-3 sm:gap-5">
+            <Link 
+              href="/admin" 
+              className="flex items-center group"
+            >
+              <span className="text-lg font-switzer font-semibold tracking-tight text-white">
+                Dashboard
+              </span>
             </Link>
 
             {/* Organization Switcher */}
-            <OrganizationSwitcher />
+            <div className="border-l border-white/20 pl-3 sm:pl-5">
+              <OrganizationSwitcher />
+            </div>
 
-            <div className="hidden md:flex items-center gap-6">
+            <div className="hidden lg:flex items-center gap-1 ml-2">
               {/* Feedback link - dynamically uses last visited board */}
               <Link
                 href={feedbackPath}
                 className={cn(
-                  "text-sm font-medium transition-colors hover:text-blue-600 dark:hover:text-blue-400",
+                  "relative px-3 py-2 text-base font-switzer font-semibold transition-all rounded-lg",
                   pathname?.startsWith('/admin/feedback')
-                    ? "text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 pb-1"
-                    : "text-gray-600 dark:text-gray-300"
+                    ? "text-white bg-white/20"
+                    : "text-white/70 hover:text-white hover:bg-white/10"
                 )}
               >
                 Feedback
+                {pathname?.startsWith('/admin/feedback') && (
+                  <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1/2 h-0.5 bg-white rounded-full" />
+                )}
               </Link>
               
               {/* Other nav items */}
@@ -105,75 +117,95 @@ export default function AdminLayout({
                   key={item.path}
                   href={item.path}
                   className={cn(
-                    "text-sm font-medium transition-colors hover:text-blue-600 dark:hover:text-blue-400",
+                    "relative px-3 py-2 text-base font-switzer font-semibold transition-all rounded-lg",
                     pathname === item.path
-                      ? "text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 pb-1"
-                      : "text-gray-600 dark:text-gray-300"
+                      ? "text-white bg-white/20"
+                      : "text-white/70 hover:text-white hover:bg-white/10"
                   )}
                 >
                   {item.name}
+                  {pathname === item.path && (
+                    <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1/2 h-0.5 bg-white rounded-full" />
+                  )}
                 </Link>
               ))}
             </div>
           </div>
 
           {/* Right side - Actions & User Menu */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             {/* Changelog Bell */}
             <ChangelogPopover />
             
             {/* Theme Toggle */}
             <button
               onClick={toggleTheme}
-              className="p-2 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-300 shadow-sm"
+              className="p-2.5 rounded-lg bg-white/20 hover:bg-white/30 hover:scale-105 transition-all duration-300"
               aria-label={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
             >
               {theme === "light" ? (
-                <div className="flex items-center gap-2">
-                  <span className="text-lg">🌙</span>
-                </div>
+                <Moon className="h-5 w-5 text-white" />
               ) : (
-                <div className="flex items-center gap-2">
-                  <span className="text-lg">☀️</span>
-                </div>
+                <Sun className="h-5 w-5 text-white" />
               )}
             </button>
 
             {/* User Menu */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="flex items-center gap-2 focus:outline-none">
-                  <Avatar className="h-9 w-9">
+                <button className="flex items-center gap-2 focus:outline-none hover:opacity-80 transition-opacity">
+                  <Avatar className="h-10 w-10 border-2 border-white/30 shadow-md">
                     <AvatarImage src={user?.avatar_url || ""} alt={user?.name || "User"} />
-                    <AvatarFallback>{user?.name?.[0]?.toUpperCase() || "U"}</AvatarFallback>
+                    <AvatarFallback className="bg-white/20 text-white font-semibold">
+                      {user?.name?.[0]?.toUpperCase() || "U"}
+                    </AvatarFallback>
                   </Avatar>
-                  <span className="hidden sm:inline text-sm font-medium text-gray-700 dark:text-gray-200">
+                  <span className="hidden sm:inline text-sm font-switzer font-semibold text-white">
                     {user?.name || "User"}
                   </span>
                 </button>
               </DropdownMenuTrigger>
 
-              <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+              <DropdownMenuContent align="end" className="w-56 p-2">
+                <DropdownMenuLabel className="font-switzer font-bold text-base">My Account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => router.push("/admin/profile")}>
+                <DropdownMenuItem 
+                  onClick={() => router.push("/admin/profile")}
+                  className="cursor-pointer rounded-lg py-2.5 font-medium"
+                >
                   Profile
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => router.push("/admin/organization")}>
+                <DropdownMenuItem 
+                  onClick={() => router.push("/admin/organization")}
+                  className="cursor-pointer rounded-lg py-2.5 font-medium"
+                >
                   Organization Settings
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => router.push("/admin/feedback")}>
+                <DropdownMenuItem 
+                  onClick={() => router.push("/admin/feedback")}
+                  className="cursor-pointer rounded-lg py-2.5 font-medium"
+                >
                   Feedback
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={() => router.push("/pricing")}
+                  className="cursor-pointer rounded-lg py-2.5 font-medium flex items-center gap-2"
+                >
+                  <CreditCard className="h-4 w-4" />
+                  Pricing & Plans
                 </DropdownMenuItem>
 
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => router.push("/create-organization")}>
+                <DropdownMenuItem 
+                  onClick={() => router.push("/create-organization")}
+                  className="cursor-pointer rounded-lg py-2.5 font-medium text-primary"
+                >
                   + Create Organization
                 </DropdownMenuItem>
 
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
-                  className="text-red-600 cursor-pointer"
+                  className="text-red-600 dark:text-red-400 cursor-pointer rounded-lg py-2.5 font-bold"
                   onClick={logout}
                 >
                   Logout
@@ -185,8 +217,7 @@ export default function AdminLayout({
       </nav>
 
       {/* 🔹 Main Content */}
-
-<main className="flex-1 mt-16 overflow-hidden">{children}</main>
+      <main className="flex-1 mt-[70px] overflow-y-auto">{children}</main>
     </div>
   );
 }

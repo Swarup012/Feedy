@@ -314,7 +314,7 @@ export function CreateBoardDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto dark:bg-gray-900 dark:border-gray-700">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto dark:bg-background dark:border-border">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle className="dark:text-white">Create New Board</DialogTitle>
@@ -338,14 +338,14 @@ export function CreateBoardDialog({
                 }
                 maxLength={100}
                 required
-                className="dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+                className="dark:bg-card dark:border-border dark:text-white"
               />
 
               {/* URL Preview */}
               {slug && (
                 <div className="flex items-center gap-2 text-sm">
                   <span className="text-gray-500 dark:text-gray-400">URL:</span>
-                  <code className="bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded text-gray-700 dark:text-gray-300">
+                  <code className="bg-gray-100 dark:bg-card px-2 py-1 rounded text-gray-700 dark:text-gray-300">
                     /board/{slug}
                   </code>
                   {checkingSlug && (
@@ -426,7 +426,7 @@ export function CreateBoardDialog({
                 }
                 rows={3}
                 maxLength={500}
-                className="dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+                className="dark:bg-card dark:border-border dark:text-white"
               />
               <p className="text-xs text-gray-500 dark:text-gray-400">
                 {formData.description.length}/500 characters
@@ -442,7 +442,7 @@ export function CreateBoardDialog({
                   setFormData({ ...formData, is_private: value === "private" })
                 }
               >
-                <div className="flex items-center space-x-2 border border-gray-200 dark:border-gray-700 rounded-lg p-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800">
+                <div className="flex items-center space-x-2 border border-gray-200 dark:border-border rounded-lg p-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800">
                   <RadioGroupItem value="public" id="public" />
                   <div className="flex-1">
                     <label
@@ -460,7 +460,7 @@ export function CreateBoardDialog({
                   </div>
                 </div>
 
-                <div className="flex items-center space-x-2 border border-gray-200 dark:border-gray-700 rounded-lg p-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800">
+                <div className="flex items-center space-x-2 border border-gray-200 dark:border-border rounded-lg p-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800">
                   <RadioGroupItem value="private" id="private" />
                   <div className="flex-1">
                     <label
@@ -520,28 +520,6 @@ export function CreateBoardDialog({
               )}
             </div>
 
-            {/* Board Color */}
-            <div className="space-y-2">
-              <Label>Board Color</Label>
-              <div className="grid grid-cols-5 gap-2">
-                {BOARD_COLORS.map((color) => (
-                  <button
-                    key={color.value}
-                    type="button"
-                    onClick={() =>
-                      setFormData({ ...formData, color: color.value })
-                    }
-                    className={`h-10 rounded-lg border-2 transition-all ${
-                      formData.color === color.value
-                        ? "border-gray-900 scale-110"
-                        : "border-gray-200 hover:border-gray-400"
-                    }`}
-                    style={{ backgroundColor: color.value }}
-                    title={color.name}
-                  />
-                ))}
-              </div>
-            </div>
 
             {/* Board Icon */}
             <div className="space-y-2">
@@ -550,13 +528,10 @@ export function CreateBoardDialog({
                 type="button"
                 variant="outline"
                 onClick={() => setShowIconPicker(true)}
-                className="w-full justify-start h-12 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:bg-gray-700"
+                className="w-full justify-start h-12 dark:bg-card dark:border-border dark:text-white dark:hover:bg-gray-700"
               >
-                <div
-                  className="h-8 w-8 rounded-lg flex items-center justify-center mr-3"
-                  style={{ backgroundColor: `${formData.color}20` }}
-                >
-                  <IconDisplay iconName={formData.icon} className="h-5 w-5" style={{ color: formData.color }} />
+                <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center mr-3">
+                  <IconDisplay iconName={formData.icon} className="h-5 w-5 text-primary" />
                 </div>
                 <span>{formData.icon || "Choose Icon"}</span>
               </Button>
@@ -565,15 +540,9 @@ export function CreateBoardDialog({
             {/* Preview */}
             <div className="space-y-2">
               <Label className="dark:text-gray-300">Preview</Label>
-              <div
-                className="border rounded-lg p-4 flex items-center gap-3 dark:border-gray-700"
-                style={{ borderColor: formData.color }}
-              >
-                <div
-                  className="h-12 w-12 rounded-lg flex items-center justify-center"
-                  style={{ backgroundColor: formData.color + "20" }}
-                >
-                  <IconDisplay iconName={formData.icon} className="h-6 w-6" style={{ color: formData.color }} />
+              <div className="border border-border rounded-lg p-4 flex items-center gap-3">
+                <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <IconDisplay iconName={formData.icon} className="h-6 w-6 text-primary" />
                 </div>
                 <div className="flex-1">
                   <h3 className="font-semibold flex items-center gap-2 text-gray-900 dark:text-white">
@@ -602,7 +571,7 @@ export function CreateBoardDialog({
               variant="outline"
               onClick={() => onOpenChange(false)}
               disabled={creating}
-              className="dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:bg-gray-700"
+              className="dark:bg-card dark:border-border dark:text-white dark:hover:bg-gray-700"
             >
               Cancel
             </Button>

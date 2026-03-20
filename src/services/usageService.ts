@@ -26,9 +26,11 @@ export interface UsageData {
 const usageService = {
   /**
    * Get current usage statistics
+   * @param boardSlug - Optional board slug to get post count for that specific board
    */
-  async getUsage(): Promise<{ success: boolean; data: UsageData }> {
-    const response = await api.get('/api/users/me/usage');
+  async getUsage(boardSlug?: string): Promise<{ success: boolean; data: UsageData }> {
+    const params = boardSlug ? { boardSlug } : {};
+    const response = await api.get('/api/users/me/usage', { params });
     return response.data;
   },
 
@@ -76,26 +78,42 @@ const usageService = {
 
   /**
    * Check if user can create a post
+   * @param boardSlug - The board slug to check post limit for
    */
-  async canCreatePost(): Promise<{ allowed: boolean; reason?: string; resetsAt?: string }> {
+  async canCreatePost(boardSlug?: string): Promise<{ allowed: boolean; reason?: string; resetsAt?: string }> {
     try {
-      const response = await this.getUsage();
+      const response = await this.getUsage(boardSlug);
       const { plan, usage } = response.data;
+
+      console.log('🔍 usageService.canCreatePost - Response:', {
+        plan,
+        boardSlug,
+        postsUsage: usage.posts,
+      });
 
       if (plan === 'starter') {
         return { allowed: true };
       }
 
-      // Check post limit
+      // Check post limit for the specific board
       const { current, limit, resets_at } = usage.posts;
+      
+      // If limit is 'per_board', it means no boardSlug was provided
+      if (limit === 'per_board') {
+        console.log('⚠️ No boardSlug provided, allowing post creation (backend will enforce limit)');
+        return { allowed: true }; // Let backend middleware handle the check
+      }
+
       if (typeof limit === 'number' && current >= limit) {
+        console.log(`🚫 Post limit reached for board: ${current}/${limit}`);
         return {
           allowed: false,
-          reason: `Post limit reached. Free plan allows ${limit} posts per month. Upgrade to Starter for unlimited posts.`,
+          reason: `Post limit reached for this board. Free plan allows ${limit} posts per board. Upgrade to Starter for unlimited posts.`,
           resetsAt: resets_at,
         };
       }
 
+      console.log(`✅ Post creation allowed: ${current}/${limit}`);
       return { allowed: true };
     } catch (error) {
       console.error('Error checking post limit:', error);

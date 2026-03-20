@@ -262,7 +262,7 @@ export default function PublicPostPage() {
         <div className="flex items-center justify-center h-[60vh]">
           <div className="text-center">
             <div className="text-6xl mb-4">🔍</div>
-            <h2 className="text-2xl font-bold mb-2">Post Not Found</h2>
+            <h2 className="text-2xl font-switzer font-medium mb-2">Post Not Found</h2>
             <p className="text-gray-500 mb-4">
               This post may have been deleted or moved.
             </p>
@@ -312,7 +312,7 @@ export default function PublicPostPage() {
                 {/* Post Header */}
                 <div className="flex-1 space-y-2">
                   <div className="flex items-start justify-between gap-4">
-                    <h1 className="text-2xl font-bold">{post.title}</h1>
+                    <h1 className="text-2xl font-switzer font-medium">{post.title}</h1>
                     <Badge className={cn('capitalize', STATUS_COLORS[post.status as keyof typeof STATUS_COLORS])}>
                       {post.status.replace('-', ' ')}
                     </Badge>

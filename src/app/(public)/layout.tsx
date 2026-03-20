@@ -9,6 +9,7 @@ import { Logo } from "@/components/logo";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { LandingFooter } from "@/components/ui/landing-footer";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,6 +23,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
 import { TokenManager } from "@/lib/tokenManager";
+import { saveReturnUrl } from "@/lib/returnUrl";
 import api from "@/lib/api";
 
 // Organization type
@@ -83,38 +85,29 @@ function AppHeader({ organization }: { organization: Organization | null }) {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-50 w-full border-b bg-white dark:bg-gray-950 shadow-sm">
       <div className="container flex h-16 items-center">
         {/* Left Section - Show Organization Branding */}
         <div className="mr-4 hidden md:flex">
           <Link href="/feedback" className="mr-6 flex items-center space-x-2">
-            {organization?.logo_url ? (
-              <img 
-                src={organization.logo_url} 
-                alt={organization.name} 
-                className="h-8 w-8 rounded-md object-cover"
-              />
-            ) : (
-              <Logo className="h-6 w-6" />
-            )}
-            <span className="font-bold">{organization?.name || "Faddy"}</span>
+            <span className="font-switzer font-medium text-gray-900 dark:text-white">{organization?.name || "Faddy"}</span>
           </Link>
           <nav className="flex items-center space-x-6 text-sm font-medium">
             <Link
               href="/feedback"
-              className="transition-colors hover:text-foreground/80 text-foreground"
+              className="transition-colors text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
             >
               Feedback
             </Link>
             <Link
-              href="/roadmap/testing"
-              className="transition-colors hover:text-foreground/80 text-foreground"
+              href="/roadmap"
+              className="transition-colors text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
             >
               Roadmap
             </Link>
             <Link
               href="/changelog"
-              className="transition-colors hover:text-foreground/80 text-foreground"
+              className="transition-colors text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
             >
               Changelog
             </Link>
@@ -185,8 +178,11 @@ function AppHeader({ organization }: { organization: Organization | null }) {
                 </DropdownMenu>
               </>
             ) : (
-              <Button asChild>
-                <Link href="/login">Sign In</Link>
+              <Button onClick={() => {
+                saveReturnUrl(); // Save current page before redirecting
+                window.location.href = '/login';
+              }}>
+                Sign In
               </Button>
             )}
           </div>
@@ -205,7 +201,7 @@ function InvalidOrganizationError() {
           <div className="flex mb-4 gap-2">
             <AlertCircle className="h-8 w-8 text-destructive" />
             <div>
-              <h1 className="text-2xl font-bold mb-2">Organization Not Found</h1>
+              <h1 className="text-2xl font-switzer font-medium mb-2">Organization Not Found</h1>
               <p className="text-muted-foreground mb-4">
                 The organization you're trying to access doesn't exist or has been removed.
               </p>
@@ -228,6 +224,7 @@ export default function AppLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const pathname = usePathname();
   const [organization, setOrganization] = useState<Organization | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -241,7 +238,7 @@ export default function AppLayout({
         const parts = hostname.split(".");
         let subdomain: string | null = null;
 
-        // Handle production (e.g., notion.fady.com)
+        // Handle production (e.g., notion.faddy.site)
         if (parts.length >= 3 && !hostname.includes("localhost")) {
           subdomain = parts[0];
           if (subdomain === "www" || subdomain === "api" || subdomain === "admin") {
@@ -298,6 +295,7 @@ export default function AppLayout({
     <div className="min-h-screen flex flex-col">
       <AppHeader organization={organization} />
       <main className="flex-1">{children}</main>
+      <LandingFooter showCTA={false} />
     </div>
   );
 }

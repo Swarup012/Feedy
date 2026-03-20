@@ -22,7 +22,12 @@ export default {
   				'sans-serif'
   			],
   			headline: [
+  				'Switzer',
   				'Inter',
+  				'sans-serif'
+  			],
+  			switzer: [
+  				'Switzer',
   				'sans-serif'
   			],
   			code: [

@@ -9,6 +9,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { boardService, Board } from "@/services/boardService";
 import { postService, Post } from "@/services/postService";
 import { useToast } from "@/hooks/use-toast";
+import { IconDisplay } from "@/components/ui/icon-picker";
 import {
   Card,
   CardContent,
@@ -195,11 +196,11 @@ export default function DashboardPage() {
     <ProtectedRoute allowedRoles={["owner", "admin", "member", "user"]}>
       <div className="min-h-screen flex flex-col bg-gray-50">
         {/* Navbar */}
-        <nav className="fixed top-0 left-0 right-0 bg-white border-b shadow-sm z-50">
+        <nav className="fixed top-0 left-0 right-0 bg-primary border-b border-primary shadow-sm z-50">
           <div className="container mx-auto flex items-center justify-between px-6 py-4">
             {/* Left side - Brand + Org Switcher + Nav Links */}
             <div className="flex items-center gap-6">
-              <Link href="/dashboard" className="text-xl font-bold tracking-tight text-gray-900">
+              <Link href="/dashboard" className="text-xl font-bold tracking-tight text-white">
                 Dashboard
               </Link>
 
@@ -210,14 +211,14 @@ export default function DashboardPage() {
               <div className="hidden md:flex items-center gap-4">
                 <Link
                   href="/feedback"
-                  className="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors"
+                  className="text-sm font-medium text-white/80 hover:text-white transition-colors"
                 >
                   Feedback Boards
                 </Link>
                 {boards.length > 0 && (
                   <Link
                     href={`/roadmap/${boards[0]?.slug || 'general'}`}
-                    className="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors"
+                    className="text-sm font-medium text-white/80 hover:text-white transition-colors"
                   >
                     Roadmap
                   </Link>
@@ -252,7 +253,7 @@ export default function DashboardPage() {
               )}
 
               {organization && (
-                <div className="hidden lg:flex items-center gap-2 text-sm text-gray-600">
+                <div className="hidden lg:flex items-center gap-2 text-sm text-white/80">
                   <Building2 className="h-4 w-4" />
                   <span>{organizationRole === 'owner' ? 'Owner' : organizationRole === 'admin' ? 'Admin' : 'Member'}</span>
                 </div>
@@ -519,10 +520,10 @@ export default function DashboardPage() {
                               <div className="flex items-start justify-between">
                                 <div className="flex items-center gap-3">
                                   <div 
-                                    className="text-3xl p-2 rounded-lg"
+                                    className="p-2 rounded-lg"
                                     style={{ backgroundColor: `${board.color}15` }}
                                   >
-                                    {board.icon}
+                                    <IconDisplay iconName={board.icon} className="h-7 w-7" style={{ color: board.color }} />
                                   </div>
                                   <div className="flex-1">
                                     <CardTitle className="text-base flex items-center gap-2">
@@ -701,7 +702,7 @@ export default function DashboardPage() {
                         <Card key={board.id} className="hover:shadow-lg transition-shadow">
                           <CardHeader>
                             <div className="flex items-center gap-3">
-                              <span className="text-3xl">{board.icon}</span>
+                              <IconDisplay iconName={board.icon} className="h-8 w-8" style={{ color: board.color }} />
                               <div>
                                 <CardTitle className="text-lg">{board.name}</CardTitle>
                                 <CardDescription className="text-xs">
