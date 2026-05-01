@@ -27,7 +27,8 @@ export default function AdminLayout({
 
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [viewMode, setViewMode] = useState<"admin" | "public">("admin");
-  const [feedbackPath, setFeedbackPath] = useState('/admin/feedback'); // Start with default
+  const [feedbackPath, setFeedbackPath] = useState('/admin/feedback/welcome'); // Default to welcome page
+  const [boardsLoaded, setBoardsLoaded] = useState(false);
 
   useEffect(() => {
     const savedTheme = localStorage.getItem("theme") as "light" | "dark";
@@ -39,11 +40,38 @@ export default function AdminLayout({
     setTheme(initialTheme);
     document.documentElement.className = initialTheme;
 
-    // Update feedback path after hydration
-    const lastBoard = localStorage.getItem('lastVisitedBoard');
-    if (lastBoard) {
-      setFeedbackPath(`/admin/feedback/boards/${lastBoard}`);
-    }
+    // Validate and set feedback path
+    const validateFeedbackPath = async () => {
+      try {
+        const { boardService } = await import('@/services/boardService');
+        const response = await boardService.getAllBoards();
+        const fetchedBoards = response.data.boards;
+
+        if (fetchedBoards.length > 0) {
+          const lastBoard = localStorage.getItem('lastVisitedBoard');
+          const lastBoardExists = lastBoard && fetchedBoards.some(b => b.slug === lastBoard);
+
+          if (lastBoardExists) {
+            setFeedbackPath(`/admin/feedback/boards/${lastBoard}`);
+          } else {
+            // Use first board and update localStorage
+            localStorage.setItem('lastVisitedBoard', fetchedBoards[0].slug);
+            setFeedbackPath(`/admin/feedback/boards/${fetchedBoards[0].slug}`);
+          }
+        } else {
+          // No boards exist, use welcome page
+          setFeedbackPath('/admin/feedback/welcome');
+          localStorage.removeItem('lastVisitedBoard');
+        }
+      } catch (error) {
+        console.error('Error validating feedback path:', error);
+        setFeedbackPath('/admin/feedback/welcome');
+      } finally {
+        setBoardsLoaded(true);
+      }
+    };
+
+    validateFeedbackPath();
   }, []);
 
   const toggleTheme = () => {
@@ -66,7 +94,6 @@ export default function AdminLayout({
     { name: "Feedback", path: feedbackPath }, // Use state instead of function
     { name: "Roadmap", path: "/admin/roadmap" },
     { name: "Changelog", path: "/admin/changelog" },
-    { name: "Profile", path: "/admin/profile" },
     { name: "Explore", path: "/feedback"},
     { name: "Contact Us", path: "/contact"}
   ];
@@ -169,38 +196,17 @@ export default function AdminLayout({
               <DropdownMenuContent align="end" className="w-56 p-2">
                 <DropdownMenuLabel className="font-switzer font-bold text-base">My Account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem 
+                <DropdownMenuItem
                   onClick={() => router.push("/admin/profile")}
                   className="cursor-pointer rounded-lg py-2.5 font-medium"
                 >
                   Profile
                 </DropdownMenuItem>
-                <DropdownMenuItem 
+                <DropdownMenuItem
                   onClick={() => router.push("/admin/organization")}
                   className="cursor-pointer rounded-lg py-2.5 font-medium"
                 >
                   Organization Settings
-                </DropdownMenuItem>
-                <DropdownMenuItem 
-                  onClick={() => router.push("/admin/feedback")}
-                  className="cursor-pointer rounded-lg py-2.5 font-medium"
-                >
-                  Feedback
-                </DropdownMenuItem>
-                <DropdownMenuItem 
-                  onClick={() => router.push("/pricing")}
-                  className="cursor-pointer rounded-lg py-2.5 font-medium flex items-center gap-2"
-                >
-                  <CreditCard className="h-4 w-4" />
-                  Pricing & Plans
-                </DropdownMenuItem>
-
-                <DropdownMenuSeparator />
-                <DropdownMenuItem 
-                  onClick={() => router.push("/create-organization")}
-                  className="cursor-pointer rounded-lg py-2.5 font-medium text-primary"
-                >
-                  + Create Organization
                 </DropdownMenuItem>
 
                 <DropdownMenuSeparator />

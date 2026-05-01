@@ -62,7 +62,8 @@ export default function OrganizationSettingsPage() {
   const [inviteRole, setInviteRole] = useState('member');
   const [inviting, setInviting] = useState(false);
   const [copiedSubdomain, setCopiedSubdomain] = useState(false);
-  
+  const [activeTab, setActiveTab] = useState('general');
+
   // Invitation modal state
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [invitationRefreshTrigger, setInvitationRefreshTrigger] = useState(0);
@@ -381,29 +382,75 @@ export default function OrganizationSettingsPage() {
         </p>
       </div>
 
-      <Tabs defaultValue="general" className="space-y-6">
-        <TabsList>
-          <TabsTrigger value="general">
-            <Settings className="h-4 w-4 mr-2" />
-            General
-          </TabsTrigger>
-          <TabsTrigger value="members">
-            <Users className="h-4 w-4 mr-2" />
-            Members ({members.length})
-          </TabsTrigger>
-          <TabsTrigger value="subdomain">
-            <ExternalLink className="h-4 w-4 mr-2" />
-            Subdomain
-          </TabsTrigger>
-          <TabsTrigger value="webhooks">
-            <Webhook className="h-4 w-4 mr-2" />
-            Webhooks
-          </TabsTrigger>
-          <TabsTrigger value="billing">
-            <CreditCard className="h-4 w-4 mr-2" />
-            Billing
-          </TabsTrigger>
-        </TabsList>
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        {/* Sidebar Navigation */}
+        <div className="lg:col-span-1">
+          <Card>
+            <CardContent className="p-4">
+              <nav className="space-y-1">
+                <button
+                  onClick={() => setActiveTab('general')}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-left ${
+                    activeTab === 'general' ? 'bg-accent' : 'hover:bg-accent'
+                  }`}
+                >
+                  <Settings className="h-4 w-4" />
+                  <span>General</span>
+                </button>
+                <button
+                  onClick={() => setActiveTab('members')}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-left ${
+                    activeTab === 'members' ? 'bg-accent' : 'hover:bg-accent'
+                  }`}
+                >
+                  <Users className="h-4 w-4" />
+                  <span>Members ({members.length})</span>
+                </button>
+                <button
+                  onClick={() => setActiveTab('subdomain')}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-left ${
+                    activeTab === 'subdomain' ? 'bg-accent' : 'hover:bg-accent'
+                  }`}
+                >
+                  <ExternalLink className="h-4 w-4" />
+                  <span>Subdomain</span>
+                </button>
+                <button
+                  onClick={() => setActiveTab('webhooks')}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-left ${
+                    activeTab === 'webhooks' ? 'bg-accent' : 'hover:bg-accent'
+                  }`}
+                >
+                  <Webhook className="h-4 w-4" />
+                  <span>Webhooks</span>
+                </button>
+                <button
+                  onClick={() => setActiveTab('billing')}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-left ${
+                    activeTab === 'billing' ? 'bg-accent' : 'hover:bg-accent'
+                  }`}
+                >
+                  <CreditCard className="h-4 w-4" />
+                  <span>Billing</span>
+                </button>
+              </nav>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Content Area */}
+        <div className="lg:col-span-3">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+            {/* Hidden tab triggers for functionality */}
+            <div className="hidden">
+              <TabsList>
+                <TabsTrigger value="general" id="tab-general">General</TabsTrigger>
+                <TabsTrigger value="members" id="tab-members">Members</TabsTrigger>
+                <TabsTrigger value="subdomain" id="tab-subdomain">Subdomain</TabsTrigger>
+                <TabsTrigger value="webhooks" id="tab-webhooks">Webhooks</TabsTrigger>
+                <TabsTrigger value="billing" id="tab-billing">Billing</TabsTrigger>
+              </TabsList>
+            </div>
 
         {/* General Settings */}
         <TabsContent value="general">
@@ -641,6 +688,8 @@ export default function OrganizationSettingsPage() {
         </TabsContent>
 
       </Tabs>
+        </div>
+      </div>
 
       {/* Invitation Modal */}
       {organization && (

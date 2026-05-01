@@ -80,6 +80,11 @@ export default function AuthCallback() {
 
           console.log('✅ Token stored in localStorage (both access_token and token)');
 
+          // 🔑 Dispatch event to trigger AuthContext re-check
+          // This fixes the race condition where AuthContext doesn't re-run checkAuth() after redirect
+          window.dispatchEvent(new CustomEvent('auth-tokens-stored', { detail: { user: backendUser } }));
+          console.log('🔔 Dispatched auth-tokens-stored event');
+
           // Check for saved return URL (from public pages like upvoting/commenting)
           const returnUrl = getPublicReturnUrl();
           console.log('🔍 Checking for return URL:', { returnUrl, hasReturnUrl: !!returnUrl });

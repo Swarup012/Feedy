@@ -388,34 +388,6 @@ export default function ProfilePage() {
 
           {activeTab === "billing" && (
             <div className="space-y-6">
-              {/* Subscription Card */}
-              <Card className="border-slate-200/60 dark:border-border shadow-sm overflow-hidden">
-                <CardHeader className="border-b border-slate-100 dark:border-border bg-blue-50 dark:bg-blue-950/20">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <CardTitle className="text-xl font-bold text-slate-900 dark:text-white">Subscription Plan</CardTitle>
-                      <CardDescription className="mt-1">Manage your current plan and billing</CardDescription>
-                    </div>
-                    <div className="p-3 bg-white dark:bg-gray-800 rounded-xl shadow-md">
-                      <Rocket size={24} className="text-blue-600 dark:text-blue-400" />
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between p-5 rounded-xl border-2 border-slate-100 dark:border-border bg-white dark:bg-gray-800">
-                    <div>
-                      <p className="text-sm text-slate-500 dark:text-gray-400 mb-1">Current Plan</p>
-                      <p className="text-2xl font-bold text-slate-900 dark:text-white capitalize">
-                        {user.plan || 'Free'}
-                      </p>
-                    </div>
-                    <Badge className="bg-blue-600 text-white border-none shadow-md text-sm px-4 py-2">
-                      Active
-                    </Badge>
-                  </div>
-                </CardContent>
-              </Card>
-
               {/* Billing Section */}
               <Card className="border-slate-200/60 dark:border-border shadow-sm">
                 <CardHeader className="border-b border-slate-100 dark:border-border bg-slate-50/50 dark:bg-gray-800/50">

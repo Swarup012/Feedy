@@ -9,7 +9,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Dialog,
   DialogContent,
@@ -461,46 +460,23 @@ export default function AdminRoadmapPage() {
         </div>
       </div>
 
-      {/* Show message if no roadmaps exist */}
-      {roadmaps.length === 0 && !loadingRoadmaps && (
-        <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
-          <CardContent className="pt-6">
-            <div className="text-center space-y-3">
-              <div className="text-4xl">🗺️</div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                No Roadmaps Yet
-              </h3>
-              <p className="text-gray-600 dark:text-gray-400">
-                Create your first roadmap to start organizing your product development timeline.
-              </p>
-              {isAdminOrOwner && (
-                <Button onClick={() => setShowCreateRoadmapDialog(true)}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Create First Roadmap
-                </Button>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
 
       {/* Board Selector for Members */}
       {!isAdminOrOwner && boardSlug && (
-        <div className="flex items-center gap-4 bg-white dark:bg-background p-4 rounded-lg border dark:border-border">
+        <div className="flex items-center gap-4">
           <Label htmlFor="boardSelector" className="text-sm font-medium whitespace-nowrap dark:text-gray-100">
             Select Board:
           </Label>
           <Select value={boardSlug} onValueChange={setBoardSlug}>
-            <SelectTrigger className="w-[300px]">
+            <SelectTrigger className="w-[200px]">
               <SelectValue placeholder="Select a board" />
             </SelectTrigger>
             <SelectContent>
               {allBoards.map((board: any) => (
                 <SelectItem key={board.slug} value={board.slug}>
                   <div className="flex items-center gap-2">
-                    <div 
-                      className="w-3 h-3 rounded" 
+                    <div
+                      className="w-3 h-3 rounded"
                       style={{ backgroundColor: board.color }}
                     />
                     {board.name}
@@ -512,43 +488,46 @@ export default function AdminRoadmapPage() {
         </div>
       )}
 
-      {/* Board Filter - Only show for Admin/Owner */}
+      {/* Filters - Board and Status side by side */}
       {isAdminOrOwner && (
-        <div className="flex items-center gap-4 bg-white dark:bg-background p-4 rounded-lg border dark:border-border">
-          <Label htmlFor="boardFilter" className="text-sm font-medium whitespace-nowrap dark:text-gray-100">
-            Filter by Board:
-          </Label>
+        <div className="flex items-center gap-4">
           <Select value={selectedBoardFilter} onValueChange={setSelectedBoardFilter}>
-            <SelectTrigger className="w-[300px]">
+            <SelectTrigger className="w-[200px]">
               <SelectValue placeholder="All Boards" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded bg-gradient-to-r from-blue-500 to-purple-500" />
-                  All Boards ({items.length} items)
-                </div>
-              </SelectItem>
-              {allBoards.map((board: any) => {
-                const boardItemCount = items.filter((item: any) => item.board?.slug === board.slug).length;
-                return (
-                  <SelectItem key={board.slug} value={board.slug}>
-                    <div className="flex items-center gap-2">
-                      <div 
-                        className="w-3 h-3 rounded" 
-                        style={{ backgroundColor: board.color }}
-                      />
-                      {board.name} ({boardItemCount} items)
-                    </div>
-                  </SelectItem>
-                );
-              })}
+              <SelectItem value="all">All Boards</SelectItem>
+              {allBoards.map((board: any) => (
+                <SelectItem key={board.slug} value={board.slug}>
+                  <div className="flex items-center gap-2">
+                    <div
+                      className="w-3 h-3 rounded"
+                      style={{ backgroundColor: board.color }}
+                    />
+                    {board.name}
+                  </div>
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
+
+          <Select value={selectedView} onValueChange={setSelectedView}>
+            <SelectTrigger className="w-[200px]">
+              <SelectValue placeholder="All Statuses" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All</SelectItem>
+              <SelectItem value="planned">Planned</SelectItem>
+              <SelectItem value="in_progress">In Progress</SelectItem>
+              <SelectItem value="in_review">In Review</SelectItem>
+              <SelectItem value="completed">Completed</SelectItem>
+            </SelectContent>
+          </Select>
+
           {selectedBoardFilter !== 'all' && (
-            <Button 
-              variant="ghost" 
-              size="sm" 
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => setSelectedBoardFilter('all')}
             >
               Clear Filter
@@ -557,20 +536,9 @@ export default function AdminRoadmapPage() {
         </div>
       )}
 
-      {/* Tabs for different views */}
-      <Tabs value={selectedView} onValueChange={setSelectedView}>
-        <TabsList>
-          <TabsTrigger value="all">All ({items.length})</TabsTrigger>
-          <TabsTrigger value="planned">Planned ({groupedByStatus.planned.length})</TabsTrigger>
-          <TabsTrigger value="in_progress">In Progress ({groupedByStatus.in_progress.length})</TabsTrigger>
-          <TabsTrigger value="in_review">In Review ({groupedByStatus.in_review.length})</TabsTrigger>
-          <TabsTrigger value="completed">Completed ({groupedByStatus.completed.length})</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value={selectedView} className="mt-6">
-          {/* Kanban Board View */}
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            {selectedView === 'all' ? (
+      {/* Kanban Board View */}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        {selectedView === 'all' ? (
               <>
                 <StatusColumn
                   title="Planned"
@@ -626,8 +594,6 @@ export default function AdminRoadmapPage() {
               </div>
             )}
           </div>
-        </TabsContent>
-      </Tabs>
 
       {/* Create Dialog */}
       <CreateEditDialog
@@ -814,16 +780,9 @@ function StatusColumn({
   onUpdate,
   showBoardBadge,
 }: any) {
-  const statusColors: any = {
-    planned: 'bg-gray-100 border-gray-300',
-    in_progress: 'bg-blue-50 border-blue-300',
-    in_review: 'bg-yellow-50 border-yellow-300',
-    completed: 'bg-green-50 border-green-300',
-  };
-
   return (
-    <div className={`rounded-lg border-2 ${statusColors[status]} p-4`}>
-      <h3 className="font-semibold text-sm uppercase tracking-wide text-gray-700 mb-4">
+    <div className="rounded-lg border-2 border-gray-200 dark:border-gray-700 p-4">
+      <h3 className="font-semibold text-sm uppercase tracking-wide text-gray-700 dark:text-gray-300 mb-4">
         {title} ({items.length})
       </h3>
       <div className="space-y-3">

@@ -20,8 +20,9 @@ export interface Invoice {
   amount: number;
   currency: string;
   status: string;
-  pdfUrl: string | null;
-  hostedUrl: string | null;
+  invoiceUrl: string | null;
+  receiptUrl: string | null;
+  hasInvoice?: boolean;
 }
 
 export interface PricingPlan {
@@ -83,7 +84,7 @@ const paddleService = {
   /**
    * Get invoices/payment history from Paddle
    */
-  async getInvoices(limit = 10): Promise<{ success: boolean; data: { invoices: Invoice[] } }> {
+  async getInvoices(limit = 1): Promise<{ success: boolean; data: { invoices: Invoice[] } }> {
     const response = await api.get(`/api/paddle/invoices?limit=${limit}`);
     return response.data;
   },

@@ -97,6 +97,41 @@ export function BillingSection() {
     }
   };
 
+  const handleDownloadInvoice = async (invoiceId: string) => {
+    try {
+      const response = await api.get(`/api/paddle/invoices/${invoiceId}/download`, {
+        responseType: 'blob'
+      });
+
+      // Check if response is an error (JSON instead of PDF)
+      const contentType = response.headers['content-type'];
+      if (contentType && contentType.includes('application/json')) {
+        // Parse the error message
+        const errorText = await response.data.text();
+        const errorData = JSON.parse(errorText);
+        throw new Error(errorData.error || errorData.message || 'Failed to download invoice');
+      }
+
+      // Create blob URL and trigger download
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `invoice-${invoiceId}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error: any) {
+      console.error('Error downloading invoice:', error);
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to download invoice',
+        variant: 'destructive',
+      });
+    }
+  };
+
   const handleUpgrade = async (skipTrial: boolean = false) => {
     try {
       setActionLoading(true);
@@ -328,7 +363,7 @@ export function BillingSection() {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: currency.toUpperCase(),
-    }).format(amount / 100);
+    }).format(amount); // Backend already converted from cents to dollars
   };
 
   if (loading) {
@@ -818,8 +853,8 @@ export function BillingSection() {
       {invoices.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Payment History</CardTitle>
-            <CardDescription>Your recent invoices and payments</CardDescription>
+            <CardTitle>Last Payment</CardTitle>
+            <CardDescription>Your most recent payment</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -841,19 +876,14 @@ export function BillingSection() {
                     <p className="font-semibold">
                       {formatAmount(invoice.amount, invoice.currency)}
                     </p>
-                    {invoice.pdfUrl && (
+                    {invoice.hasInvoice !== false && (
                       <Button
                         variant="ghost"
                         size="sm"
-                        asChild
+                        onClick={() => handleDownloadInvoice(invoice.id)}
+                        title="Download invoice"
                       >
-                        <a
-                          href={invoice.pdfUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <Download className="h-4 w-4" />
-                        </a>
+                        <Download className="h-4 w-4" />
                       </Button>
                     )}
                   </div>
@@ -868,8 +898,8 @@ export function BillingSection() {
       {invoices.length === 0 && subscription?.status !== 'free' && (
         <Card>
           <CardHeader>
-            <CardTitle>Payment History</CardTitle>
-            <CardDescription>Your recent invoices and payments</CardDescription>
+            <CardTitle>Last Payment</CardTitle>
+            <CardDescription>Your most recent payment</CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-center text-gray-500 py-8">No payment history available</p>

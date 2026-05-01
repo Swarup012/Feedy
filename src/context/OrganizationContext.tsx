@@ -14,13 +14,15 @@ interface Organization {
   industry?: string;
   company_size?: string;
   plan: string;
+  subscription_plan?: string;
+  subscription_status?: string;
   max_users: number;
   max_boards: number;
   settings?: any;
   created_at: string;
   updated_at: string;
-  role?: string; // User's role in this organization
-  is_current?: boolean; // Is this the active organization
+  role?: string;
+  is_current?: boolean;
 }
 
 interface OrganizationContextType {

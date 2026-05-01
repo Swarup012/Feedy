@@ -37,9 +37,10 @@ export function OrganizationSwitcher() {
 
   // Check organization limit based on user's plan
   const getOrganizationLimit = () => {
-    // Check if user has any starter/pro plan
+    // Check if user has any active starter/pro plan (must also have active status)
     const hasStarterPlan = organizations.some(org => 
-      org.subscription_plan === 'starter' || org.subscription_plan === 'pro'
+      (org.subscription_plan === 'starter' || org.subscription_plan === 'pro') &&
+      (org.subscription_status === 'active' || org.subscription_status === 'trialing')
     );
     return hasStarterPlan ? 2 : 1;
   };

@@ -83,8 +83,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const token = TokenManager.getAccessToken();
       const cachedUser = TokenManager.getUser();
 
-      console.log('🔍 checkAuth started:', { 
-        hasToken: !!token, 
+      console.log('🔍 checkAuth started:', {
+        hasToken: !!token,
         hasCachedUser: !!cachedUser,
         cachedUserEmail: cachedUser?.email,
         cachedUserOrg: cachedUser?.current_organization_id,
@@ -93,7 +93,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // If we have cached user data, use it immediately
       if (cachedUser) {
+        console.log('✅ Using cached user data immediately:', cachedUser.email);
         setUser(cachedUser);
+
+        // Try to verify with server in background, but don't fail if it fails
+        // This handles the race condition where backend hasn't processed the user yet
+        try {
+          const response = await authService.getMe();
+          console.log('✅ Background verification succeeded, updating user data');
+          setUser(response.data.user);
+          TokenManager.setUser(response.data.user);
+        } catch (error) {
+          // Don't clear tokens - trust the cache
+          console.warn('⚠️ getMe() failed, using cached user data:', error);
+          // Still initialize socket if we have a token
+          if (token) {
+            initSocket(token);
+          }
+        }
+
+        setLoading(false);
+        return; // Exit early - don't continue to getMe() below
       }
 
       // Even if no token in localStorage, try to verify with server
@@ -115,6 +135,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         initSocket(token);
       }
     } catch (error) {
+      // Check if we have cached data to fall back on
+      const cachedUser = TokenManager.getUser();
+      const cachedToken = TokenManager.getAccessToken();
+
+      // If we have cached data, trust it instead of clearing tokens
+      // This handles race conditions where backend hasn't processed the user yet
+      if (cachedUser && cachedToken) {
+        console.warn('⚠️ getMe() failed, using cached auth data:', error);
+        setUser(cachedUser);
+        initSocket(cachedToken);
+        setLoading(false);
+        return; // Don't clear tokens - trust the cache
+      }
+
       // Only log error if we're not on a public page (guests are expected to fail auth check)
       const isPublicPage = typeof window !== 'undefined' && (
         window.location.pathname === '/' ||
@@ -130,9 +164,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         window.location.pathname.startsWith('/signup') ||
         window.location.pathname.startsWith('/onboarding')
       );
-      
+
       if (!isPublicPage) {
-        console.error("Auth check failed:", error);
+        console.error("Auth check failed with no cache:", error);
         console.log('🚨 Auth failed on non-public page, clearing tokens:', window.location.pathname);
         TokenManager.clearTokens();
         setUser(null);
@@ -196,6 +230,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }, 500);
       }
     }
+  }, [checkAuth]);
+
+  // 🔑 Listen for auth-tokens-stored event to re-check authentication
+  // This fixes the race condition where AuthContext doesn't re-run checkAuth() after OAuth callback
+  useEffect(() => {
+    const handleTokensStored = (event: CustomEvent) => {
+      console.log('🔔 auth-tokens-stored event received, re-checking auth');
+      checkAuth();
+    };
+
+    window.addEventListener('auth-tokens-stored', handleTokensStored as EventListener);
+
+    return () => {
+      window.removeEventListener('auth-tokens-stored', handleTokensStored as EventListener);
+    };
   }, [checkAuth]);
 
   // Login function
