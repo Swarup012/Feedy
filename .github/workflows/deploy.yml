@@ -57,7 +57,7 @@ jobs:
           port: ${{ secrets.SERVER_PORT || 22 }}
           script: |
             set -e
-            cd ~/faddy
+            cd ~/faddy-app
 
             echo "📦 Pulling latest images..."
             docker compose pull frontend
@@ -80,7 +80,7 @@ jobs:
           port: ${{ secrets.SERVER_PORT || 22 }}
           script: |
             sleep 10
-            cd ~/faddy
+            cd ~/faddy-app
             echo "Checking container status..."
             docker compose ps frontend | grep running || (echo "❌ Container not running!" && exit 1)
             echo "✅ Frontend is live!"
