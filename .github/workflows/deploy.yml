@@ -60,10 +60,10 @@ jobs:
             cd ~/faddy-app
 
             echo "📦 Pulling latest images..."
-            docker compose pull frontend
+            docker-compose pull frontend
 
             echo "🚀 Restarting frontend container..."
-            docker compose up -d frontend
+            docker-compose up -d frontend
 
             echo "🧹 Cleaning up unused images..."
             docker image prune -f
@@ -82,5 +82,5 @@ jobs:
             sleep 10
             cd ~/faddy-app
             echo "Checking container status..."
-            docker compose ps frontend | grep running || (echo "❌ Container not running!" && exit 1)
+            docker-compose ps frontend | grep running || (echo "❌ Container not running!" && exit 1)
             echo "✅ Frontend is live!"
