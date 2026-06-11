@@ -187,7 +187,9 @@ export function ClusterInsights({
   const [refreshing, setRefreshing] = useState(false);
   const [sortOption, setSortOption] = useState<SortOption>('priority');
 
-  const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+  // If NEXT_PUBLIC_API_URL includes /api, we strip it here so we don't end up with /api/api/...
+  const rawApiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+  const backendUrl = rawApiUrl.replace(/\/api\/?$/, '');
 
   const fetchClusters = useCallback(
     async (showRefreshSpinner = false) => {

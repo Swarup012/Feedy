@@ -307,7 +307,8 @@ export default function WidgetManagementPage() {
   };
 
   const copyEmbedSnippet = (widget: Widget) => {
-    const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+    const rawApiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+    const backendUrl = rawApiUrl.replace(/\/api\/?$/, '');
     const snippet = `<!-- Feedy Widget -->
 <script src="${backendUrl}/widget.js"></script>
 <script>
