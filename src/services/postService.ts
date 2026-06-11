@@ -26,6 +26,21 @@ export interface Post {
     name: string;
     email: string;
   };
+  external_author?: {
+    id: string;
+    external_user_id: string;
+    name: string;
+    email: string;
+    context?: Record<string, unknown>;
+  };
+  org_end_user?: {
+    id: string;
+    external_user_id: string;
+    name: string;
+    email: string;
+    identity_type: string;
+    custom_fields: Record<string, unknown>;
+  };
   board?: {
     id: string;
     name: string;
@@ -33,6 +48,22 @@ export interface Post {
     color: string;
     icon: string;
   };
+}
+
+/** Display name for internal (author) or widget (external_author) submitters */
+export function getPostAuthorDisplayName(post: Post): string {
+  return (
+    post.author?.name ||
+    post.org_end_user?.name ||
+    post.external_author?.name ||
+    post.org_end_user?.email ||
+    post.external_author?.email ||
+    "Anonymous"
+  );
+}
+
+export function isWidgetPost(post: Post): boolean {
+  return Boolean(post.org_end_user || post.external_author);
 }
 
 export interface Comment {

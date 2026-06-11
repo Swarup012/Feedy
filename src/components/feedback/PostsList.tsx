@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Search, ArrowUp, MessageSquare, Loader2 } from "lucide-react";
-import { Post } from "@/services/postService";
+import { Post, getPostAuthorDisplayName } from "@/services/postService";
 import { Board } from "@/services/boardService";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
@@ -160,10 +160,16 @@ export function PostsList({
                     </span>
                   </div>
 
-                  {/* Author */}
-                  {post.author && (
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
-                      by {post.author.name}
+                  {/* Author - shows internal user OR widget user */}
+                  {(post.author || post.external_author || post.org_end_user) && (
+                    <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
+                      by{" "}
+                      <span className="font-medium">{getPostAuthorDisplayName(post)}</span>
+                      {(post.external_author || post.org_end_user) && (
+                        <span className="inline-flex items-center rounded-full bg-violet-100 px-1.5 py-0.5 text-[10px] font-medium text-violet-700">
+                          via Widget
+                        </span>
+                      )}
                     </p>
                   )}
                 </div>

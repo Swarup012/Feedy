@@ -17,6 +17,7 @@ interface Widget {
   id: string;
   name: string;
   api_key: string;
+  has_api_secret?: boolean;
   default_board_id: string;
   allowed_domains: string[];
   branding: {
@@ -27,6 +28,7 @@ interface Widget {
     show_voting: boolean;
     allow_anonymous: boolean;
     show_roadmap: boolean;
+    require_sdk_identity?: boolean;
   };
   created_at: string;
 }
@@ -47,6 +49,7 @@ export default function WidgetManagementPage() {
   const [selectedWidget, setSelectedWidget] = useState<Widget | null>(null);
   const [copiedApiKey, setCopiedApiKey] = useState<string | null>(null);
   const [copiedSnippet, setCopiedSnippet] = useState(false);
+  const [apiSecretDialog, setApiSecretDialog] = useState<string | null>(null);
   const { toast } = useToast();
 
   // Form state
@@ -58,6 +61,7 @@ export default function WidgetManagementPage() {
     show_voting: true,
     allow_anonymous: false,
     show_roadmap: true,
+    require_sdk_identity: true,
   });
 
   useEffect(() => {
@@ -118,15 +122,21 @@ export default function WidgetManagementPage() {
           show_voting: formData.show_voting,
           allow_anonymous: formData.allow_anonymous,
           show_roadmap: formData.show_roadmap,
+          require_sdk_identity: formData.require_sdk_identity,
         },
       });
 
       const data = response.data;
 
       if (data.success) {
+        if (data.data.api_secret) {
+          setApiSecretDialog(data.data.api_secret);
+        }
         toast({
           title: "Success",
-          description: "Widget created successfully",
+          description: data.data.api_secret
+            ? "Widget created — copy the API secret now (shown once)"
+            : "Widget created successfully",
         });
         setShowCreateDialog(false);
         resetForm();
@@ -168,6 +178,7 @@ export default function WidgetManagementPage() {
           show_voting: formData.show_voting,
           allow_anonymous: formData.allow_anonymous,
           show_roadmap: formData.show_roadmap,
+          require_sdk_identity: formData.require_sdk_identity,
         },
       });
 
@@ -231,6 +242,60 @@ export default function WidgetManagementPage() {
     }
   };
 
+  const handleRotateSecret = async (widgetId: string) => {
+    if (!confirm("Rotate API secret? Existing server-side signing code must be updated.")) {
+      return;
+    }
+
+    try {
+      const response = await api.post(`/api/admin/widgets/${widgetId}/rotate-secret`);
+      const data = response.data;
+
+      if (data.success && data.data.api_secret) {
+        setApiSecretDialog(data.data.api_secret);
+        toast({
+          title: "Secret rotated",
+          description: "Copy the new API secret now — it will not be shown again.",
+        });
+        loadWidgets();
+      }
+    } catch (error) {
+      console.error("❌ Failed to rotate secret:", error);
+      toast({
+        title: "Error",
+        description: "Failed to rotate API secret",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleEnsureSecret = async (widgetId: string) => {
+    try {
+      const response = await api.post(`/api/admin/widgets/${widgetId}/ensure-secret`);
+      const data = response.data;
+
+      if (data.success) {
+        if (data.data.api_secret) {
+          setApiSecretDialog(data.data.api_secret);
+          toast({
+            title: "API secret ready",
+            description: "Copy the API secret now — it will not be shown again.",
+          });
+        } else {
+          toast({ title: "Already configured", description: "This widget already has an API secret." });
+        }
+        loadWidgets();
+      }
+    } catch (error) {
+      console.error("❌ Failed to ensure secret:", error);
+      toast({
+        title: "Error",
+        description: "Failed to generate API secret",
+        variant: "destructive",
+      });
+    }
+  };
+
   const copyApiKey = (apiKey: string) => {
     navigator.clipboard.writeText(apiKey);
     setCopiedApiKey(apiKey);
@@ -271,6 +336,7 @@ export default function WidgetManagementPage() {
       show_voting: widget.settings.show_voting,
       allow_anonymous: widget.settings.allow_anonymous,
       show_roadmap: widget.settings.show_roadmap,
+      require_sdk_identity: widget.settings.require_sdk_identity ?? true,
     });
     setShowEditDialog(true);
   };
@@ -284,6 +350,7 @@ export default function WidgetManagementPage() {
       show_voting: true,
       allow_anonymous: false,
       show_roadmap: true,
+      require_sdk_identity: true,
     });
   };
 
@@ -404,6 +471,14 @@ export default function WidgetManagementPage() {
                     />
                     <span className="text-sm">Show roadmap view</span>
                   </label>
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={formData.require_sdk_identity}
+                      onChange={(e) => setFormData({ ...formData, require_sdk_identity: e.target.checked })}
+                    />
+                    <span className="text-sm">Require Secure Identity (HMAC)</span>
+                  </label>
                 </div>
               </div>
 
@@ -471,7 +546,25 @@ export default function WidgetManagementPage() {
                       </Button>
                     </div>
 
-                    <div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-medium">API Secret:</span>
+                      {widget.has_api_secret ? (
+                        <Badge variant="secondary">Configured</Badge>
+                      ) : (
+                        <Badge variant="destructive">Missing — SDK disabled</Badge>
+                      )}
+                      {!widget.has_api_secret ? (
+                        <Button variant="outline" size="sm" onClick={() => handleEnsureSecret(widget.id)}>
+                          Generate Secret
+                        </Button>
+                      ) : (
+                        <Button variant="outline" size="sm" onClick={() => handleRotateSecret(widget.id)}>
+                          Rotate Secret
+                        </Button>
+                      )}
+                    </div>
+
+                    <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-medium">Allowed Domains:</span>{" "}
                       {widget.allowed_domains.length > 0 ? (
                         widget.allowed_domains.map((d, i) => (
@@ -617,6 +710,14 @@ export default function WidgetManagementPage() {
                   />
                   <span className="text-sm">Show roadmap view</span>
                 </label>
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={formData.require_sdk_identity}
+                    onChange={(e) => setFormData({ ...formData, require_sdk_identity: e.target.checked })}
+                  />
+                  <span className="text-sm">Require Secure Identity (HMAC)</span>
+                </label>
               </div>
             </div>
 
@@ -637,6 +738,29 @@ export default function WidgetManagementPage() {
               </Button>
             </div>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={Boolean(apiSecretDialog)} onOpenChange={() => setApiSecretDialog(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>API Secret — copy now</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-gray-600">
+            Use this server-side only to sign SDK identity (HMAC). It will not be shown again.
+          </p>
+          <code className="block bg-gray-100 p-3 rounded text-xs break-all">{apiSecretDialog}</code>
+          <Button
+            className="w-full"
+            onClick={() => {
+              if (apiSecretDialog) {
+                navigator.clipboard.writeText(apiSecretDialog);
+                toast({ title: "Copied", description: "API secret copied to clipboard" });
+              }
+            }}
+          >
+            Copy API Secret
+          </Button>
         </DialogContent>
       </Dialog>
     </div>

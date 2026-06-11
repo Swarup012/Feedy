@@ -45,3 +45,4 @@ firebase-debug.log
 firestore-debug.log
 # DevContext - AI coding context
 .devctx/
+.context-engine/

@@ -49,6 +49,7 @@ import {
 import { DashboardSkeleton } from "@/components/admin/DashboardSkeleton";
 import { TrackedUsersWidget } from "@/components/TrackedUsersWidget";
 import { TrackedUsersLimitBanner } from "@/components/TrackedUsersLimitBanner";
+import { ClusterInsights } from "@/components/clusters/ClusterInsights";
 
 /* ======================================================
    MAIN PAGE
@@ -84,6 +85,7 @@ export default function AdminPage() {
   const [topBoards, setTopBoards] = useState([]);
   const [topContributors, setTopContributors] = useState([]);
   const [feedbackTrend, setFeedbackTrend] = useState([]);
+  const [boards, setBoards] = useState([]);
 
   const pageRef = useRef(null);
 
@@ -176,10 +178,10 @@ export default function AdminPage() {
 
   return (
     <ProtectedRoute allowedRoles={["owner", "admin"]}>
-      <div ref={pageRef} className="min-h-screen bg-background">
-        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-6 sm:space-y-8">
+      <div ref={pageRef} className="h-screen overflow-hidden bg-background flex flex-col">
+        <div className="max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 flex flex-col h-full overflow-hidden space-y-4">
           {/* HEADER - Clean Canny-style header */}
-          <section className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <section className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 shrink-0">
             <div className="space-y-1">
               <div>
                 <h1 className="text-2xl sm:text-3xl font-switzer font-semibold tracking-tight text-foreground">
@@ -243,7 +245,7 @@ export default function AdminPage() {
 
           {isBasicView ? (
             /* ===== BASIC VIEW ===== */
-            <>
+            <div className="flex-1 overflow-y-auto min-h-0 space-y-4">
               {/* MULTI-LINE CHART - All Metrics Combined */}
               <MultiMetricChart
                 pendingTrend={stats.pendingTrend || []}
@@ -266,280 +268,156 @@ export default function AdminPage() {
                   }}
                 />
               </section>
-            </>
+            </div>
           ) : (
             /* ===== FULL VIEW ===== */
-            <>
-              {/* PRIMARY METRICS - Enhanced 4 Column Grid */}
-              <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
-                <Metric
-                  title="Needs Review"
-                  value={stats.pendingPosts}
-                  trend={stats.pendingTrend || []}
-                  color="blue"
-                />
-                <Metric
-                  title="New This Week"
-                  value={stats.newThisWeek}
-                  trend={stats.newThisWeekTrend || []}
-                  color="green"
-                />
-                <Metric
-                  title="Active Contributors"
-                  value={stats.activeUsers}
-                  trend={stats.activeUsersTrend || []}
-                  color="purple"
-                />
-                <Metric
-                  title="Trending Feedback"
-                  value={trending.length}
-                  trend={stats.trendingTrend || []}
-                  color="amber"
-                />
-              </section>
-
-              {/* TRACKED USERS WIDGET - Full Width */}
-              <section>
-                <TrackedUsersWidget
-                  variant="expert"
-                  onUsageClick={() => {
-                    console.log(
-                      "🔵 TrackedUsersWidget clicked - navigating to /admin/tracked-users",
-                    );
-                    router.push("/admin/tracked-users");
-                  }}
-                />
-              </section>
-
-              {/* MAIN GRID - Responsive 2 Column Layout */}
-              <div className="grid lg:grid-cols-3 gap-5 sm:gap-6">
-                {/* LEFT COLUMN - 2/3 Width */}
-                <div className="lg:col-span-2 space-y-5 sm:space-y-6">
-                  {/* FEEDBACK TREND CHART */}
-                  <FeedbackTrendChart data={feedbackTrend} />
-
-                  {/* RECENT ACTIVITY */}
-                  <Section
-                    title="Recent Feedback"
-                    description="Latest submissions requiring your attention"
-                  >
-                    <div className="space-y-1.5">
-                      {recentPosts.length > 0 ? (
-                        recentPosts.map((p) => (
-                          <Row
-                            key={p.id}
-                            title={p.title}
-                            meta={`${p.upvotes || 0} votes · ${p.comment_count || 0} comments`}
-                            onClick={() => router.push("/admin/feedback")}
-                            status={p.status}
-                          />
-                        ))
-                      ) : (
-                        <div className="text-center py-12">
-                          <MessageSquare className="h-12 w-12 text-muted-foreground/40 mx-auto mb-3" />
-                          <p className="text-sm text-muted-foreground">
-                            No recent posts yet
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </Section>
-
-                  {/* INSIGHTS ROW - 2 Cards Side by Side */}
-                  <div className="grid md:grid-cols-2 gap-5 sm:gap-6">
-                    <Section
-                      title="Trending Now"
-                      description="Hot topics this week"
-                      badge={trending.length}
-                    >
-                      <div className="space-y-1.5">
-                        {trending.length > 0 ? (
-                          trending.map((p, idx) => (
-                            <Row
-                              key={p.id}
-                              title={p.title}
-                              meta={`#${idx + 1} · ${p.score} pts`}
-                              rank={idx + 1}
-                            />
-                          ))
-                        ) : (
-                          <div className="text-center py-8">
-                            <p className="text-sm text-gray-500 dark:text-gray-400">
-                              No trending items
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                    </Section>
-
-                    <Section
-                      title="Most Upvoted"
-                      description="Community favorites"
-                      badge={mostUpvoted.length}
-                    >
-                      <div className="space-y-1.5">
-                        {mostUpvoted.length > 0 ? (
-                          mostUpvoted.map((p, idx) => (
-                            <Row
-                              key={p.id}
-                              title={p.title}
-                              meta={`${p.upvotes} votes`}
-                              rank={idx + 1}
-                            />
-                          ))
-                        ) : (
-                          <div className="text-center py-8">
-                            <p className="text-sm text-gray-500 dark:text-gray-400">
-                              No upvoted posts
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                    </Section>
-                  </div>
+            <div className="flex-1 grid grid-rows-[1fr_auto] lg:grid-rows-[3fr_2fr] gap-4 min-h-0 overflow-hidden pb-2">
+              {/* TOP SECTION - Left 60% / Right 40% */}
+              <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 min-h-0">
+                {/* Left Column - 60% */}
+                <div className="lg:col-span-3 flex flex-col min-h-0 [&>div]:h-full">
+                  {topBoards.length > 0 ? (
+                    <ClusterInsights boardId={topBoards[0].id} />
+                  ) : (
+                    <Card className="h-full flex items-center justify-center border-border/80 text-muted-foreground p-8">
+                      No cluster insights available
+                    </Card>
+                  )}
                 </div>
 
-                {/* RIGHT SIDEBAR - 1/3 Width */}
-                <div className="space-y-5 sm:space-y-6">
-                  {/* FEEDBACK LIFECYCLE - Enhanced with visual progress */}
-                  <Section
-                    title="Status Overview"
-                    description="Feedback distribution"
-                  >
-                    <div className="space-y-3">
-                      {Object.entries(stats.statusDistribution).length > 0 ? (
-                        Object.entries(stats.statusDistribution).map(
-                          ([k, v]) => {
-                            const total = stats.totalPosts;
-                            const percentage =
-                              total > 0 ? Math.round((v / total) * 100) : 0;
-                            const statusColors = {
-                              open: "bg-blue-500",
-                              "under-review": "bg-amber-500",
-                              planned: "bg-cyan-500",
-                              "in-progress": "bg-violet-500",
-                              completed: "bg-emerald-500",
-                              closed: "bg-gray-400",
-                            };
-                            const barColor = statusColors[k] || "bg-primary";
-                            return (
-                              <div key={k} className="space-y-1.5">
-                                <div className="flex justify-between items-center">
-                                  <span className="text-sm font-medium capitalize text-foreground">
-                                    {k.replace("-", " ")}
-                                  </span>
-                                  <div className="flex items-center gap-2">
-                                    <span className="text-xs text-muted-foreground">
-                                      {percentage}%
-                                    </span>
-                                    <Badge
-                                      variant="secondary"
-                                      className="font-semibold min-w-[2.5rem] justify-center"
-                                    >
-                                      {v}
-                                    </Badge>
-                                  </div>
-                                </div>
-                                <div className="h-2 bg-muted rounded-full overflow-hidden">
-                                  <div
-                                    className={`h-full ${barColor} rounded-full transition-all duration-700 ease-out`}
-                                    style={{ width: `${percentage}%` }}
-                                  />
-                                </div>
-                              </div>
-                            );
-                          },
-                        )
-                      ) : (
-                        <div className="text-center py-8">
-                          <p className="text-sm text-gray-500 dark:text-gray-400">
-                            No data available
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </Section>
+                {/* Right Column - 40% */}
+                <div className="lg:col-span-2 flex flex-col gap-4 min-h-0">
+                  {/* Tracked Users (top) */}
+                  <div className="flex-1 min-h-0 [&>div]:h-full">
+                    <TrackedUsersWidget
+                      variant="expert"
+                      onUsageClick={() => {
+                        console.log("🔵 TrackedUsersWidget clicked - navigating to /admin/tracked-users");
+                        router.push("/admin/tracked-users");
+                      }}
+                    />
+                  </div>
+                  {/* Feedback Volume (bottom) */}
+                  <div className="flex-1 min-h-0 [&>div]:h-full">
+                    <FeedbackTrendChart data={feedbackTrend} />
+                  </div>
+                </div>
+              </div>
 
-                  {/* POPULAR BOARDS */}
-                  <Section
-                    title="Popular Boards"
-                    description="Most active boards"
-                  >
-                    <div className="space-y-1.5">
-                      {topBoards.length > 0 ? (
-                        topBoards.map((b, idx) => (
-                          <Row
-                            key={b.id}
-                            title={b.name}
-                            meta={`${b.postCount} posts`}
-                            rank={idx + 1}
-                          />
-                        ))
-                      ) : (
-                        <div className="text-center py-8">
-                          <Building2 className="h-10 w-10 text-muted-foreground/40 mx-auto mb-2" />
-                          <p className="text-sm text-muted-foreground">
-                            No boards yet
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </Section>
+              {/* BOTTOM ROW - 3 Equal Columns */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 min-h-0">
+                {/* Col 1: Trending Now */}
+                <Section
+                  title="Trending Now"
+                  description="Hot topics this week"
+                  badge={trending.length}
+                >
+                  <div className="space-y-1.5">
+                    {trending.length > 0 ? (
+                      trending.map((p, idx) => (
+                        <Row
+                          key={p.id}
+                          title={p.title}
+                          meta={`#${idx + 1} · ${p.score} pts`}
+                          rank={idx + 1}
+                        />
+                      ))
+                    ) : (
+                      <div className="text-center py-8">
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          No trending items
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </Section>
 
-                  {/* TOP CONTRIBUTORS - Enhanced with avatars */}
-                  <Section
-                    title="Top Contributors"
-                    description="Most active community members"
-                  >
-                    <div className="space-y-1">
-                      {topContributors.length > 0 ? (
-                        topContributors.map((c, idx) => {
-                          const rankColors = [
-                            "bg-amber-500 text-white",
-                            "bg-gray-400 text-white",
-                            "bg-amber-700 text-white",
-                          ];
-                          const rankBg = rankColors[idx] || "bg-secondary text-secondary-foreground";
-                          const avatarRing = idx === 0 ? "ring-2 ring-amber-400 ring-offset-2 ring-offset-background" :
-                                           idx < 3 ? "ring-2 ring-gray-300 dark:ring-gray-600" : "";
+                {/* Col 2: Popular Boards */}
+                <Section
+                  title="Popular Boards"
+                  description="Most active boards"
+                >
+                  <div className="space-y-1.5">
+                    {topBoards.length > 0 ? (
+                      topBoards.map((b, idx) => (
+                        <Row
+                          key={b.id}
+                          title={b.name}
+                          meta={`${b.postCount} posts`}
+                          rank={idx + 1}
+                        />
+                      ))
+                    ) : (
+                      <div className="text-center py-8">
+                        <Building2 className="h-10 w-10 text-muted-foreground/40 mx-auto mb-2" />
+                        <p className="text-sm text-muted-foreground">
+                          No boards yet
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </Section>
+
+                {/* Col 3: Status Overview */}
+                <Section
+                  title="Status Overview"
+                  description="Feedback distribution"
+                >
+                  <div className="space-y-3">
+                    {Object.entries(stats.statusDistribution).length > 0 ? (
+                      Object.entries(stats.statusDistribution).map(
+                        ([k, v]) => {
+                          const total = stats.totalPosts;
+                          const percentage =
+                            total > 0 ? Math.round((v / total) * 100) : 0;
+                          const statusColors = {
+                            open: "bg-blue-500",
+                            "under-review": "bg-amber-500",
+                            planned: "bg-cyan-500",
+                            "in-progress": "bg-violet-500",
+                            completed: "bg-emerald-500",
+                            closed: "bg-gray-400",
+                          };
+                          const barColor = statusColors[k] || "bg-primary";
                           return (
-                            <div
-                              key={c.id}
-                              className={`flex items-center gap-3 p-2.5 rounded-lg transition-all duration-200 hover:bg-accent/50 ${idx === 0 ? "bg-amber-50/50 dark:bg-amber-950/20" : ""}`}
-                            >
-                              <div className={`flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold ${rankBg}`}>
-                                {idx + 1}
+                            <div key={k} className="space-y-1.5">
+                              <div className="flex justify-between items-center">
+                                <span className="text-sm font-medium capitalize text-foreground">
+                                  {k.replace("-", " ")}
+                                </span>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-xs text-muted-foreground">
+                                    {percentage}%
+                                  </span>
+                                  <Badge
+                                    variant="secondary"
+                                    className="font-semibold min-w-[2.5rem] justify-center"
+                                  >
+                                    {v}
+                                  </Badge>
+                                </div>
                               </div>
-                              <Avatar className={`h-8 w-8 shadow-sm ${avatarRing}`}>
-                                <AvatarImage src={c.avatar_url} alt={c.name} />
-                                <AvatarFallback className="text-xs bg-primary text-primary-foreground">
-                                  {(c.name || c.email)?.[0]?.toUpperCase()}
-                                </AvatarFallback>
-                              </Avatar>
-                              <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium truncate text-foreground">
-                                  {c.name || c.email}
-                                </p>
-                                <p className="text-xs text-muted-foreground">
-                                  {c.posts} posts · {c.votes} votes
-                                </p>
+                              <div className="h-2 bg-muted rounded-full overflow-hidden">
+                                <div
+                                  className={`h-full ${barColor} rounded-full transition-all duration-700 ease-out`}
+                                  style={{ width: `${percentage}%` }}
+                                />
                               </div>
                             </div>
                           );
-                        })
-                      ) : (
-                        <div className="text-center py-8">
-                          <Users className="h-10 w-10 text-muted-foreground/40 mx-auto mb-2" />
-                          <p className="text-sm text-muted-foreground">
-                            No contributors yet
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </Section>
-                </div>
+                        },
+                      )
+                    ) : (
+                      <div className="text-center py-8">
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          No data available
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </Section>
               </div>
-            </>
+            </div>
           )}
         </div>
       </div>
@@ -792,8 +670,8 @@ function Section({
   fullWidth,
 }) {
   return (
-    <Card className="transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 border-border/80 overflow-hidden">
-      <CardHeader className="pb-4 border-b border-border/60 bg-gradient-to-r from-transparent to-muted/30">
+    <Card className="transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 border-border/80 overflow-hidden flex flex-col h-full">
+      <CardHeader className="pb-4 border-b border-border/60 bg-gradient-to-r from-transparent to-muted/30 shrink-0">
         <div className="flex items-start justify-between">
           <div className="flex items-start gap-3 flex-1">
             {Icon && (
@@ -821,7 +699,7 @@ function Section({
           </div>
         </div>
       </CardHeader>
-      <CardContent className="pt-5">{children}</CardContent>
+      <CardContent className="pt-5 flex-1 min-h-0 overflow-y-auto">{children}</CardContent>
     </Card>
   );
 }
@@ -952,9 +830,9 @@ function FeedbackTrendChart({ data }) {
   return (
     <Card
       ref={containerRef}
-      className="transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 border-border/80 overflow-hidden"
+      className="transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 border-border/80 overflow-hidden flex flex-col h-full"
     >
-      <CardHeader className="pb-4 border-b border-border/60 bg-gradient-to-r from-transparent to-muted/30">
+      <CardHeader className="pb-4 border-b border-border/60 bg-gradient-to-r from-transparent to-muted/30 shrink-0">
         <div className="flex items-start justify-between">
           <div className="flex items-start gap-3 flex-1">
             <div className="flex-1">
@@ -985,7 +863,7 @@ function FeedbackTrendChart({ data }) {
         </div>
       </CardHeader>
 
-      <CardContent className="h-[280px] pt-6">
+      <CardContent className="pt-6 flex-1 min-h-0 relative">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart
             data={data}

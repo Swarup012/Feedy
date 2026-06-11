@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { postService, Post, Comment } from '@/services/postService';
+import { postService, Post, Comment, getPostAuthorDisplayName, isWidgetPost } from '@/services/postService';
 import { boardService, Board } from '@/services/boardService';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -319,9 +319,14 @@ export default function PublicPostPage() {
                   </div>
 
                   <div className="flex items-center gap-4 text-sm text-gray-500">
-                    <div className="flex items-center gap-1">
-                      <User className="h-4 w-4" />
-                      <span>{post.author?.name || 'Anonymous'}</span>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <User className="h-4 w-4 shrink-0" />
+                      <span>{getPostAuthorDisplayName(post)}</span>
+                      {isWidgetPost(post) && (
+                        <span className="inline-flex items-center rounded-full bg-violet-100 px-1.5 py-0.5 text-[10px] font-medium text-violet-700">
+                          via Widget
+                        </span>
+                      )}
                     </div>
                     <div className="flex items-center gap-1">
                       <Calendar className="h-4 w-4" />

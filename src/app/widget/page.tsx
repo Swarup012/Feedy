@@ -91,6 +91,19 @@ export default function WidgetPage() {
       console.log("📖 Widget opened");
     } else if (event.data.type === "CLOSE") {
       console.log("📕 Widget closed");
+    } else if (event.data.type === "SHOW_PROMPT") {
+      console.log("📝 Show feedback prompt requested", event.data.data);
+      const { title, description, category } = event.data.data || {};
+      
+      // Pre-fill the form and open it
+      setNewFeedback({
+        title: title || "",
+        description: description || ""
+      });
+      setShowCreateForm(true);
+    } else if (event.data.type === "TRACK") {
+      console.log("📊 Track event:", event.data.data);
+      // In a real app, you would send this to your backend analytics endpoint
     }
   };
 

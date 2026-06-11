@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { postService, Post, Comment } from "@/services/postService";
+import { postService, Post, Comment, getPostAuthorDisplayName, isWidgetPost } from "@/services/postService";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -633,9 +633,14 @@ export default function PostDetailPage() {
 
                 {/* Meta info */}
                 <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                  <div className="flex items-center gap-1">
-                    <User className="h-4 w-4" />
-                    <span>{post.author?.name || "Anonymous"}</span>
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <User className="h-4 w-4 shrink-0" />
+                    <span>{getPostAuthorDisplayName(post)}</span>
+                    {isWidgetPost(post) && (
+                      <span className="inline-flex items-center rounded-full bg-violet-100 px-1.5 py-0.5 text-[10px] font-medium text-violet-700 dark:bg-violet-900/40 dark:text-violet-300">
+                        via Widget
+                      </span>
+                    )}
                   </div>
                   <div className="flex items-center gap-1">
                     <Calendar className="h-4 w-4" />

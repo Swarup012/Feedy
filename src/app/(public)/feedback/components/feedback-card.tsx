@@ -1,6 +1,6 @@
 "use client";
 
-import { Post } from "@/services/postService";
+import { Post, getPostAuthorDisplayName, isWidgetPost } from "@/services/postService";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -144,9 +144,20 @@ export function FeedbackCard({ feedback, onUpvote, isUpvoted = false }: Feedback
             </div>
 
             {/* Author & Time */}
-            <span className="ml-auto text-xs text-slate-500 dark:text-slate-500">
-              {feedback.author && <span className="font-switzer font-medium text-slate-700 dark:text-slate-300">{feedback.author.name}</span>}
-              {feedback.author && " · "}
+            <span className="ml-auto text-xs text-slate-500 dark:text-slate-500 flex items-center gap-1.5 flex-wrap justify-end">
+              {(feedback.author || feedback.external_author) && (
+                <>
+                  <span className="font-switzer font-medium text-slate-700 dark:text-slate-300">
+                    {getPostAuthorDisplayName(feedback)}
+                  </span>
+                  {isWidgetPost(feedback) && (
+                    <span className="inline-flex items-center rounded-full bg-violet-100 px-1.5 py-0.5 text-[10px] font-medium text-violet-700 dark:bg-violet-900/40 dark:text-violet-300">
+                      via Widget
+                    </span>
+                  )}
+                  <span>·</span>
+                </>
+              )}
               {formatDistanceToNow(new Date(feedback.created_at), {
                 addSuffix: true,
               })}

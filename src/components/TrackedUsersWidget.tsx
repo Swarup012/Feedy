@@ -205,7 +205,7 @@ export function TrackedUsersWidget({ onUsageClick, variant = 'basic' }: TrackedU
   if (variant === 'basic') {
     return (
       <Card 
-        className={`cursor-pointer transition-all hover:shadow-md ${
+        className={`cursor-pointer transition-all hover:shadow-md flex flex-col h-full ${
           overageStatus?.overageCost > 0 ? 'border-red-500' :
           overageStatus?.inGracePeriod ? 'border-yellow-500' :
           usage.status === 'exceeded' ? 'border-red-500' : 
@@ -214,7 +214,7 @@ export function TrackedUsersWidget({ onUsageClick, variant = 'basic' }: TrackedU
         }`}
         onClick={onUsageClick}
       >
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 shrink-0">
           <div className="flex items-center gap-2">
             <CardTitle className="text-sm font-medium">Tracked Users</CardTitle>
             <div className={getStatusColor(usage.status, overageStatus?.overageCost! > 0)}>
@@ -223,7 +223,7 @@ export function TrackedUsersWidget({ onUsageClick, variant = 'basic' }: TrackedU
           </div>
           {getStatusBadge(usage.status, usage.usage_percent, overageStatus)}
         </CardHeader>
-        <CardContent>
+        <CardContent className="flex-1 min-h-0 overflow-y-auto">
           <div className="space-y-3">
             {/* Count Display */}
             <div className="flex items-baseline gap-2">
@@ -335,7 +335,7 @@ export function TrackedUsersWidget({ onUsageClick, variant = 'basic' }: TrackedU
   // Render expert view (same as basic for now)
   return (
     <Card 
-      className={`cursor-pointer transition-all hover:shadow-md ${
+      className={`cursor-pointer transition-all hover:shadow-md flex flex-col h-full ${
         overageStatus?.overageCost > 0 ? 'border-red-500' :
         overageStatus?.inGracePeriod ? 'border-yellow-500' :
         usage.status === 'exceeded' ? 'border-red-500' : 
@@ -344,14 +344,14 @@ export function TrackedUsersWidget({ onUsageClick, variant = 'basic' }: TrackedU
       }`}
       onClick={onUsageClick}
     >
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 shrink-0">
         <div className="flex items-center gap-2">
           <CardTitle className="text-sm font-medium">Tracked Users</CardTitle>
           <ChevronRight className="h-4 w-4 text-muted-foreground" />
         </div>
         {getStatusBadge(usage.status, usage.usage_percent, overageStatus)}
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex-1 min-h-0 overflow-y-auto">
         {/* Top Section - Overage Status (Full Width if exists) */}
         {usage.plan_type === 'starter' && overageStatus && (
           <div className="mb-3">

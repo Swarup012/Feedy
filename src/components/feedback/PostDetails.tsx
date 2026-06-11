@@ -39,7 +39,7 @@ import {
   Heart,
   Reply,
 } from "lucide-react";
-import { Post, Comment, postService } from "@/services/postService";
+import { Post, Comment, postService, getPostAuthorDisplayName } from "@/services/postService";
 import { Board } from "@/services/boardService";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
@@ -862,43 +862,29 @@ export function PostDetails({
                 )}
               </div>
 
-              {/* Author and Time */}
-              {post.author && (
-                <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                  <Avatar className="h-6 w-6">
-                    <AvatarImage src={post.author.avatar_url || ""} />
-                    <AvatarFallback>{post.author.name?.[0] || "U"}</AvatarFallback>
-                  </Avatar>
-                  <span className="font-medium text-blue-600 dark:text-blue-400">{post.author.name || "Unknown"}</span>
-                  <span>·</span>
-                  <span>{formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}</span>
-                  {(user?.organization_role === "admin" || user?.organization_role === "owner" || post.author?.id === user?.id) && (
-                    <>
-                      <span>·</span>
-                      <button
-                        onClick={() => {/* Edit post inline */}}
-                        className="text-gray-600 hover:text-gray-900"
-                      >
-                        Edit Post
-                      </button>
-                      <span>·</span>
-                      <button
-                        onClick={() => {/* Reply to post */}}
-                        className="text-gray-600 hover:text-gray-900"
-                      >
-                        Reply
-                      </button>
-                      <span>·</span>
-                      <button
-                        onClick={handleDeletePost}
-                        className="text-red-600 hover:text-red-700"
-                      >
-                        Delete Post
-                      </button>
-                    </>
-                  )}
-                </div>
-              )}
+              {/* Author and time — widget posts use external_author or org_end_user; time always shown */}
+              <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 flex-wrap">
+                {(post.author || post.external_author || post.org_end_user) && (
+                  <>
+                    <Avatar className="h-6 w-6">
+                      <AvatarImage src={(post.author as { avatar_url?: string })?.avatar_url || ""} />
+                      <AvatarFallback>
+                        {getPostAuthorDisplayName(post)[0]?.toUpperCase() || "U"}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="font-medium text-blue-600 dark:text-blue-400">
+                      {getPostAuthorDisplayName(post)}
+                    </span>
+                    {(post.external_author || post.org_end_user) && (
+                      <span className="inline-flex items-center rounded-full bg-violet-100 px-1.5 py-0.5 text-[10px] font-medium text-violet-700 dark:bg-violet-900/40 dark:text-violet-300">
+                        via Widget
+                      </span>
+                    )}
+                    <span>·</span>
+                  </>
+                )}
+                <span>{formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}</span>
+              </div>
 
               {/* Description */}
               {post.description && (
@@ -1095,8 +1081,33 @@ export function PostDetails({
             {/* Owner - Placeholder */}
             <div>
               <label className="text-sm text-gray-600 dark:text-gray-400 block mb-2">Owner</label>
-              <div className="text-sm text-gray-500 dark:text-gray-400">{post.author?.name || "Unknown"}</div>
+              <div className="text-sm text-gray-500 dark:text-gray-400">
+                {getPostAuthorDisplayName(post)}
+                {(post.external_author || post.org_end_user) && (
+                  <span className="ml-2 inline-flex items-center rounded-full bg-violet-100 px-1.5 py-0.5 text-[10px] font-medium text-violet-700 dark:bg-violet-900/40 dark:text-violet-300">
+                    via Widget
+                  </span>
+                )}
+              </div>
             </div>
+
+            {/* User Attributes (Widget SDK Context) */}
+            {(post.org_end_user?.custom_fields || post.external_author?.context) &&
+              Object.keys(post.org_end_user?.custom_fields || post.external_author?.context || {}).length > 0 && (
+              <div>
+                <label className="text-sm text-gray-600 dark:text-gray-400 block mb-3">User Attributes</label>
+                <div className="flex flex-col gap-2">
+                  {Object.entries(post.org_end_user?.custom_fields || post.external_author?.context || {}).map(([key, val]) => (
+                    <div key={key} className="flex flex-col bg-gray-50 dark:bg-gray-800/50 rounded-md p-2 border border-gray-100 dark:border-gray-800">
+                      <span className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">{key}</span>
+                      <span className="text-sm font-medium text-gray-900 dark:text-gray-100 break-words font-mono text-[13px]">
+                        {typeof val === 'object' ? JSON.stringify(val) : String(val)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Estimated - Placeholder */}
             <div>
