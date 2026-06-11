@@ -41,6 +41,7 @@ jobs:
             NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}
             NEXT_PUBLIC_SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
             NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+            BACKEND_URL=http://faddy-backend:3000
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/faddy-frontend:latest
             ${{ secrets.DOCKERHUB_USERNAME }}/faddy-frontend:${{ github.sha }}
