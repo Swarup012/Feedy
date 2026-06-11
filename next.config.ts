@@ -67,7 +67,8 @@ const nextConfig: NextConfig = {
   },
   // Proxy API requests to backend server
   async rewrites() {
-    const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+    // Use the internal BACKEND_URL for server-to-server proxying
+    const backendUrl = process.env.BACKEND_URL || 'http://localhost:3000';
     return [
       {
         source: '/api/:path*',
