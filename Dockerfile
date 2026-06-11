@@ -68,7 +68,8 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
  
 USER nextjs 
 EXPOSE 5173 
-ENV PORT=5173 
+ENV PORT=5173
+ENV HOSTNAME="0.0.0.0"
  
 # Health check 
 HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \ 
