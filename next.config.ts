@@ -67,8 +67,10 @@ const nextConfig: NextConfig = {
   },
   // Proxy API requests to backend server
   async rewrites() {
-    // Use the internal BACKEND_URL for server-to-server proxying
-    const backendUrl = process.env.BACKEND_URL || 'http://localhost:3000';
+    // Rewrites are evaluated at build-time. In production, hardcode the Docker service name.
+    const backendUrl = process.env.NODE_ENV === 'production' 
+      ? 'http://faddy-backend:3000' 
+      : 'http://localhost:3000';
     return [
       {
         source: '/api/:path*',
