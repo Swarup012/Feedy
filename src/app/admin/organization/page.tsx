@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useOrganization } from '@/context/OrganizationContext';
 import { useAuth } from '@/hooks/useAuth';
+import api from '@/lib/api';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -113,33 +114,15 @@ export default function OrganizationSettingsPage() {
     try {
       setLoadingMembers(true);
       console.log('🔍 Fetching members for organization:', organization.id);
-      
-      const response = await fetch(`/api/organizations/${organization.id}/members`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
-        },
-      });
 
-      console.log('📡 Members API response status:', response.status);
-
-      if (response.ok) {
-        const data = await response.json();
-        console.log('✅ Members data received:', data);
-        setMembers(data.data.members);
-      } else {
-        const errorData = await response.json();
-        console.error('❌ Failed to fetch members:', errorData);
-        toast({
-          title: 'Error',
-          description: errorData.error || 'Failed to load members',
-          variant: 'destructive',
-        });
-      }
-    } catch (error) {
+      const response = await api.get(`/api/organizations/${organization.id}/members`);
+      console.log('✅ Members data received:', response.data);
+      setMembers(response.data.data.members);
+    } catch (error: any) {
       console.error('❌ Failed to fetch members:', error);
       toast({
         title: 'Error',
-        description: 'Failed to load members. Please try again.',
+        description: error?.response?.data?.error || 'Failed to load members',
         variant: 'destructive',
       });
     } finally {
@@ -160,34 +143,16 @@ export default function OrganizationSettingsPage() {
 
     try {
       setSaving(true);
-      const response = await fetch(`/api/organizations/${organization.id}`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
+      await api.put(`/api/organizations/${organization.id}`, formData);
+      toast({
+        title: 'Success',
+        description: 'Organization settings updated successfully.',
       });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        toast({
-          title: 'Success',
-          description: 'Organization settings updated successfully.',
-        });
-        await refreshOrganization();
-      } else {
-        toast({
-          title: 'Error',
-          description: data.error || 'Failed to update organization settings.',
-          variant: 'destructive',
-        });
-      }
-    } catch (error) {
+      await refreshOrganization();
+    } catch (error: any) {
       toast({
         title: 'Error',
-        description: 'An unexpected error occurred.',
+        description: error?.response?.data?.error || 'Failed to update organization settings.',
         variant: 'destructive',
       });
     } finally {
@@ -200,38 +165,20 @@ export default function OrganizationSettingsPage() {
 
     try {
       setInviting(true);
-      const response = await fetch(`/api/organizations/${organization.id}/members`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: inviteEmail,
-          role: inviteRole,
-        }),
+      await api.post(`/api/organizations/${organization.id}/members`, {
+        email: inviteEmail,
+        role: inviteRole,
       });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        toast({
-          title: 'Invitation sent',
-          description: `Invitation sent to ${inviteEmail}`,
-        });
-        setInviteEmail('');
-        setInviteRole('member');
-      } else {
-        toast({
-          title: 'Error',
-          description: data.error || 'Failed to send invitation.',
-          variant: 'destructive',
-        });
-      }
-    } catch (error) {
+      toast({
+        title: 'Invitation sent',
+        description: `Invitation sent to ${inviteEmail}`,
+      });
+      setInviteEmail('');
+      setInviteRole('member');
+    } catch (error: any) {
       toast({
         title: 'Error',
-        description: 'An unexpected error occurred.',
+        description: error?.response?.data?.error || 'Failed to send invitation.',
         variant: 'destructive',
       });
     } finally {

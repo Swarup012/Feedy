@@ -176,16 +176,24 @@ export function LandingFooter({ showCTA = true }: LandingFooterProps) {
                     <ArrowRight className="w-3.5 h-3.5 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
                   </a>
                 </li>
-                {/* Cookie Policy - Temporarily commented out */}
-                {/* <li>
+                <li>
                   <a 
-                    href="/policy/coockie" 
+                    href="/policy/refund" 
+                    className="group inline-flex items-center gap-1.5 text-sm font-semibold text-slate-600 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400 transition-all"
+                  >
+                    Refund Policy
+                    <ArrowRight className="w-3.5 h-3.5 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
+                  </a>
+                </li>
+                <li>
+                  <a 
+                    href="/policy/cookie" 
                     className="group inline-flex items-center gap-1.5 text-sm font-semibold text-slate-600 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400 transition-all"
                   >
                     Cookies
                     <ArrowRight className="w-3.5 h-3.5 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
                   </a>
-                </li> */}
+                </li>
               </ul>
             </div>
           </div>

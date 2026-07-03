@@ -1,23 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { extractAuthHeader, buildBackendHeaders, BACKEND_URL } from '@/lib/proxyHelper';
 
 export async function GET(request: NextRequest) {
   try {
-    const authHeader = request.headers.get('authorization');
-    
+    const authHeader = extractAuthHeader(request);
+
     if (!authHeader) {
       return NextResponse.json(
-        { success: false, error: 'No token provided' },
+        { success: false, error: 'Not authenticated' },
         { status: 401 }
       );
     }
 
-    const backendUrl = process.env.BACKEND_URL || 'http://localhost:3000';
-    const response = await fetch(`${backendUrl}/api/organizations/me/all`, {
+    const response = await fetch(`${BACKEND_URL}/api/organizations/me/all`, {
       method: 'GET',
-      headers: {
-        'Authorization': authHeader,
-        'Content-Type': 'application/json',
-      },
+      headers: buildBackendHeaders(authHeader),
     });
 
     const data = await response.json();

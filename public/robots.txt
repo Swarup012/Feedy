@@ -1,3 +1,9 @@
-# https://www.robotstxt.org/robotstxt.html
 User-agent: *
-Disallow:
+Allow: /
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /settings
+Disallow: /onboarding
+Disallow: /create-organization
+
+Sitemap: https://www.usefaddy.com/sitemap.xml

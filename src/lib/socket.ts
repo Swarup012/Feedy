@@ -6,24 +6,27 @@ const SOCKET_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 let socket: Socket | null = null;
 
 /**
- * Initialize Socket.io connection
- * Call this when user logs in
+ * Initialize Socket.io using a short-lived WS ticket.
+ *
+ * Because HttpOnly cookies cannot be read by JS and are not automatically
+ * sent during the Socket.io HTTP handshake in all environments, the backend
+ * exposes GET /api/auth/ws-ticket which returns a one-time token (valid ~30s).
+ * Pass that ticket here instead of the raw JWT.
+ *
+ * Usage:
+ *   const { ticket } = await authService.getWsTicket();
+ *   initSocketWithTicket(ticket);
  */
-export function initSocket(token: string): Socket {
+export function initSocketWithTicket(ticket: string): Socket {
   if (socket?.connected) {
     return socket;
   }
 
-  console.log('🔌 Initializing Socket.io connection...', {
-    url: SOCKET_URL,
-    tokenPrefix: token.substring(0, 20) + '...',
-  });
+  console.log('🔌 Initializing Socket.io with WS ticket...');
 
   socket = io(SOCKET_URL, {
-    auth: {
-      token,
-    },
-    transports: ['websocket', 'polling'], // Prefer WebSocket, fallback to polling
+    auth: { ticket },           // backend validates ticket, not raw JWT
+    transports: ['websocket', 'polling'],
     reconnection: true,
     reconnectionDelay: 1000,
     reconnectionDelayMax: 5000,
@@ -31,9 +34,43 @@ export function initSocket(token: string): Socket {
     timeout: 20000,
   });
 
-  console.log('📡 Socket instance created, waiting for connection...');
+  _attachSocketListeners();
+  return socket;
+}
 
-  // Connection events
+/**
+ * @deprecated Use initSocketWithTicket(ticket) instead.
+ * Kept for backward compatibility during the cookie-auth migration.
+ * Call authService.getWsTicket() to obtain a ticket.
+ */
+export function initSocket(token: string): Socket {
+  if (socket?.connected) {
+    return socket;
+  }
+
+  console.log('🔌 Initializing Socket.io connection (legacy token mode)...', {
+    url: SOCKET_URL,
+    tokenPrefix: token.substring(0, 20) + '...',
+  });
+
+  socket = io(SOCKET_URL, {
+    auth: { token },
+    transports: ['websocket', 'polling'],
+    reconnection: true,
+    reconnectionDelay: 1000,
+    reconnectionDelayMax: 5000,
+    reconnectionAttempts: 5,
+    timeout: 20000,
+  });
+
+  _attachSocketListeners();
+  return socket;
+}
+
+/** Shared event listener setup — called by both init functions */
+function _attachSocketListeners() {
+  if (!socket) return;
+
   socket.on('connect', () => {
     console.log('✅ Socket connected:', socket?.id);
   });
@@ -41,7 +78,6 @@ export function initSocket(token: string): Socket {
   socket.on('disconnect', (reason) => {
     console.log('❌ Socket disconnected:', reason);
     if (reason === 'io server disconnect') {
-      // Server disconnected the socket, try to reconnect manually
       socket?.connect();
     }
   });
@@ -65,8 +101,6 @@ export function initSocket(token: string): Socket {
   socket.on('reconnect_failed', () => {
     console.error('❌ Socket reconnection failed');
   });
-
-  return socket;
 }
 
 /**

@@ -3,12 +3,10 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Bell, Search, Eye, AlertCircle } from "lucide-react";
+import { Bell, Eye, AlertCircle } from "lucide-react";
 
-import { Logo } from "@/components/logo";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { LandingFooter } from "@/components/ui/landing-footer";
 import {
   DropdownMenu,
@@ -22,11 +20,10 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
-import { TokenManager } from "@/lib/tokenManager";
 import { saveReturnUrl } from "@/lib/returnUrl";
 import api from "@/lib/api";
 
-// Organization type
+// ─── Types ───────────────────────────────────────────────────────────────────
 interface Organization {
   id: string;
   name: string;
@@ -34,44 +31,58 @@ interface Organization {
   logo_url?: string;
 }
 
+// ─── Subdomain detection (pure, synchronous, side-effect free) ───────────────
+// Runs immediately during the first client render — no network call.
+function detectSubdomain(): string | null {
+  if (typeof window === "undefined") return null;
+  const hostname = window.location.hostname;
+  const parts = hostname.split(".");
+
+  // Production: company.faddy.site → parts = ["company", "faddy", "site"]
+  if (parts.length >= 3 && !hostname.includes("localhost")) {
+    const sub = parts[0];
+    if (sub === "www" || sub === "api" || sub === "admin") return null;
+    return sub;
+  }
+
+  // Development: company.localhost → parts = ["company", "localhost"]
+  if (hostname.includes("localhost") && parts.length > 1 && parts[0] !== "localhost") {
+    return parts[0];
+  }
+
+  return null;
+}
+
+// ─── AdminViewToggle ─────────────────────────────────────────────────────────
 function AdminViewToggle() {
   const pathname = usePathname();
   const { user } = useAuth();
   const isAdminView = pathname.startsWith("/admin");
 
-  // Only show for admin/owner users (organization_role)
-  if (!user || (user.organization_role !== "admin" && user.organization_role !== "owner")) return null;
-
-  if (isAdminView) {
-    return (
-      <Button variant="outline" asChild>
-        <Link href="/feedback">
-          <Eye className="mr-2 h-4 w-4" />
-          Public View
-        </Link>
-      </Button>
-    );
-  }
+  if (
+    !user ||
+    (user.organization_role !== "admin" && user.organization_role !== "owner")
+  )
+    return null;
 
   return (
     <Button variant="outline" asChild>
-      <Link href="/admin">
+      <Link href={isAdminView ? "/feedback" : "/admin"}>
         <Eye className="mr-2 h-4 w-4" />
-        Admin View
+        {isAdminView ? "Public View" : "Admin View"}
       </Link>
     </Button>
   );
 }
 
-function AppHeader({ organization }: { organization: Organization | null }) {
+// ─── AppHeader ───────────────────────────────────────────────────────────────
+function AppHeader({
+  organization,
+}: {
+  organization: Organization | null;
+}) {
   const { user, logout, isAuthenticated } = useAuth();
-  const router = useRouter();
 
-  const handleLogout = async () => {
-    await logout();
-  };
-
-  // Get user initials for avatar
   const getUserInitials = () => {
     if (!user) return "U";
     return (
@@ -87,10 +98,12 @@ function AppHeader({ organization }: { organization: Organization | null }) {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-white dark:bg-gray-950 shadow-sm">
       <div className="container flex h-16 items-center">
-        {/* Left Section - Show Organization Branding */}
+        {/* Left — org branding + nav */}
         <div className="mr-4 hidden md:flex">
           <Link href="/feedback" className="mr-6 flex items-center space-x-2">
-            <span className="font-switzer font-medium text-gray-900 dark:text-white">{organization?.name || "Faddy"}</span>
+            <span className="font-switzer font-medium text-gray-900 dark:text-white">
+              {organization?.name || "Faddy"}
+            </span>
           </Link>
           <nav className="flex items-center space-x-6 text-sm font-medium">
             <Link
@@ -114,12 +127,8 @@ function AppHeader({ organization }: { organization: Organization | null }) {
           </nav>
         </div>
 
-        {/* Right Section */}
+        {/* Right — user controls */}
         <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
-          {/* Search */}
-         
-
-          {/* User Section */}
           <div className="flex items-center space-x-2">
             <ThemeToggle />
             {isAuthenticated && user ? (
@@ -163,7 +172,8 @@ function AppHeader({ organization }: { organization: Organization | null }) {
                       <DropdownMenuItem asChild>
                         <Link href="/profile">Profile</Link>
                       </DropdownMenuItem>
-                      {(user.organization_role === "admin" || user.organization_role === "owner") && (
+                      {(user.organization_role === "admin" ||
+                        user.organization_role === "owner") && (
                         <DropdownMenuItem asChild>
                           <Link href="/admin/feedback">Admin Dashboard</Link>
                         </DropdownMenuItem>
@@ -171,17 +181,19 @@ function AppHeader({ organization }: { organization: Organization | null }) {
                       <DropdownMenuItem>Settings</DropdownMenuItem>
                     </DropdownMenuGroup>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={handleLogout}>
+                    <DropdownMenuItem onClick={() => logout()}>
                       Log out
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </>
             ) : (
-              <Button onClick={() => {
-                saveReturnUrl(); // Save current page before redirecting
-                window.location.href = '/login';
-              }}>
+              <Button
+                onClick={() => {
+                  saveReturnUrl();
+                  window.location.href = "/login";
+                }}
+              >
                 Sign In
               </Button>
             )}
@@ -192,108 +204,80 @@ function AppHeader({ organization }: { organization: Organization | null }) {
   );
 }
 
-// Error page component for invalid subdomain
-function InvalidOrganizationError() {
+// ─── InvalidOrganizationError ────────────────────────────────────────────────
+// Shown as an inline banner ABOVE the page content — never blocks the render.
+function InvalidOrganizationBanner() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <Card className="max-w-md w-full mx-4">
-        <CardContent className="pt-6">
-          <div className="flex mb-4 gap-2">
-            <AlertCircle className="h-8 w-8 text-destructive" />
-            <div>
-              <h1 className="text-2xl font-switzer font-medium mb-2">Organization Not Found</h1>
-              <p className="text-muted-foreground mb-4">
-                The organization you're trying to access doesn't exist or has been removed.
-              </p>
-              <p className="text-sm text-muted-foreground mb-6">
-                Please check the URL and try again, or contact support if you believe this is an error.
-              </p>
-              <Button asChild className="w-full">
-                <Link href="/">Go to Home</Link>
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+    <div className="w-full bg-destructive/10 border-b border-destructive/20 px-4 py-3">
+      <div className="container flex items-center gap-3 text-sm text-destructive">
+        <AlertCircle className="h-4 w-4 flex-shrink-0" />
+        <span>
+          <strong>Organization not found.</strong> The subdomain you visited
+          doesn&apos;t match any active organization.{" "}
+          <Link href="/" className="underline hover:no-underline">
+            Go to homepage
+          </Link>
+        </span>
+      </div>
     </div>
   );
 }
 
+// ─── AppLayout ───────────────────────────────────────────────────────────────
 export default function AppLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
-  const pathname = usePathname();
+}: Readonly<{ children: React.ReactNode }>) {
+  // Detect subdomain synchronously so we know whether to expect an org fetch.
+  // This never blocks rendering — it's pure string manipulation on the hostname.
+  const [activeSubdomain] = useState<string | null>(() => detectSubdomain());
+
+  // Organization state — starts null, populated asynchronously in background.
   const [organization, setOrganization] = useState<Organization | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
 
-  // Detect subdomain and fetch organization
+  // orgError is only true when we KNOW there's a subdomain AND the lookup failed.
+  // It is never true on the main domain (no subdomain → no error possible).
+  const [orgError, setOrgError] = useState(false);
+
+  // Fetch organization data in the background — does NOT block initial render.
   useEffect(() => {
-    const detectOrganization = async () => {
+    if (!activeSubdomain) return; // main domain — nothing to fetch
+
+    let cancelled = false;
+
+    const fetchOrg = async () => {
       try {
-        // Get subdomain from hostname
-        const hostname = window.location.hostname;
-        const parts = hostname.split(".");
-        let subdomain: string | null = null;
+        const response = await api.get(
+          `/api/organizations/subdomain/${activeSubdomain}`
+        );
+        if (cancelled) return;
 
-        // Handle production (e.g., notion.faddy.site)
-        if (parts.length >= 3 && !hostname.includes("localhost")) {
-          subdomain = parts[0];
-          if (subdomain === "www" || subdomain === "api" || subdomain === "admin") {
-            subdomain = null;
-          }
-        }
-        // Handle development (e.g., notion.localhost)
-        else if (hostname.includes("localhost") && parts.length > 1 && parts[0] !== "localhost") {
-          subdomain = parts[0];
-        }
-
-        // If no subdomain, no organization context needed (landing page)
-        if (!subdomain) {
-          setOrganization(null);
-          setLoading(false);
-          return;
-        }
-
-        // Fetch organization by subdomain
-        const response = await api.get(`/api/organizations/subdomain/${subdomain}`);
-        
-        if (response.data.success && response.data.data.organization) {
+        if (response.data.success && response.data.data?.organization) {
           setOrganization(response.data.data.organization);
-          setError(false);
         } else {
-          setError(true);
+          setOrgError(true);
         }
-      } catch (err) {
-        console.error("Failed to fetch organization:", err);
-        setError(true);
-      } finally {
-        setLoading(false);
+      } catch {
+        if (!cancelled) {
+          console.error("Failed to fetch organization for subdomain:", activeSubdomain);
+          setOrgError(true);
+        }
       }
     };
 
-    detectOrganization();
-  }, []);
+    fetchOrg();
+    return () => { cancelled = true; };
+  }, [activeSubdomain]);
 
-  // Show loading state
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
-
-  // Show error if invalid subdomain
-  if (error) {
-    return <InvalidOrganizationError />;
-  }
-
+  // ── Always render immediately — no spinner, no blocking ─────────────────
+  // Children get the page content visible to crawlers on first paint.
+  // The header will silently update its org name once the fetch resolves.
   return (
     <div className="min-h-screen flex flex-col">
       <AppHeader organization={organization} />
+
+      {/* Non-blocking org error banner — only shown when on a known-bad subdomain */}
+      {orgError && <InvalidOrganizationBanner />}
+
       <main className="flex-1">{children}</main>
       <LandingFooter showCTA={false} />
     </div>

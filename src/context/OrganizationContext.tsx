@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import api from '@/lib/api';
 
 interface Organization {
   id: string;
@@ -93,34 +94,22 @@ export function OrganizationProvider({ children }: { children: React.ReactNode }
 
     try {
       setLoading(true);
-      
-      // Fetch current organization
-      const response = await fetch('/api/organizations/me', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
-        },
-      });
 
-      if (response.ok) {
-        const data = await response.json();
-        setOrganization(data.data.organization);
-        setOrganizationRole(data.data.role);
-      } else {
+      // Fetch current organization — api client sends cookies + Authorization header automatically
+      try {
+        const response = await api.get('/api/organizations/me');
+        setOrganization(response.data.data.organization);
+        setOrganizationRole(response.data.data.role);
+      } catch {
         setOrganization(null);
         setOrganizationRole(null);
       }
 
       // Fetch all organizations
-      const allOrgsResponse = await fetch('/api/organizations/me/all', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
-        },
-      });
-
-      if (allOrgsResponse.ok) {
-        const allOrgsData = await allOrgsResponse.json();
-        setOrganizations(allOrgsData.data.organizations || []);
-      } else {
+      try {
+        const allOrgsResponse = await api.get('/api/organizations/me/all');
+        setOrganizations(allOrgsResponse.data.data.organizations || []);
+      } catch {
         setOrganizations([]);
       }
     } catch (error) {
@@ -155,14 +144,7 @@ export function OrganizationProvider({ children }: { children: React.ReactNode }
         
         try {
           // Switch to the organization that matches the subdomain
-          await fetch('/api/users/me/current-organization', {
-            method: 'PUT',
-            headers: {
-              'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ organizationId: targetOrg.id }),
-          });
+          await api.put('/api/users/me/current-organization', { organizationId: targetOrg.id });
           
           // Refresh organization data
           await fetchOrganization();
@@ -180,20 +162,8 @@ export function OrganizationProvider({ children }: { children: React.ReactNode }
 
   const switchOrganization = async (organizationId: string) => {
     try {
-      const response = await fetch('/api/users/me/current-organization', {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ organizationId }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to switch organization');
-      }
-
-      const data = await response.json();
+      const response = await api.put('/api/users/me/current-organization', { organizationId });
+      const data = response.data;
       
       // Redirect to the new organization's subdomain
       const newOrg = organizations.find(o => o.id === organizationId);
@@ -225,22 +195,8 @@ export function OrganizationProvider({ children }: { children: React.ReactNode }
 
   const createOrganization = async (orgData: any): Promise<Organization> => {
     try {
-      const response = await fetch('/api/organizations', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(orgData),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to create organization');
-      }
-
-      const data = await response.json();
-      const newOrg = data.data.organization;
+      const response = await api.post('/api/organizations', orgData);
+      const newOrg = response.data.data.organization;
       
       // Refresh organizations list
       await fetchOrganization();

@@ -1,26 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { extractAuthHeader, buildBackendHeaders, BACKEND_URL } from '@/lib/proxyHelper';
 
 export async function GET(request: NextRequest, { params }: { params: { slug: string } }) {
   try {
-    const authHeader = request.headers.get('authorization');
+    const authHeader = extractAuthHeader(request);
     const subdomain = request.headers.get('x-subdomain') || '';
     const slug = params.slug;
 
     if (!authHeader) {
       return NextResponse.json(
-        { success: false, error: 'No token provided' },
+        { success: false, error: 'Not authenticated' },
         { status: 401 }
       );
     }
 
-    const backendUrl = process.env.BACKEND_URL || 'http://localhost:3000';
-    const response = await fetch(`${backendUrl}/api/boards/check-slug/${slug}`, {
+    const response = await fetch(`${BACKEND_URL}/api/boards/check-slug/${slug}`, {
       method: 'GET',
-      headers: {
-        'Authorization': authHeader,
-        'Content-Type': 'application/json',
-        'x-subdomain': subdomain
-      },
+      headers: buildBackendHeaders(authHeader, { 'x-subdomain': subdomain }),
     });
 
     const data = await response.json();

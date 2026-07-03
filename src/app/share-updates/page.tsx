@@ -73,6 +73,12 @@ export default function ShareUpdatesPage() {
             { name: "Public Roadmap", link: "/public-roadmap" },
           ],
         },
+        {
+          section: "Resources",
+          items: [
+            { name: "Blog", link: "/blog" },
+          ],
+        },
       ],
     },
     {

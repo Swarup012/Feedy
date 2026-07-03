@@ -1,15 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { extractAuthHeader, buildBackendHeaders, BACKEND_URL } from '@/lib/proxyHelper';
 
 export async function PUT(
   request: NextRequest,
   { params }: { params: { organizationId: string } }
 ) {
   try {
-    const authHeader = request.headers.get('authorization');
-    
+    const authHeader = extractAuthHeader(request);
+
     if (!authHeader) {
       return NextResponse.json(
-        { success: false, error: 'No token provided' },
+        { success: false, error: 'Not authenticated' },
         { status: 401 }
       );
     }
@@ -17,13 +18,9 @@ export async function PUT(
     const body = await request.json();
     const { organizationId } = params;
 
-    const backendUrl = process.env.BACKEND_URL || 'http://localhost:3000';
-    const response = await fetch(`${backendUrl}/api/organizations/${organizationId}`, {
+    const response = await fetch(`${BACKEND_URL}/api/organizations/${organizationId}`, {
       method: 'PUT',
-      headers: {
-        'Authorization': authHeader,
-        'Content-Type': 'application/json',
-      },
+      headers: buildBackendHeaders(authHeader),
       body: JSON.stringify(body),
     });
 
@@ -37,3 +34,4 @@ export async function PUT(
     );
   }
 }
+

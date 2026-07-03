@@ -83,6 +83,12 @@ export default function PublicRoadmapPage() {
             { name: "Public Roadmap", link: "/public-roadmap" },
           ],
         },
+        {
+          section: "Resources",
+          items: [
+            { name: "Blog", link: "/blog" },
+          ],
+        },
       ],
     },
     {

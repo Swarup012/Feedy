@@ -243,7 +243,6 @@ export default function ContactPage() {
             </Card>
           </div>
         </div>
-        <LandingFooter showCTA={false} />
       </>
     );
   }
@@ -500,7 +499,6 @@ export default function ContactPage() {
           </div>
         </div>
       </div>
-      <LandingFooter showCTA={false} />
     </>
   );
 }

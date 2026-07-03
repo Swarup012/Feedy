@@ -1,35 +1,58 @@
+/**
+ * TokenManager — Cookie-based auth edition
+ *
+ * Tokens (access_token, refresh_token) are now stored as HttpOnly cookies
+ * set by the backend. This module no longer reads or writes tokens.
+ *
+ * The only thing stored client-side is a lightweight user-profile cache in
+ * localStorage, purely as a UX optimisation (instant first-paint without an
+ * extra network round-trip). It is NOT used for authorisation decisions.
+ */
+
+const USER_CACHE_KEY = "faddy_user_cache";
+
 export const TokenManager = {
-  getAccessToken(): string | null {
-    if (typeof window === "undefined") return null;
-    return localStorage.getItem("access_token");
+  // ─── Token methods (no-ops — tokens live in HttpOnly cookies) ───────────────
+
+  /** @deprecated Tokens are now HttpOnly cookies set by the backend. */
+  getAccessToken(): null {
+    return null;
   },
 
-  getRefreshToken(): string | null {
-    if (typeof window === "undefined") return null;
-    return localStorage.getItem("refresh_token");
+  /** @deprecated Tokens are now HttpOnly cookies set by the backend. */
+  getRefreshToken(): null {
+    return null;
   },
 
-  setTokens(accessToken: string, refreshToken: string): void {
-    if (typeof window === "undefined") return;
-    localStorage.setItem("access_token", accessToken);
-    localStorage.setItem("refresh_token", refreshToken);
+  /** @deprecated Tokens are now HttpOnly cookies set by the backend. */
+  setTokens(_accessToken: string, _refreshToken: string): void {
+    // Intentionally empty — the backend sets HttpOnly cookies via Set-Cookie.
   },
 
+  /** Clears the user cache only. The backend clears auth cookies on logout. */
   clearTokens(): void {
     if (typeof window === "undefined") return;
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("refresh_token");
-    localStorage.removeItem("user");
+    localStorage.removeItem(USER_CACHE_KEY);
   },
+
+  // ─── User-profile cache (localStorage, NOT used for auth) ───────────────────
 
   setUser(user: any): void {
     if (typeof window === "undefined") return;
-    localStorage.setItem("user", JSON.stringify(user));
+    try {
+      localStorage.setItem(USER_CACHE_KEY, JSON.stringify(user));
+    } catch {
+      // Ignore storage errors (private browsing quota, etc.)
+    }
   },
 
   getUser(): any | null {
     if (typeof window === "undefined") return null;
-    const user = localStorage.getItem("user");
-    return user ? JSON.parse(user) : null;
+    try {
+      const raw = localStorage.getItem(USER_CACHE_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
   },
 };

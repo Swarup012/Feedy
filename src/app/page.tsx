@@ -1,15 +1,15 @@
 "use client"
 import React, { useEffect, useState, useRef } from 'react';
-import { 
-  ArrowRight, 
-  MessageSquare, 
-  Lightbulb, 
-  Zap, 
-  CheckCircle, 
-  Star, 
-  Users, 
-  TrendingUp, 
-  Sparkles, 
+import {
+  ArrowRight,
+  MessageSquare,
+  Lightbulb,
+  Zap,
+  CheckCircle,
+  Star,
+  Users,
+  TrendingUp,
+  Sparkles,
   ChevronRight,
   ExternalLink
 } from 'lucide-react';
@@ -19,9 +19,9 @@ import { useAuth } from '@/hooks/useAuth';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
 import LandingButton from '../components/ui/LandingButton.tsx';
-import {LayoutTextFlip} from '../components/ui/layout-text-flip.tsx'
+import { LayoutTextFlip } from '../components/ui/layout-text-flip.tsx'
 import Eyes from '../components/Eyes.tsx'
-import {ThinkingBubble} from '../components/ThinkingBubble.tsx'
+import { ThinkingBubble } from '../components/ThinkingBubble.tsx'
 import {
   Navbar,
   NavBody,
@@ -36,7 +36,7 @@ import {
 import { ThemeToggle } from '@/components/theme-toggle';
 import { ThemeToggleDebug } from '@/components/theme-toggle-debug';
 import FaddyLandingImage from '@/assets/images/Faddy_Landing.png'
-import {PointerHighlight} from '../components/ui/pointer-highlight.tsx'
+import { PointerHighlight } from '../components/ui/pointer-highlight.tsx'
 import { LandingFooter } from '@/components/ui/landing-footer';
 
 if (typeof window !== 'undefined') {
@@ -46,10 +46,10 @@ if (typeof window !== 'undefined') {
 export default function LandingPage() {
   const router = useRouter();
   const { user, loading } = useAuth();
-  const [checkingBoards, setCheckingBoards] = useState(true);
+  const [checkingBoards, setCheckingBoards] = useState(false);
   const [hasSubdomain, setHasSubdomain] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  
+
   const handleClick = () => {
     router.push("/signup");
   }
@@ -59,14 +59,14 @@ export default function LandingPage() {
     <div className="flex items-center gap-3">
       <ThemeToggleDebug />
       {!visible && (
-        <NavbarButton 
+        <NavbarButton
           variant="secondary"
           onClick={() => router.push('/login')}
         >
           Login
         </NavbarButton>
       )}
-      <NavbarButton 
+      <NavbarButton
         variant="primary"
         onClick={() => router.push('/signup')}
       >
@@ -74,7 +74,7 @@ export default function LandingPage() {
       </NavbarButton>
     </div>
   );
-  
+
   const navItems = [
     {
       name: "Product",
@@ -95,6 +95,12 @@ export default function LandingPage() {
             { name: "Role-Based Access Control", link: "/role-based-access" },
             { name: "Public Roadmap", link: "/public-roadmap" },
           ]
+        },
+        {
+          section: "Resources",
+          items: [
+            { name: "Blog", link: "/blog" },
+          ]
         }
       ]
     },
@@ -111,7 +117,7 @@ export default function LandingPage() {
       link: "/contact",
     },
   ];
-  
+
   // Refs for GSAP
   const heroRef = useRef(null);
   const featuresRef = useRef(null);
@@ -121,9 +127,9 @@ export default function LandingPage() {
     // --- ORIGINAL BUSINESS LOGIC (PRESERVED) ---
     const hostname = window.location.hostname;
     const parts = hostname.split('.');
-    
+
     let subdomain = null;
-    
+
     // Production: company.domain.com
     if (parts.length >= 3 && !hostname.includes('localhost')) {
       subdomain = parts[0];
@@ -131,14 +137,14 @@ export default function LandingPage() {
         subdomain = null;
       }
     }
-    
+
     // Development: company.localhost:5173
     if (hostname.includes('localhost') && parts.length > 1 && parts[0] !== 'localhost') {
       subdomain = parts[0];
     }
-    
+
     setHasSubdomain(!!subdomain);
-    
+
     const redirectLogic = async () => {
       // If HAS subdomain, redirect to that organization's public feedback
       // This allows users to view ANY organization's public pages
@@ -147,7 +153,7 @@ export default function LandingPage() {
           const { boardService } = await import('@/services/boardService');
           const response = await boardService.getPublicBoards();
           const publicBoards = response.data.boards;
-          
+
           if (publicBoards.length > 0) {
             router.push('/feedback');
             return;
@@ -191,12 +197,12 @@ export default function LandingPage() {
           stagger: 0.2,
           ease: "expo.out"
         })
-        .from(".hero-stats", {
-          opacity: 0,
-          y: 20,
-          duration: 0.8,
-          ease: "power2.out"
-        }, "-=0.5");
+          .from(".hero-stats", {
+            opacity: 0,
+            y: 20,
+            duration: 0.8,
+            ease: "power2.out"
+          }, "-=0.5");
 
         // Scroll Trigger: Features
         gsap.from(".feature-card", {
@@ -242,19 +248,6 @@ export default function LandingPage() {
     }
   }, [checkingBoards, loading]);
 
-  if (loading || checkingBoards) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
-        <div className="flex flex-col items-center gap-4">
-          <div className="relative w-16 h-16">
-            <div className="absolute inset-0 border-4 border-blue-100 rounded-full"></div>
-            <div className="absolute inset-0 border-4 border-blue-600 rounded-full border-t-transparent animate-spin"></div>
-          </div>
-          <p className="text-slate-500 dark:text-slate-400 font-medium animate-pulse">Initializing Faddy...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-white dark:bg-slate-950 font-sans text-slate-900 dark:text-slate-100 antialiased selection:bg-blue-100 dark:selection:bg-blue-900 selection:text-blue-900 dark:selection:text-blue-100">
@@ -361,19 +354,19 @@ export default function LandingPage() {
             <h1 className="hero-reveal text-4xl md:text-[70px] font-switzer font-medium tracking-tight leading-tight text-slate-900 dark:text-white mb-10 text-center">
               Stop Guessing What to<br />
               <span className="inline-block"><PointerHighlight>Build Next</PointerHighlight></span>
-             {/* <LayoutTextFlip words={["What to","Build Next"]} /> */}
+              {/* <LayoutTextFlip words={["What to","Build Next"]} /> */}
             </h1>
-            
+
             <p className="hero-reveal text-xl md:text-2xl text-slate-500 dark:text-slate-400 max-w-3xl mx-auto mb-8 leading-relaxed">
-                Faddy centralizes customer feedback and turns it into a clear product roadmap. Ship features users actually want—faster and with confidence.
+              Faddy centralizes customer feedback and turns it into a clear product roadmap. Ship features users actually want—faster and with confidence.
             </p>
-            
+
             <div className="hero-reveal flex flex-col sm:flex-row justify-center gap-8">
-              <button 
+              <button
                 onClick={handleClick}
-                className="px-10 py-4 bg-blue-600 hover:bg-blue-700 text-white font-switzer font-bold rounded-2xl border border-black transition-all flex items-center justify-center gap-2 text-base"
+                className="px-10 py-4 bg-blue-600 hover:bg-blue-700 text-white font-switzer font-bold rounded-2xl border border-black transition-all flex items-center justify-center gap-2 text-xl"
               >
-                Get Started
+                Try for Free
               </button>
               <a href="/feedback" className="px-10 py-4 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-switzer font-bold rounded-2xl border border-black dark:border-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all flex items-center justify-center gap-2 text-base">
                 Explore Demo Board
@@ -401,7 +394,7 @@ export default function LandingPage() {
               ))}
             </div>
           </div>
-          
+
           {/* Abstract Glow Background */}
           <div className="absolute -top-24 -left-24 w-96 h-96 bg-blue-100/50 blur-[120px] rounded-full -z-10" />
           <div className="absolute top-1/2 -right-24 w-96 h-96 bg-blue-50/50 blur-[120px] rounded-full -z-10" />
@@ -415,26 +408,26 @@ export default function LandingPage() {
                 Everything you need to <br />manage product feedback
               </h2>
               <p className="text-lg text-slate-500 dark:text-slate-400 leading-relaxed">
-Organize all your feedback in one place, prioritize what to build next, and keep everyone updated
+                Organize all your feedback in one place, prioritize what to build next, and keep everyone updated
               </p>
             </div>
-            
+
             <div className="grid md:grid-cols-3 gap-8">
               {[
-                { 
-                  icon: <Lightbulb className="w-8 h-8" />, 
-                  title: "Less time managing , more time building", 
-                  desc: "Faddy  transforms raw user requests into actionable data points in seconds, not hours." 
+                {
+                  icon: <Lightbulb className="w-8 h-8" />,
+                  title: "Less time managing , more time building",
+                  desc: "Faddy  transforms raw user requests into actionable data points in seconds, not hours."
                 },
-                { 
-                  icon: <Zap className="w-8 h-8" />, 
-                  title: "Easy to use", 
-                  desc: "Faddy eliminates the complexity of user research with an interface designed for immediate clarity and high-velocity workflows." 
+                {
+                  icon: <Zap className="w-8 h-8" />,
+                  title: "Easy to use",
+                  desc: "Faddy eliminates the complexity of user research with an interface designed for immediate clarity and high-velocity workflows."
                 },
-                { 
-                  icon: <MessageSquare className="w-8 h-8" />, 
-                  title: "Close the Loop", 
-                  desc: "Keep users engaged with public roadmaps and automated release notes." 
+                {
+                  icon: <MessageSquare className="w-8 h-8" />,
+                  title: "Close the Loop",
+                  desc: "Keep users engaged with public roadmaps and automated release notes."
                 }
               ].map((f, i) => (
                 <div key={i} className="feature-card group p-10 bg-blue-600 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-[32px] hover:border-blue-400 hover:shadow-2xl hover:shadow-blue-500/5 transition-all duration-500">
@@ -473,7 +466,7 @@ Organize all your feedback in one place, prioritize what to build next, and keep
                   ))}
                 </div>
               </div>
-              
+
               <div className="grid gap-6">
                 {[
                   { label: "Engagement", value: "Up to 3x", icon: <Users /> },
@@ -503,7 +496,7 @@ Organize all your feedback in one place, prioritize what to build next, and keep
                 Stop guessing. <br />Start building.
               </h2>
               <p className="text-xl text-slate-400 mb-12 max-w-2xl mx-auto leading-relaxed">
-                Join the teams that use Faddy to ship better products. 
+                Join the teams that use Faddy to ship better products.
                 Free forever plan available.
               </p>
               <a href="/signup" className="inline-flex items-center gap-3 px-10 py-5 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-switzer font-black rounded-2xl hover:scale-105 transition-all shadow-xl shadow-white/10">

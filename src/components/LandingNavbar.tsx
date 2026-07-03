@@ -34,8 +34,12 @@ export function LandingNavbar({ className }: { className?: string }) {
               <HoveredLink href="/collect-feedback">Feature Request Management</HoveredLink>
               <HoveredLink href="/role-based-access">Role-Based Access Control</HoveredLink>
               <HoveredLink href="/public-roadmap">Public Roadmap</HoveredLink>
+
+              <div className="text-xs font-bold text-slate-400 dark:text-gray-500 uppercase tracking-wider mt-4 mb-2">Resources</div>
+              <HoveredLink href="/blog">Blog</HoveredLink>
             </div>
           </MenuItem>
+
           
           <MenuItem setActive={setActive} active={active} item="Documentation">
             <div className="flex flex-col space-y-4 text-sm">

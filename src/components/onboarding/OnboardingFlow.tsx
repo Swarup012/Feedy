@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
-import { TokenManager } from '@/lib/tokenManager';
+import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
@@ -88,15 +88,8 @@ export default function OnboardingFlow() {
 
   const saveProgress = async (step: number) => {
     try {
-      const token = TokenManager.getAccessToken();
-      await fetch('/api/users/onboarding/progress', {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({ step, data }),
-      });
+      // api client sends the HttpOnly cookie automatically — no token needed
+      await api.post('/api/users/onboarding/progress', { step, data });
     } catch (error) {
       console.error('Failed to save progress:', error);
     }
@@ -105,52 +98,29 @@ export default function OnboardingFlow() {
   const completeOnboarding = async () => {
     try {
       setLoading(true);
-      const token = TokenManager.getAccessToken();
-      
-      console.log('🔑 Token from TokenManager:', token ? `${token.substring(0, 20)}...` : 'null');
-      console.log('🔑 Token from localStorage direct:', localStorage.getItem('token') ? 'exists' : 'null');
-      
-      if (!token) {
-        throw new Error('No authentication token found. Please log in again.');
-      }
-      
+
       // Generate subdomain from company name if not provided
       const subdomain = data.companyName
         ? data.companyName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
         : undefined;
-      
+
       const onboardingPayload = {
         ...data,
-        subdomain, // Pass generated subdomain
+        subdomain,
       };
-      
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/onboarding/complete`, {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify(onboardingPayload),
-      });
 
-      console.log('📡 Onboarding complete response status:', response.status);
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('❌ Onboarding failed:', errorText);
-        throw new Error(`Failed to complete onboarding: ${response.status} - ${errorText}`);
-      }
+      // api client sends the HttpOnly cookie automatically — no manual token needed
+      await api.post('/api/users/onboarding/complete', onboardingPayload);
 
-      // IMPORTANT: Refresh user data to get updated organization_role = 'owner'
+      console.log('📡 Onboarding complete');
+
+      // Refresh user data to get updated organization_role = 'owner'
       console.log('🔄 Refreshing user data after onboarding...');
-      
       try {
-        // Use AuthContext's refreshUser to update user state and localStorage
         await refreshUser();
         console.log('✅ User data refreshed with organization role');
       } catch (error) {
         console.error('⚠️ Failed to refresh user data:', error);
-        // Continue anyway, user will be refreshed on next page load
       }
 
       // Small delay to ensure state is updated

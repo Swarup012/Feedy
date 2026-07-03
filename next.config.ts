@@ -65,17 +65,26 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  // Proxy API requests to backend server
+  // Proxy unmatched /api/* requests to the Express backend.
+  // IMPORTANT: Using "fallback" (not the default array/afterFiles) so that
+  // Next.js App Router Route Handlers always take priority.
+  // With Turbopack, the default "afterFiles" rewrites run BEFORE Route Handlers
+  // are resolved, causing Route Handlers to be silently bypassed and requests
+  // to reach the backend without auth cookies — resulting in 401/404 errors.
+  // "fallback" only fires when NO page, Route Handler or dynamic route matched.
   async rewrites() {
-    // BACKEND_URL is injected at build time via Docker build-arg from GitHub Actions.
-    // In local dev it falls back to localhost:3000.
     const backendUrl = process.env.BACKEND_URL || 'http://localhost:3000';
-    return [
-      {
-        source: '/api/:path*',
-        destination: `${backendUrl}/api/:path*`,
-      },
-    ];
+    return {
+      beforeFiles: [],   // nothing runs before filesystem check
+      afterFiles: [],    // nothing runs after filesystem but before dynamic routes
+      fallback: [
+        {
+          // Catch all /api/* paths that do NOT have a Next.js Route Handler
+          source: '/api/:path*',
+          destination: `${backendUrl}/api/:path*`,
+        },
+      ],
+    };
   },
 };
 

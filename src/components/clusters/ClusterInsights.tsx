@@ -35,13 +35,13 @@ interface ClusterInsightsProps {
 
 const CLUSTER_COLORS = [
   { bg: 'bg-violet-50', border: 'border-violet-200', dot: 'bg-violet-500', badge: 'bg-violet-100 text-violet-700' },
-  { bg: 'bg-sky-50',    border: 'border-sky-200',    dot: 'bg-sky-500',    badge: 'bg-sky-100 text-sky-700'    },
-  { bg: 'bg-emerald-50',border: 'border-emerald-200',dot: 'bg-emerald-500',badge: 'bg-emerald-100 text-emerald-700'},
-  { bg: 'bg-amber-50',  border: 'border-amber-200',  dot: 'bg-amber-500',  badge: 'bg-amber-100 text-amber-700'  },
-  { bg: 'bg-rose-50',   border: 'border-rose-200',   dot: 'bg-rose-500',   badge: 'bg-rose-100 text-rose-700'   },
-  { bg: 'bg-indigo-50', border: 'border-indigo-200', dot: 'bg-indigo-500', badge: 'bg-indigo-100 text-indigo-700'},
-  { bg: 'bg-teal-50',   border: 'border-teal-200',   dot: 'bg-teal-500',   badge: 'bg-teal-100 text-teal-700'   },
-  { bg: 'bg-orange-50', border: 'border-orange-200', dot: 'bg-orange-500', badge: 'bg-orange-100 text-orange-700'},
+  { bg: 'bg-sky-50', border: 'border-sky-200', dot: 'bg-sky-500', badge: 'bg-sky-100 text-sky-700' },
+  { bg: 'bg-emerald-50', border: 'border-emerald-200', dot: 'bg-emerald-500', badge: 'bg-emerald-100 text-emerald-700' },
+  { bg: 'bg-amber-50', border: 'border-amber-200', dot: 'bg-amber-500', badge: 'bg-amber-100 text-amber-700' },
+  { bg: 'bg-rose-50', border: 'border-rose-200', dot: 'bg-rose-500', badge: 'bg-rose-100 text-rose-700' },
+  { bg: 'bg-indigo-50', border: 'border-indigo-200', dot: 'bg-indigo-500', badge: 'bg-indigo-100 text-indigo-700' },
+  { bg: 'bg-teal-50', border: 'border-teal-200', dot: 'bg-teal-500', badge: 'bg-teal-100 text-teal-700' },
+  { bg: 'bg-orange-50', border: 'border-orange-200', dot: 'bg-orange-500', badge: 'bg-orange-100 text-orange-700' },
 ];
 
 function getClusterColor(index: number) {
@@ -155,13 +155,13 @@ function ClusterCard({
       )}
 
       {/* Progress bar uses dynamic max based on sort type */}
-      <BarFill 
+      <BarFill
         value={
-          sortOption === 'posts' ? cluster.post_count : 
-          sortOption === 'upvotes' ? cluster.total_upvotes : 
-          cluster.priority_score
-        } 
-        max={maxCount} 
+          sortOption === 'posts' ? cluster.post_count :
+            sortOption === 'upvotes' ? cluster.total_upvotes :
+              cluster.priority_score
+        }
+        max={maxCount}
       />
 
       {/* Cluster key (subtle, for devs) */}
@@ -187,9 +187,7 @@ export function ClusterInsights({
   const [refreshing, setRefreshing] = useState(false);
   const [sortOption, setSortOption] = useState<SortOption>('priority');
 
-  // If NEXT_PUBLIC_API_URL includes /api, we strip it here so we don't end up with /api/api/...
-  const rawApiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
-  const backendUrl = rawApiUrl.replace(/\/api\/?$/, '');
+  const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
   const fetchClusters = useCallback(
     async (showRefreshSpinner = false) => {
@@ -240,10 +238,10 @@ export function ClusterInsights({
 
   const visible = expanded ? sortedClusters : sortedClusters.slice(0, initialVisible);
   // Use priority score or upvotes to define the max bar size, depending on sort
-  const maxCount = sortedClusters[0] 
-    ? (sortOption === 'posts' ? sortedClusters[0].post_count : (sortOption === 'upvotes' ? sortedClusters[0].total_upvotes : sortedClusters[0].priority_score)) 
+  const maxCount = sortedClusters[0]
+    ? (sortOption === 'posts' ? sortedClusters[0].post_count : (sortOption === 'upvotes' ? sortedClusters[0].total_upvotes : sortedClusters[0].priority_score))
     : 1;
-    
+
   const aiCount = clusters.filter((c) => c.is_ai_generated).length;
 
   // ── Render states ────────────────────────────────────────────────────────────
@@ -345,7 +343,7 @@ export function ClusterInsights({
         {/* Data Container */}
         {!loading && !error && clusters.length > 0 && (
           <div className="flex flex-col xl:flex-row gap-6">
-            
+
             {/* Critical Alerts (Left Side) */}
             {clusters.filter(c => c.severity_level === 'critical').length > 0 && (
               <div className="xl:w-[45%] shrink-0 rounded-xl border border-red-200 bg-red-50/50 p-4 self-start">

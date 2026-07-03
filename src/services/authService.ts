@@ -4,21 +4,28 @@ export interface User {
   id: string;
   email: string;
   name: string;
-  current_organization_id?: string; // Which organization they're currently viewing
-  organization_role?: string; // Permission role in current org (owner/admin/member) - from organization_members table
-  job_role?: string; // Job function (founder/product_manager/designer/developer/marketer) - from organization_members table
-  organization_id?: string; // Alias for current_organization_id (for backward compatibility)
+  current_organization_id?: string;
+  organization_role?: string;
+  job_role?: string;
+  organization_id?: string; // alias for backward compat
   avatar_url?: string;
   created_at: string;
 }
 
+/**
+ * Auth response from the backend.
+ *
+ * With HttpOnly-cookie auth the backend no longer returns tokens in the JSON
+ * body — it sets them via Set-Cookie headers. The response only carries the
+ * user object (and an optional emailConfirmationRequired flag).
+ */
 export interface AuthResponse {
   success: boolean;
   message: string;
   data: {
     user: User;
-    access_token: string;
-    refresh_token: string;
+    // access_token / refresh_token intentionally removed —
+    // they are delivered as HttpOnly cookies by the backend.
     emailConfirmationRequired?: boolean;
   };
 }
@@ -30,13 +37,13 @@ export interface ApiError {
 }
 
 export const authService = {
-  // Signup
+  /** Sign up — backend sets access_token + refresh_token cookies in response */
   async signup(
     name: string,
     email: string,
     password: string,
     role?: string,
-    organizationId?: string,
+    organizationId?: string
   ): Promise<AuthResponse> {
     const response = await api.post<AuthResponse>("/api/auth/signup", {
       name,
@@ -48,8 +55,13 @@ export const authService = {
     return response.data;
   },
 
-  // Login
-  async login(email: string, password: string, organizationId?: string, userRole?: string): Promise<AuthResponse> {
+  /** Login — backend sets access_token + refresh_token cookies in response */
+  async login(
+    email: string,
+    password: string,
+    organizationId?: string,
+    userRole?: string
+  ): Promise<AuthResponse> {
     const response = await api.post<AuthResponse>("/api/auth/login", {
       email,
       password,
@@ -59,38 +71,54 @@ export const authService = {
     return response.data;
   },
 
-  // Get current user
+  /**
+   * Fetch the current authenticated user.
+   * Works because the browser sends the access_token HttpOnly cookie
+   * automatically on every request (withCredentials: true).
+   */
   async getMe(): Promise<{ success: boolean; data: { user: User } }> {
     const response = await api.get("/api/auth/me");
     return response.data;
   },
 
-  // Logout
+  /**
+   * Logout — the backend clears both auth cookies via Set-Cookie: Max-Age=0.
+   * No client-side token removal needed.
+   */
   async logout(): Promise<void> {
     await api.post("/api/auth/logout");
   },
 
-  // Update profile
   async updateProfile(
-    updates: Partial<User>,
+    updates: Partial<User>
   ): Promise<{ success: boolean; data: { user: User } }> {
     const response = await api.put("/api/auth/profile", updates);
     return response.data;
   },
 
-  // Forgot password
   async forgotPassword(
-    email: string,
+    email: string
   ): Promise<{ success: boolean; message: string }> {
     const response = await api.post("/api/auth/forgot-password", { email });
     return response.data;
   },
 
-  // Resend verification
   async resendVerification(
-    email: string,
+    email: string
   ): Promise<{ success: boolean; message: string }> {
     const response = await api.post("/api/auth/resend-verification", { email });
     return response.data;
+  },
+
+  /**
+   * Fetch a short-lived WebSocket ticket from the backend.
+   * Socket.io cannot read HttpOnly cookies, so the backend issues a
+   * one-time token (valid ~30 s) that the client passes in the WS handshake.
+   */
+  async getWsTicket(): Promise<{ ticket: string }> {
+    const response = await api.get<{ success: boolean; data: { ticket: string } }>(
+      "/api/auth/ws-ticket"
+    );
+    return response.data.data;
   },
 };

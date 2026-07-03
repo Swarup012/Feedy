@@ -70,6 +70,12 @@ export default function AnalyzeFeedbackPage() {
             { name: "Role-Based Access Control", link: "/role-based-access" },
             { name: "Public Roadmap", link: "/public-roadmap" },
           ]
+        },
+        {
+          section: "Resources",
+          items: [
+            { name: "Blog", link: "/blog" },
+          ]
         }
       ],
     },

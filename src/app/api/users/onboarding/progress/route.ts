@@ -1,19 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
-
-// Backend URL - with host network mode, localhost works
-const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3000';
+import { extractAuthHeader, buildBackendHeaders, BACKEND_URL } from '@/lib/proxyHelper';
 
 export async function POST(request: NextRequest) {
   try {
-    const token = request.headers.get('authorization');
+    const authHeader = extractAuthHeader(request);
     const body = await request.json();
+
+    if (!authHeader) {
+      return NextResponse.json(
+        { success: false, message: 'Not authenticated' },
+        { status: 401 }
+      );
+    }
 
     const response = await fetch(`${BACKEND_URL}/api/users/onboarding/progress`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': token || '',
-      },
+      headers: buildBackendHeaders(authHeader),
       body: JSON.stringify(body),
     });
 

@@ -9,36 +9,30 @@ import React from 'react';
 export default function OnboardingPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
-  const [canShowOnboarding, setCanShowOnboarding] = React.useState(false);
 
   useEffect(() => {
-    // Check if there's a token in localStorage
-    const token = localStorage.getItem('token');
-    
-    console.log('🔍 Onboarding page auth check:', { 
-      loading, 
-      hasUser: !!user, 
-      hasToken: !!token 
-    });
-    
-    // If we have a token, allow onboarding to show even if user isn't loaded yet
-    if (token) {
-      console.log('✅ Token found, showing onboarding');
-      setCanShowOnboarding(true);
+    // Wait until auth state is resolved
+    if (loading) return;
+
+    if (!user) {
+      // Not authenticated at all — send to login
+      console.log('❌ No auth on onboarding page, redirecting to /login');
+      router.push('/login');
       return;
     }
-    
-    // Only redirect if loading is complete, no user, AND no token
-    if (!loading && !user && !token) {
-      console.log('❌ No auth, redirecting to login');
-      router.push('/login');
+
+    if (user.current_organization_id) {
+      // User already completed onboarding — they have an org.
+      // Redirect to admin/dashboard based on role.
+      console.log('✅ User already has an organization, redirecting away from onboarding');
+      const role = user.organization_role;
+      router.replace(role === 'owner' || role === 'admin' ? '/admin' : '/dashboard');
     }
+    // If user exists but has no current_organization_id → show the onboarding flow (fall through)
   }, [user, loading, router]);
 
-  // Show loading only if no token exists
-  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-  
-  if (loading && !token) {
+  // Show spinner while auth is loading
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -49,10 +43,12 @@ export default function OnboardingPage() {
     );
   }
 
-  // Show onboarding if we have a token OR if user is loaded
-  if (canShowOnboarding || user) {
-    return <OnboardingFlow />;
+  // Don't render anything while a redirect is in flight
+  if (!user || user.current_organization_id) {
+    return null;
   }
 
-  return null;
+  // Authenticated user with no organization — show onboarding
+  return <OnboardingFlow />;
 }
+
