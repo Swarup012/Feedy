@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/context/AuthContext";
@@ -34,6 +35,23 @@ export default function RootLayout({
         />
       </head>
       <body className="font-body antialiased">
+        {process.env.NODE_ENV === "production" && (
+          <>
+            {/* Google Analytics 4 — loads after the page becomes interactive */}
+            <Script
+              src="https://www.googletagmanager.com/gtag/js?id=G-E3TEHBRZ6W"
+              strategy="afterInteractive"
+            />
+            <Script id="ga4-init" strategy="afterInteractive">
+              {`
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                gtag('config', 'G-E3TEHBRZ6W');
+              `}
+            </Script>
+          </>
+        )}
         <AuthProvider>
           <OrganizationProvider>
             <ThemeProvider
