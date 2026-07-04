@@ -7,18 +7,28 @@ import axios, {
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
 // ─── Axios instance ──────────────────────────────────────────────────────────
-// baseURL points directly at the Express backend.
-// withCredentials: true is REQUIRED so the browser automatically includes
-// the HttpOnly access_token cookie on every request to the backend origin.
-// CORS on the backend already allows the Next.js origin (localhost:5173)
-// with credentials, so cross-origin cookie transmission works correctly.
+// IMPORTANT: In the browser we use baseURL: "" (relative/same-origin).
+//
+// Why: After signup/login, the backend sets an HttpOnly cookie. The browser
+// scopes that cookie to the origin that SET it — which is `faddy.site`
+// (because signup goes through our Next.js auth proxy at /api/auth/[...path]).
+//
+// If we call the backend directly (api.faddy.site), the cookie is NOT sent
+// because the browser treats faddy.site and api.faddy.site as different origins
+// for host-only cookies. This causes every protected request to return 401.
+//
+// Solution: Keep all browser calls on the same origin (faddy.site / localhost:5173).
+// Next.js Route Handlers extract the cookie and forward it to the backend.
+// On the server (SSR / Route Handlers themselves) we use the absolute API_URL.
+const isServer = typeof window === "undefined";
+
 const api: AxiosInstance = axios.create({
-  baseURL: API_URL,
+  baseURL: isServer ? API_URL : "",
   headers: {
     "Content-Type": "application/json",
   },
   timeout: 30000,
-  withCredentials: true, // ← sends HttpOnly cookies on every request
+  withCredentials: true,
 });
 
 
@@ -98,10 +108,12 @@ api.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        // Ask the backend to rotate the access token using the refresh cookie.
-        // The backend will respond with Set-Cookie: access_token=<new>; HttpOnly
+        // Refresh the access token. MUST use a relative URL so the call goes
+        // through the Next.js proxy — same reason as the main api baseURL.
+        // Calling API_URL directly here would bypass the proxy and lose the cookie.
+        const refreshUrl = isServer ? `${API_URL}/api/auth/refresh` : "/api/auth/refresh";
         await axios.post(
-          `${API_URL}/api/auth/refresh`,
+          refreshUrl,
           {},
           { withCredentials: true }
         );

@@ -352,25 +352,27 @@ export default function LandingPage() {
         <section ref={heroRef} className="relative overflow-hidden pt-24 pb-40 px-6">
           <div className="max-w-7xl mx-auto text-center">
             <h1 className="hero-reveal text-4xl md:text-[70px] font-switzer font-medium tracking-tight leading-tight text-slate-900 dark:text-white mb-10 text-center">
-              Stop Guessing What to<br />
-              <span className="inline-block"><PointerHighlight>Build Next</PointerHighlight></span>
-              {/* <LayoutTextFlip words={["What to","Build Next"]} /> */}
+              Your users are telling you what to build.<br />
+              <span className="inline-block"><PointerHighlight>Are you listening?</PointerHighlight></span>
             </h1>
 
             <p className="hero-reveal text-xl md:text-2xl text-slate-500 dark:text-slate-400 max-w-3xl mx-auto mb-8 leading-relaxed">
-              Faddy centralizes customer feedback and turns it into a clear product roadmap. Ship features users actually want—faster and with confidence.
+              Faddy collects feedback from your users, lets them vote on what matters most, and turns it into a clear roadmap — so you always know what to build next.
             </p>
 
-            <div className="hero-reveal flex flex-col sm:flex-row justify-center gap-8">
-              <button
-                onClick={handleClick}
-                className="px-10 py-4 bg-blue-600 hover:bg-blue-700 text-white font-switzer font-bold rounded-2xl border border-black transition-all flex items-center justify-center gap-2 text-xl"
-              >
-                Try for Free
-              </button>
-              <a href="/feedback" className="px-10 py-4 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-switzer font-bold rounded-2xl border border-black dark:border-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all flex items-center justify-center gap-2 text-base">
-                Explore Demo Board
-              </a>
+            <div className="hero-reveal flex flex-col items-center">
+              <div className="flex flex-col sm:flex-row justify-center gap-8 mb-4">
+                <button
+                  onClick={handleClick}
+                  className="px-10 py-4 bg-blue-600 hover:bg-blue-700 text-white font-switzer font-bold rounded-2xl border border-black transition-all flex items-center justify-center gap-2 text-xl"
+                >
+                  Try for Free
+                </button>
+                <a href="/feedback" className="px-10 py-4 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-switzer font-bold rounded-2xl border border-black dark:border-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all flex items-center justify-center gap-2 text-base">
+                  Explore Demo Board
+                </a>
+              </div>
+              <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">No credit card required</p>
             </div>
 
             <div className="mt-16 w-full max-w-6xl mx-auto">
@@ -381,15 +383,14 @@ export default function LandingPage() {
               />
             </div>
             {/* Social Proof / Stats */}
-            <div className="hero-stats mt-8 grid grid-cols-2 md:grid-cols-3 gap-12 max-w-4xl mx-auto border-t border-slate-100 pt-8">
+            <div className="hero-stats mt-8 grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto border-t border-slate-100 dark:border-slate-800 pt-8">
               {[
-                { label: 'Join our first 50 Founding Users', value: 'Early Access' },
-                { label: 'Be part of the cmmunity shaping the future', value: 'V1.0' },
-                { label: 'Setup fees or hidden credit card requirements', value: 'Zero' },
+                "Free plan, no credit card required",
+                "Flat pricing from $19/mo — no per-user fees",
+                "Built for indie hackers & small teams"
               ].map((stat, i) => (
-                <div key={i} className="text-center">
-                  <div className="text-4xl font-switzer font-medium font-black text-slate-900 dark:text-white mb-2">{stat.value}</div>
-                  <div className="text-sm font-switzer font-bold uppercase tracking-widest text-slate-400">{stat.label}</div>
+                <div key={i} className="text-center flex items-center justify-center">
+                  <div className="text-lg font-switzer font-medium text-slate-600 dark:text-slate-300">{stat}</div>
                 </div>
               ))}
             </div>
@@ -416,18 +417,18 @@ export default function LandingPage() {
               {[
                 {
                   icon: <Lightbulb className="w-8 h-8" />,
-                  title: "Less time managing , more time building",
-                  desc: "Faddy  transforms raw user requests into actionable data points in seconds, not hours."
+                  title: "Feedback scattered across 5 tools?",
+                  desc: "Faddy gives your users one place to submit ideas and feature requests. No more digging through emails, Slack threads, or support tickets to find out what people actually want."
                 },
                 {
                   icon: <Zap className="w-8 h-8" />,
-                  title: "Easy to use",
-                  desc: "Faddy eliminates the complexity of user research with an interface designed for immediate clarity and high-velocity workflows."
+                  title: "Don't know what to build next?",
+                  desc: "Let your users vote on the features that matter most to them. The most wanted features rise to the top automatically — your roadmap builds itself."
                 },
                 {
                   icon: <MessageSquare className="w-8 h-8" />,
-                  title: "Close the Loop",
-                  desc: "Keep users engaged with public roadmaps and automated release notes."
+                  title: "Users feel ignored after submitting feedback?",
+                  desc: "Close the feedback loop with a public roadmap and changelog. Users see their ideas go from request → in progress → shipped. They stay engaged, not frustrated."
                 }
               ].map((f, i) => (
                 <div key={i} className="feature-card group p-10 bg-blue-600 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-[32px] hover:border-blue-400 hover:shadow-2xl hover:shadow-blue-500/5 transition-all duration-500">
@@ -448,17 +449,17 @@ export default function LandingPage() {
             <div className="grid md:grid-cols-2 gap-20 items-center">
               <div className="benefit-content text-white">
                 <h2 className="text-4xl md:text-6xl font-switzer font-bold tracking-tight mb-8">
-                  Focus on building, <br />not sorting.
+                  Stop building <br />in the dark.
                 </h2>
                 <div className="space-y-8">
                   {[
-                    "Public roadmaps showcase your vision",
-                    "Automated changelogs celebrate every launch",
-                    "Smart notifications keep everyone in sync",
-                    "Voting system lets users prioritize features"
+                    "Know exactly what your users want before you write a single line of code",
+                    "Public roadmap builds trust and reduces repetitive support questions",
+                    "Changelog keeps users excited about every update you ship",
+                    "Flat pricing that scales with your product, not your user count"
                   ].map((text, i) => (
                     <div key={i} className="flex items-start gap-4">
-                      <div className="mt-1 w-6 h-6 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-md">
+                      <div className="mt-1 w-6 h-6 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-md shrink-0">
                         <CheckCircle className="w-4 h-4 text-white" />
                       </div>
                       <span className="text-xl font-medium text-blue-50 leading-tight">{text}</span>
@@ -469,16 +470,16 @@ export default function LandingPage() {
 
               <div className="grid gap-6">
                 {[
-                  { label: "Engagement", value: "Up to 3x", icon: <Users /> },
-                  { label: "Adoption", value: "+100%", icon: <TrendingUp /> }
+                  { label: "Built for", value: "Startups & Indie Hackers", subtext: "Not enterprise. No complexity. No per-user pricing traps.", icon: <Users /> },
+                  { label: "Pricing starts at", value: "Free", subtext: "Upgrade to $19/mo when you're ready. No credit card to start.", icon: <Sparkles /> }
                 ].map((stat, i) => (
                   <div key={i} className="benefit-stat-card p-10 bg-white/10 backdrop-blur-2xl rounded-[40px] border border-white/20">
                     <div className="flex items-center gap-4 mb-6 text-white/80">
                       {stat.icon}
                       <span className="font-bold uppercase tracking-widest text-sm">{stat.label}</span>
                     </div>
-                    <div className="text-6xl font-switzer font-black text-white">{stat.value}</div>
-                    <p className="text-blue-100 mt-4 font-medium italic">Average increase observed by teams</p>
+                    <div className="text-4xl md:text-5xl font-switzer font-black text-white leading-tight">{stat.value}</div>
+                    <p className="text-blue-100 mt-4 font-medium leading-relaxed">{stat.subtext}</p>
                   </div>
                 ))}
               </div>
@@ -493,14 +494,13 @@ export default function LandingPage() {
           <div className="max-w-5xl mx-auto rounded-[48px] bg-slate-900 dark:bg-slate-800 p-16 md:p-24 overflow-hidden relative text-center">
             <div className="relative z-10">
               <h2 className="text-4xl md:text-6xl font-switzer font-bold text-white mb-8 tracking-tighter leading-tight">
-                Stop guessing. <br />Start building.
+                Your users are waiting to tell you what to build.
               </h2>
               <p className="text-xl text-slate-400 mb-12 max-w-2xl mx-auto leading-relaxed">
-                Join the teams that use Faddy to ship better products.
-                Free forever plan available.
+                Start collecting feedback in minutes. Free plan available — no credit card required.
               </p>
               <a href="/signup" className="inline-flex items-center gap-3 px-10 py-5 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-switzer font-black rounded-2xl hover:scale-105 transition-all shadow-xl shadow-white/10">
-                Get Started Now
+                Start Free Today
                 <ArrowRight className="w-5 h-5" />
               </a>
             </div>
