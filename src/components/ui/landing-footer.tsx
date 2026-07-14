@@ -73,6 +73,9 @@ export function LandingFooter({ showCTA = true }: LandingFooterProps) {
                 </a>
               </div>
             )}
+            <p className="text-sm font-semibold text-slate-500 dark:text-slate-400 mt-6">
+              © {new Date().getFullYear()} Faddy
+            </p>
           </div>
 
           {/* Navigation Grid */}
@@ -199,25 +202,7 @@ export function LandingFooter({ showCTA = true }: LandingFooterProps) {
           </div>
         </div>
 
-        {/* Bottom Bar - Enhanced */}
-        <div className="mt-12 pt-6 border-t border-slate-200/60 dark:border-slate-800/60">
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-            <p className="text-sm font-semibold text-slate-600 dark:text-slate-400">
-              © {new Date().getFullYear()} Faddy. All rights reserved.
-            </p>
-            <div className="flex items-center gap-3">
-              <span className="text-sm font-medium text-slate-500 dark:text-slate-500">
-                Built with ❤️ for product teams
-              </span>
-              <div className="flex items-center gap-1">
-                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
-                  Live
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
+
       </div>
     </footer>
   );

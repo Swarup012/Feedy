@@ -80,89 +80,66 @@ function LoginForm() {
   };
 
   return (
-    <div ref={formRef} className="min-h-screen flex bg-white dark:bg-slate-950">
+    <div ref={formRef} className="h-screen overflow-hidden flex bg-white dark:bg-slate-950">
       {/* Left Side - Branding */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800 relative overflow-hidden">
+      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
         {/* Decorative elements */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-white rounded-full blur-3xl"></div>
-          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-300 rounded-full blur-3xl"></div>
+        <div className="absolute inset-0 opacity-40 dark:opacity-20 pointer-events-none">
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-200/50 dark:bg-blue-900/30 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-slate-200/50 dark:bg-slate-800/30 rounded-full blur-3xl"></div>
         </div>
         
         {/* Content */}
-        <div className="relative z-10 flex flex-col justify-between p-12 text-white w-full">
+        <div className="relative z-10 flex flex-col justify-between p-8 lg:p-10 w-full">
           {/* Logo */}
           <div className="login-reveal">
             <Link href="/" className="inline-flex items-center gap-3">
-              <Logo width={40} height={40} className="text-white" />
-              <span className="text-2xl font-switzer font-bold">Faddy</span>
+              <Logo width={36} height={36} className="text-blue-600" />
+              <span className="text-xl font-switzer font-bold text-slate-900 dark:text-white">Faddy</span>
             </Link>
           </div>
 
-          {/* Main Content */}
-          <div className="login-reveal space-y-8 max-w-md">
-            <h1 className="text-5xl font-switzer font-bold leading-tight">
-              Welcome back to your feedback hub
-            </h1>
-            <p className="text-xl text-blue-100 leading-relaxed">
-              Continue building products your users love. Access your feedback boards, roadmaps, and analytics.
-            </p>
-
-            {/* Features */}
-            <div className="space-y-4 pt-8">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center">
-                  <CheckCircle2 className="w-5 h-5" />
-                </div>
-                <span className="text-lg">Centralized feedback management</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center">
-                  <Zap className="w-5 h-5" />
-                </div>
-                <span className="text-lg">Real-time collaboration</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center">
-                  <Users className="w-5 h-5" />
-                </div>
-                <span className="text-lg">Customer insights at your fingertips</span>
-              </div>
-            </div>
+          {/* Main Content - Illustration */}
+          <div className="login-reveal flex-1 flex items-center justify-center mt-6 mb-6">
+            <img 
+              src="/images/login/Secure%20lock.svg" 
+              alt="Welcome back illustration" 
+              className="w-full max-w-[400px] h-auto object-contain drop-shadow-2xl" 
+            />
           </div>
 
           {/* Footer */}
-          <div className="login-reveal text-sm text-blue-100">
+          <div className="login-reveal text-sm text-slate-500 dark:text-slate-400">
             © 2026 Faddy. All rights reserved.
           </div>
         </div>
       </div>
 
       {/* Right Side - Login Form */}
-      <div className="flex-1 flex items-center justify-center p-8 lg:p-12">
+      <div className="flex-1 flex items-center justify-center p-6 lg:p-8">
         <div className="w-full max-w-md">
           {/* Mobile Logo */}
-          <div className="login-reveal lg:hidden mb-8 text-center">
+          <div className="login-reveal lg:hidden mb-6 text-center">
             <Link href="/" className="inline-flex items-center gap-3">
-              <Logo width={40} height={40} className="text-blue-600" />
-              <span className="text-2xl font-switzer font-bold text-slate-900 dark:text-white">Faddy</span>
+              <Logo width={36} height={36} className="text-blue-600" />
+              <span className="text-xl font-switzer font-bold text-slate-900 dark:text-white">Faddy</span>
             </Link>
           </div>
 
           {/* Form Header */}
-          <div className="login-reveal mb-8">
-            <h2 className="text-3xl font-switzer font-bold text-slate-900 dark:text-white">
+          <div className="login-reveal mb-6">
+            <h2 className="text-2xl font-switzer font-bold text-slate-900 dark:text-white">
               Sign in to your account
             </h2>
-            <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+            <p className="mt-1.5 text-sm text-slate-600 dark:text-slate-400">
               Enter your credentials to access your dashboard
             </p>
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="login-reveal space-y-6">
+          <form onSubmit={handleSubmit} className="login-reveal space-y-5">
             {/* Google Sign In */}
-            <div className="space-y-4">
+            <div className="space-y-3">
               <GoogleAuthButton mode="login" />
               
               <div className="relative">
@@ -258,7 +235,7 @@ function LoginForm() {
           </form>
 
           {/* Sign up link */}
-          <p className="login-reveal text-center mt-8 text-sm text-slate-600 dark:text-slate-400">
+          <p className="login-reveal text-center mt-6 text-sm text-slate-600 dark:text-slate-400">
             Don't have an account?{" "}
             <Link href="/signup" className="text-blue-600 hover:text-blue-700 font-semibold transition-colors">
               Create account
@@ -266,7 +243,7 @@ function LoginForm() {
           </p>
 
           {/* Privacy links */}
-          <div className="login-reveal mt-8 pt-8 border-t border-slate-200 dark:border-slate-800">
+          <div className="login-reveal mt-6 pt-6 border-t border-slate-200 dark:border-slate-800">
             <p className="text-xs text-center text-slate-500 dark:text-slate-500">
               By signing in, you agree to our{" "}
               <Link href="/policy/terms" className="text-blue-600 hover:text-blue-700 hover:underline">

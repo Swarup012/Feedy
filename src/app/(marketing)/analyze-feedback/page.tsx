@@ -4,20 +4,18 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   ArrowRight,
-  Bell,
-  Users,
-  Megaphone,
-  CheckCircle2,
-  MessageSquare,
   BarChart3,
+  Filter,
+  TrendingUp,
+  Users,
   Target,
-  Zap,
-  Mail,
-  Globe,
+  MessageSquare,
+  CheckCircle2,
 } from "lucide-react";
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import {
   Navbar,
   NavBody,
@@ -33,7 +31,7 @@ import { ThemeToggleDebug } from "@/components/theme-toggle-debug";
 import { LandingFooter } from "@/components/ui/landing-footer";
 import { Logo } from "@/components/logo";
 
-export default function ShareUpdatesPage() {
+export default function AnalyzeFeedbackPage() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const router = useRouter();
 
@@ -63,7 +61,7 @@ export default function ShareUpdatesPage() {
             { name: "Collect Feedback", link: "/collect-feedback" },
             { name: "Analyze Feedback", link: "/analyze-feedback" },
             { name: "Share Updates", link: "/share-updates" },
-          ],
+          ]
         },
         {
           section: "Use Cases",
@@ -71,14 +69,14 @@ export default function ShareUpdatesPage() {
             { name: "Feature Request Management", link: "/collect-feedback" },
             { name: "Role-Based Access Control", link: "/role-based-access" },
             { name: "Public Roadmap", link: "/public-roadmap" },
-          ],
+          ]
         },
         {
           section: "Resources",
           items: [
             { name: "Blog", link: "/blog" },
-          ],
-        },
+          ]
+        }
       ],
     },
     {
@@ -98,91 +96,17 @@ export default function ShareUpdatesPage() {
   return (
     <>
       {/* Navbar */}
-      <Navbar>
-        <NavBody>
-          <NavbarLogo href="/">
-            <Logo width={120} height={32} />
-          </NavbarLogo>
-          <NavItems items={navItems} />
-          <NavbarActions />
-        </NavBody>
-
-        <MobileNav>
-          <MobileNavHeader>
-            <NavbarLogo href="/">
-              <Logo width={120} height={32} />
-            </NavbarLogo>
-            <div className="flex items-center gap-2">
-              <ThemeToggleDebug />
-              <MobileNavToggle
-                isOpen={isMobileMenuOpen}
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              />
-            </div>
-          </MobileNavHeader>
-
-          <MobileNavMenu
-            isOpen={isMobileMenuOpen}
-            onClose={() => setIsMobileMenuOpen(false)}
-          >
-            {navItems.map((item, idx) => (
-              <div key={`mobile-link-${idx}`} className="mb-4">
-                {item.dropdown ? (
-                  <div>
-                    <span className="block text-lg font-medium text-neutral-600 dark:text-neutral-300 mb-2">
-                      {item.name}
-                    </span>
-                    {item.dropdown.map((section, sectionIdx) => (
-                      <div
-                        key={`mobile-section-${sectionIdx}`}
-                        className="ml-4 mt-3"
-                      >
-                        <div className="text-xs font-bold text-slate-400 dark:text-gray-500 uppercase tracking-wider mb-2">
-                          {section.section}
-                        </div>
-                        <div className="space-y-2">
-                          {section.items.map((dropdownItem, itemIdx) => (
-                            <a
-                              key={`mobile-dropdown-${itemIdx}`}
-                              href={dropdownItem.link}
-                              onClick={() => setIsMobileMenuOpen(false)}
-                              className="block text-sm text-neutral-600 dark:text-neutral-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors py-1"
-                            >
-                              {dropdownItem.name}
-                            </a>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <a
-                    href={item.link}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="relative text-neutral-600 dark:text-neutral-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                  >
-                    <span className="block text-lg font-medium">
-                      {item.name}
-                    </span>
-                  </a>
-                )}
-              </div>
-            ))}
-            <NavbarActions visible />
-          </MobileNavMenu>
-        </MobileNav>
-      </Navbar>
 
       <div className="min-h-screen bg-[#f9f9f9] dark:bg-background">
         {/* Hero Section */}
         <section className="relative py-20 lg:py-32 overflow-hidden bg-white dark:bg-background">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <h1 className="text-3xl lg:text-4xl font-switzer font-medium text-slate-900 dark:text-white mb-6 tracking-tight">
-              Share Updates, Close the Loop
+              Analyze Feedback, Make Better Decisions
             </h1>
             <p className="text-xl font-switzer text-slate-600 dark:text-gray-400 mb-8 leading-relaxed">
-              Keep users informed with changelogs and status updates. Show them
-              you're listening and building what they want.
+              Turn user feedback into actionable insights. Filter, prioritize,
+              and understand what your users really want.
             </p>
 
             {/* CTA Button */}
@@ -192,7 +116,7 @@ export default function ShareUpdatesPage() {
                   size="lg"
                   className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg"
                 >
-                  Start Sharing
+                  Start Analyzing
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
@@ -202,29 +126,29 @@ export default function ShareUpdatesPage() {
             <div className="flex flex-col sm:flex-row gap-4 sm:gap-8 justify-center text-sm text-slate-600 dark:text-gray-400">
               <div className="flex items-center justify-center gap-2">
                 <CheckCircle2 className="h-4 w-4 text-green-600" />
-                <span>Public changelogs</span>
+                <span>Instant insights</span>
               </div>
               <div className="flex items-center justify-center gap-2">
                 <CheckCircle2 className="h-4 w-4 text-green-600" />
-                <span>Email notifications</span>
+                <span>Smart filtering</span>
               </div>
               <div className="flex items-center justify-center gap-2">
                 <CheckCircle2 className="h-4 w-4 text-green-600" />
-                <span>Status tracking</span>
+                <span>Real-time updates</span>
               </div>
             </div>
           </div>
         </section>
 
-        {/* Keep your users in the loop */}
+        {/* Faddy helps you cut through the noise */}
         <section className="py-20 bg-[#f9f9f9] dark:bg-gray-900/50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
               <h2 className="text-4xl font-switzer font-bold text-slate-900 dark:text-white mb-4">
-                Keep your users in the loop
+                Faddy helps you cut through the noise
               </h2>
               <p className="text-xl text-slate-600 dark:text-gray-400 max-w-3xl mx-auto">
-                Communication builds trust and keeps users engaged
+                Powerful analysis tools to understand what matters most
               </p>
             </div>
 
@@ -233,11 +157,11 @@ export default function ShareUpdatesPage() {
               <Card className="border-slate-200 dark:border-border shadow-lg hover:shadow-xl transition-all">
                 <CardContent className="p-8 text-center">
                   <h3 className="text-xl font-switzer font-medium text-slate-900 dark:text-white mb-3">
-                    Changelogs
+                    Smart Filters
                   </h3>
                   <p className="text-slate-600 dark:text-gray-400">
-                    Publish beautiful changelogs to showcase new features,
-                    improvements, and bug fixes
+                    Filter by category, status, votes, date, and more to find
+                    exactly what you need
                   </p>
                 </CardContent>
               </Card>
@@ -246,11 +170,11 @@ export default function ShareUpdatesPage() {
               <Card className="border-slate-200 dark:border-border shadow-lg hover:shadow-xl transition-all">
                 <CardContent className="p-8 text-center">
                   <h3 className="text-xl font-switzer font-medium text-slate-900 dark:text-white mb-3">
-                    Status Updates
+                    Vote Tracking
                   </h3>
                   <p className="text-slate-600 dark:text-gray-400">
-                    Update feedback status from planned to in progress to
-                    shipped
+                    See which features have the most demand and prioritize based
+                    on user votes
                   </p>
                 </CardContent>
               </Card>
@@ -259,11 +183,11 @@ export default function ShareUpdatesPage() {
               <Card className="border-slate-200 dark:border-border shadow-lg hover:shadow-xl transition-all">
                 <CardContent className="p-8 text-center">
                   <h3 className="text-xl font-switzer font-medium text-slate-900 dark:text-white mb-3">
-                    Notifications
+                    Insights Dashboard
                   </h3>
                   <p className="text-slate-600 dark:text-gray-400">
-                    Automatically notify users when their requested features are
-                    shipped
+                    Get a bird's-eye view of feedback trends and patterns at a
+                    glance
                   </p>
                 </CardContent>
               </Card>
@@ -272,14 +196,104 @@ export default function ShareUpdatesPage() {
               <Card className="border-slate-200 dark:border-border shadow-lg hover:shadow-xl transition-all">
                 <CardContent className="p-8 text-center">
                   <h3 className="text-xl font-switzer font-medium text-slate-900 dark:text-white mb-3">
-                    Public Roadmap
+                    Prioritization
                   </h3>
                   <p className="text-slate-600 dark:text-gray-400">
-                    Share what you're working on and build anticipation for
-                    upcoming features
+                    Tag and organize feedback to align with your product roadmap
+                    and goals
                   </p>
                 </CardContent>
               </Card>
+            </div>
+          </div>
+        </section>
+
+        {/* Analytics Views Section - Basic vs Expert */}
+        <section className="py-20 bg-background">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-12">
+              <h2 className="text-4xl font-switzer font-medium text-foreground mb-4">
+                Two Powerful Ways to Analyze Your Feedback
+              </h2>
+              <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
+                Simple metrics or advanced insights? Choose the view that fits your needs and switch anytime.
+              </p>
+            </div>
+
+            <div className="space-y-16">
+              {/* Basic View - Image Left, Content Right */}
+              <div className="grid md:grid-cols-2 gap-8 items-center">
+                {/* Image */}
+                <div className="rounded-lg border shadow-lg overflow-hidden bg-card">
+                  <Image
+                    src="/images/analytics_basic.png"
+                    alt="Analytics Basic View"
+                    width={800}
+                    height={600}
+                    className="w-full h-auto"
+                  />
+                </div>
+                {/* Content */}
+                <div className="space-y-4">
+                  <h3 className="text-3xl font-semibold text-foreground">
+                    Basic View
+                  </h3>
+                  <p className="text-lg text-muted-foreground">
+                    Perfect for quick insights and at-a-glance metrics. The Basic view provides a clean, simple interface showing your essential analytics without overwhelming details.
+                  </p>
+                  <ul className="space-y-2 text-muted-foreground">
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+                      <span>Clean, minimal interface for quick scanning</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+                      <span>Essential metrics at a glance</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+                      <span>Perfect for daily monitoring</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              {/* Expert View - Content Left, Image Right */}
+              <div className="grid md:grid-cols-2 gap-8 items-center">
+                {/* Content */}
+                <div className="space-y-4 md:order-1">
+                  <h3 className="text-3xl font-semibold text-foreground">
+                    Expert View
+                  </h3>
+                  <p className="text-lg text-muted-foreground">
+                    Unlock comprehensive insights with advanced visualizations and detailed breakdowns. The Expert view gives you full control over your analytics with powerful filtering and deep data exploration.
+                  </p>
+                  <ul className="space-y-2 text-muted-foreground">
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+                      <span>Advanced charts and trend analysis</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+                      <span>Detailed data breakdowns and segments</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+                      <span>Powerful filtering and customization</span>
+                    </li>
+                  </ul>
+                </div>
+                {/* Image */}
+                <div className="rounded-lg border shadow-lg overflow-hidden bg-card md:order-2">
+                  <Image
+                    src="/images/analytics_expert.png"
+                    alt="Analytics Expert View"
+                    width={800}
+                    height={600}
+                    className="w-full h-auto"
+                  />
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -307,7 +321,7 @@ export default function ShareUpdatesPage() {
                           1
                         </div>
                       </div>
-                      <h3 className="text-2xl font-switzer font-bold text-slate-900 dark:text-white mb-4 group-hover:text-blue-600 transition-colors">
+                      <h3 className="text-2xl font-switzer font-medium text-slate-900 dark:text-white mb-4 group-hover:text-blue-600 transition-colors">
                         Collect
                       </h3>
                       <p className="text-slate-600 dark:text-gray-400 mb-6">
@@ -331,30 +345,27 @@ export default function ShareUpdatesPage() {
 
               {/* Step 2 */}
               <div className="relative">
-                <Link href="/analyze-feedback">
-                  <Card className="border-slate-200 dark:border-border shadow-lg h-full hover:shadow-xl transition-all cursor-pointer group">
-                    <CardContent className="p-8">
-                      <div className="mb-6">
-                        <div className="inline-flex items-center justify-center w-12 h-12 bg-blue-600 text-white rounded-full text-xl font-bold group-hover:scale-110 transition-transform">
-                          2
-                        </div>
+                <Card className="border-blue-200 dark:border-blue-800 shadow-lg h-full bg-blue-50 dark:bg-blue-950/20">
+                  <CardContent className="p-8">
+                    <div className="mb-6">
+                      <div className="inline-flex items-center justify-center w-12 h-12 bg-blue-600 text-white rounded-full text-xl font-bold">
+                        2
                       </div>
-                      <h3 className="text-2xl font-switzer font-bold text-slate-900 dark:text-white mb-4 group-hover:text-blue-600 transition-colors">
-                        Analyze
-                      </h3>
-                      <p className="text-slate-600 dark:text-gray-400 mb-6">
-                        Filter, sort, and prioritize feedback based on votes,
-                        impact, and alignment with your goals. Identify patterns
-                        and trends.
-                      </p>
-                      <div className="flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 font-semibold">
-                        <BarChart3 className="h-4 w-4" />
-                        <span>Analyze Feedback</span>
-                        <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                      </div>
-                    </CardContent>
-                  </Card>
-                </Link>
+                    </div>
+                    <h3 className="text-2xl font-switzer font-medium text-slate-900 dark:text-white mb-4">
+                      Analyze
+                    </h3>
+                    <p className="text-slate-600 dark:text-gray-400 mb-6">
+                      Filter, sort, and prioritize feedback based on votes,
+                      impact, and alignment with your goals. Identify patterns
+                      and trends.
+                    </p>
+                    <div className="flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 font-semibold">
+                      <BarChart3 className="h-4 w-4" />
+                      <span>Analyze Feedback</span>
+                    </div>
+                  </CardContent>
+                </Card>
                 {/* Arrow */}
                 <div className="hidden md:block absolute top-1/2 -right-4 transform -translate-y-1/2 z-10">
                   <ArrowRight className="h-8 w-8 text-blue-600" />
@@ -363,14 +374,14 @@ export default function ShareUpdatesPage() {
 
               {/* Step 3 */}
               <div>
-                <Card className="border-blue-200 dark:border-blue-800 shadow-lg h-full bg-blue-50 dark:bg-blue-950/20">
+                <Card className="border-slate-200 dark:border-border shadow-lg h-full">
                   <CardContent className="p-8">
                     <div className="mb-6">
                       <div className="inline-flex items-center justify-center w-12 h-12 bg-blue-600 text-white rounded-full text-xl font-bold">
                         3
                       </div>
                     </div>
-                    <h3 className="text-2xl font-switzer font-bold text-slate-900 dark:text-white mb-4">
+                    <h3 className="text-2xl font-switzer font-medium text-slate-900 dark:text-white mb-4">
                       Share
                     </h3>
                     <p className="text-slate-600 dark:text-gray-400 mb-6">

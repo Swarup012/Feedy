@@ -46,3 +46,4 @@ firestore-debug.log
 # DevContext - AI coding context
 .devctx/
 .context-engine/
+claude.md

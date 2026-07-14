@@ -100,89 +100,66 @@ export default function SignupPage() {
   };
 
   return (
-    <div ref={containerRef} className="min-h-screen flex bg-white dark:bg-slate-950">
+    <div ref={containerRef} className="h-screen overflow-hidden flex bg-white dark:bg-slate-950">
       {/* Left Side - Branding */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800 relative overflow-hidden">
+      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
         {/* Decorative elements */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-white rounded-full blur-3xl"></div>
-          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-300 rounded-full blur-3xl"></div>
+        <div className="absolute inset-0 opacity-40 dark:opacity-20 pointer-events-none">
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-200/50 dark:bg-blue-900/30 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-slate-200/50 dark:bg-slate-800/30 rounded-full blur-3xl"></div>
         </div>
         
         {/* Content */}
-        <div className="relative z-10 flex flex-col justify-between p-12 text-white w-full">
+        <div className="relative z-10 flex flex-col justify-between p-8 lg:p-10 w-full">
           {/* Logo */}
           <div className="signup-reveal">
             <Link href="/" className="inline-flex items-center gap-3">
-              <Logo width={40} height={40} className="text-white" />
-              <span className="text-2xl font-switzer font-bold">Faddy</span>
+              <Logo width={36} height={36} className="text-blue-600" />
+              <span className="text-xl font-switzer font-bold text-slate-900 dark:text-white">Faddy</span>
             </Link>
           </div>
 
-          {/* Main Content */}
-          <div className="signup-reveal space-y-8 max-w-md">
-            <h1 className="text-5xl font-switzer font-bold leading-tight">
-              Start building better products today
-            </h1>
-            <p className="text-xl text-blue-100 leading-relaxed">
-              Join thousands of teams using Faddy to collect feedback, prioritize features, and ship what matters.
-            </p>
-
-            {/* Features */}
-            <div className="space-y-4 pt-8">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center">
-                  <CheckCircle2 className="w-5 h-5" />
-                </div>
-                <span className="text-lg">Free 14-day trial, no credit card required</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center">
-                  <Zap className="w-5 h-5" />
-                </div>
-                <span className="text-lg">Set up in under 5 minutes</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center">
-                  <Shield className="w-5 h-5" />
-                </div>
-                <span className="text-lg">Enterprise-grade security & privacy</span>
-              </div>
-            </div>
+          {/* Main Content - Illustration */}
+          <div className="signup-reveal flex-1 flex items-center justify-center mt-6 mb-6">
+            <img 
+              src="/images/login/Login.svg" 
+              alt="Sign up illustration" 
+              className="w-full max-w-[400px] h-auto object-contain drop-shadow-2xl" 
+            />
           </div>
 
           {/* Footer */}
-          <div className="signup-reveal text-sm text-blue-100">
+          <div className="signup-reveal text-sm text-slate-500 dark:text-slate-400">
             © 2026 Faddy. All rights reserved.
           </div>
         </div>
       </div>
 
       {/* Right Side - Signup Form */}
-      <div className="flex-1 flex items-center justify-center p-8 lg:p-12">
+      <div className="flex-1 h-full overflow-y-auto flex items-center justify-center py-4 px-6 lg:px-8 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
         <div className="w-full max-w-md">
           {/* Mobile Logo */}
-          <div className="signup-reveal lg:hidden mb-8 text-center">
+          <div className="signup-reveal lg:hidden mb-4 text-center">
             <Link href="/" className="inline-flex items-center gap-3">
-              <Logo width={40} height={40} className="text-blue-600" />
-              <span className="text-2xl font-switzer font-bold text-slate-900 dark:text-white">Faddy</span>
+              <Logo width={32} height={32} className="text-blue-600" />
+              <span className="text-lg font-switzer font-bold text-slate-900 dark:text-white">Faddy</span>
             </Link>
           </div>
 
           {/* Form Header */}
-          <div className="signup-reveal mb-8">
-            <h2 className="text-3xl font-switzer font-bold text-slate-900 dark:text-white">
+          <div className="signup-reveal mb-4">
+            <h2 className="text-2xl font-switzer font-bold text-slate-900 dark:text-white">
               Create your account
             </h2>
-            <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+            <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
               Start collecting feedback in minutes
             </p>
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="signup-reveal space-y-5">
+          <form onSubmit={handleSubmit} className="signup-reveal space-y-3">
             {/* Google Sign Up */}
-            <div className="space-y-4">
+            <div className="space-y-3">
               <GoogleAuthButton mode="signup" />
               
               <div className="relative">
@@ -202,19 +179,19 @@ export default function SignupPage() {
               <Label htmlFor="name" className="text-sm font-medium text-slate-700 dark:text-slate-300">
                 Full name
               </Label>
-              <div className="relative mt-2">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+              <div className="relative mt-1.5">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
                 <Input
                   id="name"
                   value={formData.name}
                   onChange={handleChange}
                   disabled={loading}
                   placeholder="Jane Doe"
-                  className="pl-10 h-12 bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 rounded-lg font-switzer"
+                  className="pl-9 h-10 bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 rounded-lg font-switzer text-sm"
                 />
               </div>
               {errors.name && (
-                <p className="text-xs mt-2 text-red-600 dark:text-red-400">
+                <p className="text-xs mt-1 text-red-600 dark:text-red-400">
                   {errors.name}
                 </p>
               )}
@@ -225,8 +202,8 @@ export default function SignupPage() {
               <Label htmlFor="email" className="text-sm font-medium text-slate-700 dark:text-slate-300">
                 Email address
               </Label>
-              <div className="relative mt-2">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+              <div className="relative mt-1.5">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
                 <Input
                   id="email"
                   type="email"
@@ -234,11 +211,11 @@ export default function SignupPage() {
                   onChange={handleChange}
                   disabled={loading}
                   placeholder="you@company.com"
-                  className="pl-10 h-12 bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 rounded-lg font-switzer"
+                  className="pl-9 h-10 bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 rounded-lg font-switzer text-sm"
                 />
               </div>
               {errors.email && (
-                <p className="text-xs mt-2 text-red-600 dark:text-red-400">
+                <p className="text-xs mt-1 text-red-600 dark:text-red-400">
                   {errors.email}
                 </p>
               )}
@@ -249,8 +226,8 @@ export default function SignupPage() {
               <Label htmlFor="password" className="text-sm font-medium text-slate-700 dark:text-slate-300">
                 Password
               </Label>
-              <div className="relative mt-2">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+              <div className="relative mt-1.5">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
@@ -258,22 +235,22 @@ export default function SignupPage() {
                   onChange={handleChange}
                   disabled={loading}
                   placeholder="••••••••"
-                  className="pl-10 pr-12 h-12 bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 rounded-lg font-switzer"
+                  className="pl-9 pr-12 h-10 bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 rounded-lg font-switzer text-sm"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(p => !p)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
                 >
-                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
               {errors.password ? (
-                <p className="text-xs mt-2 text-red-600 dark:text-red-400">
+                <p className="text-xs mt-1 text-red-600 dark:text-red-400">
                   {errors.password}
                 </p>
               ) : (
-                <p className="text-xs mt-2 text-slate-500 dark:text-slate-500">
+                <p className="text-xs mt-1 text-slate-500 dark:text-slate-500">
                   8+ characters • uppercase • number
                 </p>
               )}
@@ -283,7 +260,7 @@ export default function SignupPage() {
             <Button
               type="submit"
               disabled={loading}
-              className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-switzer font-semibold rounded-lg transition-all duration-200 shadow-lg shadow-blue-600/25 hover:shadow-blue-600/40 disabled:opacity-50 disabled:cursor-not-allowed mt-6"
+              className="w-full h-10 bg-blue-600 hover:bg-blue-700 text-white font-switzer font-semibold rounded-lg transition-all duration-200 shadow-lg shadow-blue-600/25 hover:shadow-blue-600/40 disabled:opacity-50 disabled:cursor-not-allowed mt-2"
             >
               {loading ? (
                 <LoadingAnimation width={20} height={20} />
@@ -297,7 +274,7 @@ export default function SignupPage() {
           </form>
 
           {/* Sign in link */}
-          <p className="signup-reveal text-center mt-8 text-sm text-slate-600 dark:text-slate-400">
+          <p className="signup-reveal text-center mt-4 text-sm text-slate-600 dark:text-slate-400">
             Already have an account?{" "}
             <Link href="/login" className="text-blue-600 hover:text-blue-700 font-semibold transition-colors">
               Sign in
@@ -305,7 +282,7 @@ export default function SignupPage() {
           </p>
 
           {/* Privacy links */}
-          <div className="signup-reveal mt-8 pt-8 border-t border-slate-200 dark:border-slate-800">
+          <div className="signup-reveal mt-4 pt-4 border-t border-slate-200 dark:border-slate-800">
             <p className="text-xs text-center text-slate-500 dark:text-slate-500">
               By signing up, you agree to our{" "}
               <Link href="/policy/terms" className="text-blue-600 hover:text-blue-700 hover:underline">

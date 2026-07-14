@@ -28,9 +28,14 @@ export function ThemeProvider({
   storageKey = "vite-ui-theme",
   ...props
 }: ThemeProviderProps) {
-  const [theme, setTheme] = React.useState(
-    () => (typeof window !== 'undefined' && window.localStorage.getItem(storageKey)) || defaultTheme
-  )
+  const [theme, setTheme] = React.useState(defaultTheme)
+
+  // Sync from localStorage after mount (client-only) to avoid SSR/client mismatch
+  React.useEffect(() => {
+    const stored = window.localStorage.getItem(storageKey)
+    if (stored) setTheme(stored)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   React.useEffect(() => {
     const root = window.document.documentElement

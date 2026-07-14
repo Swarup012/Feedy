@@ -41,6 +41,7 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import paddleService from "@/services/paddleService";
+import { TrackedUsersExplainer } from "@/components/pricing/TrackedUsersExplainer";
 
 export default function PricingPage() {
   const router = useRouter();
@@ -147,7 +148,7 @@ export default function PricingPage() {
     free: {
       name: "Free",
       price: 0,
-      description: "Perfect for trying out Faddy",
+      description: "For solo builders just getting started with structured feedback.",
       features: [
         { text: "3 feedback boards", included: true },
         { text: "5 posts per board", included: true },
@@ -155,9 +156,6 @@ export default function PricingPage() {
         { text: "3 team members", included: true },
         { text: "1 roadmap", included: true },
         { text: "Basic analytics", included: true },
-        { text: "Custom branding", included: false },
-        { text: "Advanced analytics", included: false },
-        { text: "Priority support", included: false },
       ],
       cta: "Current Plan",
       highlight: false,
@@ -168,18 +166,15 @@ export default function PricingPage() {
       yearlyPrice: 180,
       effectiveMonthlyYearly: 15,
       savings: 48,
-      description: "For growing teams collecting feedback",
+      description: "For indie founders and small teams ready to put their brand front and center.",
       features: [
-        { text: "Unlimited feedback boards", included: true },
-        { text: "Unlimited posts", included: true },
-        { text: "125+ tracked users included", included: true },
+        { text: "Unlimited Feedback Boards + Posts", included: true },
         { text: "Unlimited team members", included: true, highlight: true },
         { text: "Up to 5 admins", included: true, highlight: true },
         { text: "1 roadmap", included: true },
+        { text: "125+ tracked users", included: true },
         { text: "Advanced analytics", included: true },
         { text: "Custom branding", included: true },
-        { text: "$6 per 50 additional users", included: true, subtext: true },
-        { text: "14-day free trial", included: true, highlight: true },
       ],
       cta: "Start Free Trial",
       highlight: true,
@@ -190,17 +185,14 @@ export default function PricingPage() {
       yearlyPrice: 540,
       effectiveMonthlyYearly: 45,
       savings: 48,
-      description: "For teams that need more collaboration",
+      description: "Turn scattered feedback into clear priorities with AI-powered clustering and automation.",
       features: [
-        { text: 'Everything in Starter, plus:', included: true, bold: true },
-        { text: 'Unlimited team members', included: true, highlight: true },
+        { text: 'All Starter features, plus:', included: true, bold: true },
         { text: 'Up to 10 admins', included: true, highlight: true },
-        { text: '1 custom domain (subdomain)', included: true, highlight: true },
+        { text: '1 custom Subdomain', included: true, highlight: true },
         { text: 'Priority support', included: true, highlight: true },
         { text: 'Custom integrations', included: true },
         { text: 'Advanced security features', included: true },
-        { text: '$6 per 50 additional users', included: true, subtext: true },
-        { text: '14-day free trial', included: true, highlight: true },
       ],
       cta: "Start Pro Trial",
       highlight: false,
@@ -212,116 +204,15 @@ export default function PricingPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
       {/* Navbar */}
-      <Navbar>
-        <NavBody>
-          <NavbarLogo href="/">
-            <Logo width={120} height={32} />
-          </NavbarLogo>
-          <NavItems items={navItems} />
-          <NavbarActions />
-        </NavBody>
-
-        <MobileNav>
-          <MobileNavHeader>
-            <NavbarLogo href="/">
-              <Logo width={120} height={32} />
-            </NavbarLogo>
-            <div className="flex items-center gap-2">
-              <ThemeToggleDebug />
-              <MobileNavToggle
-                isOpen={isMobileMenuOpen}
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              />
-            </div>
-          </MobileNavHeader>
-
-          <MobileNavMenu
-            isOpen={isMobileMenuOpen}
-            onClose={() => setIsMobileMenuOpen(false)}
-          >
-            {navItems.map((item, idx) => (
-              <div key={`mobile-link-${idx}`} className="mb-4">
-                {item.dropdown ? (
-                  <div>
-                    <span className="block text-lg font-medium text-neutral-600 dark:text-neutral-300 mb-2">
-                      {item.name}
-                    </span>
-                    {item.dropdown.map((section, sectionIdx) => (
-                      <div
-                        key={`mobile-section-${sectionIdx}`}
-                        className="ml-4 mt-3"
-                      >
-                        <div className="text-xs font-bold text-slate-400 dark:text-gray-500 uppercase tracking-wider mb-2">
-                          {section.section}
-                        </div>
-                        <div className="space-y-2">
-                          {section.items.map((dropdownItem, itemIdx) => (
-                            <a
-                              key={`mobile-dropdown-${itemIdx}`}
-                              href={dropdownItem.link}
-                              onClick={() => setIsMobileMenuOpen(false)}
-                              className="block text-sm text-neutral-600 dark:text-neutral-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors py-1"
-                            >
-                              {dropdownItem.name}
-                            </a>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <a
-                    href={item.link}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="relative text-neutral-600 dark:text-neutral-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                  >
-                    <span className="block text-lg font-medium">
-                      {item.name}
-                    </span>
-                  </a>
-                )}
-              </div>
-            ))}
-
-            <div className="mt-6 space-y-3 border-t border-neutral-200 dark:border-neutral-800 pt-4">
-              <NavbarButton
-                variant="secondary"
-                onClick={() => {
-                  setIsMobileMenuOpen(false);
-                  router.push("/login");
-                }}
-                className="w-full"
-              >
-                Login
-              </NavbarButton>
-              <NavbarButton
-                variant="primary"
-                onClick={() => {
-                  setIsMobileMenuOpen(false);
-                  router.push("/signup");
-                }}
-                className="w-full"
-              >
-                Sign Up
-              </NavbarButton>
-            </div>
-          </MobileNavMenu>
-        </MobileNav>
-      </Navbar>
 
       <div className="container mx-auto px-4 py-16 pt-24">
         {/* Header */}
         <div className="text-center mb-12">
-          <Badge className="mb-4" variant="secondary">
-            <Sparkles className="w-3 h-3 mr-1" />
-            Pricing
-          </Badge>
           <h1 className="text-3xl md:text-4xl font-switzer font-medium mb-4">
-            Simple, Transparent Pricing
+            <span className="text-blue-600">Transparent</span> Pricing
           </h1>
           <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-            Start with our free plan. Upgrade when you need more. Cancel
-            anytime.
+            Start with our <span className="font-switzer text-blue-600">FREE</span> plan. Upgrade when you need more. <span className="text-blue-600">Cancel anytime</span>
           </p>
         </div>
 
@@ -330,21 +221,19 @@ export default function PricingPage() {
           <div className="inline-flex items-center bg-gray-100 dark:bg-gray-800 rounded-full p-1 shadow-inner">
             <button
               onClick={() => setBillingCycle("monthly")}
-              className={`px-6 py-2.5 rounded-full font-medium text-sm transition-all duration-200 ${
-                billingCycle === "monthly"
-                  ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-md"
-                  : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
-              }`}
+              className={`px-6 py-2.5 rounded-full font-medium text-sm transition-all duration-200 ${billingCycle === "monthly"
+                ? "bg-blue-50/50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 ring-1 ring-inset ring-blue-500 shadow-sm"
+                : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                }`}
             >
               Monthly
             </button>
             <button
               onClick={() => setBillingCycle("yearly")}
-              className={`px-6 py-2.5 rounded-full font-medium text-sm transition-all duration-200 flex items-center gap-2 ${
-                billingCycle === "yearly"
-                  ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-md"
-                  : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
-              }`}
+              className={`px-6 py-2.5 rounded-full font-medium text-sm transition-all duration-200 flex items-center gap-2 ${billingCycle === "yearly"
+                ? "bg-blue-50/50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 ring-1 ring-inset ring-blue-500 shadow-sm"
+                : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                }`}
             >
               Yearly
               <Badge className="bg-green-500 text-white text-xs px-2 py-0.5">
@@ -378,9 +267,12 @@ export default function PricingPage() {
               <Button
                 variant="outline"
                 className="w-full mb-6"
-                disabled={currentPlan === "free"}
+                disabled={!!user && currentPlan === "free"}
+                onClick={() => {
+                  if (!user) router.push("/signup");
+                }}
               >
-                {currentPlan === "free" ? "Current Plan" : "Downgrade"}
+                {!user ? "Start FREE" : currentPlan === "free" ? "Current Plan" : "Downgrade"}
               </Button>
 
               <div className="space-y-3">
@@ -407,21 +299,19 @@ export default function PricingPage() {
           </Card>
 
           {/* Starter Plan */}
-          <Card
-            className={`relative ${plans.starter.highlight ? "border-2 border-blue-500 shadow-xl" : ""}`}
-          >
-            {plans.starter.highlight && (
-              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                <Badge className="bg-blue-500 text-white px-4 py-1">
-                  <Crown className="w-3 h-3 mr-1" />
-                  Most Popular
-                </Badge>
-              </div>
-            )}
+          <Card className="relative">
+
 
             <CardHeader>
               <div className="flex items-center justify-between mb-2">
                 <CardTitle className="text-2xl">{plans.starter.name}</CardTitle>
+                <div className="relative group">
+                  <div className="absolute -inset-0.5 bg-gradient-to-r from-amber-400 to-orange-500 rounded-full blur opacity-30 group-hover:opacity-60 transition duration-200"></div>
+                  <Badge className="relative bg-white dark:bg-gray-900 text-orange-600 dark:text-amber-400 border border-orange-200 dark:border-amber-800/60 shadow-sm font-bold uppercase tracking-wider text-[10px] px-2.5 py-0.5 flex items-center gap-1">
+                    <Zap className="w-3 h-3 fill-orange-500 dark:fill-amber-500 text-orange-500 dark:text-amber-500" />
+                    Early Access
+                  </Badge>
+                </div>
               </div>
               <div className="mb-4">
                 {billingCycle === "monthly" ? (
@@ -443,7 +333,7 @@ export default function PricingPage() {
                         /month
                       </span>
                     </div>
-                    <div className="text-sm text-gray-500 mt-1">
+                    <div className="text-sm text-blue-600 mt-1">
                       Billed yearly (${plans.starter.yearlyPrice}/year)
                     </div>
                   </div>
@@ -463,14 +353,7 @@ export default function PricingPage() {
                   >
                     {loading ? "Loading..." : "Start 14-Day Free Trial"}
                   </Button>
-                  <Button
-                    variant="outline"
-                    className="w-full"
-                    onClick={() => handleUpgrade("starter", billingCycle, true)}
-                    disabled={loading}
-                  >
-                    Skip Trial & Subscribe Now
-                  </Button>
+
                 </div>
               ) : currentPlan === "starter" ? (
                 <Button variant="outline" className="w-full mb-6" disabled>
@@ -515,17 +398,24 @@ export default function PricingPage() {
           </Card>
 
           {/* Pro Plan */}
-          <Card className="relative border-2 border-purple-500 shadow-xl">
+          <Card className="relative border-2 border-blue-500 shadow-xl">
             <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-              <Badge className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-1">
-                <Sparkles className="w-3 h-3 mr-1" />
-                Best Value
+              <Badge className="bg-blue-500 text-white px-4 py-1">
+                <Crown className="w-3 h-3 mr-1" />
+                Most Popular
               </Badge>
             </div>
 
             <CardHeader>
               <div className="flex items-center justify-between mb-2">
                 <CardTitle className="text-2xl">{plans.pro.name}</CardTitle>
+                <div className="relative group">
+                  <div className="absolute -inset-0.5 bg-gradient-to-r from-amber-400 to-orange-500 rounded-full blur opacity-30 group-hover:opacity-60 transition duration-200"></div>
+                  <Badge className="relative bg-white dark:bg-gray-900 text-orange-600 dark:text-amber-400 border border-orange-200 dark:border-amber-800/60 shadow-sm font-bold uppercase tracking-wider text-[10px] px-2.5 py-0.5 flex items-center gap-1">
+                    <Zap className="w-3 h-3 fill-orange-500 dark:fill-amber-500 text-orange-500 dark:text-amber-500" />
+                    Early Access
+                  </Badge>
+                </div>
               </div>
               <div className="mb-4">
                 {billingCycle === "monthly" ? (
@@ -547,7 +437,7 @@ export default function PricingPage() {
                         /month
                       </span>
                     </div>
-                    <div className="text-sm text-gray-500 mt-1">
+                    <div className="text-sm text-blue-600 mt-1">
                       Billed yearly (${plans.pro.yearlyPrice}/year)
                     </div>
                   </div>
@@ -559,24 +449,17 @@ export default function PricingPage() {
               {currentPlan === "free" ? (
                 <div className="space-y-2 mb-6">
                   <Button
-                    className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                    className="w-full bg-blue-600 hover:bg-blue-700"
                     onClick={() => handleUpgrade("pro", billingCycle, false)}
                     disabled={loading}
                   >
-                    {loading ? "Loading..." : "Start Pro Trial"}
+                    {loading ? "Loading..." : "Start 14-Day Free Trial"}
                   </Button>
-                  <Button
-                    variant="outline"
-                    className="w-full"
-                    onClick={() => handleUpgrade("pro", billingCycle, true)}
-                    disabled={loading}
-                  >
-                    Skip Trial & Subscribe Now
-                  </Button>
+
                 </div>
               ) : currentPlan === "starter" ? (
                 <Button
-                  className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 mb-6"
+                  className="w-full bg-blue-600 hover:bg-blue-700 mb-6"
                   onClick={() => handleUpgrade("pro", billingCycle, false)}
                   disabled={loading}
                 >
@@ -593,20 +476,19 @@ export default function PricingPage() {
                   <div key={idx} className="flex items-start gap-3">
                     {feature.included ? (
                       <Check
-                        className={`w-5 h-5 flex-shrink-0 mt-0.5 ${feature.highlight ? "text-purple-500" : "text-green-500"}`}
+                        className={`w-5 h-5 flex-shrink-0 mt-0.5 ${feature.highlight ? "text-blue-500" : "text-green-500"}`}
                       />
                     ) : (
                       <X className="w-5 h-5 text-gray-300 flex-shrink-0 mt-0.5" />
                     )}
                     <div className="flex-1">
                       <span
-                        className={`${
-                          feature.bold
-                            ? "font-bold text-gray-900 dark:text-white"
-                            : feature.highlight
-                              ? "font-semibold text-purple-600 dark:text-purple-400"
-                              : "text-gray-700 dark:text-gray-300"
-                        }`}
+                        className={`${feature.bold
+                          ? "font-bold text-gray-900 dark:text-white"
+                          : feature.highlight
+                            ? "font-semibold text-blue-600 dark:text-blue-400"
+                            : "text-gray-700 dark:text-gray-300"
+                          }`}
                       >
                         {feature.text}
                       </span>
@@ -622,6 +504,12 @@ export default function PricingPage() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Tracked Users Estimator */}
+        <TrackedUsersExplainer
+          billingCycle={billingCycle}
+          onBillingCycleChange={setBillingCycle}
+        />
 
         {/* Detailed Plan Comparison Table */}
         <div className="max-w-6xl mx-auto mb-16">
@@ -725,7 +613,7 @@ export default function PricingPage() {
                       <td className="py-4 px-6 text-center text-sm font-semibold text-blue-600 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-900/10">
                         Unlimited
                       </td>
-                      <td className="py-4 px-6 text-center text-sm font-semibold text-purple-600 dark:text-purple-400">
+                      <td className="py-4 px-6 text-center text-sm font-semibold text-blue-600 dark:text-blue-400">
                         Unlimited
                       </td>
                     </tr>
@@ -739,7 +627,7 @@ export default function PricingPage() {
                       <td className="py-4 px-6 text-center text-sm font-semibold text-blue-600 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-900/10">
                         Up to 5 admins
                       </td>
-                      <td className="py-4 px-6 text-center text-sm font-semibold text-purple-600 dark:text-purple-400">
+                      <td className="py-4 px-6 text-center text-sm font-semibold text-blue-600 dark:text-blue-400">
                         Up to 10 admins
                       </td>
                     </tr>
@@ -777,7 +665,7 @@ export default function PricingPage() {
                       <td className="py-4 px-6 text-center text-sm font-semibold text-blue-600 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-900/10">
                         Unlimited
                       </td>
-                      <td className="py-4 px-6 text-center text-sm font-semibold text-purple-600 dark:text-purple-400">
+                      <td className="py-4 px-6 text-center text-sm font-semibold text-blue-600 dark:text-blue-400">
                         Unlimited
                       </td>
                     </tr>
@@ -791,7 +679,7 @@ export default function PricingPage() {
                       <td className="py-4 px-6 text-center text-sm font-semibold text-blue-600 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-900/10">
                         Unlimited
                       </td>
-                      <td className="py-4 px-6 text-center text-sm font-semibold text-purple-600 dark:text-purple-400">
+                      <td className="py-4 px-6 text-center text-sm font-semibold text-blue-600 dark:text-blue-400">
                         Unlimited
                       </td>
                     </tr>
@@ -805,7 +693,7 @@ export default function PricingPage() {
                       <td className="py-4 px-6 text-center text-sm font-semibold text-blue-600 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-900/10">
                         125+ users
                       </td>
-                      <td className="py-4 px-6 text-center text-sm font-semibold text-purple-600 dark:text-purple-400">
+                      <td className="py-4 px-6 text-center text-sm font-semibold text-blue-600 dark:text-blue-400">
                         125+ users
                       </td>
                     </tr>
@@ -819,7 +707,7 @@ export default function PricingPage() {
                       <td className="py-4 px-6 text-center text-sm font-semibold text-blue-600 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-900/10">
                         1 roadmap
                       </td>
-                      <td className="py-4 px-6 text-center text-sm font-semibold text-purple-600 dark:text-purple-400">
+                      <td className="py-4 px-6 text-center text-sm font-semibold text-blue-600 dark:text-blue-400">
                         Unlimited
                       </td>
                     </tr>
@@ -858,7 +746,7 @@ export default function PricingPage() {
                         <X className="w-5 h-5 text-gray-300 mx-auto" />
                       </td>
                       <td className="py-4 px-6 text-center">
-                        <span className="text-sm font-semibold text-purple-600 dark:text-purple-400">1 subdomain</span>
+                        <span className="text-sm font-semibold text-blue-600 dark:text-blue-400">1 subdomain</span>
                       </td>
                     </tr>
                     <tr>
@@ -871,7 +759,7 @@ export default function PricingPage() {
                       <td className="py-4 px-6 text-center text-sm font-semibold text-blue-600 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-900/10">
                         Advanced
                       </td>
-                      <td className="py-4 px-6 text-center text-sm font-semibold text-purple-600 dark:text-purple-400">
+                      <td className="py-4 px-6 text-center text-sm font-semibold text-blue-600 dark:text-blue-400">
                         Advanced
                       </td>
                     </tr>
@@ -979,7 +867,7 @@ export default function PricingPage() {
                       <td className="py-4 px-6 text-center text-sm font-semibold text-blue-600 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-900/10">
                         14 days
                       </td>
-                      <td className="py-4 px-6 text-center text-sm font-semibold text-purple-600 dark:text-purple-400">
+                      <td className="py-4 px-6 text-center text-sm font-semibold text-blue-600 dark:text-blue-400">
                         14 days
                       </td>
                     </tr>
@@ -990,280 +878,188 @@ export default function PricingPage() {
           </div>
         </div>
 
-        {/* Overage Pricing Explanation - Redesigned */}
+        {/* How Overage Billing Works — Professional Redesign */}
         <div className="max-w-5xl mx-auto mb-16">
           <div className="text-center mb-10">
-            <h2 className="text-3xl font-bold mb-3">
-              How Overage Billing Works
-            </h2>
+            <h2 className="text-3xl font-bold mb-3">How Overage Billing Works</h2>
             <p className="text-gray-600 dark:text-gray-400 text-lg">
               Simple, predictable pricing as your community grows
             </p>
           </div>
 
-          {/* Visual Pricing Tiers */}
-          <div className="grid md:grid-cols-3 gap-6 mb-10">
-            {/* Tier 1: Included */}
-            <div className="relative">
-              <div className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 border-2 border-green-500 dark:border-green-600 rounded-xl p-6 h-full">
-                <div className="absolute -top-3 left-4">
-                  <Badge className="bg-green-500 text-white">Included</Badge>
+          {/* Three-zone usage bar */}
+          <div className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm overflow-hidden mb-6">
+            <div className="px-8 pt-7 pb-6">
+              <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-5">
+                User Zones at a Glance
+              </p>
+              {/* Bar */}
+              <div className="flex h-10 rounded-xl overflow-hidden gap-0.5 mb-3">
+                <div className="flex-[5] bg-green-500 flex items-center justify-center">
+                  <span className="text-white text-xs font-semibold">0 – 125</span>
                 </div>
-                <div className="text-center mt-2">
-                  <div className="text-5xl font-bold text-green-600 dark:text-green-400 mb-2">
-                    0-125
-                  </div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                    Tracked Users
-                  </div>
-                  <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                    $0
-                  </div>
-                  <div className="text-xs text-gray-500 mt-1">
-                    Included in plan
-                  </div>
+                <div className="flex-[1] bg-blue-400 flex items-center justify-center">
+                  <span className="text-white text-xs font-semibold hidden sm:block">126 – 150</span>
+                </div>
+                <div className="flex-[1] bg-blue-600 flex items-center justify-center rounded-r-xl">
+                  <span className="text-white text-xs font-semibold">151+</span>
                 </div>
               </div>
-            </div>
-
-            {/* Tier 2: Grace Buffer */}
-            <div className="relative">
-              <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border-2 border-blue-500 dark:border-blue-600 rounded-xl p-6 h-full">
-                <div className="absolute -top-3 left-4">
-                  <Badge className="bg-blue-500 text-white">Grace Period</Badge>
+              {/* Zone labels */}
+              <div className="flex gap-0.5">
+                <div className="flex-[5] text-center">
+                  <span className="inline-flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-400">
+                    <span className="w-2 h-2 rounded-full bg-green-500 inline-block" />
+                    Included &mdash; <strong className="text-gray-800 dark:text-gray-200">$0</strong>
+                  </span>
                 </div>
-                <div className="text-center mt-2">
-                  <div className="text-5xl font-bold text-blue-600 dark:text-blue-400 mb-2">
-                    126-150
-                  </div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                    Tracked Users
-                  </div>
-                  <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                    $0
-                  </div>
-                  <div className="text-xs text-gray-500 mt-1">
-                    20% grace buffer
-                  </div>
+                <div className="flex-[1] text-center">
+                  <span className="inline-flex items-center gap-1 text-xs text-gray-600 dark:text-gray-400">
+                    <span className="w-2 h-2 rounded-full bg-blue-400 inline-block" />
+                    Grace &mdash; <strong className="text-gray-800 dark:text-gray-200">$0</strong>
+                  </span>
                 </div>
-              </div>
-            </div>
-
-            {/* Tier 3: Overage */}
-            <div className="relative">
-              <div className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 border-2 border-purple-500 dark:border-purple-600 rounded-xl p-6 h-full">
-                <div className="absolute -top-3 left-4">
-                  <Badge className="bg-purple-500 text-white">Overage</Badge>
-                </div>
-                <div className="text-center mt-2">
-                  <div className="text-5xl font-bold text-purple-600 dark:text-purple-400 mb-2">
-                    151+
-                  </div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                    Tracked Users
-                  </div>
-                  <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                    $6
-                  </div>
-                  <div className="text-xs text-gray-500 mt-1">per 50 users</div>
+                <div className="flex-[1] text-center">
+                  <span className="inline-flex items-center gap-1 text-xs text-gray-600 dark:text-gray-400">
+                    <span className="w-2 h-2 rounded-full bg-blue-600 inline-block" />
+                    Overage &mdash; <strong className="text-gray-800 dark:text-gray-200">$6/50 users</strong>
+                  </span>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* How It Works Steps */}
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <TrendingUp className="w-5 h-5 text-blue-600" />
-                How It Works
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Step 1 */}
-              <div className="flex gap-4">
-                <div className="flex-shrink-0">
-                  <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-600 dark:text-green-400 font-bold">
-                    1
-                  </div>
+          {/* Steps + Rate table in a two-column grid */}
+          <div className="grid md:grid-cols-[1fr_auto] gap-6 mb-6">
+            {/* Vertical timeline */}
+            <div className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
+              <div className="flex items-center gap-3 px-7 py-5 border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/60">
+                <div className="w-7 h-7 rounded-lg bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center">
+                  <TrendingUp className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
                 </div>
-                <div className="flex-1">
-                  <h4 className="font-semibold text-lg mb-2">
-                    Start with 125 Included Users
-                  </h4>
-                  <p className="text-gray-600 dark:text-gray-400">
-                    Your Starter plan includes 125 tracked users at no extra
-                    cost. Tracked users are unique visitors who interact with
-                    your feedback boards.
-                  </p>
-                </div>
+                <span className="font-semibold text-gray-900 dark:text-white text-sm">How It Works</span>
               </div>
-
-              {/* Step 2 */}
-              <div className="flex gap-4">
-                <div className="flex-shrink-0">
-                  <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 font-bold">
-                    2
+              <div className="px-7 py-6 space-y-0">
+                {/* Step 1 */}
+                <div className="flex gap-5">
+                  <div className="flex flex-col items-center">
+                    <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/30 border-2 border-green-400 dark:border-green-600 flex items-center justify-center text-green-700 dark:text-green-400 font-bold text-xs flex-shrink-0">1</div>
+                    <div className="w-px flex-1 bg-gradient-to-b from-green-300 to-blue-300 dark:from-green-700 dark:to-blue-700 my-2 min-h-[2rem]" />
+                  </div>
+                  <div className="pb-6 flex-1">
+                    <h4 className="font-semibold text-gray-900 dark:text-white text-sm mb-1">Start with 125 Included Users</h4>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">Your Starter plan includes 125 tracked users at no extra cost — unique visitors who engage with your feedback boards.</p>
                   </div>
                 </div>
-                <div className="flex-1">
-                  <h4 className="font-semibold text-lg mb-2">
-                    Get 20% Grace Buffer (25 Users)
-                  </h4>
-                  <p className="text-gray-600 dark:text-gray-400">
-                    We won't charge you until you reach{" "}
-                    <strong>150 users</strong>. This gives you flexibility as
-                    your community grows without unexpected charges.
-                  </p>
-                </div>
-              </div>
-
-              {/* Step 3 */}
-              <div className="flex gap-4">
-                <div className="flex-shrink-0">
-                  <div className="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-purple-600 dark:text-purple-400 font-bold">
-                    3
+                {/* Step 2 */}
+                <div className="flex gap-5">
+                  <div className="flex flex-col items-center">
+                    <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 border-2 border-blue-400 dark:border-blue-600 flex items-center justify-center text-blue-700 dark:text-blue-400 font-bold text-xs flex-shrink-0">2</div>
+                    <div className="w-px flex-1 bg-gradient-to-b from-blue-300 to-blue-400 dark:from-blue-700 dark:to-blue-600 my-2 min-h-[2rem]" />
+                  </div>
+                  <div className="pb-6 flex-1">
+                    <h4 className="font-semibold text-gray-900 dark:text-white text-sm mb-1">Get a Free 20% Grace Buffer</h4>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">We won't charge you until you reach <span className="font-semibold text-gray-700 dark:text-gray-200">150 users</span>. 25 extra users, completely free — giving you room to grow without surprise bills.</p>
                   </div>
                 </div>
-                <div className="flex-1">
-                  <h4 className="font-semibold text-lg mb-2">
-                    Pay Only for What You Use
-                  </h4>
-                  <p className="text-gray-600 dark:text-gray-400 mb-3">
-                    After 150 users, pay just{" "}
-                    <strong>$6 for every 50 additional users</strong> each
-                    month. No long-term commitments.
-                  </p>
-                  <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4">
-                    <div className="grid grid-cols-2 gap-3 text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-gray-600 dark:text-gray-400">
-                          151-200 users:
-                        </span>
-                        <span className="font-semibold">+$6</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600 dark:text-gray-400">
-                          201-250 users:
-                        </span>
-                        <span className="font-semibold">+$12</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600 dark:text-gray-400">
-                          251-300 users:
-                        </span>
-                        <span className="font-semibold">+$18</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600 dark:text-gray-400">
-                          301-350 users:
-                        </span>
-                        <span className="font-semibold">+$24</span>
-                      </div>
-                    </div>
+                {/* Step 3 */}
+                <div className="flex gap-5">
+                  <div className="flex flex-col items-center">
+                    <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 border-2 border-blue-500 dark:border-blue-500 flex items-center justify-center text-blue-700 dark:text-blue-400 font-bold text-xs flex-shrink-0">3</div>
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-gray-900 dark:text-white text-sm mb-1">Pay Only for What You Use</h4>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">After 150 users, pay <span className="font-semibold text-gray-700 dark:text-gray-200">$6 per 50 additional users</span> each month. No commitments, cancel anytime.</p>
                   </div>
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
 
-          {/* Example Calculation */}
-          <Card className="border-2 border-blue-200 dark:border-blue-800">
-            <CardHeader className="bg-blue-50 dark:bg-blue-900/20">
-              <CardTitle className="flex items-center gap-2">
-                <Users className="w-5 h-5 text-blue-600" />
-                Example: 180 Tracked Users This Month
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-6">
-              <div className="space-y-4">
-                {/* Visual Progress Bar */}
-                <div className="relative">
-                  <div className="flex items-center justify-between mb-2 text-sm">
-                    <span className="font-medium">Your Usage</span>
-                    <span className="font-bold text-blue-600">180 users</span>
+            {/* Overage rate card */}
+            <div className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm overflow-hidden self-start min-w-[200px]">
+              <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/60">
+                <span className="text-xs font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">Overage Rates</span>
+              </div>
+              <div className="divide-y divide-gray-100 dark:divide-gray-800">
+                {[
+                  { range: "151 – 200", cost: "+$6" },
+                  { range: "201 – 250", cost: "+$12" },
+                  { range: "251 – 300", cost: "+$18" },
+                  { range: "301 – 350", cost: "+$24" },
+                ].map((row, i) => (
+                  <div key={i} className="flex items-center justify-between px-6 py-3 bg-gray-50/40 dark:bg-gray-800/30">
+                    <span className="text-sm text-gray-500 dark:text-gray-400 tabular-nums">{row.range}</span>
+                    <span className="text-sm font-bold text-gray-900 dark:text-white tabular-nums ml-6">{row.cost}</span>
                   </div>
-                  <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden relative">
-                    <div className="absolute inset-0 flex">
-                      <div
-                        className="bg-green-500 h-full"
-                        style={{ width: "41.67%" }}
-                        title="0-125: Included"
-                      ></div>
-                      <div
-                        className="bg-blue-500 h-full"
-                        style={{ width: "8.33%" }}
-                        title="126-150: Grace"
-                      ></div>
-                      <div
-                        className="bg-purple-500 h-full"
-                        style={{ width: "10%" }}
-                        title="151-180: Overage"
-                      ></div>
-                    </div>
-                  </div>
-                  <div className="flex justify-between text-xs text-gray-500 mt-1">
-                    <span>0</span>
-                    <span>125</span>
-                    <span>150</span>
-                    <span className="font-semibold text-purple-600">180</span>
-                  </div>
+                ))}
+              </div>
+              <div className="px-6 py-3 bg-blue-50 dark:bg-blue-900/20 border-t border-blue-100 dark:border-blue-800/50">
+                <p className="text-xs text-blue-600 dark:text-blue-400 font-medium">Per 50 users / month</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Example calculation — invoice style */}
+          <div className="rounded-2xl border border-blue-200 dark:border-blue-800/60 bg-white dark:bg-gray-900 shadow-md overflow-hidden">
+            <div className="flex items-center gap-3 px-8 py-5 bg-blue-600 dark:bg-blue-700">
+              <Users className="w-5 h-5 text-white/90" />
+              <span className="font-semibold text-white text-sm">Example: 180 Tracked Users This Month</span>
+            </div>
+            <div className="px-8 py-7 space-y-6">
+              {/* Segmented usage bar */}
+              <div>
+                <div className="flex items-center justify-between mb-2 text-sm">
+                  <span className="font-medium text-gray-700 dark:text-gray-300">Your Usage</span>
+                  <span className="font-bold text-blue-600 tabular-nums">180 / 125 included</span>
                 </div>
-
-                {/* Calculation Breakdown */}
-                <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-5">
-                  <div className="space-y-3">
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                        <span className="text-gray-700 dark:text-gray-300">
-                          Base Plan (125 users)
-                        </span>
-                      </div>
-                      <span className="font-semibold">$19</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-                        <span className="text-gray-700 dark:text-gray-300">
-                          Grace Buffer (25 users)
-                        </span>
-                      </div>
-                      <span className="font-semibold text-green-600">$0</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-full bg-purple-500"></div>
-                        <span className="text-gray-700 dark:text-gray-300">
-                          Overage (30 users = 1 block)
-                        </span>
-                      </div>
-                      <span className="font-semibold">+$6</span>
-                    </div>
-                    <div className="border-t border-gray-300 dark:border-gray-600 pt-3 flex justify-between items-center">
-                      <span className="text-lg font-bold">
-                        Total This Month:
-                      </span>
-                      <span className="text-2xl font-bold text-blue-600">
-                        $25
-                      </span>
-                    </div>
-                  </div>
+                <div className="h-5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden flex gap-0.5">
+                  <div className="bg-green-500 h-full rounded-l-full" style={{ width: "69.4%" }} title="0–125: Included" />
+                  <div className="bg-blue-400 h-full" style={{ width: "13.9%" }} title="126–150: Grace" />
+                  <div className="bg-blue-600 h-full rounded-r-full" style={{ width: "11.1%" }} title="151–180: Overage" />
                 </div>
-
-                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-                  <p className="text-sm text-blue-900 dark:text-blue-100 flex items-start gap-2">
-                    <Check className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-                    <span>
-                      <strong>You're only paying for 30 extra users</strong>{" "}
-                      because of the grace buffer. Track your usage in real-time
-                      on your dashboard.
-                    </span>
-                  </p>
+                <div className="relative mt-1.5 text-xs text-gray-400" style={{ height: "1.1rem" }}>
+                  <span className="absolute left-0">0</span>
+                  <span className="absolute" style={{ left: "69.4%" }}>125</span>
+                  <span className="absolute" style={{ left: "83.3%" }}>150</span>
+                  <span className="absolute right-0 font-semibold text-blue-600">180</span>
+                </div>
+                <div className="flex items-center gap-4 mt-3 text-xs text-gray-500 dark:text-gray-400">
+                  <span className="flex items-center gap-1.5"><span className="inline-block w-2.5 h-2.5 rounded-sm bg-green-500" />Included</span>
+                  <span className="flex items-center gap-1.5"><span className="inline-block w-2.5 h-2.5 rounded-sm bg-blue-400" />Grace (free)</span>
+                  <span className="flex items-center gap-1.5"><span className="inline-block w-2.5 h-2.5 rounded-sm bg-blue-600" />Overage</span>
                 </div>
               </div>
-            </CardContent>
-          </Card>
+
+              {/* Invoice breakdown */}
+              <div className="rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden">
+                {[
+                  { dot: "bg-green-500", label: "Base Plan (125 users included)", value: "$19", valueClass: "" },
+                  { dot: "bg-blue-400", label: "Grace Buffer (26–150 users)", value: "$0", valueClass: "text-green-600" },
+                  { dot: "bg-blue-600", label: "Overage (30 users = 1 block × $6)", value: "+$6", valueClass: "" },
+                ].map((row, i) => (
+                  <div key={i} className="flex items-center justify-between px-5 py-3.5 border-b border-gray-100 dark:border-gray-700 last:border-0 bg-gray-50/40 dark:bg-gray-800/30">
+                    <div className="flex items-center gap-3">
+                      <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${row.dot}`} />
+                      <span className="text-sm text-gray-700 dark:text-gray-300">{row.label}</span>
+                    </div>
+                    <span className={`text-sm font-semibold tabular-nums ${row.valueClass || "text-gray-900 dark:text-white"}`}>{row.value}</span>
+                  </div>
+                ))}
+                <div className="flex items-center justify-between px-5 py-4 bg-blue-50 dark:bg-blue-900/20 border-t-2 border-blue-200 dark:border-blue-700">
+                  <span className="font-bold text-gray-900 dark:text-white">Total This Month</span>
+                  <span className="text-2xl font-bold text-blue-600 tabular-nums">$25</span>
+                </div>
+              </div>
+
+              {/* Callout */}
+              <div className="flex items-start gap-3 rounded-xl bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800/60 px-5 py-4">
+                <Check className="w-4 h-4 text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5" />
+                <p className="text-sm text-green-900 dark:text-green-100 leading-relaxed">
+                  <strong>You only pay for 30 extra users</strong> thanks to the grace buffer — not 55. Track your usage in real-time on your dashboard.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* FAQ Section */}

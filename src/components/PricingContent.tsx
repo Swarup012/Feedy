@@ -139,7 +139,7 @@ export default function PricingContent() {
             onClick={() => setBillingCycle("monthly")}
             className={`px-6 py-2.5 rounded-full font-medium text-sm transition-all duration-200 ${
               billingCycle === "monthly"
-                ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-md"
+                ? "bg-blue-50/50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 ring-1 ring-inset ring-blue-500 shadow-sm"
                 : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
             }`}
           >
@@ -149,7 +149,7 @@ export default function PricingContent() {
             onClick={() => setBillingCycle("yearly")}
             className={`px-6 py-2.5 rounded-full font-medium text-sm transition-all duration-200 flex items-center gap-2 ${
               billingCycle === "yearly"
-                ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-md"
+                ? "bg-blue-50/50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 ring-1 ring-inset ring-blue-500 shadow-sm"
                 : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
             }`}
           >
@@ -176,8 +176,15 @@ export default function PricingContent() {
             <CardDescription>{plans.free.description}</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button variant="outline" className="w-full mb-6" disabled={currentPlan === "free"}>
-              {currentPlan === "free" ? "Current Plan" : "Downgrade"}
+            <Button 
+              variant="outline" 
+              className="w-full mb-6" 
+              disabled={!!user && currentPlan === "free"}
+              onClick={() => {
+                if (!user) router.push("/signup");
+              }}
+            >
+              {!user ? "Start FREE" : currentPlan === "free" ? "Current Plan" : "Downgrade"}
             </Button>
             <div className="space-y-3">
               {plans.free.features.map((feature, idx) => (
@@ -197,17 +204,19 @@ export default function PricingContent() {
         </Card>
 
         {/* Starter Plan */}
-        <Card className={`relative ${plans.starter.highlight ? "border-2 border-blue-500 shadow-xl" : ""}`}>
-          {plans.starter.highlight && (
-            <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-              <Badge className="bg-blue-500 text-white px-4 py-1">
-                <Crown className="w-3 h-3 mr-1" />
-                Most Popular
-              </Badge>
-            </div>
-          )}
+        <Card className="relative">
+
           <CardHeader>
-            <CardTitle className="text-2xl">{plans.starter.name}</CardTitle>
+            <div className="flex items-center justify-between mb-1">
+              <CardTitle className="text-2xl">{plans.starter.name}</CardTitle>
+              <div className="relative group">
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-amber-400 to-orange-500 rounded-full blur opacity-30 group-hover:opacity-60 transition duration-200"></div>
+                <Badge className="relative bg-white dark:bg-gray-900 text-orange-600 dark:text-amber-400 border border-orange-200 dark:border-amber-800/60 shadow-sm font-bold uppercase tracking-wider text-[10px] px-2.5 py-0.5 flex items-center gap-1">
+                  <Zap className="w-3 h-3 fill-orange-500 dark:fill-amber-500 text-orange-500 dark:text-amber-500" />
+                  Early Access
+                </Badge>
+              </div>
+            </div>
             <div className="mb-2">
               {billingCycle === "monthly" ? (
                 <div className="flex items-baseline gap-1">
@@ -283,15 +292,24 @@ export default function PricingContent() {
         </Card>
 
         {/* Pro Plan */}
-        <Card className="relative border-2 border-purple-500 shadow-xl">
+        <Card className="relative border-2 border-blue-500 shadow-xl">
           <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-            <Badge className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-1">
-              <Sparkles className="w-3 h-3 mr-1" />
-              Best Value
+            <Badge className="bg-blue-500 text-white px-4 py-1">
+              <Crown className="w-3 h-3 mr-1" />
+              Most Popular
             </Badge>
           </div>
           <CardHeader>
-            <CardTitle className="text-2xl">{plans.pro.name}</CardTitle>
+            <div className="flex items-center justify-between mb-1">
+              <CardTitle className="text-2xl">{plans.pro.name}</CardTitle>
+              <div className="relative group">
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-amber-400 to-orange-500 rounded-full blur opacity-30 group-hover:opacity-60 transition duration-200"></div>
+                <Badge className="relative bg-white dark:bg-gray-900 text-orange-600 dark:text-amber-400 border border-orange-200 dark:border-amber-800/60 shadow-sm font-bold uppercase tracking-wider text-[10px] px-2.5 py-0.5 flex items-center gap-1">
+                  <Zap className="w-3 h-3 fill-orange-500 dark:fill-amber-500 text-orange-500 dark:text-amber-500" />
+                  Early Access
+                </Badge>
+              </div>
+            </div>
             <div className="mb-2">
               {billingCycle === "monthly" ? (
                 <div className="flex items-baseline gap-1">
@@ -316,7 +334,7 @@ export default function PricingContent() {
             {currentPlan === "free" ? (
               <div className="space-y-2 mb-6">
                 <Button
-                  className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                  className="w-full bg-blue-600 hover:bg-blue-700"
                   onClick={() => handleUpgrade("pro", billingCycle, false)}
                   disabled={loading}
                 >
@@ -333,7 +351,7 @@ export default function PricingContent() {
               </div>
             ) : currentPlan === "starter" ? (
               <Button
-                className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 mb-6"
+                className="w-full bg-blue-600 hover:bg-blue-700 mb-6"
                 onClick={() => handleUpgrade("pro", billingCycle, false)}
                 disabled={loading}
               >
@@ -348,12 +366,12 @@ export default function PricingContent() {
               {plans.pro.features.map((feature, idx) => (
                 <div key={idx} className="flex items-start gap-3">
                   {feature.included ? (
-                    <Check className={`w-5 h-5 flex-shrink-0 mt-0.5 ${feature.highlight ? "text-purple-500" : "text-green-500"}`} />
+                    <Check className={`w-5 h-5 flex-shrink-0 mt-0.5 ${feature.highlight ? "text-blue-500" : "text-green-500"}`} />
                   ) : (
                     <X className="w-5 h-5 text-gray-300 flex-shrink-0 mt-0.5" />
                   )}
                   <div className="flex-1">
-                    <span className={`${feature.bold ? "font-bold text-gray-900 dark:text-white" : feature.highlight ? "font-semibold text-purple-600 dark:text-purple-400" : "text-gray-700 dark:text-gray-300"}`}>
+                    <span className={`${feature.bold ? "font-bold text-gray-900 dark:text-white" : feature.highlight ? "font-semibold text-blue-600 dark:text-blue-400" : "text-gray-700 dark:text-gray-300"}`}>
                       {feature.text}
                     </span>
                     {feature.subtext && (

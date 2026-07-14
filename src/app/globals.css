@@ -54,7 +54,7 @@
 @layer base {
   :root {
     /* 60% - Main Content & Background (Canny uses clean, breathable surfaces) */
-    --background: 171 27% 96%;        /* Lightest Mint (#f1f8f7) */
+    --background: 0 0% 99%;        /* Clean white (#fdfdfd) */
     --foreground: 174 43% 12%;        /* Deepest Teal for text readability */
 
     --card: 0 0% 100%;                /* Pure White for posts/cards */
