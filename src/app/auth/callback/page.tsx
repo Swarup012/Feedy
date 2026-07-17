@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import axios from 'axios';
 import { getPublicReturnUrl, clearReturnUrl } from '@/lib/returnUrl';
+import { TokenManager } from '@/lib/tokenManager';
 
 export default function AuthCallback() {
   const router = useRouter();
@@ -47,8 +48,9 @@ export default function AuthCallback() {
         }
 
         // Send to backend with Supabase access token for verification
+        // Use relative URL to go through Next.js proxy so HttpOnly cookies are set correctly
         const response = await axios.post(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/auth/google`,
+          `/api/auth/google`,
           {
             email: user.email,
             name: user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0],
@@ -72,13 +74,12 @@ export default function AuthCallback() {
         });
 
         if (token) {
-          // Store the backend JWT token
-          // TokenManager expects 'access_token' but we also keep 'token' for backwards compatibility
+          // Store the backend JWT token for fallback
           localStorage.setItem('access_token', token);
           localStorage.setItem('token', token);
-          localStorage.setItem('user', JSON.stringify(backendUser));
+          TokenManager.setUser(backendUser); // Store in cache for instant UI
 
-          console.log('✅ Token stored in localStorage (both access_token and token)');
+          console.log('✅ Token stored in localStorage, User stored in cache');
 
           // 🔑 Dispatch event to trigger AuthContext re-check
           // This fixes the race condition where AuthContext doesn't re-run checkAuth() after redirect

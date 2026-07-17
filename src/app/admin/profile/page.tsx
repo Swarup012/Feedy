@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
+import { useOrganization } from "@/context/OrganizationContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,6 +21,7 @@ import {
   CreditCard, ExternalLink, ChevronRight, Bell, AlertTriangle, Lock, Check
 } from "lucide-react";
 import { RoleSelectionModal } from "@/components/RoleSelectionModal";
+import { IconDisplay } from "@/components/ui/icon-picker";
 import gsap from "gsap";
 
 export default function ProfilePage() {
@@ -32,6 +34,7 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [showRoleModal, setShowRoleModal] = useState(false);
+  const { organizationRole } = useOrganization();
   
   const mainContentRef = useRef(null);
 
@@ -183,8 +186,8 @@ export default function ProfilePage() {
                   
                   <div className="text-center">
                     <h2 className="font-bold text-lg text-slate-900 dark:text-white">{user.name}</h2>
-                    <Badge variant="secondary" className="mt-1.5 text-xs font-semibold bg-slate-100 dark:bg-gray-800 text-slate-600 dark:text-gray-300">
-                      {user.job_role?.replace('_', ' ') || 'New Member'}
+                    <Badge variant="secondary" className="mt-1.5 text-xs font-semibold bg-slate-100 dark:bg-gray-800 text-slate-600 dark:text-gray-300 capitalize">
+                      {user.job_role_name || user.job_role?.replace('_', ' ') || 'New Member'}
                     </Badge>
                   </div>
                 </div>
@@ -338,26 +341,28 @@ export default function ProfilePage() {
                   <div className="flex items-center justify-between p-5 rounded-xl border-2 border-slate-100 dark:border-border bg-white dark:bg-gray-800 hover:border-blue-200 dark:hover:border-blue-800 transition-all group">
                     <div className="flex items-center gap-4">
                       <div className="p-3 bg-blue-600 text-white rounded-xl shadow-md">
-                        {user.job_role === 'developer' ? <Code size={24} /> : <Briefcase size={24} />}
+                        <IconDisplay iconName={user.job_role_icon || "UserCircle"} className="h-6 w-6" />
                       </div>
                       <div>
                         <p className="text-base font-bold text-slate-900 dark:text-white capitalize">
-                          {user.job_role?.replace('_', ' ') || 'Not specified'}
+                          {user.job_role_name || user.job_role?.replace('_', ' ') || 'Not specified'}
                         </p>
                         <p className="text-sm text-slate-500 dark:text-gray-400">
                           {user.job_role ? 'Current role' : 'Select your professional role'}
                         </p>
                       </div>
                     </div>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={() => setShowRoleModal(true)}
-                      className="gap-2 hover:bg-blue-50 dark:hover:bg-blue-950 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-300 dark:hover:border-blue-700 transition-all"
-                    >
-                      Change Role
-                      <ChevronRight size={16} />
-                    </Button>
+                    {(organizationRole === 'admin' || organizationRole === 'owner') && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setShowRoleModal(true)}
+                        className="gap-2 hover:bg-blue-50 dark:hover:bg-blue-950 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-300 dark:hover:border-blue-700 transition-all"
+                      >
+                        Change Role
+                        <ChevronRight size={16} />
+                      </Button>
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -474,16 +479,20 @@ export default function ProfilePage() {
       </div>
       </div>
 
-      <RoleSelectionModal
-        open={showRoleModal}
-        isNewOrganization={false}
-        isChangingRole={!!user.job_role}
-        onComplete={async () => {
-          setShowRoleModal(false);
-          await refreshUser();
-          toast({ title: "Updated", description: "Role updated successfully." });
-        }}
-      />
+      {/* Role Selection Modal — admin/owner only */}
+      {(organizationRole === 'admin' || organizationRole === 'owner') && (
+        <RoleSelectionModal
+          open={showRoleModal}
+          isNewOrganization={false}
+          isChangingRole={!!user?.job_role}
+          onComplete={async () => {
+            setShowRoleModal(false);
+            await refreshUser();
+            toast({ title: "Updated", description: "Role updated successfully." });
+          }}
+        />
+      )}
     </div>
   );
 }
+

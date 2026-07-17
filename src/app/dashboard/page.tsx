@@ -162,35 +162,7 @@ export default function DashboardPage() {
     return user?.email?.[0]?.toUpperCase() || 'U';
   };
 
-  const getJobRoleInfo = () => {
-    const jobRole = user?.job_role;
-    
-    switch (jobRole) {
-      case 'product_manager':
-        return { label: 'Product Manager', icon: <Briefcase className="h-5 w-5" /> };
-      case 'founder':
-        return { label: 'Founder / CEO', icon: <Rocket className="h-5 w-5" /> };
-      case 'designer':
-        return { label: 'Designer', icon: <Palette className="h-5 w-5" /> };
-      case 'developer':
-        return { label: 'Developer', icon: <Code className="h-5 w-5" /> };
-      case 'marketer':
-        return { label: 'Marketer', icon: <TrendingUp className="h-5 w-5" /> };
-      case 'other':
-        return { label: 'Other', icon: <UserCircle className="h-5 w-5" /> };
-      default:
-        return { label: 'Not Set', icon: <UserCircle className="h-5 w-5" /> };
-    }
-  };
 
-  const handleRoleModalComplete = async () => {
-    setShowRoleModal(false);
-    await refreshUser();
-    toast({
-      title: "Success!",
-      description: "Your job role has been updated",
-    });
-  };
 
   return (
     <ProtectedRoute allowedRoles={["owner", "admin", "member", "user"]}>
@@ -391,20 +363,22 @@ export default function DashboardPage() {
                   <div className="flex items-center justify-between p-4 border rounded-lg bg-gray-50">
                     <div className="flex items-center gap-3">
                       <div className="p-3 rounded-full bg-blue-100 text-blue-600">
-                        {getJobRoleInfo().icon}
+                        <IconDisplay iconName={user?.job_role_icon || "UserCircle"} className="h-5 w-5" />
                       </div>
                       <div>
                         <p className="text-sm text-gray-600">Job Role</p>
-                        <p className="font-semibold text-lg">{getJobRoleInfo().label}</p>
+                        <p className="font-semibold text-lg">{user?.job_role_name || user?.job_role?.replace('_', ' ') || "Not Set"}</p>
                       </div>
                     </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setShowRoleModal(true)}
-                    >
-                      {user?.job_role ? 'Change Role' : 'Set Role'}
-                    </Button>
+                    {(organizationRole === 'admin' || organizationRole === 'owner') && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setShowRoleModal(true)}
+                      >
+                        Change Role
+                      </Button>
+                    )}
                   </div>
                   <p className="text-xs text-gray-500 mt-3">
                     Your job role helps us personalize your experience and show relevant content
@@ -731,14 +705,20 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Role Selection Modal */}
-      <RoleSelectionModal
-        open={showRoleModal}
-        organizationId={organization?.id}
-        organizationName={organization?.name}
-        isChangingRole={true}
-        onComplete={handleRoleModalComplete}
-      />
+      {/* Role Selection Modal — admin/owner only */}
+      {(organizationRole === 'admin' || organizationRole === 'owner') && (
+        <RoleSelectionModal
+          open={showRoleModal}
+          organizationId={organization?.id}
+          organizationName={organization?.name}
+          isChangingRole={true}
+          onComplete={async () => {
+            setShowRoleModal(false);
+            await refreshUser();
+            toast({ title: "Success!", description: "Job role updated." });
+          }}
+        />
+      )}
     </ProtectedRoute>
   );
 }

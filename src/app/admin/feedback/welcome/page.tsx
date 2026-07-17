@@ -20,6 +20,8 @@ import { useToast } from "@/hooks/use-toast";
 import { boardService, BoardCategory } from "@/services/boardService";
 import { IconPicker, IconDisplay } from "@/components/ui/icon-picker";
 import { UpgradeDialog } from "@/components/UpgradeDialog";
+import { useOrganization } from "@/context/OrganizationContext";
+import { useJobRoles } from "@/hooks/useJobRoles";
 import { 
   Sparkles, 
   MessageSquare, 
@@ -36,10 +38,6 @@ import {
   Globe,
   Lock,
   Check,
-  Briefcase,
-  Palette,
-  Code,
-  User
 } from "lucide-react";
 
 // Predefined board colors
@@ -56,19 +54,12 @@ const BOARD_COLORS = [
   { name: "Gray", value: "#6b7280" },
 ];
 
-// Job roles for targeting
-const JOB_ROLES = [
-  { value: "product_manager", label: "Product Manager", icon: "Briefcase" },
-  { value: "founder", label: "Founder / CEO", icon: "Rocket" },
-  { value: "designer", label: "Designer", icon: "Palette" },
-  { value: "developer", label: "Developer", icon: "Code" },
-  { value: "marketer", label: "Marketer", icon: "TrendingUp" },
-  { value: "other", label: "Other", icon: "User" },
-];
 
 export default function FirstBoardWelcomePage() {
   const router = useRouter();
   const { toast } = useToast();
+  const { organization } = useOrganization();
+  const { roles: jobRoles, loading: rolesLoading } = useJobRoles(organization?.id);
   const [step, setStep] = useState<"welcome" | "create">("welcome");
   const [loading, setLoading] = useState(false);
   const [loadingCategories, setLoadingCategories] = useState(false);
@@ -452,26 +443,30 @@ export default function FirstBoardWelcomePage() {
                     Select which job roles can see this board. Leave empty for all team members.
                   </p>
                   <div className="grid grid-cols-2 gap-3">
-                    {JOB_ROLES.map((role) => (
-                      <div
-                        key={role.value}
-                        className="flex items-center space-x-2 border rounded-lg p-3 hover:bg-gray-50 dark:hover:bg-gray-800"
-                      >
-                        <Checkbox
-                          id={role.value}
-                          checked={formData.visible_to_roles.includes(role.value)}
-                          onCheckedChange={() => handleRoleToggle(role.value)}
-                          disabled={loading}
-                        />
-                        <label
-                          htmlFor={role.value}
-                          className="flex items-center gap-2 cursor-pointer flex-1"
+                    {rolesLoading ? (
+                      <p className="text-sm text-gray-500 col-span-2">Loading roles...</p>
+                    ) : (
+                      jobRoles.map((role) => (
+                        <div
+                          key={role.key}
+                          className="flex items-center space-x-2 border rounded-lg p-3 hover:bg-gray-50 dark:hover:bg-gray-800"
                         >
-                          <IconDisplay iconName={role.icon} className="h-4 w-4 text-gray-600" />
-                          <span className="text-sm font-medium">{role.label}</span>
-                        </label>
-                      </div>
-                    ))}
+                          <Checkbox
+                            id={`step1-${role.key}`}
+                            checked={formData.visible_to_roles.includes(role.key)}
+                            onCheckedChange={() => handleRoleToggle(role.key)}
+                            disabled={loading}
+                          />
+                          <label
+                            htmlFor={`step1-${role.key}`}
+                            className="flex items-center gap-2 cursor-pointer flex-1"
+                          >
+                            <IconDisplay iconName={role.icon} className="h-4 w-4 text-gray-600" />
+                            <span className="text-sm font-medium">{role.name}</span>
+                          </label>
+                        </div>
+                      ))
+                    )}
                   </div>
                   {formData.visible_to_roles.length > 0 && (
                     <div className="flex items-center gap-2 p-2 bg-blue-50 border border-blue-200 rounded-lg">
@@ -751,26 +746,30 @@ export default function FirstBoardWelcomePage() {
                     Select which job roles can see this board. Leave empty for all team members.
                   </p>
                   <div className="grid grid-cols-2 gap-3">
-                    {JOB_ROLES.map((role) => (
-                      <div
-                        key={role.value}
-                        className="flex items-center space-x-2 border rounded-lg p-3 hover:bg-gray-50 dark:hover:bg-gray-800"
-                      >
-                        <Checkbox
-                          id={role.value}
-                          checked={formData.visible_to_roles.includes(role.value)}
-                          onCheckedChange={() => handleRoleToggle(role.value)}
-                          disabled={loading}
-                        />
-                        <label
-                          htmlFor={role.value}
-                          className="flex items-center gap-2 cursor-pointer flex-1"
+                    {rolesLoading ? (
+                      <p className="text-sm text-gray-500 col-span-2">Loading roles...</p>
+                    ) : (
+                      jobRoles.map((role) => (
+                        <div
+                          key={role.key}
+                          className="flex items-center space-x-2 border rounded-lg p-3 hover:bg-gray-50 dark:hover:bg-gray-800"
                         >
-                          <IconDisplay iconName={role.icon} className="h-4 w-4 text-gray-600" />
-                          <span className="text-sm font-medium">{role.label}</span>
-                        </label>
-                      </div>
-                    ))}
+                          <Checkbox
+                            id={`step2-${role.key}`}
+                            checked={formData.visible_to_roles.includes(role.key)}
+                            onCheckedChange={() => handleRoleToggle(role.key)}
+                            disabled={loading}
+                          />
+                          <label
+                            htmlFor={`step2-${role.key}`}
+                            className="flex items-center gap-2 cursor-pointer flex-1"
+                          >
+                            <IconDisplay iconName={role.icon} className="h-4 w-4 text-gray-600" />
+                            <span className="text-sm font-medium">{role.name}</span>
+                          </label>
+                        </div>
+                      ))
+                    )}
                   </div>
                   {formData.visible_to_roles.length > 0 && (
                     <div className="flex items-center gap-2 p-2 bg-blue-50 border border-blue-200 rounded-lg">

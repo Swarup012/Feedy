@@ -7,6 +7,8 @@ export interface User {
   current_organization_id?: string;
   organization_role?: string;
   job_role?: string;
+  job_role_name?: string;
+  job_role_icon?: string;
   organization_id?: string; // alias for backward compat
   avatar_url?: string;
   created_at: string;

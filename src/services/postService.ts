@@ -18,6 +18,7 @@ export interface Post {
   comment_count: number;
   is_pinned: boolean;
   is_archived: boolean;
+  category?: string; // ✅ Add category
   images?: string[]; // ✅ Add images array
   created_at: string;
   updated_at: string;
@@ -146,7 +147,7 @@ export const postService = {
   // Create post
   async createPost(
     boardSlug: string,
-    data: { title: string; description?: string; images?: string[] },
+    data: { title: string; description?: string; images?: string[]; category?: string },
   ): Promise<{ success: boolean; data: { post: Post } }> {
     const response = await api.post(`/api/boards/${boardSlug}/posts`, data);
     return response.data;

@@ -11,57 +11,11 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Check, Loader2, Briefcase, Rocket, Palette, Code, TrendingUp, UserCircle } from "lucide-react";
+import { Check, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import api from "@/lib/api";
-
-export type Role = "product_manager" | "founder" | "designer" | "developer" | "marketer" | "other";
-
-interface RoleOption {
-  value: Role;
-  label: string;
-  description: string;
-  icon: React.ReactNode;
-}
-
-const roleOptions: RoleOption[] = [
-  {
-    value: "product_manager",
-    label: "Product Manager",
-    description: "I manage product development and roadmaps",
-    icon: <Briefcase className="h-6 w-6" />,
-  },
-  {
-    value: "founder",
-    label: "Founder / CEO",
-    description: "I lead the company and make strategic decisions",
-    icon: <Rocket className="h-6 w-6" />,
-  },
-  {
-    value: "designer",
-    label: "Designer",
-    description: "I design user experiences and interfaces",
-    icon: <Palette className="h-6 w-6" />,
-  },
-  {
-    value: "developer",
-    label: "Developer",
-    description: "I build and maintain software products",
-    icon: <Code className="h-6 w-6" />,
-  },
-  {
-    value: "marketer",
-    label: "Marketer",
-    description: "I handle marketing and growth strategies",
-    icon: <TrendingUp className="h-6 w-6" />,
-  },
-  {
-    value: "other",
-    label: "Other",
-    description: "I have a different role",
-    icon: <UserCircle className="h-6 w-6" />,
-  },
-];
+import { useJobRoles } from "@/hooks/useJobRoles";
+import { IconDisplay } from "@/components/ui/icon-picker";
 
 interface RoleSelectionModalProps {
   open: boolean;
@@ -80,7 +34,8 @@ export function RoleSelectionModal({
   isChangingRole = false,
   onComplete,
 }: RoleSelectionModalProps) {
-  const [selectedRole, setSelectedRole] = useState<Role | null>(null);
+  const [selectedRole, setSelectedRole] = useState<string | null>(null);
+  const { roles: jobRoles, loading: rolesLoading } = useJobRoles(organizationId);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
@@ -177,36 +132,39 @@ export function RoleSelectionModal({
         </DialogHeader>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 py-4">
-          {roleOptions.map((option) => (
-            <Card
-              key={option.value}
-              className={`p-4 cursor-pointer transition-all hover:shadow-md border-2 ${
-                selectedRole === option.value
-                  ? "border-primary bg-primary/5"
-                  : "border-gray-200 hover:border-gray-300"
-              }`}
-              onClick={() => setSelectedRole(option.value)}
-            >
-              <div className="flex items-start gap-3">
-                <div className={`p-2 rounded-lg ${
-                  selectedRole === option.value 
-                    ? "bg-primary text-primary-foreground" 
-                    : "bg-gray-100 text-gray-600"
-                }`}>
-                  {option.icon}
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-semibold text-base">{option.label}</h3>
-                    {selectedRole === option.value && (
-                      <Check className="h-5 w-5 text-primary" />
-                    )}
+          {rolesLoading ? (
+            <p className="text-center text-sm text-gray-500 col-span-2 py-8">Loading roles...</p>
+          ) : (
+            jobRoles.map((option) => (
+              <Card
+                key={option.key}
+                className={`p-4 cursor-pointer transition-all hover:shadow-md border-2 ${
+                  selectedRole === option.key
+                    ? "border-primary bg-primary/5"
+                    : "border-gray-200 hover:border-gray-300"
+                }`}
+                onClick={() => setSelectedRole(option.key)}
+              >
+                <div className="flex items-start gap-3">
+                  <div className={`p-2 rounded-lg ${
+                    selectedRole === option.key 
+                      ? "bg-primary text-primary-foreground" 
+                      : "bg-gray-100 text-gray-600"
+                  }`}>
+                    <IconDisplay iconName={option.icon} className="h-6 w-6" />
                   </div>
-                  <p className="text-sm text-gray-600 mt-1">{option.description}</p>
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-semibold text-base">{option.name}</h3>
+                      {selectedRole === option.key && (
+                        <Check className="h-5 w-5 text-primary" />
+                      )}
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </Card>
-          ))}
+              </Card>
+            ))
+          )}
         </div>
 
         <div className="flex flex-col gap-3 pt-4">

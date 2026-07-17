@@ -23,6 +23,8 @@ import {
 import { invitationService } from '@/services/invitationService';
 import { Mail, UserPlus, Loader2 } from 'lucide-react';
 import { UpgradeDialog } from '@/components/UpgradeDialog';
+import { useJobRoles } from '@/hooks/useJobRoles';
+import { IconDisplay } from '@/components/ui/icon-picker';
 
 interface InviteMemberModalProps {
   open: boolean;
@@ -41,6 +43,8 @@ export function InviteMemberModal({
 }: InviteMemberModalProps) {
   const [email, setEmail] = useState('');
   const [role, setRole] = useState<'member' | 'admin'>('member');
+  const [jobRole, setJobRole] = useState('other');
+  const { roles: jobRoles, loading: rolesLoading } = useJobRoles(organizationId);
   const [loading, setLoading] = useState(false);
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
   const { toast } = useToast();
@@ -71,7 +75,7 @@ export function InviteMemberModal({
     setLoading(true);
 
     try {
-      await invitationService.createInvitation(organizationId, email, role);
+      await invitationService.createInvitation(organizationId, email, role, jobRole);
 
       toast({
         title: 'Invitation sent! 📧',
@@ -81,6 +85,7 @@ export function InviteMemberModal({
       // Reset form and close modal
       setEmail('');
       setRole('member');
+      setJobRole('other');
       onClose();
 
       // Refresh invitations list
@@ -169,6 +174,29 @@ export function InviteMemberModal({
               </Select>
               <p className="text-xs text-gray-500">
                 You can change their role later from the members page.
+              </p>
+            </div>
+
+            {/* Job Role Selection */}
+            <div className="space-y-2">
+              <Label htmlFor="jobRole">Job Role (Optional)</Label>
+              <Select value={jobRole} onValueChange={setJobRole} disabled={loading || rolesLoading}>
+                <SelectTrigger id="jobRole">
+                  <SelectValue placeholder="Select a job role" />
+                </SelectTrigger>
+                <SelectContent>
+                  {jobRoles.map((roleOpt) => (
+                    <SelectItem key={roleOpt.key} value={roleOpt.key}>
+                      <div className="flex items-center gap-2">
+                        <IconDisplay iconName={roleOpt.icon} className="h-4 w-4 text-gray-500" />
+                        <span>{roleOpt.name}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-gray-500">
+                Assign a professional job role to this member.
               </p>
             </div>
           </div>

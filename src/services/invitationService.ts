@@ -39,10 +39,11 @@ class InvitationService {
   /**
    * Create a new invitation
    */
-  async createInvitation(organizationId: string, email: string, role: 'member' | 'admin' = 'member') {
+  async createInvitation(organizationId: string, email: string, role: 'member' | 'admin' = 'member', jobRole: string = 'other') {
     const response = await api.post(`/api/organizations/${organizationId}/invites`, {
       email,
       role,
+      jobRole,
     });
     return response.data;
   }

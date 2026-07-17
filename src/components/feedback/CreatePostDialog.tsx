@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -13,7 +13,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, Paperclip, X } from "lucide-react";
+import { Loader2, Paperclip, X, Sparkles } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { boardService, BoardCategory } from "@/services/boardService";
 import { postService, Post } from "@/services/postService";
 import { useToast } from "@/hooks/use-toast";
 import { TokenManager } from "@/lib/tokenManager";
@@ -38,8 +46,28 @@ export function CreatePostDialog({
   const [formData, setFormData] = useState({
     title: "",
     description: "",
+    category: "",
     images: [] as string[],
   });
+  const [customCategory, setCustomCategory] = useState("");
+  const [showCustomCategory, setShowCustomCategory] = useState(false);
+
+  const predefinedCategories = [
+    { id: "1", name: "Feature Request" },
+    { id: "2", name: "Bug Report" },
+    { id: "3", name: "General Feedback" }
+  ];
+
+  // Handle category selection
+  const handleCategoryChange = (value: string) => {
+    if (value === "custom") {
+      setShowCustomCategory(true);
+      setFormData({ ...formData, category: "" });
+    } else {
+      setShowCustomCategory(false);
+      setFormData({ ...formData, category: value });
+    }
+  };
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   // Validate form
@@ -70,14 +98,24 @@ export function CreatePostDialog({
       return;
     }
 
+    const finalCategory =
+      showCustomCategory && customCategory.trim()
+        ? customCategory.trim()
+        : formData.category || undefined;
+
     try {
       setCreating(true);
-      const response = await postService.createPost(boardSlug, formData);
+      const response = await postService.createPost(boardSlug, {
+        ...formData,
+        category: finalCategory,
+      });
 
       onPostCreated(response.data.post);
 
       // Reset form
-      setFormData({ title: "", description: "", images: [] });
+      setFormData({ title: "", description: "", category: "", images: [] });
+      setCustomCategory("");
+      setShowCustomCategory(false);
       setErrors({});
     } catch (error: any) {
       toast({
@@ -194,6 +232,48 @@ export function CreatePostDialog({
               <p className="text-xs text-gray-500">
                 {formData.title.length}/500 characters
               </p>
+            </div>
+
+            {/* ✅ CATEGORY SELECTION */}
+            <div className="space-y-2">
+              <Label htmlFor="category">
+                Category{" "}
+                <span className="text-gray-500 text-sm font-normal">
+                  (optional)
+                </span>
+              </Label>
+              <Select
+                value={showCustomCategory ? "custom" : formData.category}
+                onValueChange={handleCategoryChange}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a category" />
+                </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="null">No Category</SelectItem>
+                      {predefinedCategories.map((category) => (
+                        <SelectItem key={category.id} value={category.name}>
+                          <span>{category.name}</span>
+                        </SelectItem>
+                      ))}
+                      <SelectItem value="custom">
+                        <div className="flex items-center gap-2">
+                          <Sparkles className="h-4 w-4" />
+                          <span>Custom Category</span>
+                        </div>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+
+              {/* Custom Category Input */}
+              {showCustomCategory && (
+                <Input
+                  placeholder="Enter custom category"
+                  value={customCategory}
+                  onChange={(e) => setCustomCategory(e.target.value)}
+                  maxLength={100}
+                />
+              )}
             </div>
 
             {/* Description */}

@@ -30,10 +30,12 @@ import {
   CreditCard,
   Globe,
   Code,
+  Briefcase,
 } from 'lucide-react';
 import { OrganizationSkeleton, MembersTableSkeleton } from '@/components/admin/OrganizationSkeleton';
 import { InviteMemberModal } from '@/components/organization/InviteMemberModal';
 import { PendingInvitations } from '@/components/organization/PendingInvitations';
+import { JobRolesTab } from '@/components/organization/JobRolesTab';
 import dynamic from 'next/dynamic';
 const WebhooksPage = dynamic(() => import('@/app/admin/webhooks/page'), { ssr: false });
 const WidgetsPage = dynamic(() => import('@/app/admin/widgets/page'), { ssr: false });
@@ -350,6 +352,15 @@ export default function OrganizationSettingsPage() {
             <span className="text-gray-700 dark:text-gray-300">Members ({members.length})</span>
           </button>
           <button
+            onClick={() => setActiveTab('roles')}
+            className={`w-full flex items-center gap-3 px-3 py-2 rounded-md transition-colors text-left text-sm ${
+              activeTab === 'roles' ? 'bg-gray-100 dark:bg-gray-800' : 'hover:bg-gray-50 dark:hover:bg-gray-800'
+            }`}
+          >
+            <Briefcase className="h-4 w-4 text-gray-500" />
+            <span className="text-gray-700 dark:text-gray-300">Job Roles</span>
+          </button>
+          <button
             onClick={() => setActiveTab('subdomain')}
             className={`w-full flex items-center gap-3 px-3 py-2 rounded-md transition-colors text-left text-sm ${
               activeTab === 'subdomain' ? 'bg-gray-100 dark:bg-gray-800' : 'hover:bg-gray-50 dark:hover:bg-gray-800'
@@ -403,6 +414,7 @@ export default function OrganizationSettingsPage() {
               <TabsList>
                 <TabsTrigger value="general" id="tab-general">General</TabsTrigger>
                 <TabsTrigger value="members" id="tab-members">Members</TabsTrigger>
+                <TabsTrigger value="roles" id="tab-roles">Job Roles</TabsTrigger>
                 <TabsTrigger value="subdomain" id="tab-subdomain">Subdomain</TabsTrigger>
                 <TabsTrigger value="webhooks" id="tab-webhooks">Webhooks</TabsTrigger>
                 <TabsTrigger value="widgets" id="tab-widgets">Widgets</TabsTrigger>
@@ -635,6 +647,11 @@ export default function OrganizationSettingsPage() {
         {/* Widgets Tab */}
         <TabsContent value="widgets">
           <WidgetsPage />
+        </TabsContent>
+
+        {/* Job Roles Tab */}
+        <TabsContent value="roles">
+          <JobRolesTab />
         </TabsContent>
 
         {/* Billing Tab */}

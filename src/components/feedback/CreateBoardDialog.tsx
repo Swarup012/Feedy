@@ -21,12 +21,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2, Check, Lock, Globe, Sparkles, Users, Briefcase, Rocket, Palette, Code, TrendingUp, User } from "lucide-react";
+import { Loader2, Check, Lock, Globe, Sparkles, Users } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { boardService, Board, BoardCategory } from "@/services/boardService";
 import { useToast } from "@/hooks/use-toast";
 import { IconPicker, IconDisplay } from "@/components/ui/icon-picker";
 import { UpgradeDialog } from "@/components/UpgradeDialog";
+import { useOrganization } from "@/context/OrganizationContext";
+import { useJobRoles } from "@/hooks/useJobRoles";
 
 interface CreateBoardDialogProps {
   open: boolean;
@@ -48,15 +50,6 @@ const BOARD_COLORS = [
   { name: "Gray", value: "#6b7280" },
 ];
 
-// Job roles for targeting with Lucide icons
-const JOB_ROLES = [
-  { value: "product_manager", label: "Product Manager", icon: "Briefcase" },
-  { value: "founder", label: "Founder / CEO", icon: "Rocket" },
-  { value: "designer", label: "Designer", icon: "Palette" },
-  { value: "developer", label: "Developer", icon: "Code" },
-  { value: "marketer", label: "Marketer", icon: "TrendingUp" },
-  { value: "other", label: "Other", icon: "User" },
-];
 
 export function CreateBoardDialog({
   open,
@@ -64,9 +57,9 @@ export function CreateBoardDialog({
   onBoardCreated,
 }: CreateBoardDialogProps) {
   const { toast } = useToast();
+  const { organization } = useOrganization();
+  const { roles: jobRoles, loading: rolesLoading } = useJobRoles(organization?.id);
   const [creating, setCreating] = useState(false);
-  const [loadingCategories, setLoadingCategories] = useState(false);
-  const [categories, setCategories] = useState<BoardCategory[]>([]);
   const [customCategory, setCustomCategory] = useState("");
   const [showCustomCategory, setShowCustomCategory] = useState(false);
   const [showIconPicker, setShowIconPicker] = useState(false); // Icon picker state
@@ -77,7 +70,6 @@ export function CreateBoardDialog({
     name: "",
     description: "",
     is_private: false,
-    category: "", // ✅ ADD CATEGORY
     color: "#6366f1",
     icon: "Lightbulb", // Default to Lucide icon name
     visible_to_roles: [] as string[], // ✅ ADD JOB ROLES FILTER
@@ -87,75 +79,7 @@ export function CreateBoardDialog({
   const [slugAvailable, setSlugAvailable] = useState<boolean | null>(null);
   const [checkingSlug, setCheckingSlug] = useState(false);
 
-  // ✅ Fetch categories when dialog opens
-  useEffect(() => {
-    if (open) {
-      fetchCategories();
-    }
-  }, [open]);
 
-  const fetchCategories = async () => {
-    try {
-      setLoadingCategories(true);
-      const response = await boardService.getCategories();
-      setCategories(response.data.categories);
-    } catch (error) {
-      console.error("Error fetching categories:", error);
-      // Use default categories if API fails
-      setCategories([
-        {
-          id: "1",
-          name: "Feature Requests",
-          slug: "feature-requests",
-          icon: "💡",
-          color: "#6366f1",
-          description: "",
-        },
-        {
-          id: "2",
-          name: "Bug Reports",
-          slug: "bug-reports",
-          icon: "🐛",
-          color: "#ef4444",
-          description: "",
-        },
-        {
-          id: "3",
-          name: "General Feedback",
-          slug: "general-feedback",
-          icon: "💬",
-          color: "#10b981",
-          description: "",
-        },
-        {
-          id: "4",
-          name: "Questions",
-          slug: "questions",
-          icon: "❓",
-          color: "#f59e0b",
-          description: "",
-        },
-        {
-          id: "5",
-          name: "Ideas",
-          slug: "ideas",
-          icon: "💭",
-          color: "#ec4899",
-          description: "",
-        },
-        {
-          id: "6",
-          name: "Support",
-          slug: "support",
-          icon: "🆘",
-          color: "#14b8a6",
-          description: "",
-        },
-      ]);
-    } finally {
-      setLoadingCategories(false);
-    }
-  };
 
   // Generate slug from name
   useEffect(() => {
@@ -193,27 +117,7 @@ export function CreateBoardDialog({
     }
   };
 
-  // Handle category selection
-  const handleCategoryChange = (value: string) => {
-    if (value === "custom") {
-      setShowCustomCategory(true);
-      setFormData({ ...formData, category: "" });
-    } else {
-      setShowCustomCategory(false);
-      setFormData({ ...formData, category: value });
 
-      // Auto-set icon and color based on category
-      const selectedCategory = categories.find((c) => c.name === value);
-      if (selectedCategory) {
-        setFormData((prev) => ({
-          ...prev,
-          category: value,
-          icon: selectedCategory.icon,
-          color: selectedCategory.color,
-        }));
-      }
-    }
-  };
 
   // Handle role selection
   const handleRoleToggle = (roleValue: string) => {
@@ -256,18 +160,9 @@ export function CreateBoardDialog({
       return;
     }
 
-    // Use custom category if provided
-    const finalCategory =
-      showCustomCategory && customCategory.trim()
-        ? customCategory.trim()
-        : formData.category || "General";
-
     try {
       setCreating(true);
-      const response = await boardService.createBoard({
-        ...formData,
-        category: finalCategory, // ✅ SEND CATEGORY
-      });
+      const response = await boardService.createBoard(formData);
 
       toast({
         title: "Success!",
@@ -281,13 +176,10 @@ export function CreateBoardDialog({
         name: "",
         description: "",
         is_private: false,
-        category: "",
         color: "#6366f1",
         icon: "💡",
         visible_to_roles: [],
       });
-      setCustomCategory("");
-      setShowCustomCategory(false);
 
       onOpenChange(false);
     } catch (error: any) {
@@ -361,58 +253,7 @@ export function CreateBoardDialog({
               )}
             </div>
 
-            {/* ✅ CATEGORY SELECTION */}
-            <div className="space-y-2">
-              <Label htmlFor="category">
-                Category{" "}
-                <span className="text-gray-500 text-sm font-normal">
-                  (optional)
-                </span>
-              </Label>
-              {loadingCategories ? (
-                <div className="flex items-center justify-center py-4">
-                  <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
-                </div>
-              ) : (
-                <>
-                  <Select
-                    value={showCustomCategory ? "custom" : formData.category}
-                    onValueChange={handleCategoryChange}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="null">No Category</SelectItem>
-                      {categories.map((category) => (
-                        <SelectItem key={category.id} value={category.name}>
-                          <div className="flex items-center gap-2">
-                            <span>{category.icon}</span>
-                            <span>{category.name}</span>
-                          </div>
-                        </SelectItem>
-                      ))}
-                      <SelectItem value="custom">
-                        <div className="flex items-center gap-2">
-                          <Sparkles className="h-4 w-4" />
-                          <span>Custom Category</span>
-                        </div>
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
 
-                  {/* Custom Category Input */}
-                  {showCustomCategory && (
-                    <Input
-                      placeholder="Enter custom category"
-                      value={customCategory}
-                      onChange={(e) => setCustomCategory(e.target.value)}
-                      maxLength={100}
-                    />
-                  )}
-                </>
-              )}
-            </div>
 
             {/* Description */}
             <div className="space-y-2">
@@ -490,25 +331,29 @@ export function CreateBoardDialog({
                 Select which job roles can see this board. Leave empty for all team members.
               </p>
               <div className="grid grid-cols-2 gap-3">
-                {JOB_ROLES.map((role) => (
-                  <div
-                    key={role.value}
-                    className="flex items-center space-x-2 border rounded-lg p-3 hover:bg-gray-50"
-                  >
-                    <Checkbox
-                      id={role.value}
-                      checked={formData.visible_to_roles.includes(role.value)}
-                      onCheckedChange={() => handleRoleToggle(role.value)}
-                    />
-                    <label
-                      htmlFor={role.value}
-                      className="flex items-center gap-2 cursor-pointer flex-1"
+                {rolesLoading ? (
+                  <p className="text-sm text-gray-500 col-span-2">Loading roles...</p>
+                ) : (
+                  jobRoles.map((role) => (
+                    <div
+                      key={role.key}
+                      className="flex items-center space-x-2 border rounded-lg p-3 hover:bg-gray-50"
                     >
-                      <IconDisplay iconName={role.icon} className="h-4 w-4 text-gray-600" />
-                      <span className="text-sm font-medium">{role.label}</span>
-                    </label>
-                  </div>
-                ))}
+                      <Checkbox
+                        id={role.key}
+                        checked={formData.visible_to_roles.includes(role.key)}
+                        onCheckedChange={() => handleRoleToggle(role.key)}
+                      />
+                      <label
+                        htmlFor={role.key}
+                        className="flex items-center gap-2 cursor-pointer flex-1"
+                      >
+                        <IconDisplay iconName={role.icon} className="h-4 w-4 text-gray-600" />
+                        <span className="text-sm font-medium">{role.name}</span>
+                      </label>
+                    </div>
+                  ))
+                )}
               </div>
               {formData.visible_to_roles.length > 0 && (
                 <div className="flex items-center gap-2 p-2 bg-blue-50 border border-blue-200 rounded-lg">
@@ -551,12 +396,7 @@ export function CreateBoardDialog({
                       <Lock className="h-3 w-3 text-gray-400 dark:text-gray-500" />
                     )}
                   </h3>
-                  {(formData.category || customCategory) && (
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
-                      Category:{" "}
-                      {showCustomCategory ? customCategory : formData.category}
-                    </p>
-                  )}
+
                   <p className="text-sm text-gray-500 dark:text-gray-400">
                     {formData.description || "Board description"}
                   </p>
