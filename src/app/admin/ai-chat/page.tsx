@@ -257,6 +257,7 @@ function AiChatContent() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const isCreatingConvRef = useRef(false);
   const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
   // Auto-scroll
@@ -285,6 +286,13 @@ function AiChatContent() {
   // ── Load messages when active conversation changes ────────────────────────
   useEffect(() => {
     if (!activeConvId || !orgId) { setMessages([]); return; }
+    
+    // Skip DB fetch if we literally just created it (prevents overwriting the optimistic streaming UI)
+    if (isCreatingConvRef.current) {
+      isCreatingConvRef.current = false;
+      return;
+    }
+
     setMsgsLoading(true);
     api.get(`/api/organizations/${orgId}/ai-chat/conversations/${activeConvId}/messages`)
       .then(res => {
@@ -299,6 +307,7 @@ function AiChatContent() {
   const createConversation = useCallback(async (firstMessage: string): Promise<string | null> => {
     if (!orgId) return null;
     try {
+      isCreatingConvRef.current = true;
       const res = await api.post(`/api/organizations/${orgId}/ai-chat/conversations`, { firstMessage });
       const conv: Conversation = res.data?.data?.conversation;
       setConversations(prev => [conv, ...prev]);
