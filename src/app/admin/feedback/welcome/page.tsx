@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
-import { boardService, BoardCategory } from "@/services/boardService";
+import { boardService } from "@/services/boardService";
 import { IconPicker, IconDisplay } from "@/components/ui/icon-picker";
 import { UpgradeDialog } from "@/components/UpgradeDialog";
 import { useOrganization } from "@/context/OrganizationContext";
@@ -62,10 +62,6 @@ export default function FirstBoardWelcomePage() {
   const { roles: jobRoles, loading: rolesLoading } = useJobRoles(organization?.id);
   const [step, setStep] = useState<"welcome" | "create">("welcome");
   const [loading, setLoading] = useState(false);
-  const [loadingCategories, setLoadingCategories] = useState(false);
-  const [categories, setCategories] = useState<BoardCategory[]>([]);
-  const [customCategory, setCustomCategory] = useState("");
-  const [showCustomCategory, setShowCustomCategory] = useState(false);
   const [showIconPicker, setShowIconPicker] = useState(false);
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
   
@@ -73,7 +69,6 @@ export default function FirstBoardWelcomePage() {
     name: "",
     description: "",
     is_private: false,
-    category: "",
     color: "#6366f1",
     icon: "Lightbulb",
     visible_to_roles: [] as string[],
@@ -83,25 +78,7 @@ export default function FirstBoardWelcomePage() {
   const [slugAvailable, setSlugAvailable] = useState<boolean | null>(null);
   const [checkingSlug, setCheckingSlug] = useState(false);
 
-  // Fetch categories when moving to create step
-  useEffect(() => {
-    if (step === "create") {
-      fetchCategories();
-    }
-  }, [step]);
 
-  const fetchCategories = async () => {
-    try {
-      setLoadingCategories(true);
-      const response = await boardService.getCategories();
-      setCategories(response.data.categories);
-    } catch (error) {
-      console.error("Error fetching categories:", error);
-      setCategories([]);
-    } finally {
-      setLoadingCategories(false);
-    }
-  };
 
   // Generate slug from name
   useEffect(() => {
@@ -139,26 +116,7 @@ export default function FirstBoardWelcomePage() {
     }
   };
 
-  // Handle category selection
-  const handleCategoryChange = (value: string) => {
-    if (value === "custom") {
-      setShowCustomCategory(true);
-      setFormData({ ...formData, category: "" });
-    } else {
-      setShowCustomCategory(false);
-      const selectedCategory = categories.find((c) => c.name === value);
-      if (selectedCategory) {
-        setFormData({
-          ...formData,
-          category: value,
-          icon: selectedCategory.icon,
-          color: selectedCategory.color,
-        });
-      } else {
-        setFormData({ ...formData, category: value });
-      }
-    }
-  };
+
 
   // Handle role toggle
   const handleRoleToggle = (roleValue: string) => {
@@ -197,18 +155,9 @@ export default function FirstBoardWelcomePage() {
       return;
     }
 
-    // Use custom category if provided
-    const finalCategory =
-      showCustomCategory && customCategory.trim()
-        ? customCategory.trim()
-        : formData.category || "General";
-
     setLoading(true);
     try {
-      const response = await boardService.createBoard({
-        ...formData,
-        category: finalCategory,
-      });
+      const response = await boardService.createBoard(formData);
 
       const newBoard = response.data.board;
 
@@ -321,57 +270,7 @@ export default function FirstBoardWelcomePage() {
                   </p>
                 </div>
 
-                {/* Category */}
-                <div className="space-y-3">
-                  <Label htmlFor="category" className="text-base font-semibold">
-                    Category <span className="text-gray-400">(optional)</span>
-                  </Label>
-                  {loadingCategories ? (
-                    <div className="flex items-center justify-center py-4">
-                      <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
-                    </div>
-                  ) : (
-                    <>
-                      <Select
-                        value={showCustomCategory ? "custom" : formData.category}
-                        onValueChange={handleCategoryChange}
-                        disabled={loading}
-                      >
-                        <SelectTrigger className="h-12">
-                          <SelectValue placeholder="Select a category" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="null">No Category</SelectItem>
-                          {categories.map((category) => (
-                            <SelectItem key={category.id} value={category.name}>
-                              <div className="flex items-center gap-2">
-                                <span>{category.icon}</span>
-                                <span>{category.name}</span>
-                              </div>
-                            </SelectItem>
-                          ))}
-                          <SelectItem value="custom">
-                            <div className="flex items-center gap-2">
-                              <Sparkles className="h-4 w-4" />
-                              <span>Custom Category</span>
-                            </div>
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
 
-                      {showCustomCategory && (
-                        <Input
-                          placeholder="Enter custom category"
-                          value={customCategory}
-                          onChange={(e) => setCustomCategory(e.target.value)}
-                          maxLength={100}
-                          className="h-12"
-                          disabled={loading}
-                        />
-                      )}
-                    </>
-                  )}
-                </div>
 
                 {/* Description */}
                 <div className="space-y-3">
@@ -518,11 +417,7 @@ export default function FirstBoardWelcomePage() {
                           <Lock className="h-3 w-3 text-gray-400" />
                         )}
                       </h3>
-                      {(formData.category || customCategory) && (
-                        <p className="text-xs text-gray-500">
-                          Category: {showCustomCategory ? customCategory : formData.category}
-                        </p>
-                      )}
+
                       <p className="text-sm text-gray-500">
                         {formData.description || "Board description"}
                       </p>
@@ -624,57 +519,7 @@ export default function FirstBoardWelcomePage() {
                   </p>
                 </div>
 
-                {/* Category */}
-                <div className="space-y-3">
-                  <Label htmlFor="category" className="text-base font-semibold">
-                    Category <span className="text-gray-400">(optional)</span>
-                  </Label>
-                  {loadingCategories ? (
-                    <div className="flex items-center justify-center py-4">
-                      <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
-                    </div>
-                  ) : (
-                    <>
-                      <Select
-                        value={showCustomCategory ? "custom" : formData.category}
-                        onValueChange={handleCategoryChange}
-                        disabled={loading}
-                      >
-                        <SelectTrigger className="h-12">
-                          <SelectValue placeholder="Select a category" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="null">No Category</SelectItem>
-                          {categories.map((category) => (
-                            <SelectItem key={category.id} value={category.name}>
-                              <div className="flex items-center gap-2">
-                                <span>{category.icon}</span>
-                                <span>{category.name}</span>
-                              </div>
-                            </SelectItem>
-                          ))}
-                          <SelectItem value="custom">
-                            <div className="flex items-center gap-2">
-                              <Sparkles className="h-4 w-4" />
-                              <span>Custom Category</span>
-                            </div>
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
 
-                      {showCustomCategory && (
-                        <Input
-                          placeholder="Enter custom category"
-                          value={customCategory}
-                          onChange={(e) => setCustomCategory(e.target.value)}
-                          maxLength={100}
-                          className="h-12"
-                          disabled={loading}
-                        />
-                      )}
-                    </>
-                  )}
-                </div>
 
                 {/* Description */}
                 <div className="space-y-3">
@@ -821,11 +666,7 @@ export default function FirstBoardWelcomePage() {
                           <Lock className="h-3 w-3 text-gray-400" />
                         )}
                       </h3>
-                      {(formData.category || customCategory) && (
-                        <p className="text-xs text-gray-500">
-                          Category: {showCustomCategory ? customCategory : formData.category}
-                        </p>
-                      )}
+
                       <p className="text-sm text-gray-500">
                         {formData.description || "Board description"}
                       </p>

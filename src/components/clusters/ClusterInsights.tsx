@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Sparkles, Tag, BarChart3, ChevronDown, ChevronUp, RefreshCw, AlertCircle } from 'lucide-react';
-import { TokenManager } from '@/lib/tokenManager';
+import api from '@/lib/api';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -187,8 +187,6 @@ export function ClusterInsights({
   const [refreshing, setRefreshing] = useState(false);
   const [sortOption, setSortOption] = useState<SortOption>('priority');
 
-  const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
-
   const fetchClusters = useCallback(
     async (showRefreshSpinner = false) => {
       if (showRefreshSpinner) setRefreshing(true);
@@ -196,30 +194,16 @@ export function ClusterInsights({
       setError(null);
 
       try {
-        // Get token fresh each call (mirrors how the axios client works)
-        const token = TokenManager.getAccessToken();
-
-        const res = await fetch(`${backendUrl}/api/clusters/boards/${boardId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        });
-
-        if (!res.ok) {
-          throw new Error(`Failed to load clusters (${res.status})`);
-        }
-
-        const json = await res.json();
-        setClusters(json.data?.clusters || []);
+        const res = await api.get(`/api/clusters/boards/${boardId}`);
+        setClusters(res.data?.data?.clusters || []);
       } catch (err: any) {
-        setError(err.message || 'Failed to load cluster insights');
+        setError(err.response?.data?.message || err.message || 'Failed to load cluster insights');
       } finally {
         setLoading(false);
         setRefreshing(false);
       }
     },
-    [boardId, backendUrl]
+    [boardId]
   );
 
   useEffect(() => {

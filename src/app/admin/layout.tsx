@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { OrganizationSwitcher } from "@/components/organization/OrganizationSwitcher";
 import { ChangelogPopover } from "@/components/changelog/ChangelogPopover";
-import { LayoutDashboard, Sun, Moon, CreditCard } from "lucide-react";
+import { LayoutDashboard, Sun, Moon, CreditCard, BotMessageSquare } from "lucide-react";
 import {useState,useEffect} from "react"
 
 export default function AdminLayout({
@@ -91,9 +91,10 @@ export default function AdminLayout({
   };
 
   const navItems = [
-    { name: "Feedback", path: feedbackPath }, // Use state instead of function
+    { name: "Feedback", path: feedbackPath },
     { name: "Roadmap", path: "/admin/roadmap" },
     { name: "Changelog", path: "/admin/changelog" },
+    { name: "AI Chat", path: "/admin/ai-chat" },
     { name: "Explore", path: "/feedback"},
     { name: "Contact Us", path: "/contact"}
   ];
