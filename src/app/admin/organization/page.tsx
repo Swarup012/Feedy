@@ -31,6 +31,7 @@ import {
   Globe,
   Code,
   Briefcase,
+  Plug,
 } from 'lucide-react';
 import { OrganizationSkeleton, MembersTableSkeleton } from '@/components/admin/OrganizationSkeleton';
 import { InviteMemberModal } from '@/components/organization/InviteMemberModal';
@@ -386,6 +387,13 @@ export default function OrganizationSettingsPage() {
           >
             <Code className="h-4 w-4 text-gray-500" />
             <span className="text-gray-700 dark:text-gray-300">Widgets</span>
+          </button>
+          <button
+            onClick={() => router.push('/admin/settings/integrations')}
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-md transition-colors text-left text-sm hover:bg-gray-50 dark:hover:bg-gray-800"
+          >
+            <Plug className="h-4 w-4 text-gray-500" />
+            <span className="text-gray-700 dark:text-gray-300">Integrations</span>
           </button>
           <button
             onClick={() => setActiveTab('billing')}

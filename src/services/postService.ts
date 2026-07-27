@@ -6,7 +6,7 @@ export interface Post {
   board_id: string;
   title: string;
   description?: string;
-  author_id: string;
+  author_id: string | null;
   status:
     | "open"
     | "under-review"
@@ -20,6 +20,7 @@ export interface Post {
   is_archived: boolean;
   category?: string; // ✅ Add category
   images?: string[]; // ✅ Add images array
+  source?: string; // ✅ Add source
   created_at: string;
   updated_at: string;
   author?: {
@@ -51,16 +52,17 @@ export interface Post {
   };
 }
 
-/** Display name for internal (author) or widget (external_author) submitters */
+/** Display name for internal (author) or widget (external_author) submitters.
+ *  Falls back to "Autopilot" only for auto-published AI posts. */
 export function getPostAuthorDisplayName(post: Post): string {
-  return (
-    post.author?.name ||
-    post.org_end_user?.name ||
-    post.external_author?.name ||
-    post.org_end_user?.email ||
-    post.external_author?.email ||
-    "Anonymous"
-  );
+  if (post.author?.name) return post.author.name;
+  if (post.org_end_user?.name) return post.org_end_user.name;
+  if (post.external_author?.name) return post.external_author.name;
+  if (post.org_end_user?.email) return post.org_end_user.email;
+  if (post.external_author?.email) return post.external_author.email;
+  
+  if (post.source === 'autopilot') return "Autopilot";
+  return "Anonymous";
 }
 
 export function isWidgetPost(post: Post): boolean {

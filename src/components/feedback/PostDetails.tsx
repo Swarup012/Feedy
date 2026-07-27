@@ -862,27 +862,26 @@ export function PostDetails({
                 )}
               </div>
 
-              {/* Author and time — widget posts use external_author or org_end_user; time always shown */}
+              {/* Author and time — widget posts use external_author or org_end_user;
+                  AI-published posts (author_id = null) show "Autopilot" via getPostAuthorDisplayName */}
               <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 flex-wrap">
-                {(post.author || post.external_author || post.org_end_user) && (
-                  <>
-                    <Avatar className="h-6 w-6">
-                      <AvatarImage src={(post.author as { avatar_url?: string })?.avatar_url || ""} />
-                      <AvatarFallback>
-                        {getPostAuthorDisplayName(post)[0]?.toUpperCase() || "U"}
-                      </AvatarFallback>
-                    </Avatar>
-                    <span className="font-medium text-blue-600 dark:text-blue-400">
-                      {getPostAuthorDisplayName(post)}
+                <>
+                  <Avatar className="h-6 w-6">
+                    <AvatarImage src={(post.author as { avatar_url?: string })?.avatar_url || ""} />
+                    <AvatarFallback>
+                      {getPostAuthorDisplayName(post)[0]?.toUpperCase() || "A"}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className="font-medium text-blue-600 dark:text-blue-400">
+                    {getPostAuthorDisplayName(post)}
+                  </span>
+                  {(post.external_author || post.org_end_user) && (
+                    <span className="inline-flex items-center rounded-full bg-violet-100 px-1.5 py-0.5 text-[10px] font-medium text-violet-700 dark:bg-violet-900/40 dark:text-violet-300">
+                      via Widget
                     </span>
-                    {(post.external_author || post.org_end_user) && (
-                      <span className="inline-flex items-center rounded-full bg-violet-100 px-1.5 py-0.5 text-[10px] font-medium text-violet-700 dark:bg-violet-900/40 dark:text-violet-300">
-                        via Widget
-                      </span>
-                    )}
-                    <span>·</span>
-                  </>
-                )}
+                  )}
+                  <span>·</span>
+                </>
                 <span>{formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}</span>
               </div>
 

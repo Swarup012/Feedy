@@ -95,6 +95,7 @@ export default function AdminLayout({
     { name: "Roadmap", path: "/admin/roadmap" },
     { name: "Changelog", path: "/admin/changelog" },
     { name: "AI Chat", path: "/admin/ai-chat" },
+    { name: "Autopilot", path: "/admin/autopilot" },
     { name: "Explore", path: "/feedback"},
     { name: "Contact Us", path: "/contact"}
   ];
@@ -146,13 +147,17 @@ export default function AdminLayout({
                   href={item.path}
                   className={cn(
                     "relative px-3 py-2 text-base font-switzer font-semibold transition-all rounded-lg",
-                    pathname === item.path
+                    (item.path === "/admin/autopilot" || item.path === "/admin/ai-chat"
+                      ? pathname?.startsWith(item.path)
+                      : pathname === item.path)
                       ? "text-white bg-white/20"
                       : "text-white/70 hover:text-white hover:bg-white/10"
                   )}
                 >
                   {item.name}
-                  {pathname === item.path && (
+                  {(item.path === "/admin/autopilot" || item.path === "/admin/ai-chat"
+                    ? pathname?.startsWith(item.path)
+                    : pathname === item.path) && (
                     <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1/2 h-0.5 bg-white rounded-full" />
                   )}
                 </Link>
@@ -208,6 +213,12 @@ export default function AdminLayout({
                   className="cursor-pointer rounded-lg py-2.5 font-medium"
                 >
                   Organization Settings
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => router.push("/admin/settings/integrations")}
+                  className="cursor-pointer rounded-lg py-2.5 font-medium"
+                >
+                  Integrations
                 </DropdownMenuItem>
 
                 <DropdownMenuSeparator />
