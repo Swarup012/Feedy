@@ -54,21 +54,15 @@ function formatDate(iso: string | null) {
 }
 
 const DiscordIcon = ({ className }: { className?: string }) => (
-  <svg className={className} viewBox="0 0 127.14 96.36" fill="currentColor">
-    <path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1,105.25,105.25,0,0,0,32.19-16.14c2.64-27.38-4.51-51.11-19.32-72.15ZM42.68,65.33C38.08,65.33,34.2,61,34.2,55.77s3.8-9.56,8.48-9.56,8.53,4.3,8.48,9.56C51.15,61,47.38,65.33,42.68,65.33Zm41.73,0c-4.6,0-8.48-4.3-8.48-9.56s3.8-9.56,8.48-9.56,8.53,4.3,8.48,9.56C92.89,61,89.11,65.33,84.41,65.33Z" />
-  </svg>
+  <img src="/images/icons/discord.svg" alt="Discord" className={className} />
 );
 
 const IntercomIcon = ({ className }: { className?: string }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="currentColor">
-    <path d="M12 0C5.372 0 0 5.373 0 12s5.372 12 12 12 12-5.373 12-12S18.628 0 12 0zm-2.486 16.593a1.536 1.536 0 1 1 0-3.072 1.536 1.536 0 0 1 0 3.072zm0-4.577a1.536 1.536 0 1 1 0-3.072 1.536 1.536 0 0 1 0 3.072zm4.972 4.577a1.536 1.536 0 1 1 0-3.072 1.536 1.536 0 0 1 0 3.072zm0-4.577a1.536 1.536 0 1 1 0-3.072 1.536 1.536 0 0 1 0 3.072z" />
-  </svg>
+  <img src="/images/icons/intercom.svg" alt="Intercom" className={className} />
 );
 
 const SlackIcon = ({ className }: { className?: string }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="currentColor">
-    <path d="M5.042 15.165a2.528 2.528 0 0 1-2.52 2.523A2.528 2.528 0 0 1 0 15.165a2.527 2.527 0 0 1 2.522-2.52h2.52v2.52zM6.313 15.165a2.527 2.527 0 0 1 2.521-2.52 2.527 2.527 0 0 1 2.521 2.52v6.313A2.528 2.528 0 0 1 8.834 24a2.528 2.528 0 0 1-2.521-2.522v-6.313zM8.834 5.042a2.528 2.528 0 0 1-2.521-2.52A2.528 2.528 0 0 1 8.834 0a2.528 2.528 0 0 1 2.521 2.522v2.52H8.834zM8.834 6.313a2.528 2.528 0 0 1 2.521 2.521 2.528 2.528 0 0 1-2.521 2.521h-6.313A2.528 2.528 0 0 1 0 8.834a2.528 2.528 0 0 1 2.522-2.521h6.312zM18.956 8.835a2.528 2.528 0 0 1 2.522-2.521A2.528 2.528 0 0 1 24 8.835a2.528 2.528 0 0 1-2.522 2.521h-2.522V8.835zM17.688 8.835a2.528 2.528 0 0 1-2.523 2.521 2.527 2.527 0 0 1-2.52-2.521V2.522A2.527 2.527 0 0 1 15.165 0a2.528 2.528 0 0 1 2.523 2.522v6.313zM15.165 18.958a2.528 2.528 0 0 1 2.523 2.52 2.528 2.528 0 0 1-2.523 2.522 2.528 2.528 0 0 1-2.52-2.522v-2.52h2.52zM15.165 17.687a2.528 2.528 0 0 1-2.523-2.52 2.528 2.528 0 0 1 2.523-2.521h6.313A2.528 2.528 0 0 1 24 15.167a2.528 2.528 0 0 1-2.522 2.52h-6.313z" />
-  </svg>
+  <img src="/images/icons/slack-new.svg" alt="Slack" className={className} />
 );
 
 function StatusBadge({ status }: { status: string | null }) {
@@ -442,8 +436,8 @@ function IntegrationsPageInner() {
                 <div className="rounded-xl border bg-card shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden hover:shadow-md transition-shadow">
                   <div className="p-5 flex items-start justify-between gap-4">
                     <div className="flex items-start gap-4">
-                      <div className="h-12 w-12 shrink-0 rounded-xl bg-[#5865F2] flex items-center justify-center shadow-sm">
-                        <DiscordIcon className="h-6 w-6 text-white" />
+                      <div className="h-12 w-12 shrink-0 rounded-xl bg-[#5865F2]/10 flex items-center justify-center shadow-sm">
+                        <DiscordIcon className="h-6 w-6" />
                       </div>
                       <div>
                         <div className="flex items-center gap-2.5">
@@ -546,8 +540,8 @@ function IntegrationsPageInner() {
                 <div className="rounded-xl border bg-card shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden hover:shadow-md transition-shadow">
                   <div className="p-5 flex items-start justify-between gap-4">
                     <div className="flex items-start gap-4">
-                      <div className="h-12 w-12 shrink-0 rounded-xl bg-[#1F8DED] flex items-center justify-center shadow-sm">
-                        <IntercomIcon className="h-6 w-6 text-white" />
+                      <div className="h-12 w-12 shrink-0 rounded-xl bg-[#1F8DED]/10 flex items-center justify-center shadow-sm">
+                        <IntercomIcon className="h-6 w-6" />
                       </div>
                       <div>
                         <div className="flex items-center gap-2.5">
