@@ -4,13 +4,12 @@ import { useState } from 'react';
 import { useOrganization } from '@/context/OrganizationContext';
 import { useJobRoles } from '@/hooks/useJobRoles';
 import jobRolesService, { JobRole } from '@/services/jobRolesService';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { IconDisplay, IconPicker } from '@/components/ui/icon-picker';
-import { Loader2, Plus, Pencil, Trash2, ShieldAlert } from 'lucide-react';
+import { Loader2, Plus, Pencil, Trash2, ShieldAlert, BriefcaseBusiness, AlertCircle } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -28,7 +27,6 @@ export function JobRolesTab() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingRole, setEditingRole] = useState<JobRole | null>(null);
   const [formData, setFormData] = useState({ name: '', icon: 'UserCircle' });
-  const [showIconPicker, setShowIconPicker] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   const isAdmin = organizationRole === 'admin' || organizationRole === 'owner';
@@ -92,67 +90,75 @@ export function JobRolesTab() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">Job Roles</h2>
-          <p className="text-muted-foreground">
-            Manage custom job roles for your organization's members.
-          </p>
+    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      {/* Header Section */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-gray-900/50 p-6 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none" />
+        <div className="flex items-center gap-5 relative z-10">
+          <div className="p-3.5 bg-primary/10 text-primary rounded-xl ring-1 ring-primary/20 shadow-inner">
+            <BriefcaseBusiness className="h-6 w-6" />
+          </div>
+          <div>
+            <h2 className="text-xl font-bold tracking-tight text-gray-900 dark:text-gray-100">Job Roles</h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1.5 max-w-md">
+              Define and manage custom job roles to organize your team members efficiently.
+            </p>
+          </div>
         </div>
-        <Button onClick={handleOpenCreate} disabled={!isAdmin}>
+        <Button onClick={handleOpenCreate} disabled={!isAdmin} className="shadow-sm relative z-10 shrink-0">
           <Plus className="h-4 w-4 mr-2" />
-          Add Role
+          Add New Role
         </Button>
       </div>
 
       {!isAdmin && (
-        <div className="bg-amber-50 border border-amber-200 text-amber-800 p-4 rounded-lg flex items-center gap-3">
-          <ShieldAlert className="h-5 w-5" />
-          <p className="text-sm">Only organization admins and owners can manage job roles.</p>
+        <div className="bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50 text-amber-800 dark:text-amber-300 p-4 rounded-xl flex items-center gap-3 shadow-sm backdrop-blur-sm">
+          <AlertCircle className="h-5 w-5 shrink-0" />
+          <p className="text-sm font-medium">Only organization admins and owners can manage job roles.</p>
         </div>
       )}
 
       {loading ? (
-        <div className="flex justify-center p-12">
-          <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+        <div className="flex flex-col items-center justify-center p-16 space-y-4">
+          <Loader2 className="h-10 w-10 animate-spin text-primary/60" />
+          <p className="text-sm text-muted-foreground animate-pulse">Loading roles...</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
           {roles.map((role) => (
-            <Card key={role.key} className="overflow-hidden">
-              <CardContent className="p-6">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="p-3 bg-blue-50 text-blue-600 rounded-lg">
-                      <IconDisplay iconName={role.icon} className="h-6 w-6" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-lg">{role.name}</h3>
-                      <p className="text-sm text-gray-500 font-mono mt-1">{role.key}</p>
-                    </div>
+            <Card 
+              key={role.key} 
+              className="overflow-hidden transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 hover:border-primary/30 group relative bg-white dark:bg-gray-900/80"
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+              <CardContent className="p-4 relative z-10 flex flex-col h-full">
+                <div className="flex flex-col mb-3 flex-1">
+                  <h3 className="font-semibold text-base text-gray-900 dark:text-gray-100 group-hover:text-primary transition-colors line-clamp-1">{role.name}</h3>
+                  <div className="inline-flex items-center self-start px-1.5 py-0.5 mt-1.5 rounded text-[10px] font-mono bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-700">
+                    {role.key}
                   </div>
                 </div>
+                
                 {isAdmin && (
-                  <div className="flex gap-2 mt-6 pt-4 border-t">
+                  <div className="flex gap-2 mt-auto pt-3 border-t border-gray-100 dark:border-gray-800">
                     <Button
-                      variant="outline"
+                      variant="secondary"
                       size="sm"
-                      className="flex-1"
+                      className="flex-1 h-7 text-xs shadow-sm transition-all hover:bg-primary hover:text-primary-foreground font-medium"
                       onClick={() => handleOpenEdit(role)}
                     >
-                      <Pencil className="h-4 w-4 mr-2" />
+                      <Pencil className="h-3 w-3 mr-1.5" />
                       Edit
                     </Button>
                     <Button
                       variant="outline"
                       size="sm"
-                      className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50"
+                      className="flex-1 h-7 text-xs shadow-sm transition-all text-red-600 hover:text-red-700 hover:bg-red-50 border-red-100 hover:border-red-200 dark:hover:bg-red-950/30 dark:border-red-900/30 dark:hover:border-red-900/50 font-medium"
                       disabled={!role.is_deletable}
                       onClick={() => handleDelete(role)}
                       title={!role.is_deletable ? 'This default role cannot be deleted' : ''}
                     >
-                      <Trash2 className="h-4 w-4 mr-2" />
+                      <Trash2 className="h-3 w-3 mr-1.5" />
                       Delete
                     </Button>
                   </div>
@@ -175,29 +181,15 @@ export function JobRolesTab() {
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4 py-4">
+          <div className="space-y-5 py-4">
             <div className="space-y-2">
-              <Label>Role Name</Label>
+              <Label className="text-sm font-medium">Role Name</Label>
               <Input
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 placeholder="e.g. Senior Developer"
+                className="h-11 transition-all focus-visible:ring-primary/50"
               />
-            </div>
-
-            <div className="space-y-2">
-              <Label>Icon</Label>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setShowIconPicker(true)}
-                className="w-full justify-start h-12"
-              >
-                <div className="h-8 w-8 rounded-lg flex items-center justify-center mr-3 bg-gray-100">
-                  <IconDisplay iconName={formData.icon} className="h-5 w-5 text-gray-700" />
-                </div>
-                <span>{formData.icon}</span>
-              </Button>
             </div>
           </div>
 
@@ -212,13 +204,6 @@ export function JobRolesTab() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
-      {/* Icon Picker */}
-      <IconPicker
-        open={showIconPicker}
-        onOpenChange={setShowIconPicker}
-        onSelectIcon={(iconName) => setFormData({ ...formData, icon: iconName })}
-      />
     </div>
   );
 }

@@ -32,6 +32,7 @@ import {
   Code,
   Briefcase,
   Plug,
+  User,
 } from 'lucide-react';
 import { OrganizationSkeleton, MembersTableSkeleton } from '@/components/admin/OrganizationSkeleton';
 import { InviteMemberModal } from '@/components/organization/InviteMemberModal';
@@ -40,6 +41,8 @@ import { JobRolesTab } from '@/components/organization/JobRolesTab';
 import dynamic from 'next/dynamic';
 const WebhooksPage = dynamic(() => import('@/app/admin/webhooks/page'), { ssr: false });
 const WidgetsPage = dynamic(() => import('@/app/admin/widgets/page'), { ssr: false });
+const IntegrationsPage = dynamic(() => import('@/app/admin/settings/integrations/page'), { ssr: false });
+import { ProfileTab } from '@/components/organization/ProfileTab';
 import { BillingSection } from '@/components/BillingSection';
 import PricingContent from '@/components/PricingContent';
 import { CustomDomainSettings } from '@/components/organization/CustomDomainSettings';
@@ -81,6 +84,16 @@ export default function OrganizationSettingsPage() {
     website: '',
     industry: '',
   });
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const tab = params.get('tab');
+      if (tab) {
+        setActiveTab(tab);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -320,9 +333,9 @@ export default function OrganizationSettingsPage() {
   };
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-[calc(100vh-70px)]">
       {/* Notion-style Sidebar */}
-      <div className="w-64 border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4 flex flex-col">
+      <div className="w-64 border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4 flex flex-col sticky top-0 h-[calc(100vh-70px)] overflow-y-auto shrink-0">
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
             <Building2 className="h-6 w-6 text-primary" />
@@ -335,71 +348,73 @@ export default function OrganizationSettingsPage() {
 
         <nav className="space-y-1 flex-1">
           <button
+            onClick={() => setActiveTab('profile')}
+            className={`w-full flex items-center gap-3 px-3 py-2 rounded-md transition-colors text-left text-sm ${activeTab === 'profile' ? 'bg-gray-100 dark:bg-gray-800' : 'hover:bg-gray-50 dark:hover:bg-gray-800'
+              }`}
+          >
+            <User className="h-4 w-4 text-gray-500" />
+            <span className="text-gray-700 dark:text-gray-300">Profile</span>
+          </button>
+          <button
             onClick={() => setActiveTab('general')}
-            className={`w-full flex items-center gap-3 px-3 py-2 rounded-md transition-colors text-left text-sm ${
-              activeTab === 'general' ? 'bg-gray-100 dark:bg-gray-800' : 'hover:bg-gray-50 dark:hover:bg-gray-800'
-            }`}
+            className={`w-full flex items-center gap-3 px-3 py-2 rounded-md transition-colors text-left text-sm ${activeTab === 'general' ? 'bg-gray-100 dark:bg-gray-800' : 'hover:bg-gray-50 dark:hover:bg-gray-800'
+              }`}
           >
             <Settings className="h-4 w-4 text-gray-500" />
             <span className="text-gray-700 dark:text-gray-300">General</span>
           </button>
           <button
             onClick={() => setActiveTab('members')}
-            className={`w-full flex items-center gap-3 px-3 py-2 rounded-md transition-colors text-left text-sm ${
-              activeTab === 'members' ? 'bg-gray-100 dark:bg-gray-800' : 'hover:bg-gray-50 dark:hover:bg-gray-800'
-            }`}
+            className={`w-full flex items-center gap-3 px-3 py-2 rounded-md transition-colors text-left text-sm ${activeTab === 'members' ? 'bg-gray-100 dark:bg-gray-800' : 'hover:bg-gray-50 dark:hover:bg-gray-800'
+              }`}
           >
             <Users className="h-4 w-4 text-gray-500" />
             <span className="text-gray-700 dark:text-gray-300">Members ({members.length})</span>
           </button>
           <button
             onClick={() => setActiveTab('roles')}
-            className={`w-full flex items-center gap-3 px-3 py-2 rounded-md transition-colors text-left text-sm ${
-              activeTab === 'roles' ? 'bg-gray-100 dark:bg-gray-800' : 'hover:bg-gray-50 dark:hover:bg-gray-800'
-            }`}
+            className={`w-full flex items-center gap-3 px-3 py-2 rounded-md transition-colors text-left text-sm ${activeTab === 'roles' ? 'bg-gray-100 dark:bg-gray-800' : 'hover:bg-gray-50 dark:hover:bg-gray-800'
+              }`}
           >
             <Briefcase className="h-4 w-4 text-gray-500" />
             <span className="text-gray-700 dark:text-gray-300">Job Roles</span>
           </button>
           <button
             onClick={() => setActiveTab('subdomain')}
-            className={`w-full flex items-center gap-3 px-3 py-2 rounded-md transition-colors text-left text-sm ${
-              activeTab === 'subdomain' ? 'bg-gray-100 dark:bg-gray-800' : 'hover:bg-gray-50 dark:hover:bg-gray-800'
-            }`}
+            className={`w-full flex items-center gap-3 px-3 py-2 rounded-md transition-colors text-left text-sm ${activeTab === 'subdomain' ? 'bg-gray-100 dark:bg-gray-800' : 'hover:bg-gray-50 dark:hover:bg-gray-800'
+              }`}
           >
             <ExternalLink className="h-4 w-4 text-gray-500" />
             <span className="text-gray-700 dark:text-gray-300">Subdomain</span>
           </button>
           <button
             onClick={() => setActiveTab('webhooks')}
-            className={`w-full flex items-center gap-3 px-3 py-2 rounded-md transition-colors text-left text-sm ${
-              activeTab === 'webhooks' ? 'bg-gray-100 dark:bg-gray-800' : 'hover:bg-gray-50 dark:hover:bg-gray-800'
-            }`}
+            className={`w-full flex items-center gap-3 px-3 py-2 rounded-md transition-colors text-left text-sm ${activeTab === 'webhooks' ? 'bg-gray-100 dark:bg-gray-800' : 'hover:bg-gray-50 dark:hover:bg-gray-800'
+              }`}
           >
             <Webhook className="h-4 w-4 text-gray-500" />
             <span className="text-gray-700 dark:text-gray-300">Webhooks</span>
           </button>
           <button
             onClick={() => setActiveTab('widgets')}
-            className={`w-full flex items-center gap-3 px-3 py-2 rounded-md transition-colors text-left text-sm ${
-              activeTab === 'widgets' ? 'bg-gray-100 dark:bg-gray-800' : 'hover:bg-gray-50 dark:hover:bg-gray-800'
-            }`}
+            className={`w-full flex items-center gap-3 px-3 py-2 rounded-md transition-colors text-left text-sm ${activeTab === 'widgets' ? 'bg-gray-100 dark:bg-gray-800' : 'hover:bg-gray-50 dark:hover:bg-gray-800'
+              }`}
           >
             <Code className="h-4 w-4 text-gray-500" />
             <span className="text-gray-700 dark:text-gray-300">Widgets</span>
           </button>
           <button
-            onClick={() => router.push('/admin/settings/integrations')}
-            className="w-full flex items-center gap-3 px-3 py-2 rounded-md transition-colors text-left text-sm hover:bg-gray-50 dark:hover:bg-gray-800"
+            onClick={() => setActiveTab('integrations')}
+            className={`w-full flex items-center gap-3 px-3 py-2 rounded-md transition-colors text-left text-sm ${activeTab === 'integrations' ? 'bg-gray-100 dark:bg-gray-800' : 'hover:bg-gray-50 dark:hover:bg-gray-800'
+              }`}
           >
             <Plug className="h-4 w-4 text-gray-500" />
             <span className="text-gray-700 dark:text-gray-300">Integrations</span>
           </button>
           <button
             onClick={() => setActiveTab('billing')}
-            className={`w-full flex items-center gap-3 px-3 py-2 rounded-md transition-colors text-left text-sm ${
-              activeTab === 'billing' ? 'bg-gray-100 dark:bg-gray-800' : 'hover:bg-gray-50 dark:hover:bg-gray-800'
-            }`}
+            className={`w-full flex items-center gap-3 px-3 py-2 rounded-md transition-colors text-left text-sm ${activeTab === 'billing' ? 'bg-gray-100 dark:bg-gray-800' : 'hover:bg-gray-50 dark:hover:bg-gray-800'
+              }`}
           >
             <CreditCard className="h-4 w-4 text-gray-500" />
             <span className="text-gray-700 dark:text-gray-300">Billing</span>
@@ -410,272 +425,278 @@ export default function OrganizationSettingsPage() {
       {/* Main Content Area */}
       <div className="flex-1 overflow-auto">
         <div className="container mx-auto py-8 px-8">
-          <div className="mb-8">
-            <p className="text-muted-foreground">
-              Manage your organization settings, members, and subscription
-            </p>
-          </div>
-
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
             {/* Hidden tab triggers for functionality */}
             <div className="hidden">
               <TabsList>
+                <TabsTrigger value="profile" id="tab-profile">Profile</TabsTrigger>
                 <TabsTrigger value="general" id="tab-general">General</TabsTrigger>
                 <TabsTrigger value="members" id="tab-members">Members</TabsTrigger>
                 <TabsTrigger value="roles" id="tab-roles">Job Roles</TabsTrigger>
                 <TabsTrigger value="subdomain" id="tab-subdomain">Subdomain</TabsTrigger>
                 <TabsTrigger value="webhooks" id="tab-webhooks">Webhooks</TabsTrigger>
                 <TabsTrigger value="widgets" id="tab-widgets">Widgets</TabsTrigger>
+                <TabsTrigger value="integrations" id="tab-integrations">Integrations</TabsTrigger>
                 <TabsTrigger value="billing" id="tab-billing">Billing</TabsTrigger>
               </TabsList>
             </div>
 
-        {/* General Settings */}
-        <TabsContent value="general">
-          <Card>
-            <CardHeader>
-              <CardTitle>Organization Details</CardTitle>
-              <CardDescription>
-                Update your organization's basic information
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <Label htmlFor="name">Organization Name</Label>
-                <Input
-                  id="name"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  disabled={organizationRole !== 'owner'}
-                />
-              </div>
+            {/* Profile Tab */}
+            <TabsContent value="profile">
+              <ProfileTab />
+            </TabsContent>
 
-              <div>
-                <Label htmlFor="description">Description</Label>
-                <Textarea
-                  id="description"
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  disabled={organizationRole !== 'owner'}
-                  rows={3}
-                />
-              </div>
+            {/* General Settings */}
+            <TabsContent value="general">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Organization Details</CardTitle>
+                  <CardDescription>
+                    Update your organization's basic information
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <Label htmlFor="name">Organization Name</Label>
+                    <Input
+                      id="name"
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      disabled={organizationRole !== 'owner'}
+                    />
+                  </div>
 
-              <div>
-                <Label htmlFor="website">Website</Label>
-                <Input
-                  id="website"
-                  type="url"
-                  placeholder="https://example.com"
-                  value={formData.website}
-                  onChange={(e) => setFormData({ ...formData, website: e.target.value })}
-                  disabled={organizationRole !== 'owner'}
-                />
-              </div>
+                  <div>
+                    <Label htmlFor="description">Description</Label>
+                    <Textarea
+                      id="description"
+                      value={formData.description}
+                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                      disabled={organizationRole !== 'owner'}
+                      rows={3}
+                    />
+                  </div>
 
-              <div>
-                <Label htmlFor="industry">Industry</Label>
-                <Input
-                  id="industry"
-                  placeholder="e.g., SaaS, E-commerce"
-                  value={formData.industry}
-                  onChange={(e) => setFormData({ ...formData, industry: e.target.value })}
-                  disabled={organizationRole !== 'owner'}
-                />
-              </div>
+                  <div>
+                    <Label htmlFor="website">Website</Label>
+                    <Input
+                      id="website"
+                      type="url"
+                      placeholder="https://example.com"
+                      value={formData.website}
+                      onChange={(e) => setFormData({ ...formData, website: e.target.value })}
+                      disabled={organizationRole !== 'owner'}
+                    />
+                  </div>
 
-              {organizationRole === 'owner' && (
-                <Button onClick={handleUpdateOrganization} disabled={saving}>
-                  {saving ? 'Saving...' : 'Save Changes'}
-                </Button>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
+                  <div>
+                    <Label htmlFor="industry">Industry</Label>
+                    <Input
+                      id="industry"
+                      placeholder="e.g., SaaS, E-commerce"
+                      value={formData.industry}
+                      onChange={(e) => setFormData({ ...formData, industry: e.target.value })}
+                      disabled={organizationRole !== 'owner'}
+                    />
+                  </div>
 
-        {/* Members Tab */}
-        <TabsContent value="members">
-          <div className="space-y-6">
-            {/* Invite Member - New System */}
-            {organizationRole === 'owner' && (
-              <>
+                  {organizationRole === 'owner' && (
+                    <Button onClick={handleUpdateOrganization} disabled={saving}>
+                      {saving ? 'Saving...' : 'Save Changes'}
+                    </Button>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Members Tab */}
+            <TabsContent value="members">
+              <div className="space-y-6">
+                {/* Invite Member - New System */}
+                {organizationRole === 'owner' && (
+                  <>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Invite Team Members</CardTitle>
+                        <CardDescription>
+                          Send email invitations to add new members to your organization
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <Button onClick={() => setShowInviteModal(true)}>
+                          <Mail className="h-4 w-4 mr-2" />
+                          Invite Member
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    {/* Pending Invitations */}
+                    <PendingInvitations
+                      organizationId={organization.id}
+                      refreshTrigger={invitationRefreshTrigger}
+                    />
+                  </>
+                )}
+
+                {/* Members List */}
                 <Card>
                   <CardHeader>
-                    <CardTitle>Invite Team Members</CardTitle>
+                    <CardTitle>Team Members</CardTitle>
                     <CardDescription>
-                      Send email invitations to add new members to your organization
+                      {members.length} / {organization.max_users} members
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <Button onClick={() => setShowInviteModal(true)}>
-                      <Mail className="h-4 w-4 mr-2" />
-                      Invite Member
-                    </Button>
+                    {loadingMembers ? (
+                      <MembersTableSkeleton />
+                    ) : (
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Name</TableHead>
+                            <TableHead>Email</TableHead>
+                            <TableHead>Role</TableHead>
+                            <TableHead>Joined</TableHead>
+                            <TableHead className="text-right">Actions</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {members.map((member) => (
+                            <TableRow key={member.id}>
+                              <TableCell className="font-medium">{member.name}</TableCell>
+                              <TableCell>{member.email}</TableCell>
+                              <TableCell>
+                                {organizationRole === 'owner' && member.organization_role !== 'owner' ? (
+                                  <select
+                                    className="px-3 py-1 border rounded-md text-sm"
+                                    value={member.organization_role}
+                                    onChange={(e) => handleUpdateMemberRole(member.id, e.target.value)}
+                                  >
+                                    <option value="member">Member</option>
+                                    <option value="admin">Admin</option>
+                                    <option value="owner">Owner</option>
+                                  </select>
+                                ) : (
+                                  <Badge variant={getRoleBadgeVariant(member.organization_role)}>
+                                    <span className="mr-1">{getRoleIcon(member.organization_role)}</span>
+                                    {member.organization_role}
+                                  </Badge>
+                                )}
+                              </TableCell>
+                              <TableCell>
+                                {new Date(member.created_at).toLocaleDateString()}
+                              </TableCell>
+                              <TableCell className="text-right">
+                                {organizationRole === 'owner' && member.organization_role !== 'owner' && (
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleRemoveMember(member.id, member.name)}
+                                  >
+                                    <Trash2 className="h-4 w-4 text-red-500" />
+                                  </Button>
+                                )}
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+
+            {/* Subdomain Tab */}
+            <TabsContent value="subdomain">
+              <div className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Organization Subdomain</CardTitle>
+                    <CardDescription>
+                      Your unique subdomain for accessing your organization
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div>
+                      <Label>Current Subdomain</Label>
+                      <div className="flex items-center gap-2 mt-2">
+                        <code className="px-4 py-2 bg-muted rounded-md flex-1">
+                          {organization.subdomain}.fady.com
+                        </code>
+                        <Button variant="outline" size="icon" onClick={copySubdomain}>
+                          {copiedSubdomain ? (
+                            <Check className="h-4 w-4 text-green-500" />
+                          ) : (
+                            <Copy className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                      <p className="text-sm text-yellow-800">
+                        <strong>Note:</strong> Changing your subdomain will affect all existing links and integrations. This action cannot be undone.
+                      </p>
+                    </div>
+
+                    <div>
+                      <Label>Public Access URL</Label>
+                      <div className="flex items-center gap-2 mt-2">
+                        <Input
+                          value={`https://${organization.subdomain}.fady.com`}
+                          readOnly
+                          className="flex-1"
+                        />
+                        <Button variant="outline" asChild>
+                          <a href={`https://${organization.subdomain}.fady.com`} target="_blank" rel="noopener noreferrer">
+                            <ExternalLink className="h-4 w-4" />
+                          </a>
+                        </Button>
+                      </div>
+                    </div>
                   </CardContent>
                 </Card>
 
-                {/* Pending Invitations */}
-                <PendingInvitations 
-                  organizationId={organization.id} 
-                  refreshTrigger={invitationRefreshTrigger}
-                />
-              </>
-            )}
+                {/* Custom Domain Settings */}
+                <CustomDomainSettings organizationId={organization.id} />
+              </div>
+            </TabsContent>
 
-            {/* Members List */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Team Members</CardTitle>
-                <CardDescription>
-                  {members.length} / {organization.max_users} members
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {loadingMembers ? (
-                  <MembersTableSkeleton />
-                ) : (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Name</TableHead>
-                        <TableHead>Email</TableHead>
-                        <TableHead>Role</TableHead>
-                        <TableHead>Joined</TableHead>
-                        <TableHead className="text-right">Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {members.map((member) => (
-                        <TableRow key={member.id}>
-                          <TableCell className="font-medium">{member.name}</TableCell>
-                          <TableCell>{member.email}</TableCell>
-                          <TableCell>
-                            {organizationRole === 'owner' && member.organization_role !== 'owner' ? (
-                              <select
-                                className="px-3 py-1 border rounded-md text-sm"
-                                value={member.organization_role}
-                                onChange={(e) => handleUpdateMemberRole(member.id, e.target.value)}
-                              >
-                                <option value="member">Member</option>
-                                <option value="admin">Admin</option>
-                                <option value="owner">Owner</option>
-                              </select>
-                            ) : (
-                              <Badge variant={getRoleBadgeVariant(member.organization_role)}>
-                                <span className="mr-1">{getRoleIcon(member.organization_role)}</span>
-                                {member.organization_role}
-                              </Badge>
-                            )}
-                          </TableCell>
-                          <TableCell>
-                            {new Date(member.created_at).toLocaleDateString()}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            {organizationRole === 'owner' && member.organization_role !== 'owner' && (
-                              <Button 
-                                variant="ghost" 
-                                size="sm"
-                                onClick={() => handleRemoveMember(member.id, member.name)}
-                              >
-                                <Trash2 className="h-4 w-4 text-red-500" />
-                              </Button>
-                            )}
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
+            {/* Webhooks Tab */}
+            <TabsContent value="webhooks">
+              <WebhooksPage />
+            </TabsContent>
 
-        {/* Subdomain Tab */}
-        <TabsContent value="subdomain">
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Organization Subdomain</CardTitle>
-                <CardDescription>
-                  Your unique subdomain for accessing your organization
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <Label>Current Subdomain</Label>
-                  <div className="flex items-center gap-2 mt-2">
-                    <code className="px-4 py-2 bg-muted rounded-md flex-1">
-                      {organization.subdomain}.fady.com
-                    </code>
-                    <Button variant="outline" size="icon" onClick={copySubdomain}>
-                      {copiedSubdomain ? (
-                        <Check className="h-4 w-4 text-green-500" />
-                      ) : (
-                        <Copy className="h-4 w-4" />
-                      )}
-                    </Button>
-                  </div>
+            {/* Widgets Tab */}
+            <TabsContent value="widgets">
+              <WidgetsPage />
+            </TabsContent>
+
+            {/* Job Roles Tab */}
+            <TabsContent value="roles">
+              <JobRolesTab />
+            </TabsContent>
+
+            {/* Integrations Tab */}
+            <TabsContent value="integrations">
+              <IntegrationsPage />
+            </TabsContent>
+
+            {/* Billing Tab */}
+            <TabsContent value="billing">
+              <div className="space-y-8">
+                {/* Current subscription status + cancel */}
+                <BillingSection />
+                {/* Full pricing cards to upgrade/downgrade */}
+                <div className="border-t pt-6">
+                  <h3 className="text-xl font-semibold mb-6">Plans & Pricing</h3>
+                  <PricingContent />
                 </div>
+              </div>
+            </TabsContent>
 
-                <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                  <p className="text-sm text-yellow-800">
-                    <strong>Note:</strong> Changing your subdomain will affect all existing links and integrations. This action cannot be undone.
-                  </p>
-                </div>
-
-                <div>
-                  <Label>Public Access URL</Label>
-                  <div className="flex items-center gap-2 mt-2">
-                    <Input
-                      value={`https://${organization.subdomain}.fady.com`}
-                      readOnly
-                      className="flex-1"
-                    />
-                    <Button variant="outline" asChild>
-                      <a href={`https://${organization.subdomain}.fady.com`} target="_blank" rel="noopener noreferrer">
-                        <ExternalLink className="h-4 w-4" />
-                      </a>
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Custom Domain Settings */}
-            <CustomDomainSettings organizationId={organization.id} />
-          </div>
-        </TabsContent>
-
-        {/* Webhooks Tab */}
-        <TabsContent value="webhooks">
-          <WebhooksPage />
-        </TabsContent>
-
-        {/* Widgets Tab */}
-        <TabsContent value="widgets">
-          <WidgetsPage />
-        </TabsContent>
-
-        {/* Job Roles Tab */}
-        <TabsContent value="roles">
-          <JobRolesTab />
-        </TabsContent>
-
-        {/* Billing Tab */}
-        <TabsContent value="billing">
-          <div className="space-y-8">
-            {/* Current subscription status + cancel */}
-            <BillingSection />
-            {/* Full pricing cards to upgrade/downgrade */}
-            <div className="border-t pt-6">
-              <h3 className="text-xl font-semibold mb-6">Plans & Pricing</h3>
-              <PricingContent />
-            </div>
-          </div>
-        </TabsContent>
-
-      </Tabs>
+          </Tabs>
         </div>
       </div>
 

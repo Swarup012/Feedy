@@ -60,25 +60,24 @@ export function RoleSelectionModal({
       });
 
       toast({
-        title: "Welcome!",
+        title: isChangingRole ? "Role Updated!" : "Welcome!",
         description: organizationName
           ? `You've joined ${organizationName} successfully`
+          : isChangingRole
+          ? "Your job role has been updated successfully"
           : "Your profile has been completed",
       });
 
       // Call the onComplete callback
       onComplete();
 
-      // Redirect based on context
-      if (isNewOrganization) {
-        // New user who needs to create organization
-        router.push("/onboarding");
-      } else if (organizationId) {
-        // User joined existing organization
-        router.push("/dashboard");
-      } else {
-        // Fallback
-        router.push("/dashboard");
+      // Only redirect when onboarding — NOT when simply changing an existing role
+      if (!isChangingRole) {
+        if (isNewOrganization) {
+          router.push("/onboarding");
+        } else {
+          router.push("/dashboard");
+        }
       }
     } catch (error: any) {
       console.error("Failed to set role:", error);

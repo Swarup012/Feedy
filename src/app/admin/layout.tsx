@@ -203,7 +203,7 @@ export default function AdminLayout({
                 <DropdownMenuLabel className="font-switzer font-bold text-base">My Account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
-                  onClick={() => router.push("/admin/profile")}
+                  onClick={() => router.push("/admin/organization?tab=profile")}
                   className="cursor-pointer rounded-lg py-2.5 font-medium"
                 >
                   Profile
@@ -214,12 +214,7 @@ export default function AdminLayout({
                 >
                   Organization Settings
                 </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => router.push("/admin/settings/integrations")}
-                  className="cursor-pointer rounded-lg py-2.5 font-medium"
-                >
-                  Integrations
-                </DropdownMenuItem>
+
 
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
