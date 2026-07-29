@@ -55,7 +55,7 @@ function formatDate(iso: string | null) {
 
 const DiscordIcon = ({ className }: { className?: string }) => (
   <svg className={className} viewBox="0 0 127.14 96.36" fill="currentColor">
-    <path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1,105.25,105.25,0,0,0,32.19-16.14c2.64-27.38-4.51-51.11-19.32-72.15ZM42.68,65.33C38.08,65.33,34.2,61,34.2,55.77s3.8-9.56,8.48-9.56,8.53,4.3,8.48,9.56C51.15,61,47.38,65.33,42.68,65.33Zm41.73,0c-4.6,0-8.48-4.3-8.48-9.56s3.8-9.56,8.48-9.56,8.53,4.3,8.48,9.56C92.89,61,89.11,65.33,84.41,65.33Z"/>
+    <path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1,105.25,105.25,0,0,0,32.19-16.14c2.64-27.38-4.51-51.11-19.32-72.15ZM42.68,65.33C38.08,65.33,34.2,61,34.2,55.77s3.8-9.56,8.48-9.56,8.53,4.3,8.48,9.56C51.15,61,47.38,65.33,42.68,65.33Zm41.73,0c-4.6,0-8.48-4.3-8.48-9.56s3.8-9.56,8.48-9.56,8.53,4.3,8.48,9.56C92.89,61,89.11,65.33,84.41,65.33Z" />
   </svg>
 );
 
@@ -112,15 +112,15 @@ function IntegrationsPageInner() {
   const [intercomStatus, setIntercomStatus] = useState<IntercomStatus | null>(null);
   const [discordStatus, setDiscordStatus] = useState<DiscordStatus | null>(null);
   const [discordChannels, setDiscordChannels] = useState<DiscordChannel[]>([]);
-  
+
   const [intercomAutopilot, setIntercomAutopilot] = useState<AutopilotSettings | null>(null);
   const [discordAutopilot, setDiscordAutopilot] = useState<AutopilotSettings | null>(null);
-  
+
   const [boards, setBoards] = useState<Board[]>([]);
-  
+
   const [intercomBoardId, setIntercomBoardId] = useState<string | null>(null);
   const [discordBoardId, setDiscordBoardId] = useState<string | null>(null);
-  
+
   const [loading, setLoading] = useState(true);
   const [disconnectingIntercom, setDisconnectingIntercom] = useState(false);
   const [disconnectingDiscord, setDisconnectingDiscord] = useState(false);
@@ -136,10 +136,10 @@ function IntegrationsPageInner() {
         intercomService.getStatus(orgId).catch(() => null),
         discordService.getStatus(orgId).catch(() => null),
       ]);
-      
+
       if (intercomRes) setIntercomStatus(intercomRes.data);
       if (discordRes) setDiscordStatus(discordRes.data);
-      
+
       // Load Discord channels if connected
       if (discordRes?.data?.status === 'active' && discordRes.data.provider_workspace_id) {
         discordService.listChannels(orgId).then(res => {
@@ -167,14 +167,14 @@ function IntegrationsPageInner() {
           autopilotService.getSettings(orgId, 'intercom').catch(() => null),
           autopilotService.getSettings(orgId, 'discord').catch(() => null),
         ]);
-        
+
         if (intercomRes?.data?.settings) {
           setIntercomAutopilot(intercomRes.data.settings);
           if (intercomRes.data.settings.default_board_id) {
             setIntercomBoardId(intercomRes.data.settings.default_board_id);
           }
         }
-        
+
         if (discordRes?.data?.settings) {
           setDiscordAutopilot(discordRes.data.settings);
           if (discordRes.data.settings.default_board_id) {
@@ -182,7 +182,7 @@ function IntegrationsPageInner() {
           }
         }
       } catch {
-        // non-fatal
+        // non-fatal.
       }
     })();
   }, [orgId]);
@@ -202,7 +202,7 @@ function IntegrationsPageInner() {
 
   const handleAutopilotModeToggle = async (provider: 'intercom' | 'discord', enable: boolean) => {
     if (!orgId) return;
-    
+
     const selectedBoardId = provider === 'intercom' ? intercomBoardId : discordBoardId;
 
     if (enable && !selectedBoardId) {
@@ -313,7 +313,7 @@ function IntegrationsPageInner() {
     const intercomResult = searchParams.get('intercom');
     const discordResult = searchParams.get('discord');
     const message = searchParams.get('message');
-    
+
     if (intercomResult === 'connected') {
       toast({
         title: 'Intercom connected',
@@ -414,7 +414,7 @@ function IntegrationsPageInner() {
 
   const isIntercomActive = intercomStatus?.status === 'active';
   const needsIntercomReconnect = intercomStatus?.status === 'error';
-  
+
   const isDiscordActive = discordStatus?.status === 'active';
   const needsDiscordReconnect = discordStatus?.status === 'error';
 
@@ -493,7 +493,7 @@ function IntegrationsPageInner() {
                               </div>
                               <Switch checked={discordAutopilot?.autopilot_mode === 'automatic'} disabled={savingDiscordAutopilot || !discordBoardId} onCheckedChange={(checked) => handleAutopilotModeToggle('discord', checked)} />
                             </div>
-                            
+
                             <div className="space-y-2 pt-1 border-t">
                               <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mt-2 block">Default Board</Label>
                               <Select value={discordBoardId || undefined} onValueChange={(val) => handleBoardChange('discord', val)} disabled={savingDiscordAutopilot}>
@@ -505,7 +505,7 @@ function IntegrationsPageInner() {
                             </div>
                           </div>
                         </div>
-                        
+
                         <div className="border-t bg-red-50/50 dark:bg-red-950/20 p-4">
                           <Button variant="destructive" size="sm" className="w-full gap-2" onClick={handleDisconnectDiscord} disabled={disconnectingDiscord}>
                             {disconnectingDiscord ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Unplug className="h-3.5 w-3.5" />}
@@ -581,7 +581,7 @@ function IntegrationsPageInner() {
                               </div>
                               <Switch checked={intercomAutopilot?.autopilot_mode === 'automatic'} disabled={savingIntercomAutopilot || !intercomBoardId} onCheckedChange={(checked) => handleAutopilotModeToggle('intercom', checked)} />
                             </div>
-                            
+
                             <div className="space-y-2 pt-1 border-t">
                               <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mt-2 block">Default Board</Label>
                               <Select value={intercomBoardId || undefined} onValueChange={(val) => handleBoardChange('intercom', val)} disabled={savingIntercomAutopilot}>
@@ -599,7 +599,7 @@ function IntegrationsPageInner() {
                             </p>
                           </div>
                         </div>
-                        
+
                         <div className="border-t bg-red-50/50 dark:bg-red-950/20 p-4">
                           <Button variant="destructive" size="sm" className="w-full gap-2" onClick={handleDisconnectIntercom} disabled={disconnectingIntercom}>
                             {disconnectingIntercom ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Unplug className="h-3.5 w-3.5" />}
