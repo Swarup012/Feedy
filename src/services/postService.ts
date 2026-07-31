@@ -21,6 +21,8 @@ export interface Post {
   category?: string; // ✅ Add category
   images?: string[]; // ✅ Add images array
   source?: string; // ✅ Add source
+  source_platform?: string; // discord, slack, intercom
+  external_submitter_name?: string; // display name of the original submitter on the platform
   created_at: string;
   updated_at: string;
   author?: {
@@ -53,7 +55,8 @@ export interface Post {
 }
 
 /** Display name for internal (author) or widget (external_author) submitters.
- *  Falls back to "Autopilot" only for auto-published AI posts. */
+ *  For auto-published AI posts, returns the external submitter's name if available,
+ *  otherwise falls back to "Suggested via {platform}". */
 export function getPostAuthorDisplayName(post: Post): string {
   if (post.author?.name) return post.author.name;
   if (post.org_end_user?.name) return post.org_end_user.name;
@@ -61,12 +64,33 @@ export function getPostAuthorDisplayName(post: Post): string {
   if (post.org_end_user?.email) return post.org_end_user.email;
   if (post.external_author?.email) return post.external_author.email;
   
-  if (post.source === 'autopilot') return "Autopilot";
+  if (post.source === 'autopilot') {
+    if (post.external_submitter_name) return post.external_submitter_name;
+    const platform = post.source_platform;
+    if (platform) {
+      const label = platform.charAt(0).toUpperCase() + platform.slice(1);
+      return `Suggested via ${label}`;
+    }
+    return "Autopilot";
+  }
   return "Anonymous";
 }
 
 export function isWidgetPost(post: Post): boolean {
   return Boolean(post.org_end_user || post.external_author);
+}
+
+export function isAutopilotPost(post: Post): boolean {
+  return post.source === 'autopilot';
+}
+
+export function getSourcePlatformBadgeStyle(platform: string | null | undefined): string {
+  switch (platform) {
+    case 'discord': return 'bg-[#5865F2]/10 text-[#5865F2] dark:bg-[#5865F2]/20 dark:text-[#949CF7]';
+    case 'slack': return 'bg-[#2EB67D]/10 text-[#2EB67D] dark:bg-[#2EB67D]/20 dark:text-[#4ADE80]';
+    case 'intercom': return 'bg-[#1F8DED]/10 text-[#1F8DED] dark:bg-[#1F8DED]/20 dark:text-[#60B4F0]';
+    default: return 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400';
+  }
 }
 
 export interface Comment {

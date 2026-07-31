@@ -47,3 +47,5 @@ firestore-debug.log
 .devctx/
 .context-engine/
 claude.md
+
+graphify-out

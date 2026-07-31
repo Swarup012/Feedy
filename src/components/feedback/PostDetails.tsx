@@ -40,7 +40,7 @@ import {
   Reply,
   BotMessageSquare,
 } from "lucide-react";
-import { Post, Comment, postService, getPostAuthorDisplayName } from "@/services/postService";
+import { Post, Comment, postService, getPostAuthorDisplayName, isAutopilotPost, getSourcePlatformBadgeStyle } from "@/services/postService";
 import { Board } from "@/services/boardService";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
@@ -890,25 +890,43 @@ export function PostDetails({
                 </div>
 
                 {/* Author and time — widget posts use external_author or org_end_user;
-                    AI-published posts (author_id = null) show "Autopilot" via getPostAuthorDisplayName */}
+                    AI-published posts show platform-specific source + optional submitter name */}
                 <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 flex-wrap">
-                  <>
-                    <Avatar className="h-6 w-6">
-                      <AvatarImage src={(post.author as { avatar_url?: string })?.avatar_url || undefined} />
-                      <AvatarFallback>
-                        {getPostAuthorDisplayName(post) === "Autopilot" ? <BotMessageSquare className="h-4 w-4" /> : getPostAuthorDisplayName(post)[0]?.toUpperCase() || "A"}
-                      </AvatarFallback>
-                    </Avatar>
-                    <span className="font-medium text-blue-600 dark:text-blue-400">
-                      {getPostAuthorDisplayName(post)}
-                    </span>
-                    {(post.external_author || post.org_end_user) && (
-                      <span className="inline-flex items-center rounded-full bg-violet-100 px-1.5 py-0.5 text-[10px] font-medium text-violet-700 dark:bg-violet-900/40 dark:text-violet-300">
-                        via Widget
+                  {isAutopilotPost(post) ? (
+                    <>
+                      <Avatar className="h-6 w-6">
+                        <AvatarFallback>
+                          <BotMessageSquare className="h-4 w-4" />
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="font-medium text-blue-600 dark:text-blue-400">
+                        {getPostAuthorDisplayName(post)}
                       </span>
-                    )}
-                    <span>·</span>
-                  </>
+                      {post.source_platform && (
+                        <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-medium ${getSourcePlatformBadgeStyle(post.source_platform)}`}>
+                          {post.source_platform}
+                        </span>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      <Avatar className="h-6 w-6">
+                        <AvatarImage src={(post.author as { avatar_url?: string })?.avatar_url || undefined} />
+                        <AvatarFallback>
+                          {getPostAuthorDisplayName(post)[0]?.toUpperCase() || "A"}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="font-medium text-blue-600 dark:text-blue-400">
+                        {getPostAuthorDisplayName(post)}
+                      </span>
+                      {(post.external_author || post.org_end_user) && (
+                        <span className="inline-flex items-center rounded-full bg-violet-100 px-1.5 py-0.5 text-[10px] font-medium text-violet-700 dark:bg-violet-900/40 dark:text-violet-300">
+                          via Widget
+                        </span>
+                      )}
+                    </>
+                  )}
+                  <span>·</span>
                   <span>{formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}</span>
                 </div>
 
@@ -1165,11 +1183,24 @@ export function PostDetails({
             <div>
               <label className="text-sm text-gray-600 dark:text-gray-400 block mb-2">Owner</label>
               <div className="text-sm text-gray-500 dark:text-gray-400">
-                {getPostAuthorDisplayName(post)}
-                {(post.external_author || post.org_end_user) && (
-                  <span className="ml-2 inline-flex items-center rounded-full bg-violet-100 px-1.5 py-0.5 text-[10px] font-medium text-violet-700 dark:bg-violet-900/40 dark:text-violet-300">
-                    via Widget
-                  </span>
+                {isAutopilotPost(post) ? (
+                  <>
+                    <span>{getPostAuthorDisplayName(post)}</span>
+                    {post.source_platform && (
+                      <span className={`ml-2 inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-medium ${getSourcePlatformBadgeStyle(post.source_platform)}`}>
+                        {post.source_platform}
+                      </span>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    {getPostAuthorDisplayName(post)}
+                    {(post.external_author || post.org_end_user) && (
+                      <span className="ml-2 inline-flex items-center rounded-full bg-violet-100 px-1.5 py-0.5 text-[10px] font-medium text-violet-700 dark:bg-violet-900/40 dark:text-violet-300">
+                        via Widget
+                      </span>
+                    )}
+                  </>
                 )}
               </div>
             </div>
