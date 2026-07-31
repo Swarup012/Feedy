@@ -4,6 +4,7 @@ import { Suspense, useCallback, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
+import { PaidFeatureGate } from '@/components/PaidFeatureGate';
 import { useOrganization } from '@/context/OrganizationContext';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -15,6 +16,11 @@ import {
   type DiscordStatus,
   type DiscordChannel,
 } from '@/services/discordService';
+import {
+  slackService,
+  type SlackStatus,
+  type SlackChannel,
+} from '@/services/slackService';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -105,34 +111,43 @@ function IntegrationsPageInner() {
 
   const [intercomStatus, setIntercomStatus] = useState<IntercomStatus | null>(null);
   const [discordStatus, setDiscordStatus] = useState<DiscordStatus | null>(null);
+  const [slackStatus, setSlackStatus] = useState<SlackStatus | null>(null);
   const [discordChannels, setDiscordChannels] = useState<DiscordChannel[]>([]);
+  const [slackChannels, setSlackChannels] = useState<SlackChannel[]>([]);
 
   const [intercomAutopilot, setIntercomAutopilot] = useState<AutopilotSettings | null>(null);
   const [discordAutopilot, setDiscordAutopilot] = useState<AutopilotSettings | null>(null);
+  const [slackAutopilot, setSlackAutopilot] = useState<AutopilotSettings | null>(null);
 
   const [boards, setBoards] = useState<Board[]>([]);
 
   const [intercomBoardId, setIntercomBoardId] = useState<string | null>(null);
   const [discordBoardId, setDiscordBoardId] = useState<string | null>(null);
+  const [slackBoardId, setSlackBoardId] = useState<string | null>(null);
 
   const [loading, setLoading] = useState(true);
   const [disconnectingIntercom, setDisconnectingIntercom] = useState(false);
   const [disconnectingDiscord, setDisconnectingDiscord] = useState(false);
+  const [disconnectingSlack, setDisconnectingSlack] = useState(false);
   const [savingIntercomAutopilot, setSavingIntercomAutopilot] = useState(false);
   const [savingDiscordAutopilot, setSavingDiscordAutopilot] = useState(false);
+  const [savingSlackAutopilot, setSavingSlackAutopilot] = useState(false);
   const [savingDiscordChannel, setSavingDiscordChannel] = useState(false);
+  const [savingSlackChannel, setSavingSlackChannel] = useState(false);
 
   const loadStatus = useCallback(async () => {
     if (!orgId) return;
     setLoading(true);
     try {
-      const [intercomRes, discordRes] = await Promise.all([
+      const [intercomRes, discordRes, slackRes] = await Promise.all([
         intercomService.getStatus(orgId).catch(() => null),
         discordService.getStatus(orgId).catch(() => null),
+        slackService.getStatus(orgId).catch(() => null),
       ]);
 
       if (intercomRes) setIntercomStatus(intercomRes.data);
       if (discordRes) setDiscordStatus(discordRes.data);
+      if (slackRes) setSlackStatus(slackRes.data);
 
       // Load Discord channels if connected
       if (discordRes?.data?.status === 'active' && discordRes.data.provider_workspace_id) {
@@ -140,6 +155,15 @@ function IntegrationsPageInner() {
           setDiscordChannels(res.data.channels);
         }).catch(err => {
           console.error("Failed to load Discord channels:", err);
+        });
+      }
+
+      // Load Slack channels if connected
+      if (slackRes?.data?.status === 'active' && slackRes.data.provider_workspace_id) {
+        slackService.listChannels(orgId).then(res => {
+          setSlackChannels(res.data.channels);
+        }).catch(err => {
+          console.error("Failed to load Slack channels:", err);
         });
       }
     } catch (err: unknown) {
@@ -157,9 +181,10 @@ function IntegrationsPageInner() {
     if (!orgId) return;
     (async () => {
       try {
-        const [intercomRes, discordRes] = await Promise.all([
+        const [intercomRes, discordRes, slackRes] = await Promise.all([
           autopilotService.getSettings(orgId, 'intercom').catch(() => null),
           autopilotService.getSettings(orgId, 'discord').catch(() => null),
+          autopilotService.getSettings(orgId, 'slack').catch(() => null),
         ]);
 
         if (intercomRes?.data?.settings) {
@@ -173,6 +198,13 @@ function IntegrationsPageInner() {
           setDiscordAutopilot(discordRes.data.settings);
           if (discordRes.data.settings.default_board_id) {
             setDiscordBoardId(discordRes.data.settings.default_board_id);
+          }
+        }
+
+        if (slackRes?.data?.settings) {
+          setSlackAutopilot(slackRes.data.settings);
+          if (slackRes.data.settings.default_board_id) {
+            setSlackBoardId(slackRes.data.settings.default_board_id);
           }
         }
       } catch {
@@ -194,10 +226,13 @@ function IntegrationsPageInner() {
     })();
   }, [orgId]);
 
-  const handleAutopilotModeToggle = async (provider: 'intercom' | 'discord', enable: boolean) => {
+  const handleAutopilotModeToggle = async (provider: 'intercom' | 'discord' | 'slack', enable: boolean) => {
     if (!orgId) return;
 
-    const selectedBoardId = provider === 'intercom' ? intercomBoardId : discordBoardId;
+    const selectedBoardId =
+      provider === 'intercom' ? intercomBoardId :
+      provider === 'discord' ? discordBoardId :
+      slackBoardId;
 
     if (enable && !selectedBoardId) {
       toast({
@@ -213,14 +248,19 @@ function IntegrationsPageInner() {
       ...(selectedBoardId ? { default_board_id: selectedBoardId } : {}),
     };
 
-    const setSaving = provider === 'intercom' ? setSavingIntercomAutopilot : setSavingDiscordAutopilot;
+    const setSaving =
+      provider === 'intercom' ? setSavingIntercomAutopilot :
+      provider === 'discord' ? setSavingDiscordAutopilot :
+      setSavingSlackAutopilot;
     setSaving(true);
     try {
       const res = await autopilotService.updateSettings(orgId, provider, payload);
       if (provider === 'intercom') {
         setIntercomAutopilot(res.data.settings);
-      } else {
+      } else if (provider === 'discord') {
         setDiscordAutopilot(res.data.settings);
+      } else {
+        setSlackAutopilot(res.data.settings);
       }
       toast({
         title: enable ? 'Automatic Mode enabled' : 'Switched to Manual Mode',
@@ -239,17 +279,25 @@ function IntegrationsPageInner() {
     }
   };
 
-  const handleBoardChange = async (provider: 'intercom' | 'discord', boardId: string) => {
+  const handleBoardChange = async (provider: 'intercom' | 'discord' | 'slack', boardId: string) => {
     if (provider === 'intercom') {
       setIntercomBoardId(boardId);
-    } else {
+    } else if (provider === 'discord') {
       setDiscordBoardId(boardId);
+    } else {
+      setSlackBoardId(boardId);
     }
 
-    const autopilotSettings = provider === 'intercom' ? intercomAutopilot : discordAutopilot;
+    const autopilotSettings =
+      provider === 'intercom' ? intercomAutopilot :
+      provider === 'discord' ? discordAutopilot :
+      slackAutopilot;
 
     if (autopilotSettings?.autopilot_mode === 'automatic' && orgId) {
-      const setSaving = provider === 'intercom' ? setSavingIntercomAutopilot : setSavingDiscordAutopilot;
+      const setSaving =
+        provider === 'intercom' ? setSavingIntercomAutopilot :
+        provider === 'discord' ? setSavingDiscordAutopilot :
+        setSavingSlackAutopilot;
       setSaving(true);
       try {
         const res = await autopilotService.updateSettings(orgId, provider, {
@@ -258,8 +306,10 @@ function IntegrationsPageInner() {
         });
         if (provider === 'intercom') {
           setIntercomAutopilot(res.data.settings);
-        } else {
+        } else if (provider === 'discord') {
           setDiscordAutopilot(res.data.settings);
+        } else {
+          setSlackAutopilot(res.data.settings);
         }
         toast({ title: 'Default board updated' });
       } catch (err: unknown) {
@@ -298,6 +348,30 @@ function IntegrationsPageInner() {
     }
   };
 
+  const handleSlackChannelChange = async (channelId: string) => {
+    if (!orgId) return;
+    setSavingSlackChannel(true);
+    try {
+      const res = await slackService.setChannel(orgId, channelId);
+      if (slackStatus) {
+        setSlackStatus({
+          ...slackStatus,
+          provider_channel_id: res.data.provider_channel_id,
+          updated_at: res.data.updated_at,
+        });
+      }
+      toast({ title: 'Monitored channel updated' });
+    } catch (err: unknown) {
+      toast({
+        title: 'Update failed',
+        description: (err as any)?.response?.data?.message || 'Failed to set channel',
+        variant: 'destructive',
+      });
+    } finally {
+      setSavingSlackChannel(false);
+    }
+  };
+
   useEffect(() => {
     loadStatus();
   }, [loadStatus]);
@@ -306,6 +380,7 @@ function IntegrationsPageInner() {
   useEffect(() => {
     const intercomResult = searchParams.get('intercom');
     const discordResult = searchParams.get('discord');
+    const slackResult = searchParams.get('slack');
     const message = searchParams.get('message');
 
     if (intercomResult === 'connected') {
@@ -335,11 +410,26 @@ function IntegrationsPageInner() {
       });
     }
 
-    if (intercomResult || discordResult) {
+    if (slackResult === 'connected') {
+      toast({
+        title: 'Slack connected',
+        description: 'Select a channel to monitor for feedback. Invite the bot to that channel.',
+      });
+      loadStatus();
+    } else if (slackResult === 'error') {
+      toast({
+        title: 'Slack connection failed',
+        description: message || 'Please try again.',
+        variant: 'destructive',
+      });
+    }
+
+    if (intercomResult || discordResult || slackResult) {
       // Clean query string without full reload
       const url = new URL(window.location.href);
       url.searchParams.delete('intercom');
       url.searchParams.delete('discord');
+      url.searchParams.delete('slack');
       url.searchParams.delete('message');
       window.history.replaceState({}, '', url.pathname);
     }
@@ -353,6 +443,11 @@ function IntegrationsPageInner() {
   const handleConnectDiscord = () => {
     if (!orgId) return;
     discordService.startConnect(orgId);
+  };
+
+  const handleConnectSlack = () => {
+    if (!orgId) return;
+    slackService.startConnect(orgId);
   };
 
   const handleDisconnectIntercom = async () => {
@@ -398,6 +493,28 @@ function IntegrationsPageInner() {
     }
   };
 
+  const handleDisconnectSlack = async () => {
+    if (!orgId) return;
+    setDisconnectingSlack(true);
+    try {
+      await slackService.disconnect(orgId);
+      toast({
+        title: 'Slack disconnected',
+        description: 'We will no longer monitor your Slack channel.',
+      });
+      setSlackChannels([]);
+      await loadStatus();
+    } catch (err: unknown) {
+      toast({
+        title: 'Disconnect failed',
+        description: (err as Error)?.message || 'Disconnect failed',
+        variant: 'destructive',
+      });
+    } finally {
+      setDisconnectingSlack(false);
+    }
+  };
+
   if (orgLoading || !orgId) {
     return (
       <div className="flex items-center justify-center min-h-[40vh]">
@@ -412,7 +529,11 @@ function IntegrationsPageInner() {
   const isDiscordActive = discordStatus?.status === 'active';
   const needsDiscordReconnect = discordStatus?.status === 'error';
 
+  const isSlackActive = slackStatus?.status === 'active';
+  const needsSlackReconnect = slackStatus?.status === 'error';
+
   return (
+    <PaidFeatureGate featureName="Integrations">
     <div className="space-y-10">
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Integrations</h1>
@@ -426,7 +547,7 @@ function IntegrationsPageInner() {
       ) : (
         <>
           {/* ── Connected Integrations ── */}
-          {(isDiscordActive || isIntercomActive) && (
+          {(isDiscordActive || isIntercomActive || isSlackActive) && (
             <section className="space-y-3">
               <h2 className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
                 Connected Integrations
@@ -627,6 +748,122 @@ function IntegrationsPageInner() {
                 </div>
               )}
 
+              {isSlackActive && (
+                <div className="rounded-xl border bg-card shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden hover:shadow-md transition-shadow">
+                  <div className="p-5 flex items-start justify-between gap-4">
+                    <div className="flex items-start gap-4">
+                      <div className="h-12 w-12 shrink-0 rounded-xl bg-[#E01E5A]/10 flex items-center justify-center shadow-sm">
+                        <SlackIcon className="h-6 w-6" />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2.5">
+                          <h3 className="font-semibold">Slack</h3>
+                          <Badge className="bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-0 text-[11px] font-semibold">Connected</Badge>
+                        </div>
+                        <p className="text-sm text-muted-foreground mt-1 max-w-lg">
+                          Monitor a Slack channel for product feedback. New messages feed into Autopilot.
+                        </p>
+                      </div>
+                    </div>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button variant="outline" size="sm" className="shrink-0 gap-2">
+                          <Settings2 className="h-3.5 w-3.5" /> Manage
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent align="end" className="w-80 p-0 overflow-hidden rounded-xl border bg-card shadow-lg">
+                        <div className="bg-muted/50 px-4 py-3 border-b">
+                          <h4 className="font-semibold text-sm flex items-center gap-2">
+                            <SlackIcon className="h-4 w-4" /> Slack Settings
+                          </h4>
+                        </div>
+                        <div className="p-4 space-y-5">
+                          {slackChannels.length > 0 && (
+                            <div className="space-y-2">
+                              <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                                <Hash className="h-3.5 w-3.5" /> Monitored Channel
+                              </Label>
+                              <Select value={slackStatus?.provider_channel_id || undefined} onValueChange={handleSlackChannelChange} disabled={savingSlackChannel}>
+                                <SelectTrigger className="h-9"><SelectValue placeholder="Select channel…" /></SelectTrigger>
+                                <SelectContent>
+                                  {slackChannels.map(ch => (
+                                    <SelectItem key={ch.id} value={ch.id}># {ch.name}</SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <p className="text-[10px] text-muted-foreground leading-relaxed">
+                                Invite the Feedy bot to this channel so Events API can deliver messages.
+                              </p>
+                            </div>
+                          )}
+
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between gap-4">
+                              <div className="space-y-0.5">
+                                <Label className="text-sm font-medium flex items-center gap-1.5"><Zap className="h-3.5 w-3.5 text-amber-500" /> Automatic Mode</Label>
+                                <p className="text-[11px] text-muted-foreground leading-tight">Bypass review & publish instantly.</p>
+                                {!slackBoardId && <p className="text-[10px] text-amber-600 dark:text-amber-500 mt-0.5 font-medium">Select a board below first.</p>}
+                              </div>
+                              <Switch checked={slackAutopilot?.autopilot_mode === 'automatic'} disabled={savingSlackAutopilot || !slackBoardId} onCheckedChange={(checked) => handleAutopilotModeToggle('slack', checked)} />
+                            </div>
+
+                            {slackAutopilot?.autopilot_mode === 'automatic' && (
+                              <div className="rounded-lg border border-amber-200 bg-amber-50/80 dark:border-amber-900/50 dark:bg-amber-950/30 px-3 py-2.5 flex gap-2">
+                                <AlertTriangle className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                                <p className="text-[11px] text-amber-800 dark:text-amber-300 leading-relaxed">
+                                  Feedback from this channel will publish directly to the board without manual review.
+                                </p>
+                              </div>
+                            )}
+
+                            <div className="space-y-2 pt-1 border-t">
+                              <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mt-2 block">Default Board</Label>
+                              <Select value={slackBoardId || undefined} onValueChange={(val) => handleBoardChange('slack', val)} disabled={savingSlackAutopilot}>
+                                <SelectTrigger className="h-9"><SelectValue placeholder="Select a board…" /></SelectTrigger>
+                                <SelectContent>
+                                  {boards.map(b => (<SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="border-t bg-red-50/50 dark:bg-red-950/20 p-4">
+                          <Button variant="destructive" size="sm" className="w-full gap-2" onClick={handleDisconnectSlack} disabled={disconnectingSlack}>
+                            {disconnectingSlack ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Unplug className="h-3.5 w-3.5" />}
+                            Disconnect Slack
+                          </Button>
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                  <div className="border-t bg-muted/30 px-5 py-3.5 flex flex-wrap items-center gap-x-10 gap-y-2 text-sm">
+                    <div>
+                      <span className="text-[11px] text-muted-foreground uppercase tracking-wide block">Channel</span>
+                      <p className="font-medium flex items-center gap-1 mt-0.5">
+                        <Hash className="h-3.5 w-3.5 text-muted-foreground" />
+                        {slackChannels.find(c => c.id === slackStatus?.provider_channel_id)?.name || 'Not selected'}
+                      </p>
+                    </div>
+                    <div>
+                      <span className="text-[11px] text-muted-foreground uppercase tracking-wide block">Board</span>
+                      <p className="font-medium mt-0.5">{boards.find(b => b.id === slackBoardId)?.name || 'Not set'}</p>
+                    </div>
+                    <div>
+                      <span className="text-[11px] text-muted-foreground uppercase tracking-wide block">Connected on</span>
+                      <p className="font-medium mt-0.5">{slackStatus?.connected_at ? formatDate(slackStatus.connected_at) : '—'}</p>
+                    </div>
+                    <div className="ml-auto flex items-center gap-2">
+                      <span className="relative flex h-2 w-2">
+                        <span className="animate-ping absolute h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                        <span className="relative rounded-full h-2 w-2 bg-emerald-500" />
+                      </span>
+                      <span className="text-emerald-600 dark:text-emerald-400 font-semibold text-xs">Active</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {needsDiscordReconnect && (
                 <div className="rounded-xl border border-red-200 dark:border-red-900/50 bg-red-50/50 dark:bg-red-950/20 p-4 flex items-start gap-3">
                   <AlertTriangle className="h-5 w-5 text-red-500 shrink-0 mt-0.5" />
@@ -648,6 +885,19 @@ function IntegrationsPageInner() {
                     <p className="text-sm text-red-600/80 dark:text-red-400/80 mt-0.5">Auth error — reconnect to restore.</p>
                   </div>
                   <Button size="sm" variant="outline" className="border-red-300 text-red-700 hover:bg-red-100 dark:border-red-800 dark:text-red-300" onClick={handleConnectIntercom}>
+                    <Plug className="h-3.5 w-3.5 mr-1.5" /> Reconnect
+                  </Button>
+                </div>
+              )}
+
+              {needsSlackReconnect && (
+                <div className="rounded-xl border border-red-200 dark:border-red-900/50 bg-red-50/50 dark:bg-red-950/20 p-4 flex items-start gap-3">
+                  <AlertTriangle className="h-5 w-5 text-red-500 shrink-0 mt-0.5" />
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-red-800 dark:text-red-300">Slack connection lost</p>
+                    <p className="text-sm text-red-600/80 dark:text-red-400/80 mt-0.5">Auth error — reconnect to restore.</p>
+                  </div>
+                  <Button size="sm" variant="outline" className="border-red-300 text-red-700 hover:bg-red-100 dark:border-red-800 dark:text-red-300" onClick={handleConnectSlack}>
                     <Plug className="h-3.5 w-3.5 mr-1.5" /> Reconnect
                   </Button>
                 </div>
@@ -692,14 +942,20 @@ function IntegrationsPageInner() {
                   <Button size="sm" className="mt-4 w-full bg-[#1F8DED] hover:bg-[#1a7ad4]" onClick={handleConnectIntercom}>Connect</Button>
                 )}
               </div>
-              {/* Slack — coming soon */}
-              <div className="rounded-xl border bg-card p-5 flex flex-col opacity-60 cursor-not-allowed">
-                <div className="h-10 w-10 rounded-lg bg-[#E01E5A]/10 flex items-center justify-center mb-3">
-                  <SlackIcon className="h-5 w-5 text-[#E01E5A]" />
+              {/* Slack */}
+              <div className="rounded-xl border bg-card p-5 flex flex-col hover:shadow-md hover:border-[#E01E5A]/30 transition-all group">
+                <div className="h-10 w-10 rounded-lg bg-[#E01E5A]/10 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+                  <SlackIcon className="h-5 w-5" />
                 </div>
                 <h3 className="font-semibold text-sm">Slack</h3>
-                <p className="text-xs text-muted-foreground mt-1.5 flex-1 leading-relaxed">Receive notifications and manage feedback directly from Slack.</p>
-                <Button size="sm" variant="outline" className="mt-4 w-full" disabled>Coming Soon</Button>
+                <p className="text-xs text-muted-foreground mt-1.5 flex-1 leading-relaxed">Monitor a Slack channel and convert messages into actionable feedback.</p>
+                {isSlackActive ? (
+                  <div className="mt-4 flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-semibold text-sm">
+                    <CheckCircle2 className="h-4 w-4" /> Connected
+                  </div>
+                ) : (
+                  <Button size="sm" className="mt-4 w-full bg-[#4A154B] hover:bg-[#3b113c]" onClick={handleConnectSlack}>Connect</Button>
+                )}
               </div>
               {/* Email — coming soon */}
               <div className="rounded-xl border bg-card p-5 flex flex-col opacity-60 cursor-not-allowed">
@@ -717,6 +973,7 @@ function IntegrationsPageInner() {
         </>
       )}
     </div>
+    </PaidFeatureGate>
   );
 }
 

@@ -15,6 +15,16 @@ import { useToast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import {
   Building2,
   Users,
   Settings,
@@ -76,6 +86,10 @@ export default function OrganizationSettingsPage() {
   // Invitation modal state
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [invitationRefreshTrigger, setInvitationRefreshTrigger] = useState(0);
+
+  // Remove member confirmation dialog state
+  const [removeMemberTarget, setRemoveMemberTarget] = useState<{ id: string; name: string } | null>(null);
+  const [removing, setRemoving] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -247,50 +261,45 @@ export default function OrganizationSettingsPage() {
     }
   };
 
-  const handleRemoveMember = async (memberId: string, memberName: string) => {
-    if (!organization) return;
-    if (organizationRole !== 'owner' && organizationRole !== 'admin') {
-      toast({
-        title: 'Unauthorized',
-        description: 'Only owners and admins can remove members.',
-        variant: 'destructive',
-      });
-      return;
-    }
+  /**
+   * Initiates the remove-member flow by storing the target and opening the
+   * confirmation dialog. Actual deletion happens in confirmRemoveMember.
+   *
+   * Guards:
+   *  - Only admins/owners can see the Remove button (enforced in the JSX).
+   *  - Owners are never shown a Remove button (enforced in the JSX).
+   *  - Self-removal is caught by the backend (returns 400 with a clear message).
+   */
+  const handleRemoveMember = (memberId: string, memberName: string) => {
+    setRemoveMemberTarget({ id: memberId, name: memberName });
+  };
 
-    if (!confirm(`Are you sure you want to remove ${memberName} from the organization?`)) {
-      return;
-    }
+  const confirmRemoveMember = async () => {
+    if (!organization || !removeMemberTarget) return;
 
     try {
-      const response = await fetch(`/api/organizations/${organization.id}/members/${memberId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
-        },
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        toast({
-          title: 'Success',
-          description: `${memberName} has been removed from the organization.`,
-        });
-        await fetchMembers(); // Refresh the members list
-      } else {
-        toast({
-          title: 'Error',
-          description: data.error || 'Failed to remove member.',
-          variant: 'destructive',
-        });
-      }
-    } catch (error) {
+      setRemoving(true);
+      await api.delete(
+        `/api/organizations/${organization.id}/members/${removeMemberTarget.id}`
+      );
       toast({
-        title: 'Error',
-        description: 'An unexpected error occurred.',
+        title: 'Member removed',
+        description: `${removeMemberTarget.name} has been removed from the organization.`,
+      });
+      setRemoveMemberTarget(null);
+      await fetchMembers();
+    } catch (error: any) {
+      const message =
+        error?.response?.data?.error ||
+        error?.response?.data?.message ||
+        'Failed to remove member.';
+      toast({
+        title: 'Could not remove member',
+        description: message,
         variant: 'destructive',
       });
+    } finally {
+      setRemoving(false);
     }
   };
 
@@ -587,15 +596,18 @@ export default function OrganizationSettingsPage() {
                                 {new Date(member.created_at).toLocaleDateString()}
                               </TableCell>
                               <TableCell className="text-right">
-                                {organizationRole === 'owner' && member.organization_role !== 'owner' && (
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => handleRemoveMember(member.id, member.name)}
-                                  >
-                                    <Trash2 className="h-4 w-4 text-red-500" />
-                                  </Button>
-                                )}
+                                {/* Show Remove button for owner/admin, but never for the org owner themselves */}
+                                {(['owner', 'admin'] as string[]).includes(organizationRole ?? '') &&
+                                  member.organization_role !== 'owner' && (
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => handleRemoveMember(member.id, member.name)}
+                                      id={`remove-member-${member.id}`}
+                                    >
+                                      <Trash2 className="h-4 w-4 text-red-500" />
+                                    </Button>
+                                  )}
                               </TableCell>
                             </TableRow>
                           ))}
@@ -713,6 +725,36 @@ export default function OrganizationSettingsPage() {
           }}
         />
       )}
+
+      {/* Remove Member Confirmation Dialog */}
+      <AlertDialog
+        open={!!removeMemberTarget}
+        onOpenChange={(open) => { if (!open) setRemoveMemberTarget(null); }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove member?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to remove{' '}
+              <strong>{removeMemberTarget?.name}</strong> from{' '}
+              <strong>{organization?.name}</strong>? They will lose access to
+              this organization immediately. Their account and any other
+              organization memberships will remain untouched.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={removing}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmRemoveMember}
+              disabled={removing}
+              className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
+              id="confirm-remove-member"
+            >
+              {removing ? 'Removing…' : 'Remove member'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

@@ -71,7 +71,7 @@ export default function PricingContent() {
     free: {
       name: "Free",
       price: 0,
-      description: "Perfect for trying out Faddy",
+      description: "For solo builders just getting started with structured feedback.",
       features: [
         { text: "3 feedback boards", included: true },
         { text: "5 posts per board", included: true },
@@ -79,9 +79,6 @@ export default function PricingContent() {
         { text: "3 team members", included: true },
         { text: "1 roadmap", included: true },
         { text: "Basic analytics", included: true },
-        { text: "Custom branding", included: false },
-        { text: "Advanced analytics", included: false },
-        { text: "Priority support", included: false },
       ],
       highlight: false,
     },
@@ -91,18 +88,15 @@ export default function PricingContent() {
       yearlyPrice: 180,
       effectiveMonthlyYearly: 15,
       savings: 48,
-      description: "For growing teams collecting feedback",
+      description: "For indie founders and small teams ready to put their brand front and center.",
       features: [
-        { text: "Unlimited feedback boards", included: true },
-        { text: "Unlimited posts", included: true },
-        { text: "125+ tracked users included", included: true },
+        { text: "Unlimited Feedback Boards + Posts", included: true },
         { text: "Unlimited team members", included: true, highlight: true },
         { text: "Up to 5 admins", included: true, highlight: true },
         { text: "1 roadmap", included: true },
+        { text: "125+ tracked users", included: true },
         { text: "Advanced analytics", included: true },
         { text: "Custom branding", included: true },
-        { text: "$6 per 50 additional users", included: true, subtext: true },
-        { text: "14-day free trial", included: true, highlight: true },
       ],
       highlight: true,
     },
@@ -112,17 +106,14 @@ export default function PricingContent() {
       yearlyPrice: 540,
       effectiveMonthlyYearly: 45,
       savings: 48,
-      description: "For teams that need more collaboration",
+      description: "Turn scattered feedback into clear priorities with AI-powered clustering and automation.",
       features: [
-        { text: "Everything in Starter, plus:", included: true, bold: true },
-        { text: "Unlimited team members", included: true, highlight: true },
-        { text: "Up to 10 admins", included: true, highlight: true },
-        { text: "1 custom domain (subdomain)", included: true, highlight: true },
-        { text: "Priority support", included: true, highlight: true },
-        { text: "Custom integrations", included: true },
-        { text: "Advanced security features", included: true },
-        { text: "$6 per 50 additional users", included: true, subtext: true },
-        { text: "14-day free trial", included: true, highlight: true },
+        { text: 'All Starter features, plus:', included: true, bold: true },
+        { text: 'Up to 10 admins', included: true, highlight: true },
+        { text: '1 custom Subdomain', included: true, highlight: true },
+        { text: 'Priority support', included: true, highlight: true },
+        { text: 'Custom integrations', included: true },
+        { text: 'Advanced security features', included: true },
       ],
       highlight: false,
     },
@@ -247,14 +238,6 @@ export default function PricingContent() {
                 >
                   {loading ? "Loading..." : "Start 14-Day Free Trial"}
                 </Button>
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={() => handleUpgrade("starter", billingCycle, true)}
-                  disabled={loading}
-                >
-                  Skip Trial & Subscribe Now
-                </Button>
               </div>
             ) : currentPlan === "starter" ? (
               <Button variant="outline" className="w-full mb-6" disabled>
@@ -339,14 +322,6 @@ export default function PricingContent() {
                   disabled={loading}
                 >
                   {loading ? "Loading..." : "Start Pro Trial"}
-                </Button>
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={() => handleUpgrade("pro", billingCycle, true)}
-                  disabled={loading}
-                >
-                  Skip Trial & Subscribe Now
                 </Button>
               </div>
             ) : currentPlan === "starter" ? (

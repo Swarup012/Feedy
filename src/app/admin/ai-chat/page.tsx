@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
+import { PaidFeatureGate } from '@/components/PaidFeatureGate';
 import { useOrganization } from '@/context/OrganizationContext';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
@@ -443,6 +444,7 @@ function AiChatContent() {
   };
 
   return (
+    <PaidFeatureGate featureName="AI Feedback Chat">
     <div className="h-full flex bg-background overflow-hidden">
       {/* Sidebar */}
       <ConversationSidebar
@@ -525,6 +527,7 @@ function AiChatContent() {
         </div>
       </div>
     </div>
+    </PaidFeatureGate>
   );
 }
 

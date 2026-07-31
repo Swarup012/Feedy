@@ -207,228 +207,148 @@ export function CreateBoardDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto dark:bg-background dark:border-border">
-        <form onSubmit={handleSubmit}>
-          <DialogHeader>
-            <DialogTitle className="dark:text-white">Create New Board</DialogTitle>
-            <DialogDescription className="dark:text-gray-400">
-              Create a feedback board to organize posts by category
-            </DialogDescription>
+        <form onSubmit={handleSubmit} className="p-2 space-y-5">
+          <DialogHeader className="sr-only">
+            <DialogTitle>Create New Board</DialogTitle>
+            <DialogDescription>Create a feedback board</DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-6 py-4">
-            {/* Board Name */}
-            <div className="space-y-2">
-              <Label htmlFor="name" className="dark:text-gray-300">
-                Board Name <span className="text-red-500">*</span>
-              </Label>
-              <Input
-                id="name"
-                placeholder="e.g., Feature Requests"
-                value={formData.name}
-                onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
-                maxLength={100}
-                required
-                className="dark:bg-card dark:border-border dark:text-white"
-              />
+          {/* Board Name */}
+          <Input
+            id="name"
+            placeholder="Board name"
+            value={formData.name}
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            disabled={creating}
+            autoFocus
+            className="h-11 text-base rounded-xl bg-gray-50 dark:bg-gray-800/60 border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-blue-400"
+            maxLength={100}
+            required
+          />
 
-              {/* URL Preview */}
-              {slug && (
-                <div className="flex items-center gap-2 text-sm">
-                  <span className="text-gray-500 dark:text-gray-400">URL:</span>
-                  <code className="bg-gray-100 dark:bg-card px-2 py-1 rounded text-gray-700 dark:text-gray-300">
-                    /board/{slug}
-                  </code>
-                  {checkingSlug && (
-                    <Loader2 className="h-3 w-3 animate-spin text-gray-400 dark:text-gray-500" />
-                  )}
-                  {!checkingSlug && slugAvailable === true && (
-                    <Check className="h-4 w-4 text-green-500" />
-                  )}
-                  {!checkingSlug && slugAvailable === false && (
-                    <span className="text-red-500 dark:text-red-400 text-xs">Already taken</span>
-                  )}
-                </div>
-              )}
+          {/* URL slug feedback */}
+          {slug && (
+            <div className="flex items-center gap-2 text-xs text-gray-400 -mt-2 px-1">
+              <span>/board/{slug}</span>
+              {checkingSlug && <Loader2 className="h-3 w-3 animate-spin" />}
+              {!checkingSlug && slugAvailable === true && <Check className="h-3 w-3 text-green-500" />}
+              {!checkingSlug && slugAvailable === false && <span className="text-red-400">Already taken</span>}
             </div>
+          )}
 
+          {/* Privacy */}
+          <RadioGroup
+            value={formData.is_private ? "private" : "public"}
+            onValueChange={(value) => setFormData({ ...formData, is_private: value === "private" })}
+            disabled={creating}
+            className="flex gap-5"
+          >
+            <label htmlFor="d-public" className="flex items-center gap-2 cursor-pointer text-sm text-gray-700 dark:text-gray-300">
+              <RadioGroupItem value="public" id="d-public" />
+              public
+            </label>
+            <label htmlFor="d-private" className="flex items-center gap-2 cursor-pointer text-sm text-gray-700 dark:text-gray-300">
+              <RadioGroupItem value="private" id="d-private" />
+              private
+            </label>
+          </RadioGroup>
 
+          {/* Job Role Chips */}
+          <div className="flex flex-wrap gap-2">
+            {rolesLoading ? (
+              <span className="text-xs text-gray-400">Loading roles...</span>
+            ) : (
+              jobRoles.map((role) => {
+                const selected = formData.visible_to_roles.includes(role.key);
+                return (
+                  <button
+                    key={role.key}
+                    type="button"
+                    disabled={creating}
+                    onClick={() => handleRoleToggle(role.key)}
+                    className={`px-3 py-1 rounded-full border text-xs font-medium transition-colors ${
+                      selected
+                        ? "bg-blue-500 text-white border-blue-500"
+                        : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:border-blue-400"
+                    }`}
+                  >
+                    {role.name}
+                  </button>
+                );
+              })
+            )}
+          </div>
 
-            {/* Description */}
-            <div className="space-y-2">
-              <Label htmlFor="description" className="dark:text-gray-300">Description (optional)</Label>
-              <Textarea
-                id="description"
-                placeholder="What is this board for?"
-                value={formData.description}
-                onChange={(e) =>
-                  setFormData({ ...formData, description: e.target.value })
-                }
-                rows={3}
-                maxLength={500}
-                className="dark:bg-card dark:border-border dark:text-white"
-              />
-              <p className="text-xs text-gray-500 dark:text-gray-400">
-                {formData.description.length}/500 characters
-              </p>
-            </div>
-
-            {/* Privacy Setting */}
-            <div className="space-y-3">
-              <Label className="dark:text-gray-300">Privacy</Label>
-              <RadioGroup
-                value={formData.is_private ? "private" : "public"}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, is_private: value === "private" })
-                }
+          {/* Icon + Preview side by side */}
+          <div className="flex gap-3 items-stretch">
+            {/* Icon picker button */}
+            <button
+              type="button"
+              onClick={() => setShowIconPicker(true)}
+              disabled={creating}
+              className="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 flex flex-col items-center justify-center gap-1 hover:border-blue-400 transition-colors"
+            >
+              <div
+                className="h-8 w-8 rounded-lg flex items-center justify-center"
+                style={{ backgroundColor: formData.color + "20" }}
               >
-                <div className="flex items-center space-x-2 border border-gray-200 dark:border-border rounded-lg p-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800">
-                  <RadioGroupItem value="public" id="public" />
-                  <div className="flex-1">
-                    <label
-                      htmlFor="public"
-                      className="flex items-center gap-2 cursor-pointer"
-                    >
-                      <Globe className="h-4 w-4 text-green-500" />
-                      <div>
-                        <p className="font-medium text-gray-900 dark:text-white">Public</p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
-                          Anyone can view and post feedback
-                        </p>
-                      </div>
-                    </label>
-                  </div>
-                </div>
-
-                <div className="flex items-center space-x-2 border border-gray-200 dark:border-border rounded-lg p-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800">
-                  <RadioGroupItem value="private" id="private" />
-                  <div className="flex-1">
-                    <label
-                      htmlFor="private"
-                      className="flex items-center gap-2 cursor-pointer"
-                    >
-                      <Lock className="h-4 w-4 text-orange-500" />
-                      <div>
-                        <p className="font-medium text-gray-900 dark:text-white">Private</p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
-                          Only invited members can access
-                        </p>
-                      </div>
-                    </label>
-                  </div>
-                </div>
-              </RadioGroup>
-            </div>
-
-            {/* Target Team / Visible to Roles */}
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <Users className="h-4 w-4 text-gray-500 dark:text-gray-400" />
-                <Label className="dark:text-gray-300">Target Team (Optional)</Label>
+                <IconDisplay iconName={formData.icon} className="h-5 w-5" style={{ color: formData.color }} />
               </div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                Select which job roles can see this board. Leave empty for all team members.
-              </p>
-              <div className="grid grid-cols-2 gap-3">
-                {rolesLoading ? (
-                  <p className="text-sm text-gray-500 col-span-2">Loading roles...</p>
-                ) : (
-                  jobRoles.map((role) => (
-                    <div
-                      key={role.key}
-                      className="flex items-center space-x-2 border rounded-lg p-3 hover:bg-gray-50"
-                    >
-                      <Checkbox
-                        id={role.key}
-                        checked={formData.visible_to_roles.includes(role.key)}
-                        onCheckedChange={() => handleRoleToggle(role.key)}
-                      />
-                      <label
-                        htmlFor={role.key}
-                        className="flex items-center gap-2 cursor-pointer flex-1"
-                      >
-                        <IconDisplay iconName={role.icon} className="h-4 w-4 text-gray-600" />
-                        <span className="text-sm font-medium">{role.name}</span>
-                      </label>
-                    </div>
-                  ))
-                )}
-              </div>
-              {formData.visible_to_roles.length > 0 && (
-                <div className="flex items-center gap-2 p-2 bg-blue-50 border border-blue-200 rounded-lg">
-                  <Users className="h-4 w-4 text-blue-600" />
-                  <p className="text-sm text-blue-800">
-                    Visible to {formData.visible_to_roles.length} role{formData.visible_to_roles.length > 1 ? 's' : ''}
-                  </p>
-                </div>
-              )}
-            </div>
+              <span className="text-[10px] text-gray-400">icon</span>
+            </button>
 
-
-            {/* Board Icon */}
-            <div className="space-y-2">
-              <Label className="dark:text-gray-300">Board Icon</Label>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setShowIconPicker(true)}
-                className="w-full justify-start h-12 dark:bg-card dark:border-border dark:text-white dark:hover:bg-gray-700"
-              >
-                <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center mr-3">
-                  <IconDisplay iconName={formData.icon} className="h-5 w-5 text-primary" />
-                </div>
-                <span>{formData.icon || "Choose Icon"}</span>
-              </Button>
-            </div>
-
-            {/* Preview */}
-            <div className="space-y-2">
-              <Label className="dark:text-gray-300">Preview</Label>
-              <div className="border border-border rounded-lg p-4 flex items-center gap-3">
-                <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <IconDisplay iconName={formData.icon} className="h-6 w-6 text-primary" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold flex items-center gap-2 text-gray-900 dark:text-white">
-                    {formData.name || "Board Name"}
-                    {formData.is_private && (
-                      <Lock className="h-3 w-3 text-gray-400 dark:text-gray-500" />
+            {/* Board preview */}
+            <div
+              className="flex-1 rounded-xl border bg-gray-50 dark:bg-gray-800/60 p-3 flex items-center justify-center min-h-[64px]"
+              style={{ borderColor: formData.name ? formData.color : undefined }}
+            >
+              {formData.name ? (
+                <div className="flex items-center gap-2 w-full">
+                  <div
+                    className="h-8 w-8 rounded-lg flex-shrink-0 flex items-center justify-center"
+                    style={{ backgroundColor: formData.color + "20" }}
+                  >
+                    <IconDisplay iconName={formData.icon} className="h-4 w-4" style={{ color: formData.color }} />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold leading-tight flex items-center gap-1 text-gray-900 dark:text-white">
+                      {formData.name}
+                      {formData.is_private && <Lock className="h-3 w-3 text-gray-400" />}
+                    </p>
+                    {formData.description && (
+                      <p className="text-xs text-gray-400 line-clamp-1">{formData.description}</p>
                     )}
-                  </h3>
-
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    {formData.description || "Board description"}
-                  </p>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <p className="text-xs text-gray-400 text-center">how the board look like<br />with icon should be here</p>
+              )}
             </div>
           </div>
 
-          <DialogFooter>
+          {/* Create Board button — right-aligned */}
+          <div className="flex justify-end pt-1 gap-3">
             <Button
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
               disabled={creating}
-              className="dark:bg-card dark:border-border dark:text-white dark:hover:bg-gray-700"
+              className="rounded-full px-6 h-10 text-sm font-medium"
             >
               Cancel
             </Button>
             <Button
               type="submit"
-              disabled={creating || slugAvailable === false}
+              disabled={creating || !formData.name.trim() || slugAvailable === false}
+              className="rounded-full px-6 h-10 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium shadow-md"
             >
               {creating ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Creating...
-                </>
+                <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Creating...</>
               ) : (
                 "Create Board"
               )}
             </Button>
-          </DialogFooter>
+          </div>
         </form>
       </DialogContent>
 

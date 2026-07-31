@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
@@ -38,6 +38,7 @@ import {
   Pencil,
   Heart,
   Reply,
+  BotMessageSquare,
 } from "lucide-react";
 import { Post, Comment, postService, getPostAuthorDisplayName } from "@/services/postService";
 import { Board } from "@/services/boardService";
@@ -130,13 +131,13 @@ function CommentItem({
     <div className={depth > 0 ? "ml-8 mt-2" : ""}>
       <div
         className={cn(
-          "flex gap-3 py-3 border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900/30 transition-colors",
-          comment.is_admin && "bg-blue-50/30 dark:bg-blue-900/10",
+          "flex gap-3 py-3.5 -mx-1 px-1 rounded-lg hover:bg-muted/40 dark:hover:bg-muted/20 transition-colors",
+          comment.is_admin && "bg-blue-50/40 dark:bg-blue-900/10",
         )}
       >
         {/* Avatar */}
         <Avatar className="h-9 w-9 flex-shrink-0 mt-0.5">
-          <AvatarImage src={comment.author?.avatar_url || ""} alt={comment.author?.name || "User"} />
+          <AvatarImage src={comment.author?.avatar_url || undefined} alt={comment.author?.name || "User"} />
           <AvatarFallback className="text-xs">
             {comment.author?.name?.charAt(0)?.toUpperCase() || "U"}
           </AvatarFallback>
@@ -229,42 +230,47 @@ function CommentItem({
 
       {/* Reply input */}
       {replyingTo === comment.id && (
-        <div className="ml-8 mt-2 space-y-2">
-          <Textarea
-            placeholder="Write a reply..."
-            value={replyContent}
-            onChange={(e) => setReplyContent(e.target.value)}
-            rows={2}
-            className="resize-none text-sm dark:bg-card dark:border-border dark:text-white"
-          />
-          <div className="flex gap-2">
-            <Button
-              onClick={() => handleReply(comment.id)}
-              disabled={!replyContent.trim() || submittingComment}
-              size="sm"
-            >
-              {submittingComment ? (
-                <>
-                  <Loader2 className="mr-2 h-3 w-3 animate-spin" />
-                  Replying...
-                </>
-              ) : (
-                <>
-                  <Send className="mr-2 h-3 w-3" />
-                  Reply
-                </>
-              )}
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setReplyingTo(null);
-                setReplyContent("");
-              }}
-              size="sm"
-            >
-              Cancel
-            </Button>
+        <div className="ml-8 mt-2 mb-2">
+          <div className="rounded-xl border border-border bg-muted/30 dark:bg-muted/20 focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/15 focus-within:bg-background transition-shadow">
+            <Textarea
+              placeholder="Write a reply…"
+              value={replyContent}
+              onChange={(e) => setReplyContent(e.target.value)}
+              rows={2}
+              autoFocus
+              className="resize-none border-0 bg-transparent shadow-none focus-visible:ring-0 dark:bg-transparent dark:text-white text-sm px-3.5 pt-3 pb-1"
+            />
+            <div className="flex items-center justify-end gap-2 px-3 pb-2.5 pt-1">
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  setReplyingTo(null);
+                  setReplyContent("");
+                }}
+                size="sm"
+                className="h-8"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={() => handleReply(comment.id)}
+                disabled={!replyContent.trim() || submittingComment}
+                size="sm"
+                className="h-8 gap-1.5 rounded-lg"
+              >
+                {submittingComment ? (
+                  <>
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                    Replying…
+                  </>
+                ) : (
+                  <>
+                    <Send className="h-3 w-3" />
+                    Reply
+                  </>
+                )}
+              </Button>
+            </div>
           </div>
         </div>
       )}
@@ -322,6 +328,15 @@ export function PostDetails({
   const [replyContent, setReplyContent] = useState("");
   const [showChangelogDialog, setShowChangelogDialog] = useState(false);
   const [pendingStatus, setPendingStatus] = useState<string | null>(null);
+  const [composerFocused, setComposerFocused] = useState(false);
+  const commentTextareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const autoResizeComment = () => {
+    const el = commentTextareaRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${Math.min(el.scrollHeight, 200)}px`;
+  };
 
   // Real-time Socket.io updates
   usePostRealtime({
@@ -559,6 +574,10 @@ export function PostDetails({
       setSubmittingComment(true);
       await postService.addComment(post.id, newComment);
       setNewComment("");
+      setComposerFocused(false);
+      if (commentTextareaRef.current) {
+        commentTextareaRef.current.style.height = "auto";
+      }
 
       // Don't manually add comment - let real-time Socket.io handle it
       // This prevents duplicate comments when the socket event fires
@@ -812,193 +831,258 @@ export function PostDetails({
     );
   }
 
+  const commentCount = comments.length;
+  const userInitial =
+    user?.name?.[0]?.toUpperCase() ||
+    user?.email?.[0]?.toUpperCase() ||
+    "U";
+
   return (
     <div className="flex-1 border-l border-gray-200 dark:border-border bg-gray-50 dark:bg-background flex overflow-hidden" style={{ height: 'calc(100vh - 64px)' }}>
-      {/* Main Content - Left Side */}
-      <div className="flex-1 flex flex-col overflow-hidden" style={{ height: '100%' }}>
-        {/* Post Header with Upvote */}
-        <div className="bg-white dark:bg-background p-6 border-b border-gray-200 dark:border-border flex-shrink-0 overflow-y-auto" style={{ maxHeight: 'calc(40vh - 64px)' }}>
-          <div className="flex gap-4">
-            {/* Upvote Button - Left Side */}
-            <div className="flex flex-col items-center gap-1">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleUpvote}
-                disabled={upvoting}
+      {/* Main Content - Left Side: post + comments as one continuous thread */}
+      <div className="flex-1 flex flex-col overflow-hidden bg-white dark:bg-background" style={{ height: '100%' }}>
+        {/* Unified scroll: post content flows directly into comments */}
+        <div className="flex-1 overflow-y-auto min-h-0">
+          {/* Post Header with Upvote */}
+          <div className="px-6 pt-6 pb-5">
+            <div className="flex gap-4">
+              {/* Upvote Button - Left Side */}
+              <div className="flex flex-col items-center gap-1">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleUpvote}
+                  disabled={upvoting}
+                  className={cn(
+                    "h-8 w-8 p-0 rounded-md",
+                    upvoted ? "text-blue-600 bg-blue-50 dark:bg-blue-900/20" : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  )}
+                >
+                  <ArrowUp className="h-4 w-4" />
+                </Button>
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{post.upvotes}</span>
+              </div>
+
+              {/* Post Title and Info */}
+              <div className="flex-1 space-y-2">
+                <div className="flex items-start justify-between gap-2">
+                  <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{post.title}</h1>
+                  {(user?.organization_role === "admin" || user?.organization_role === "owner" || post.author?.id === user?.id) && (
+                    <div className="flex gap-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={openEditDialog}
+                        className="h-8 w-8 p-0 text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                      >
+                        <Edit2 className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleDeletePost}
+                        className="h-8 w-8 p-0 text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Author and time — widget posts use external_author or org_end_user;
+                    AI-published posts (author_id = null) show "Autopilot" via getPostAuthorDisplayName */}
+                <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 flex-wrap">
+                  <>
+                    <Avatar className="h-6 w-6">
+                      <AvatarImage src={(post.author as { avatar_url?: string })?.avatar_url || undefined} />
+                      <AvatarFallback>
+                        {getPostAuthorDisplayName(post) === "Autopilot" ? <BotMessageSquare className="h-4 w-4" /> : getPostAuthorDisplayName(post)[0]?.toUpperCase() || "A"}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="font-medium text-blue-600 dark:text-blue-400">
+                      {getPostAuthorDisplayName(post)}
+                    </span>
+                    {(post.external_author || post.org_end_user) && (
+                      <span className="inline-flex items-center rounded-full bg-violet-100 px-1.5 py-0.5 text-[10px] font-medium text-violet-700 dark:bg-violet-900/40 dark:text-violet-300">
+                        via Widget
+                      </span>
+                    )}
+                    <span>·</span>
+                  </>
+                  <span>{formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}</span>
+                </div>
+
+                {/* Description */}
+                {post.description && (
+                  <p className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap mt-3">
+                    {post.description}
+                  </p>
+                )}
+
+                {/* Images Gallery */}
+                {post.images && post.images.length > 0 && (
+                  <div className="mt-4 space-y-2">
+                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                      Attachments ({post.images.length})
+                    </p>
+                    <div className={cn(
+                      "grid gap-3",
+                      post.images.length === 1 && "grid-cols-1 max-w-md",
+                      post.images.length === 2 && "grid-cols-2",
+                      post.images.length >= 3 && "grid-cols-3"
+                    )}>
+                      {post.images.map((url, index) => (
+                        <div
+                          key={index}
+                          className="relative group aspect-video rounded-lg overflow-hidden border border-border bg-muted cursor-pointer hover:opacity-90 transition-opacity"
+                          onClick={() => window.open(url, '_blank')}
+                        >
+                          <img
+                            src={url}
+                            alt={`Attachment ${index + 1}`}
+                            className="w-full h-full object-cover"
+                          />
+                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                            <Eye className="h-6 w-6 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Comments — continuous with post, no Activity Feed barrier */}
+          <div className="px-6 pb-4">
+            <div className="flex items-center gap-2 mb-1 pt-1">
+              <MessageSquare className="h-4 w-4 text-muted-foreground" />
+              <h3 className="text-sm font-medium text-muted-foreground">
+                {commentCount === 0
+                  ? "Comments"
+                  : `${commentCount} ${commentCount === 1 ? "comment" : "comments"}`}
+              </h3>
+            </div>
+
+            {loadingComments ? (
+              <div className="flex justify-center py-10">
+                <Loader2 className="h-6 w-6 animate-spin text-gray-400 dark:text-gray-500" />
+              </div>
+            ) : comments.length === 0 ? (
+              <div className="py-10 text-center">
+                <div className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-muted/60">
+                  <MessageSquare className="h-5 w-5 text-muted-foreground" />
+                </div>
+                <p className="text-sm font-medium text-foreground">No comments yet</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Start the conversation with the team or customer.
+                </p>
+              </div>
+            ) : (
+              <div className="divide-y divide-border/60">
+                {organizeComments(comments).map((comment) => (
+                  <CommentItem
+                    key={comment.id}
+                    comment={comment}
+                    user={user}
+                    depth={0}
+                    replyingTo={replyingTo}
+                    replyContent={replyContent}
+                    submittingComment={submittingComment}
+                    setReplyingTo={setReplyingTo}
+                    setReplyContent={setReplyContent}
+                    handleToggleCommentLike={handleToggleCommentLike}
+                    handleDeleteComment={handleDeleteComment}
+                    handleReply={handleReply}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Comment composer — Twitter-style */}
+        <div className="flex-shrink-0 border-t border-border bg-white dark:bg-background px-4 py-3 sm:px-5">
+          <div className="flex gap-3">
+            <Avatar className="h-10 w-10 flex-shrink-0 mt-0.5">
+              <AvatarImage src={user?.avatar_url || undefined} alt={user?.name || "You"} />
+              <AvatarFallback className="text-sm bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300 font-semibold">
+                {userInitial}
+              </AvatarFallback>
+            </Avatar>
+
+            <div className="flex-1 min-w-0">
+              <textarea
+                ref={commentTextareaRef}
+                placeholder={user ? "Post your reply" : "Sign in to leave a comment"}
+                value={newComment}
+                onChange={(e) => {
+                  setNewComment(e.target.value);
+                  autoResizeComment();
+                }}
+                onFocus={() => {
+                  setComposerFocused(true);
+                  if (!user && onAuthRequired) onAuthRequired();
+                }}
+                onBlur={() => {
+                  if (!newComment.trim()) setComposerFocused(false);
+                }}
+                onKeyDown={(e) => {
+                  if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+                    e.preventDefault();
+                    handleAddComment();
+                  }
+                }}
+                rows={1}
+                disabled={!user && !onAuthRequired}
                 className={cn(
-                  "h-8 w-8 p-0 rounded-md",
-                  upvoted ? "text-blue-600 bg-blue-50 dark:bg-blue-900/20" : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  "w-full resize-none bg-transparent border-0 outline-none shadow-none",
+                  "text-[17px] leading-6 text-foreground placeholder:text-muted-foreground/70",
+                  "py-2 min-h-[40px] max-h-[200px] overflow-y-auto",
+                  "disabled:cursor-not-allowed disabled:opacity-60"
+                )}
+              />
+
+              {/* Action bar — expands when focused or has text (Twitter pattern) */}
+              <div
+                className={cn(
+                  "flex items-center justify-end gap-3 transition-all duration-200",
+                  composerFocused || newComment.trim()
+                    ? "opacity-100 max-h-12 pt-2 mt-1 border-t border-border"
+                    : "opacity-100 max-h-12 pt-1"
                 )}
               >
-                <ArrowUp className="h-4 w-4" />
-              </Button>
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{post.upvotes}</span>
-            </div>
-
-            {/* Post Title and Info */}
-            <div className="flex-1 space-y-2">
-              <div className="flex items-start justify-between gap-2">
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{post.title}</h1>
-                {(user?.organization_role === "admin" || user?.organization_role === "owner" || post.author?.id === user?.id) && (
-                  <div className="flex gap-1">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={openEditDialog}
-                      className="h-8 w-8 p-0 text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20"
-                    >
-                      <Edit2 className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={handleDeletePost}
-                      className="h-8 w-8 p-0 text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                )}
-              </div>
-
-              {/* Author and time — widget posts use external_author or org_end_user;
-                  AI-published posts (author_id = null) show "Autopilot" via getPostAuthorDisplayName */}
-              <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 flex-wrap">
-                <>
-                  <Avatar className="h-6 w-6">
-                    <AvatarImage src={(post.author as { avatar_url?: string })?.avatar_url || ""} />
-                    <AvatarFallback>
-                      {getPostAuthorDisplayName(post)[0]?.toUpperCase() || "A"}
-                    </AvatarFallback>
-                  </Avatar>
-                  <span className="font-medium text-blue-600 dark:text-blue-400">
-                    {getPostAuthorDisplayName(post)}
+                {newComment.length > 0 && (
+                  <span
+                    className={cn(
+                      "text-xs tabular-nums",
+                      newComment.length > 480 ? "text-amber-500" : "text-muted-foreground"
+                    )}
+                  >
+                    {newComment.length}
                   </span>
-                  {(post.external_author || post.org_end_user) && (
-                    <span className="inline-flex items-center rounded-full bg-violet-100 px-1.5 py-0.5 text-[10px] font-medium text-violet-700 dark:bg-violet-900/40 dark:text-violet-300">
-                      via Widget
-                    </span>
+                )}
+                <Button
+                  onClick={handleAddComment}
+                  disabled={!newComment.trim() || submittingComment}
+                  size="sm"
+                  className={cn(
+                    "rounded-full h-9 px-4 font-bold text-[15px] shadow-none",
+                    "bg-sky-500 hover:bg-sky-600 text-white",
+                    "disabled:bg-sky-500/50 disabled:text-white/80 disabled:opacity-100"
                   )}
-                  <span>·</span>
-                </>
-                <span>{formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}</span>
+                >
+                  {submittingComment ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    "Reply"
+                  )}
+                </Button>
               </div>
-
-              {/* Description */}
-              {post.description && (
-                <p className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap mt-3">
-                  {post.description}
-                </p>
-              )}
-
-              {/* Images Gallery */}
-              {post.images && post.images.length > 0 && (
-                <div className="mt-4 space-y-2">
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                    Attachments ({post.images.length})
-                  </p>
-                  <div className={cn(
-                    "grid gap-3",
-                    post.images.length === 1 && "grid-cols-1 max-w-md",
-                    post.images.length === 2 && "grid-cols-2",
-                    post.images.length >= 3 && "grid-cols-3"
-                  )}>
-                    {post.images.map((url, index) => (
-                      <div
-                        key={index}
-                        className="relative group aspect-video rounded-lg overflow-hidden border border-border bg-muted cursor-pointer hover:opacity-90 transition-opacity"
-                        onClick={() => window.open(url, '_blank')}
-                      >
-                        <img
-                          src={url}
-                          alt={`Attachment ${index + 1}`}
-                          className="w-full h-full object-cover"
-                        />
-                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
-                          <Eye className="h-6 w-6 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         </div>
-
-        {/* Activity Feed Section */}
-        <div className="flex-1 flex flex-col bg-white dark:bg-background min-h-0">
-          <div className="p-3 border-b border-gray-200 dark:border-border flex items-center justify-between flex-shrink-0 bg-white dark:bg-background">
-            <h3 className="font-semibold text-base text-gray-900 dark:text-white">Activity Feed</h3>
-            <Select defaultValue="all">
-              <SelectTrigger className="w-40 h-9">
-                <SelectValue placeholder="View" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Activity</SelectItem>
-                <SelectItem value="comments">Comments Only</SelectItem>
-                <SelectItem value="status">Status Changes</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-        {/* Comments List */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0">
-          {loadingComments ? (
-            <div className="flex justify-center py-8">
-              <Loader2 className="h-6 w-6 animate-spin text-gray-400 dark:text-gray-500" />
-            </div>
-          ) : comments.length === 0 ? (
-            <div className="text-center py-8 text-gray-500 dark:text-gray-400 text-sm">
-              No comments yet. Be the first to comment!
-            </div>
-          ) : (
-            organizeComments(comments).map((comment) => (
-              <CommentItem
-                key={comment.id}
-                comment={comment}
-                user={user}
-                depth={0}
-                replyingTo={replyingTo}
-                replyContent={replyContent}
-                submittingComment={submittingComment}
-                setReplyingTo={setReplyingTo}
-                setReplyContent={setReplyContent}
-                handleToggleCommentLike={handleToggleCommentLike}
-                handleDeleteComment={handleDeleteComment}
-                handleReply={handleReply}
-              />
-            ))
-          )}
-        </div>
-
-        {/* Add Comment - Sticky at bottom */}
-        <div className="p-3 border-t-2 border-gray-300 dark:border-border bg-white dark:bg-card flex-shrink-0 shadow-lg">
-          <div className="flex gap-2 items-end">
-            <Textarea
-              placeholder="Write a comment..."
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-              rows={1}
-              className="resize-none dark:bg-card dark:border-border dark:text-white flex-1"
-            />
-            <Button
-              onClick={handleAddComment}
-              disabled={!newComment.trim() || submittingComment}
-              size="sm"
-              className="shrink-0"
-            >
-              {submittingComment ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Send className="h-4 w-4" />
-              )}
-            </Button>
-          </div>
-        </div>
-        </div>
-        {/* End of Activity Feed Section */}
       </div>
       {/* End of Main Content */}
 

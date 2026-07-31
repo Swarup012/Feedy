@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
+import { PaidFeatureGate } from '@/components/PaidFeatureGate';
 import { useOrganization } from '@/context/OrganizationContext';
 import { useToast } from '@/hooks/use-toast';
 import { boardService, type Board } from '@/services/boardService';
@@ -200,6 +201,7 @@ function AutopilotPageInner() {
   }
 
   return (
+    <PaidFeatureGate featureName="Autopilot">
     <div className="mx-auto flex h-full max-w-4xl flex-col gap-8 overflow-y-auto px-4 py-8 sm:px-6">
       <header className="space-y-1">
         <div className="flex items-center gap-2">
@@ -370,6 +372,7 @@ function AutopilotPageInner() {
         )}
       </section>
     </div>
+    </PaidFeatureGate>
   );
 }
 

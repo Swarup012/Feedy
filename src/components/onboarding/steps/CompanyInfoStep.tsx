@@ -64,9 +64,10 @@ export function CompanyInfoStep({ data, onUpdate }: CompanyInfoStepProps) {
     const baseSubdomain = companyName
       .toLowerCase()
       .replace(/\s+/g, '-')
-      .replace(/[^a-z0-9-]/g, '');
+      .replace(/[^a-z0-9-]/g, '')
+      .replace(/^-+|-+$/g, '');
 
-    if (!baseSubdomain) {
+    if (!baseSubdomain || baseSubdomain.length < 3) {
       setSubdomainStatus({ checking: false, available: null, suggestedSubdomain: null });
       return;
     }

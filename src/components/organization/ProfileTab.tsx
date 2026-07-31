@@ -58,7 +58,7 @@ export function ProfileTab() {
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 -mt-12 mb-6">
             <div className="flex items-end gap-5">
               <Avatar className="h-28 w-28 border-4 border-white dark:border-slate-900 shadow-xl bg-white dark:bg-slate-800">
-                <AvatarImage src={user.avatar_url || ""} alt={user.name || "User"} />
+                <AvatarImage src={user.avatar_url || undefined} alt={user.name || "User"} />
                 <AvatarFallback className="bg-primary/5 text-primary text-3xl font-bold">
                   {user.name?.[0]?.toUpperCase() || "U"}
                 </AvatarFallback>

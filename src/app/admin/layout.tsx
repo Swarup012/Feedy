@@ -188,7 +188,7 @@ export default function AdminLayout({
               <DropdownMenuTrigger asChild>
                 <button className="flex items-center gap-2 focus:outline-none hover:opacity-80 transition-opacity">
                   <Avatar className="h-10 w-10 border-2 border-white/30 shadow-md">
-                    <AvatarImage src={user?.avatar_url || ""} alt={user?.name || "User"} />
+                    <AvatarImage src={user?.avatar_url || undefined} alt={user?.name || "User"} />
                     <AvatarFallback className="bg-white/20 text-white font-semibold">
                       {user?.name?.[0]?.toUpperCase() || "U"}
                     </AvatarFallback>

@@ -23,6 +23,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { UpgradeDialog } from "@/components/UpgradeDialog";
 
 import {
   LayoutDashboard,
@@ -96,6 +97,7 @@ export default function AdminPage() {
 
   // Free users are locked to basic view, paid users default to expert view
   const [isBasicView, setIsBasicView] = useState(!hasPaidPlan);
+  const [upgradeDialogOpen, setUpgradeDialogOpen] = useState(false);
 
   /* =======================
      DATA LOADING (UNCHANGED)
@@ -178,6 +180,11 @@ export default function AdminPage() {
 
   return (
     <ProtectedRoute allowedRoles={["owner", "admin"]}>
+      <UpgradeDialog
+        open={upgradeDialogOpen}
+        onOpenChange={setUpgradeDialogOpen}
+        featureName="Expert View"
+      />
       <div ref={pageRef} className="h-screen overflow-hidden bg-background flex flex-col">
         <div className="max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 flex flex-col h-full overflow-hidden space-y-4">
           {/* HEADER - Clean Canny-style header */}
@@ -206,27 +213,14 @@ export default function AdminPage() {
                   Basic
                 </button>
                 <button
-                  onClick={() => (hasPaidPlan ? setIsBasicView(false) : null)}
-                  disabled={!hasPaidPlan}
-                  className={`px-4 py-2 text-sm font-medium rounded-md transition-all relative ${
+                  onClick={() => hasPaidPlan ? setIsBasicView(false) : setUpgradeDialogOpen(true)}
+                  className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
                     !isBasicView && hasPaidPlan
                       ? "bg-primary text-primary-foreground shadow-sm"
-                      : hasPaidPlan
-                        ? "text-muted-foreground hover:text-foreground"
-                        : "text-muted-foreground/50 cursor-not-allowed"
+                      : "text-muted-foreground hover:text-foreground"
                   }`}
-                  title={
-                    !hasPaidPlan
-                      ? "Upgrade to Starter or Pro plan to access Expert view"
-                      : ""
-                  }
                 >
                   Expert
-                  {!hasPaidPlan && (
-                    <span className="ml-1.5 inline-flex items-center justify-center w-4 h-4 text-[10px] bg-amber-500 text-white rounded-full">
-                      ⭐
-                    </span>
-                  )}
                 </button>
               </div>
               <Button
@@ -245,29 +239,230 @@ export default function AdminPage() {
 
           {isBasicView ? (
             /* ===== BASIC VIEW ===== */
-            <div className="flex-1 overflow-y-auto min-h-0 space-y-4">
-              {/* MULTI-LINE CHART - All Metrics Combined */}
-              <MultiMetricChart
-                pendingTrend={stats.pendingTrend || []}
-                newThisWeekTrend={stats.newThisWeekTrend || []}
-                activeUsersTrend={stats.activeUsersTrend || []}
-                trendingTrend={stats.trendingTrend || []}
-                stats={stats}
-                trending={trending}
-              />
+            <div className="flex-1 overflow-y-auto min-h-0 pb-4 space-y-4">
 
-              {/* TRACKED USERS WIDGET - Full Width */}
-              <section>
-                <TrackedUsersWidget
-                  variant="basic"
-                  onUsageClick={() => {
-                    console.log(
-                      "🔵 TrackedUsersWidget clicked - navigating to /admin/tracked-users",
-                    );
-                    router.push("/admin/tracked-users");
-                  }}
-                />
-              </section>
+              {/* ── Stat Cards ── */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                {[
+                  {
+                    label: 'Total Posts',
+                    value: stats.totalPosts,
+                    sub: `${stats.newThisWeek} new this week`,
+                    icon: FileText,
+                    color: 'text-blue-600',
+                    bg: 'bg-blue-50 dark:bg-blue-950/30',
+                  },
+                  {
+                    label: 'Needs Review',
+                    value: stats.pendingPosts,
+                    sub: 'Waiting for your action',
+                    icon: Clock,
+                    color: 'text-amber-600',
+                    bg: 'bg-amber-50 dark:bg-amber-950/30',
+                  },
+                  {
+                    label: 'Total Votes',
+                    value: stats.totalVotes,
+                    sub: 'Across all boards',
+                    icon: ThumbsUp,
+                    color: 'text-emerald-600',
+                    bg: 'bg-emerald-50 dark:bg-emerald-950/30',
+                  },
+                  {
+                    label: 'Active Users',
+                    value: stats.activeUsers,
+                    sub: 'Contributing members',
+                    icon: Users,
+                    color: 'text-violet-600',
+                    bg: 'bg-violet-50 dark:bg-violet-950/30',
+                  },
+                ].map(({ label, value, sub, icon: Icon, color, bg }) => (
+                  <div
+                    key={label}
+                    className="rounded-xl border border-border bg-card p-4 flex items-start gap-3"
+                  >
+                    <div className={`mt-0.5 w-9 h-9 rounded-lg ${bg} flex items-center justify-center flex-shrink-0`}>
+                      <Icon className={`w-4 h-4 ${color}`} />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-2xl font-bold text-foreground leading-none">{value ?? 0}</p>
+                      <p className="text-xs font-medium text-foreground mt-1">{label}</p>
+                      <p className="text-[11px] text-muted-foreground mt-0.5 truncate">{sub}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* ── Two-column layout ── */}
+              <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+
+                {/* Left — Recent Posts + Top Upvoted */}
+                <div className="lg:col-span-3 space-y-4">
+
+                  {/* Recent Posts */}
+                  <div className="rounded-xl border border-border bg-card overflow-hidden">
+                    <div className="px-5 py-4 border-b border-border flex items-center justify-between">
+                      <div>
+                        <h3 className="text-sm font-semibold text-foreground">Recent Posts</h3>
+                        <p className="text-xs text-muted-foreground mt-0.5">Latest feedback from your users</p>
+                      </div>
+                      <button
+                        onClick={() => router.push('/admin/feedback')}
+                        className="text-xs text-primary hover:underline font-medium"
+                      >
+                        View all →
+                      </button>
+                    </div>
+                    <div className="divide-y divide-border">
+                      {recentPosts.length > 0 ? (
+                        recentPosts.slice(0, 5).map((p: any) => {
+                          const statusDot: Record<string, string> = {
+                            open: 'bg-blue-500',
+                            'under-review': 'bg-amber-500',
+                            planned: 'bg-cyan-500',
+                            'in-progress': 'bg-violet-500',
+                            completed: 'bg-emerald-500',
+                            closed: 'bg-gray-400',
+                          };
+                          return (
+                            <div key={p.id} className="px-5 py-3 flex items-center gap-3 hover:bg-muted/40 transition-colors">
+                              <span className={`w-2 h-2 rounded-full flex-shrink-0 ${statusDot[p.status] || 'bg-gray-300'}`} />
+                              <span className="flex-1 text-sm font-medium text-foreground truncate">{p.title}</span>
+                              <div className="flex items-center gap-3 flex-shrink-0">
+                                <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                                  <ThumbsUp className="w-3 h-3" />{p.vote_count ?? 0}
+                                </span>
+                                <span className="text-[11px] text-muted-foreground capitalize hidden sm:block">
+                                  {(p.status || 'open').replace('-', ' ')}
+                                </span>
+                              </div>
+                            </div>
+                          );
+                        })
+                      ) : (
+                        <div className="px-5 py-8 text-center text-sm text-muted-foreground">
+                          No posts yet
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Top Upvoted */}
+                  <div className="rounded-xl border border-border bg-card overflow-hidden">
+                    <div className="px-5 py-4 border-b border-border">
+                      <h3 className="text-sm font-semibold text-foreground">Most Requested</h3>
+                      <p className="text-xs text-muted-foreground mt-0.5">Posts with the most votes</p>
+                    </div>
+                    <div className="divide-y divide-border">
+                      {mostUpvoted.length > 0 ? (
+                        mostUpvoted.slice(0, 4).map((p: any, i: number) => (
+                          <div key={p.id} className="px-5 py-3 flex items-center gap-3 hover:bg-muted/40 transition-colors">
+                            <span className="w-5 text-center text-xs font-bold text-muted-foreground flex-shrink-0">#{i + 1}</span>
+                            <span className="flex-1 text-sm font-medium text-foreground truncate">{p.title}</span>
+                            <div className="flex items-center gap-1 text-xs font-semibold text-amber-600 dark:text-amber-400 flex-shrink-0">
+                              <ThumbsUp className="w-3 h-3" />{p.vote_count ?? 0}
+                            </div>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="px-5 py-8 text-center text-sm text-muted-foreground">No votes yet</div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right — Boards + Status */}
+                <div className="lg:col-span-2 space-y-4">
+
+                  {/* Boards */}
+                  <div className="rounded-xl border border-border bg-card overflow-hidden">
+                    <div className="px-5 py-4 border-b border-border flex items-center justify-between">
+                      <div>
+                        <h3 className="text-sm font-semibold text-foreground">Your Boards</h3>
+                        <p className="text-xs text-muted-foreground mt-0.5">{boards.length} active board{boards.length !== 1 ? 's' : ''}</p>
+                      </div>
+                      <button
+                        onClick={() => router.push('/admin/feedback')}
+                        className="text-xs text-primary hover:underline font-medium"
+                      >
+                        Manage →
+                      </button>
+                    </div>
+                    <div className="divide-y divide-border">
+                      {boards.length > 0 ? (
+                        boards.slice(0, 5).map((b: any) => (
+                          <div
+                            key={b.id}
+                            onClick={() => router.push(`/admin/feedback/boards/${b.slug}`)}
+                            className="px-5 py-3 flex items-center justify-between gap-3 hover:bg-muted/40 transition-colors cursor-pointer"
+                          >
+                            <div className="flex items-center gap-2.5 min-w-0">
+                              <div className="w-2 h-2 rounded-full bg-primary flex-shrink-0" />
+                              <span className="text-sm font-medium text-foreground truncate">{b.name}</span>
+                            </div>
+                            <span className="text-xs text-muted-foreground flex-shrink-0">{b.postCount ?? 0} posts</span>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="px-5 py-6 text-center space-y-2">
+                          <p className="text-sm text-muted-foreground">No boards yet</p>
+                          <button
+                            onClick={() => router.push('/admin/feedback/welcome')}
+                            className="text-xs text-primary hover:underline font-medium"
+                          >
+                            Create your first board →
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Status Overview */}
+                  <div className="rounded-xl border border-border bg-card overflow-hidden">
+                    <div className="px-5 py-4 border-b border-border">
+                      <h3 className="text-sm font-semibold text-foreground">Feedback Status</h3>
+                      <p className="text-xs text-muted-foreground mt-0.5">Distribution across {stats.totalPosts} posts</p>
+                    </div>
+                    <div className="px-5 py-4 space-y-3">
+                      {Object.entries(stats.statusDistribution || {}).length > 0 ? (
+                        Object.entries(stats.statusDistribution).map(([k, v]: [string, any]) => {
+                          const pct = stats.totalPosts > 0 ? Math.round((v / stats.totalPosts) * 100) : 0;
+                          const colors: Record<string, string> = {
+                            open: 'bg-blue-500',
+                            'under-review': 'bg-amber-500',
+                            planned: 'bg-cyan-500',
+                            'in-progress': 'bg-violet-500',
+                            completed: 'bg-emerald-500',
+                            closed: 'bg-gray-400',
+                          };
+                          return (
+                            <div key={k} className="space-y-1">
+                              <div className="flex items-center justify-between text-xs">
+                                <span className="font-medium text-foreground capitalize">{k.replace('-', ' ')}</span>
+                                <span className="text-muted-foreground">{v} <span className="text-muted-foreground/60">({pct}%)</span></span>
+                              </div>
+                              <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                                <div
+                                  className={`h-full ${colors[k] || 'bg-primary'} rounded-full transition-all duration-700`}
+                                  style={{ width: `${pct}%` }}
+                                />
+                              </div>
+                            </div>
+                          );
+                        })
+                      ) : (
+                        <p className="text-sm text-muted-foreground text-center py-4">No data yet</p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Tracked Users */}
+                  <TrackedUsersWidget
+                    variant="basic"
+                    onUsageClick={() => router.push('/admin/tracked-users')}
+                  />
+                </div>
+              </div>
             </div>
           ) : (
             /* ===== FULL VIEW ===== */

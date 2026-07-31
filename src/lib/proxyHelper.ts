@@ -29,15 +29,18 @@ export function extractAuthHeader(request: NextRequest): string | null {
 
 /**
  * Build the standard headers to forward to the Express backend.
- * Always includes Authorization when available. Does NOT set a default
- * Content-Type — callers should include it in `extra` when needed,
- * so binary/multipart requests are not corrupted by a forced JSON header.
+ * Always includes Authorization when available.
+ * Defaults Content-Type to application/json — override via `extra` for
+ * multipart / binary requests where a forced JSON header would corrupt the body.
  */
 export function buildBackendHeaders(
   authHeader: string | null,
   extra: Record<string, string> = {}
 ): Record<string, string> {
-  const headers: Record<string, string> = { ...extra };
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    ...extra,
+  };
 
   if (authHeader) {
     headers['Authorization'] = authHeader;
