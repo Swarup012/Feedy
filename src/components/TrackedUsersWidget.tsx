@@ -204,12 +204,12 @@ export function TrackedUsersWidget({ onUsageClick, variant = 'basic' }: TrackedU
   // Render basic view (compact, original design)
   if (variant === 'basic') {
     return (
-      <Card 
+      <Card
         className={`cursor-pointer transition-all hover:shadow-md flex flex-col h-full ${
           overageStatus?.overageCost > 0 ? 'border-red-500' :
           overageStatus?.inGracePeriod ? 'border-yellow-500' :
-          usage.status === 'exceeded' ? 'border-red-500' : 
-          usage.status === 'critical' ? 'border-orange-500' : 
+          usage.status === 'exceeded' ? 'border-red-500' :
+          usage.status === 'critical' ? 'border-orange-500' :
           usage.status === 'warning' ? 'border-yellow-500' : ''
         }`}
         onClick={onUsageClick}
@@ -224,8 +224,8 @@ export function TrackedUsersWidget({ onUsageClick, variant = 'basic' }: TrackedU
           {getStatusBadge(usage.status, usage.usage_percent, overageStatus)}
         </CardHeader>
         <CardContent className="flex-1 min-h-0 overflow-y-auto">
-          <div className="space-y-3">
-            {/* Count Display */}
+          <div className="space-y-4">
+            {/* Row 1: Hero count — the single most important number */}
             <div className="flex items-baseline gap-2">
               <div className="text-2xl font-bold">
                 {usage.count.toLocaleString()}
@@ -236,7 +236,7 @@ export function TrackedUsersWidget({ onUsageClick, variant = 'basic' }: TrackedU
               </div>
             </div>
 
-            {/* Overage Status - Starter Plan Only */}
+            {/* Overage Status - Starter Plan Only (distinct callout band) */}
             {usage.plan_type === 'starter' && overageStatus && (
               <div className="space-y-2">
                 {/* Grace Period Warning */}
@@ -290,10 +290,10 @@ export function TrackedUsersWidget({ onUsageClick, variant = 'basic' }: TrackedU
               </div>
             )}
 
-            {/* Progress Bar */}
-            <div className="space-y-1">
-              <Progress 
-                value={Math.min(usage.usage_percent, 100)} 
+            {/* Row 2: Full-width usage bar with labeled axis */}
+            <div className="space-y-1.5">
+              <Progress
+                value={Math.min(usage.usage_percent, 100)}
                 className={
                   overageStatus?.overageCost > 0 ? 'bg-red-100 [&>div]:bg-red-600' :
                   overageStatus?.inGracePeriod ? 'bg-yellow-100 [&>div]:bg-yellow-600' :
@@ -309,18 +309,18 @@ export function TrackedUsersWidget({ onUsageClick, variant = 'basic' }: TrackedU
               </div>
             </div>
 
-            {/* Breakdown (optional - shown if expanded or on hover) */}
+            {/* Row 3: Breakdown — three equal stat tiles */}
             {usage.breakdown && (
               <div className="grid grid-cols-3 gap-2 pt-2 border-t">
-                <div className="text-center">
+                <div className="rounded-lg bg-muted/40 py-2 text-center">
                   <div className="text-xs text-muted-foreground">Posts</div>
                   <div className="text-sm font-medium">{usage.breakdown.posts}</div>
                 </div>
-                <div className="text-center">
+                <div className="rounded-lg bg-muted/40 py-2 text-center">
                   <div className="text-xs text-muted-foreground">Votes</div>
                   <div className="text-sm font-medium">{usage.breakdown.votes}</div>
                 </div>
-                <div className="text-center">
+                <div className="rounded-lg bg-muted/40 py-2 text-center">
                   <div className="text-xs text-muted-foreground">Comments</div>
                   <div className="text-sm font-medium">{usage.breakdown.comments}</div>
                 </div>
@@ -332,14 +332,14 @@ export function TrackedUsersWidget({ onUsageClick, variant = 'basic' }: TrackedU
     );
   }
 
-  // Render expert view (same as basic for now)
+  // Render expert view — same vertical hierarchy, slightly denser
   return (
-    <Card 
+    <Card
       className={`cursor-pointer transition-all hover:shadow-md flex flex-col h-full ${
         overageStatus?.overageCost > 0 ? 'border-red-500' :
         overageStatus?.inGracePeriod ? 'border-yellow-500' :
-        usage.status === 'exceeded' ? 'border-red-500' : 
-        usage.status === 'critical' ? 'border-orange-500' : 
+        usage.status === 'exceeded' ? 'border-red-500' :
+        usage.status === 'critical' ? 'border-orange-500' :
         usage.status === 'warning' ? 'border-yellow-500' : ''
       }`}
       onClick={onUsageClick}
@@ -352,10 +352,20 @@ export function TrackedUsersWidget({ onUsageClick, variant = 'basic' }: TrackedU
         {getStatusBadge(usage.status, usage.usage_percent, overageStatus)}
       </CardHeader>
       <CardContent className="flex-1 min-h-0 overflow-y-auto">
-        {/* Top Section - Overage Status (Full Width if exists) */}
-        {usage.plan_type === 'starter' && overageStatus && (
-          <div className="mb-3">
-            {/* Overage Status - Starter Plan Only */}
+        <div className="space-y-3">
+          {/* Row 1: Hero count */}
+          <div className="flex items-baseline gap-2">
+            <div className="text-2xl font-bold">
+              {usage.count.toLocaleString()}
+            </div>
+            <div className="text-sm text-muted-foreground">
+              / {usage.plan_type === 'starter' ? '125' : usage.limit.toLocaleString()}
+              {usage.plan_type === 'starter' && <span className="text-xs ml-1">(+25 grace)</span>}
+            </div>
+          </div>
+
+          {/* Overage Status - Starter Plan Only (distinct callout band) */}
+          {usage.plan_type === 'starter' && overageStatus && (
             <div className="space-y-2">
               {/* Grace Period Warning */}
               {overageStatus.inGracePeriod && (
@@ -406,56 +416,39 @@ export function TrackedUsersWidget({ onUsageClick, variant = 'basic' }: TrackedU
                 )}
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Bottom Section - Progress Bar (80%) + Breakdown (20%) */}
-        <div className="flex gap-4 items-center">
-          {/* Left Section - Progress Bar (80%) */}
-          <div className="w-[80%] space-y-2">
-          {/* Count and Progress Bar */}
-          <div className="flex items-center gap-3">
-            {/* Count Display - Left */}
-            <div className="flex items-baseline gap-1 text-sm font-medium whitespace-nowrap">
-              <span className="text-foreground">{usage.count.toLocaleString()}</span>
-              <span className="text-muted-foreground">/ {usage.plan_type === 'starter' ? '125' : usage.limit.toLocaleString()}</span>
-            </div>
-            
-            {/* Progress Bar */}
-            <div className="flex-1">
-              <Progress 
-                value={Math.min(usage.usage_percent, 100)} 
-                className={
-                  overageStatus?.overageCost > 0 ? 'bg-red-100 [&>div]:bg-red-600' :
-                  overageStatus?.inGracePeriod ? 'bg-yellow-100 [&>div]:bg-yellow-600' :
-                  usage.status === 'exceeded' ? 'bg-red-100 [&>div]:bg-red-600' :
-                  usage.status === 'critical' ? 'bg-orange-100 [&>div]:bg-orange-600' :
-                  usage.status === 'warning' ? 'bg-yellow-100 [&>div]:bg-yellow-600' :
-                  ''
-                }
-              />
+          {/* Row 2: Full-width usage bar with labeled axis */}
+          <div className="space-y-1.5">
+            <Progress
+              value={Math.min(usage.usage_percent, 100)}
+              className={
+                overageStatus?.overageCost > 0 ? 'bg-red-100 [&>div]:bg-red-600' :
+                overageStatus?.inGracePeriod ? 'bg-yellow-100 [&>div]:bg-yellow-600' :
+                usage.status === 'exceeded' ? 'bg-red-100 [&>div]:bg-red-600' :
+                usage.status === 'critical' ? 'bg-orange-100 [&>div]:bg-orange-600' :
+                usage.status === 'warning' ? 'bg-yellow-100 [&>div]:bg-yellow-600' :
+                ''
+              }
+            />
+            <div className="flex justify-between text-xs text-muted-foreground">
+              <span>{usage.current_period}</span>
+              <span>{usage.days_remaining} days left</span>
             </div>
           </div>
-          
-          {/* Period Info - Bottom */}
-          <div className="flex justify-between text-xs text-muted-foreground">
-            <span>{usage.current_period}</span>
-            <span>{usage.days_remaining} days left</span>
-          </div>
-          </div>
 
-          {/* Right Section - 20% - Breakdown */}
+          {/* Row 3: Breakdown — three equal stat tiles */}
           {usage.breakdown && (
-            <div className="w-[20%] flex flex-col justify-center gap-3">
-              <div className="text-center">
+            <div className="grid grid-cols-3 gap-2 pt-1.5 border-t">
+              <div className="rounded-lg bg-muted/40 py-2 text-center">
                 <div className="text-xs text-muted-foreground">Posts</div>
                 <div className="text-sm font-medium">{usage.breakdown.posts}</div>
               </div>
-              <div className="text-center">
+              <div className="rounded-lg bg-muted/40 py-2 text-center">
                 <div className="text-xs text-muted-foreground">Votes</div>
                 <div className="text-sm font-medium">{usage.breakdown.votes}</div>
               </div>
-              <div className="text-center">
+              <div className="rounded-lg bg-muted/40 py-2 text-center">
                 <div className="text-xs text-muted-foreground">Comments</div>
                 <div className="text-sm font-medium">{usage.breakdown.comments}</div>
               </div>

@@ -241,7 +241,7 @@ export function ClusterInsights({
             <div>
               <CardTitle className="text-base">Cluster Insights</CardTitle>
               <CardDescription className="text-xs mt-0.5">
-                AI-grouped feedback topics for this board
+                AI-grouped themes ranked by all-time priority — different from post-level "Trending" momentum
               </CardDescription>
             </div>
           </div>

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Search, ArrowUp, MessageSquare, Loader2 } from "lucide-react";
-import { Post, getPostAuthorDisplayName, isAutopilotPost, getSourcePlatformBadgeStyle } from "@/services/postService";
+import { Post, getPostAuthorDisplayName, getSourcePlatformBadgeStyle } from "@/services/postService";
 import { Board } from "@/services/boardService";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
@@ -160,12 +160,12 @@ export function PostsList({
                     </span>
                   </div>
 
-                  {/* Author - shows internal user, widget user, or autopilot source */}
-                  {(post.author || post.external_author || post.org_end_user || isAutopilotPost(post)) && (
+                  {/* Author - shows internal user, widget user, or external platform source */}
+                  {(post.author || post.external_author || post.org_end_user || post.source_platform) && (
                     <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
                       by{" "}
                       <span className="font-medium">{getPostAuthorDisplayName(post)}</span>
-                      {isAutopilotPost(post) && post.source_platform && (
+                      {post.source_platform && (
                         <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-medium ${getSourcePlatformBadgeStyle(post.source_platform)}`}>
                           {post.source_platform}
                         </span>

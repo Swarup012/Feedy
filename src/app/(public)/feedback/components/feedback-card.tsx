@@ -1,6 +1,6 @@
 "use client";
 
-import { Post, getPostAuthorDisplayName, isWidgetPost, isAutopilotPost, getSourcePlatformBadgeStyle } from "@/services/postService";
+import { Post, getPostAuthorDisplayName, isWidgetPost, getSourcePlatformBadgeStyle } from "@/services/postService";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -145,12 +145,12 @@ export function FeedbackCard({ feedback, onUpvote, isUpvoted = false }: Feedback
 
             {/* Author & Time */}
             <span className="ml-auto text-xs text-slate-500 dark:text-slate-500 flex items-center gap-1.5 flex-wrap justify-end">
-              {(feedback.author || feedback.external_author || isAutopilotPost(feedback)) && (
+              {(feedback.author || feedback.external_author || feedback.source_platform) && (
                 <>
                   <span className="font-switzer font-medium text-slate-700 dark:text-slate-300">
                     {getPostAuthorDisplayName(feedback)}
                   </span>
-                  {isAutopilotPost(feedback) && feedback.source_platform && (
+                  {feedback.source_platform && (
                     <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-medium ${getSourcePlatformBadgeStyle(feedback.source_platform)}`}>
                       {feedback.source_platform}
                     </span>

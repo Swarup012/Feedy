@@ -33,7 +33,6 @@ import {
   ThumbsUp,
   MessageSquare,
   FileText,
-  Building2,
 } from "lucide-react";
 
 import {
@@ -50,7 +49,7 @@ import {
 import { DashboardSkeleton } from "@/components/admin/DashboardSkeleton";
 import { TrackedUsersWidget } from "@/components/TrackedUsersWidget";
 import { TrackedUsersLimitBanner } from "@/components/TrackedUsersLimitBanner";
-import { ClusterInsights } from "@/components/clusters/ClusterInsights";
+import { ExpertView } from "@/components/admin/ExpertView";
 
 /* ======================================================
    MAIN PAGE
@@ -465,153 +464,9 @@ export default function AdminPage() {
               </div>
             </div>
           ) : (
-            /* ===== FULL VIEW ===== */
-            <div className="flex-1 grid grid-rows-[1fr_auto] lg:grid-rows-[3fr_2fr] gap-4 min-h-0 overflow-hidden pb-2">
-              {/* TOP SECTION - Left 60% / Right 40% */}
-              <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 min-h-0">
-                {/* Left Column - 60% */}
-                <div className="lg:col-span-3 flex flex-col min-h-0 [&>div]:h-full">
-                  {topBoards.length > 0 ? (
-                    <ClusterInsights boardId={topBoards[0].id} />
-                  ) : (
-                    <Card className="h-full flex items-center justify-center border-border/80 text-muted-foreground p-8">
-                      No cluster insights available
-                    </Card>
-                  )}
-                </div>
-
-                {/* Right Column - 40% */}
-                <div className="lg:col-span-2 flex flex-col gap-4 min-h-0">
-                  {/* Tracked Users (top) */}
-                  <div className="flex-1 min-h-0 [&>div]:h-full">
-                    <TrackedUsersWidget
-                      variant="expert"
-                      onUsageClick={() => {
-                        console.log("🔵 TrackedUsersWidget clicked - navigating to /admin/tracked-users");
-                        router.push("/admin/tracked-users");
-                      }}
-                    />
-                  </div>
-                  {/* Feedback Volume (bottom) */}
-                  <div className="flex-1 min-h-0 [&>div]:h-full">
-                    <FeedbackTrendChart data={feedbackTrend} />
-                  </div>
-                </div>
-              </div>
-
-              {/* BOTTOM ROW - 3 Equal Columns */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 min-h-0">
-                {/* Col 1: Trending Now */}
-                <Section
-                  title="Trending Now"
-                  description="Hot topics this week"
-                  badge={trending.length}
-                >
-                  <div className="space-y-1.5">
-                    {trending.length > 0 ? (
-                      trending.map((p, idx) => (
-                        <Row
-                          key={p.id}
-                          title={p.title}
-                          meta={`#${idx + 1} · ${p.score} pts`}
-                          rank={idx + 1}
-                        />
-                      ))
-                    ) : (
-                      <div className="text-center py-8">
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
-                          No trending items
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </Section>
-
-                {/* Col 2: Popular Boards */}
-                <Section
-                  title="Popular Boards"
-                  description="Most active boards"
-                >
-                  <div className="space-y-1.5">
-                    {topBoards.length > 0 ? (
-                      topBoards.map((b, idx) => (
-                        <Row
-                          key={b.id}
-                          title={b.name}
-                          meta={`${b.postCount} posts`}
-                          rank={idx + 1}
-                        />
-                      ))
-                    ) : (
-                      <div className="text-center py-8">
-                        <Building2 className="h-10 w-10 text-muted-foreground/40 mx-auto mb-2" />
-                        <p className="text-sm text-muted-foreground">
-                          No boards yet
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </Section>
-
-                {/* Col 3: Status Overview */}
-                <Section
-                  title="Status Overview"
-                  description="Feedback distribution"
-                >
-                  <div className="space-y-3">
-                    {Object.entries(stats.statusDistribution).length > 0 ? (
-                      Object.entries(stats.statusDistribution).map(
-                        ([k, v]) => {
-                          const total = stats.totalPosts;
-                          const percentage =
-                            total > 0 ? Math.round((v / total) * 100) : 0;
-                          const statusColors = {
-                            open: "bg-blue-500",
-                            "under-review": "bg-amber-500",
-                            planned: "bg-cyan-500",
-                            "in-progress": "bg-violet-500",
-                            completed: "bg-emerald-500",
-                            closed: "bg-gray-400",
-                          };
-                          const barColor = statusColors[k] || "bg-primary";
-                          return (
-                            <div key={k} className="space-y-1.5">
-                              <div className="flex justify-between items-center">
-                                <span className="text-sm font-medium capitalize text-foreground">
-                                  {k.replace("-", " ")}
-                                </span>
-                                <div className="flex items-center gap-2">
-                                  <span className="text-xs text-muted-foreground">
-                                    {percentage}%
-                                  </span>
-                                  <Badge
-                                    variant="secondary"
-                                    className="font-semibold min-w-[2.5rem] justify-center"
-                                  >
-                                    {v}
-                                  </Badge>
-                                </div>
-                              </div>
-                              <div className="h-2 bg-muted rounded-full overflow-hidden">
-                                <div
-                                  className={`h-full ${barColor} rounded-full transition-all duration-700 ease-out`}
-                                  style={{ width: `${percentage}%` }}
-                                />
-                              </div>
-                            </div>
-                          );
-                        },
-                      )
-                    ) : (
-                      <div className="text-center py-8">
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
-                          No data available
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </Section>
-              </div>
+            /* ===== EXPERT VIEW (Part 2 — deeper operational analytics) ===== */
+            <div className="flex-1 min-h-0 overflow-hidden pb-2">
+              <ExpertView organizationId={organization?.id} />
             </div>
           )}
         </div>
@@ -1022,6 +877,15 @@ function FeedbackTrendChart({ data }) {
   const average = data.length > 0 ? Math.round(total / data.length) : 0;
   const peak = Math.max(...data.map((d) => d.count));
 
+  // 30 daily points cannot fit 30 readable labels. Show only the first,
+  // last, and every 7th day so ticks never overlap on narrow cards.
+  const ticks = data.reduce((acc, d, i) => {
+    if (i === 0 || i === data.length - 1 || i % 7 === 0) {
+      acc.push(d.day);
+    }
+    return acc;
+  }, [] as string[]);
+
   return (
     <Card
       ref={containerRef}
@@ -1075,7 +939,7 @@ function FeedbackTrendChart({ data }) {
               tickLine={false}
               axisLine={false}
               tick={{ fill: "#9ca3af", fontSize: 11 }}
-              interval="preserveStartEnd"
+              ticks={ticks}
             />
             <YAxis
               allowDecimals={false}

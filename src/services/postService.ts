@@ -55,24 +55,23 @@ export interface Post {
 }
 
 /** Display name for internal (author) or widget (external_author) submitters.
- *  For auto-published AI posts, returns the external submitter's name if available,
- *  otherwise falls back to "Suggested via {platform}". */
+ *  External attribution (source_platform/external_submitter_name) takes priority
+ *  over author?.name, so manual-mode autopilot posts show the original submitter. */
 export function getPostAuthorDisplayName(post: Post): string {
+  // External attribution wins — shows original submitter, not the admin who approved
+  if (post.source_platform || post.external_submitter_name) {
+    if (post.external_submitter_name) return post.external_submitter_name;
+    const label = post.source_platform!.charAt(0).toUpperCase() + post.source_platform!.slice(1);
+    return `Suggested via ${label}`;
+  }
+
   if (post.author?.name) return post.author.name;
   if (post.org_end_user?.name) return post.org_end_user.name;
   if (post.external_author?.name) return post.external_author.name;
   if (post.org_end_user?.email) return post.org_end_user.email;
   if (post.external_author?.email) return post.external_author.email;
   
-  if (post.source === 'autopilot') {
-    if (post.external_submitter_name) return post.external_submitter_name;
-    const platform = post.source_platform;
-    if (platform) {
-      const label = platform.charAt(0).toUpperCase() + platform.slice(1);
-      return `Suggested via ${label}`;
-    }
-    return "Autopilot";
-  }
+  if (post.source === 'autopilot') return "Autopilot";
   return "Anonymous";
 }
 

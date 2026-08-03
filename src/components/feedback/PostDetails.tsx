@@ -890,9 +890,9 @@ export function PostDetails({
                 </div>
 
                 {/* Author and time — widget posts use external_author or org_end_user;
-                    AI-published posts show platform-specific source + optional submitter name */}
+                    Posts with source_platform show the original submitter + platform badge */}
                 <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 flex-wrap">
-                  {isAutopilotPost(post) ? (
+                  {(isAutopilotPost(post) || post.source_platform) ? (
                     <>
                       <Avatar className="h-6 w-6">
                         <AvatarFallback>
@@ -1183,7 +1183,7 @@ export function PostDetails({
             <div>
               <label className="text-sm text-gray-600 dark:text-gray-400 block mb-2">Owner</label>
               <div className="text-sm text-gray-500 dark:text-gray-400">
-                {isAutopilotPost(post) ? (
+                {(isAutopilotPost(post) || post.source_platform) ? (
                   <>
                     <span>{getPostAuthorDisplayName(post)}</span>
                     {post.source_platform && (

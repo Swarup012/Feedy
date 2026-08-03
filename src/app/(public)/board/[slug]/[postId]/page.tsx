@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { postService, Post, Comment, getPostAuthorDisplayName, isWidgetPost, isAutopilotPost, getSourcePlatformBadgeStyle } from '@/services/postService';
+import { postService, Post, Comment, getPostAuthorDisplayName, isWidgetPost, getSourcePlatformBadgeStyle } from '@/services/postService';
 import { boardService, Board } from '@/services/boardService';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -322,7 +322,7 @@ export default function PublicPostPage() {
                     <div className="flex items-center gap-1.5 flex-wrap">
                       <User className="h-4 w-4 shrink-0" />
                       <span>{getPostAuthorDisplayName(post)}</span>
-                      {isAutopilotPost(post) && post.source_platform && (
+                      {post.source_platform && (
                         <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-medium ${getSourcePlatformBadgeStyle(post.source_platform)}`}>
                           {post.source_platform}
                         </span>
