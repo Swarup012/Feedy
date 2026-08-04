@@ -50,21 +50,71 @@ import {
 import {
   LineChart,
   Line,
-  BarChart,
-  Bar,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
   Legend,
   ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
 } from 'recharts';
 import { Skeleton } from '@/components/ui/skeleton';
 
-const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444'];
+const BREAKDOWN_COLORS = {
+  posts: 'bg-blue-500',
+  votes: 'bg-emerald-500',
+  comments: 'bg-amber-500',
+};
+
+function getStatusBadge(status: string, percent: number) {
+  const config: Record<string, { label: string; className: string; icon: React.ElementType }> = {
+    good: {
+      label: 'Good',
+      className: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 border-green-200 dark:border-green-800',
+      icon: CheckCircle,
+    },
+    warning: {
+      label: 'Warning',
+      className: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-450 border-yellow-200 dark:border-yellow-800',
+      icon: AlertTriangle,
+    },
+    critical: {
+      label: 'Critical',
+      className: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400 border-orange-200 dark:border-orange-800',
+      icon: AlertTriangle,
+    },
+    exceeded: {
+      label: 'Limit Reached',
+      className: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400 border-red-200 dark:border-red-800',
+      icon: AlertTriangle,
+    },
+  };
+  const cfg = config[status] || config.good;
+  const Icon = cfg.icon;
+  return (
+    <Badge variant="outline" className={`gap-1 ${cfg.className}`}>
+      <Icon className="h-3 w-3" />
+      {cfg.label}
+    </Badge>
+  );
+}
+
+function getInitials(name: string | null | undefined): string {
+  if (!name) return '?';
+  const parts = name.trim().split(/\s+/);
+  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+  return parts[0].substring(0, 2).toUpperCase();
+}
+
+function getAvatarColor(name: string | null | undefined): string {
+  if (!name) return 'bg-gray-400';
+  const colors = [
+    'bg-blue-500', 'bg-emerald-500', 'bg-violet-500', 'bg-amber-500',
+    'bg-rose-500', 'bg-cyan-500', 'bg-indigo-500', 'bg-pink-500',
+  ];
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  return colors[Math.abs(hash) % colors.length];
+}
 
 export default function TrackedUsersPage() {
   const router = useRouter();
@@ -130,9 +180,7 @@ export default function TrackedUsersPage() {
         setTotalPages(response.data.pagination?.pages ? response.data.pagination.pages : 1);
       }
     } catch (error) {
-      // Silent error for users list - don't show toast, just log
       handleUsersError(error);
-      // Still set empty arrays to prevent errors in rendering
       setUsers([]);
       setTotalPages(1);
     }
@@ -182,16 +230,6 @@ export default function TrackedUsersPage() {
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'good': return 'text-green-600';
-      case 'warning': return 'text-yellow-600';
-      case 'critical': return 'text-orange-600';
-      case 'exceeded': return 'text-red-600';
-      default: return 'text-gray-600';
-    }
-  };
-
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -200,35 +238,36 @@ export default function TrackedUsersPage() {
     });
   };
 
+  const percentUsed = usage?.usage_percent || 0;
+  const totalActions = usage?.breakdown
+    ? usage.breakdown.posts + usage.breakdown.votes + usage.breakdown.comments
+    : 0;
+  const breakdownTotal = totalActions || 1;
+
   if (loading) {
     return (
       <ProtectedRoute>
-        <div className="container mx-auto px-4 py-8">
-          <Skeleton className="h-12 w-64 mb-6" />
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
+        <div className="container mx-auto px-4 py-5">
+          <Skeleton className="h-10 w-52 mb-4" />
+          <Skeleton className="h-36 mb-4" />
+          <div className="grid gap-4 md:grid-cols-4 mb-8">
             {[1, 2, 3, 4].map((i) => (
-              <Skeleton key={i} className="h-32" />
+              <Skeleton key={i} className="h-20" />
             ))}
           </div>
-          <Skeleton className="h-96" />
+          <Skeleton className="h-64" />
         </div>
       </ProtectedRoute>
     );
   }
 
-  const breakdownData = usage?.breakdown ? [
-    { name: 'Posts', value: usage.breakdown.posts, color: COLORS[0] },
-    { name: 'Votes', value: usage.breakdown.votes, color: COLORS[1] },
-    { name: 'Comments', value: usage.breakdown.comments, color: COLORS[2] },
-  ] : [];
-
   return (
     <ProtectedRoute>
-      <div className="container mx-auto px-4 py-8 space-y-8">
+      <div className="container mx-auto px-4 py-5 space-y-5">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold">Tracked Users</h1>
+            <h1 className="text-xl font-bold">Tracked Users</h1>
             <p className="text-muted-foreground mt-1">
               Monitor unique users interacting with your feedback board
             </p>
@@ -253,152 +292,182 @@ export default function TrackedUsersPage() {
           </div>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {/* Current Count */}
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Current Users</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {usage?.count.toLocaleString() || 0}
+        {/* Hero Usage Card */}
+        <Card className="overflow-hidden">
+          <CardContent className="p-5">
+            <div className="flex items-start justify-between mb-4">
+              <div className="space-y-1">
+                <p className="text-sm text-muted-foreground">Tracked Users</p>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-3xl font-bold tabular-nums">{usage?.count.toLocaleString() || 0}</span>
+                  <span className="text-lg text-muted-foreground font-medium">of {usage?.limit.toLocaleString() || 0}</span>
+                </div>
               </div>
-              <p className="text-xs text-muted-foreground">
-                of {usage?.limit.toLocaleString() || 0} limit
-              </p>
-              <Progress value={usage?.usage_percent || 0} className="mt-2" />
+              {getStatusBadge(usage?.status || 'good', percentUsed)}
+            </div>
+            <Progress value={percentUsed} className="h-2 mb-3" />
+            <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+              <Calendar className="h-3.5 w-3.5" />
+              <span>
+                {usage?.days_remaining || 0} days remaining until reset on{' '}
+                <span className="font-medium text-foreground">{usage?.current_period || ''}</span>
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Secondary Stats Grid */}
+        <div className="grid gap-4 md:grid-cols-4">
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="flex-shrink-0 w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <TrendingUp className="h-4 w-4 text-primary" />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Total Actions</p>
+                  <p className="text-lg font-bold tabular-nums">{totalActions.toLocaleString()}</p>
+                </div>
+              </div>
             </CardContent>
           </Card>
-
-          {/* Days Remaining */}
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Days Remaining</CardTitle>
-              <Calendar className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {usage?.days_remaining || 0}
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="flex-shrink-0 w-9 h-9 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                  <FileText className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Posts</p>
+                  <p className="text-lg font-bold tabular-nums">{(usage?.breakdown?.posts || 0).toLocaleString()}</p>
+                </div>
               </div>
-              <p className="text-xs text-muted-foreground">
-                Until {usage?.current_period || ''} resets
-              </p>
             </CardContent>
           </Card>
-
-          {/* Total Actions */}
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Actions</CardTitle>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">
-                {usage?.breakdown
-                  ? (usage.breakdown.posts + usage.breakdown.votes + usage.breakdown.comments).toLocaleString()
-                  : 0}
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="flex-shrink-0 w-9 h-9 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                  <ThumbsUp className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Votes</p>
+                  <p className="text-lg font-bold tabular-nums">{(usage?.breakdown?.votes || 0).toLocaleString()}</p>
+                </div>
               </div>
-              <p className="text-xs text-muted-foreground">
-                Posts, votes, and comments
-              </p>
             </CardContent>
           </Card>
-
-          {/* Status */}
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Status</CardTitle>
-              {usage?.status === 'exceeded' ? (
-                <AlertTriangle className="h-4 w-4 text-red-600" />
-              ) : (
-                <CheckCircle className="h-4 w-4 text-green-600" />
-              )}
-            </CardHeader>
-            <CardContent>
-              <div className={`text-2xl font-bold ${getStatusColor(usage?.status || 'good')}`}>
-                {usage?.status === 'exceeded' ? 'Limit Reached' :
-                 usage?.status === 'critical' ? 'Critical' :
-                 usage?.status === 'warning' ? 'Warning' : 'Good'}
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="flex-shrink-0 w-9 h-9 rounded-lg bg-amber-500/10 flex items-center justify-center">
+                  <MessageSquare className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Comments</p>
+                  <p className="text-lg font-bold tabular-nums">{(usage?.breakdown?.comments || 0).toLocaleString()}</p>
+                </div>
               </div>
-              <p className="text-xs text-muted-foreground">
-                {Math.round(usage?.usage_percent || 0)}% of limit used
-              </p>
             </CardContent>
           </Card>
         </div>
 
         {/* Charts */}
         <div className="grid gap-4 md:grid-cols-2">
-          {/* Historical Trend */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Historical Trend</CardTitle>
-              <CardDescription>Tracked users over the past 6 months</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={history}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="billing_period" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Line
-                    type="monotone"
-                    dataKey="total_users"
-                    stroke="#3b82f6"
-                    strokeWidth={2}
-                    name="Tracked Users"
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
+          {/* Historical Trend — hidden when < 10 tracked users */}
+          {(usage?.count || 0) >= 10 ? (
+            <Card>
+              <CardHeader>
+                <CardTitle>Historical Trend</CardTitle>
+                <CardDescription>Tracked users over the past 6 months</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={history}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="billing_period" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Line
+                      type="monotone"
+                      dataKey="total_users"
+                      stroke="#3b82f6"
+                      strokeWidth={2}
+                      name="Tracked Users"
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          ) : (
+            <Card>
+              <CardHeader>
+                <CardTitle>Historical Trend</CardTitle>
+                <CardDescription>Tracked users over the past 6 months</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-col items-center justify-center py-12 text-center">
+                  <Users className="h-10 w-10 text-muted-foreground/40 mb-3" />
+                  <p className="text-sm text-muted-foreground max-w-xs">
+                    Not enough data yet — check back once you have more tracked users.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
-          {/* Action Breakdown */}
+          {/* Action Breakdown — horizontal progress bars */}
           <Card>
             <CardHeader>
               <CardTitle>Action Breakdown</CardTitle>
               <CardDescription>Distribution of user actions this month</CardDescription>
             </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie
-                    data={breakdownData}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                    outerRadius={80}
-                    fill="#8884d8"
-                    dataKey="value"
-                  >
-                    {breakdownData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
-              <div className="grid grid-cols-3 gap-4 mt-4">
-                <div className="text-center">
-                  <FileText className="h-5 w-5 mx-auto mb-1 text-blue-600" />
-                  <div className="text-sm font-medium">{usage?.breakdown.posts || 0}</div>
-                  <div className="text-xs text-muted-foreground">Posts</div>
+            <CardContent className="space-y-4">
+              {/* Posts */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="font-medium">Posts</span>
+                  <span className="text-muted-foreground tabular-nums">{(usage?.breakdown?.posts || 0).toLocaleString()}</span>
                 </div>
-                <div className="text-center">
-                  <ThumbsUp className="h-5 w-5 mx-auto mb-1 text-green-600" />
-                  <div className="text-sm font-medium">{usage?.breakdown.votes || 0}</div>
-                  <div className="text-xs text-muted-foreground">Votes</div>
+                <div className="h-2 rounded-full bg-muted overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-blue-500 transition-all duration-500"
+                    style={{ width: `${breakdownTotal > 0 ? ((usage?.breakdown?.posts || 0) / breakdownTotal) * 100 : 0}%` }}
+                  />
                 </div>
-                <div className="text-center">
-                  <MessageSquare className="h-5 w-5 mx-auto mb-1 text-orange-600" />
-                  <div className="text-sm font-medium">{usage?.breakdown.comments || 0}</div>
-                  <div className="text-xs text-muted-foreground">Comments</div>
+              </div>
+              {/* Votes */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="font-medium">Votes</span>
+                  <span className="text-muted-foreground tabular-nums">{(usage?.breakdown?.votes || 0).toLocaleString()}</span>
                 </div>
+                <div className="h-2 rounded-full bg-muted overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-emerald-500 transition-all duration-500"
+                    style={{ width: `${breakdownTotal > 0 ? ((usage?.breakdown?.votes || 0) / breakdownTotal) * 100 : 0}%` }}
+                  />
+                </div>
+              </div>
+              {/* Comments */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="font-medium">Comments</span>
+                  <span className="text-muted-foreground tabular-nums">{(usage?.breakdown?.comments || 0).toLocaleString()}</span>
+                </div>
+                <div className="h-2 rounded-full bg-muted overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-amber-500 transition-all duration-500"
+                    style={{ width: `${breakdownTotal > 0 ? ((usage?.breakdown?.comments || 0) / breakdownTotal) * 100 : 0}%` }}
+                  />
+                </div>
+              </div>
+              {/* Legend */}
+              <div className="flex items-center gap-4 pt-2 text-xs text-muted-foreground">
+                <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-blue-500" />Posts</span>
+                <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-emerald-500" />Votes</span>
+                <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-amber-500" />Comments</span>
               </div>
             </CardContent>
           </Card>
@@ -442,7 +511,7 @@ export default function TrackedUsersPage() {
               <TableBody>
                 {users.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center text-muted-foreground">
+                    <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
                       No tracked users yet
                     </TableCell>
                   </TableRow>
@@ -450,24 +519,36 @@ export default function TrackedUsersPage() {
                   users.map((user) => (
                     <TableRow key={user.id}>
                       <TableCell>
-                        <div className="font-medium">{user.display_name || 'Anonymous'}</div>
-                        <div className="text-sm text-muted-foreground">
-                          {user.email || user.user_identifier}
+                        <div className="flex items-center gap-2.5">
+                          <div className={`flex-shrink-0 w-7 h-7 rounded-full ${getAvatarColor(user.display_name)} flex items-center justify-center`}>
+                            <span className="text-[10px] font-semibold text-white">{getInitials(user.display_name)}</span>
+                          </div>
+                          <div className="min-w-0">
+                            <div className="font-medium text-sm truncate">{user.display_name || 'Anonymous'}</div>
+                            <div className="text-xs text-muted-foreground truncate">
+                              {user.email || user.user_identifier}
+                            </div>
+                          </div>
                         </div>
                       </TableCell>
-                      <TableCell>{formatDate(user.first_tracked_at)}</TableCell>
-                      <TableCell>{formatDate(user.last_activity_at)}</TableCell>
-                      <TableCell className="text-center">{user.posts_created}</TableCell>
-                      <TableCell className="text-center">{user.votes_cast}</TableCell>
-                      <TableCell className="text-center">{user.comments_made}</TableCell>
+                      <TableCell className="text-sm">{formatDate(user.first_tracked_at)}</TableCell>
+                      <TableCell className="text-sm">{formatDate(user.last_activity_at)}</TableCell>
+                      <TableCell className="text-center text-sm tabular-nums">{user.posts_created}</TableCell>
+                      <TableCell className="text-center text-sm tabular-nums">{user.votes_cast}</TableCell>
+                      <TableCell className="text-center text-sm tabular-nums">{user.comments_made}</TableCell>
                       <TableCell className="text-center">
-                        <Badge variant="secondary">{user.total_actions}</Badge>
+                        <Badge variant="secondary" className="tabular-nums">{user.total_actions}</Badge>
                       </TableCell>
                     </TableRow>
                   ))
                 )}
               </TableBody>
             </Table>
+
+            {/* Caption */}
+            <p className="text-xs text-muted-foreground mt-3">
+              Different email addresses are tracked as separate users, even for the same name.
+            </p>
 
             {/* Pagination */}
             {totalPages > 1 && (

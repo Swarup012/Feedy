@@ -534,14 +534,14 @@ function IntegrationsPageInner() {
 
   return (
     <PaidFeatureGate featureName="Integrations">
-    <div className="space-y-10">
+    <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Integrations</h1>
+        <h1 className="text-lg font-bold tracking-tight">Integrations</h1>
         <p className="text-sm text-muted-foreground mt-1">Connect and manage your favorite tools.</p>
       </div>
 
       {loading ? (
-        <div className="flex items-center gap-2 text-sm text-muted-foreground py-8">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground py-5">
           <Loader2 className="h-5 w-5 animate-spin" /> Loading integrations…
         </div>
       ) : (
@@ -550,29 +550,31 @@ function IntegrationsPageInner() {
           {(isDiscordActive || isIntercomActive || isSlackActive) && (
             <section className="space-y-3">
               <h2 className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
-                Connected Integrations
+                Connected · {[isDiscordActive, isIntercomActive, isSlackActive].filter(Boolean).length}
               </h2>
 
-              {isDiscordActive && (
-                <div className="rounded-xl border bg-card shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden hover:shadow-md transition-shadow">
-                  <div className="p-5 flex items-start justify-between gap-4">
-                    <div className="flex items-start gap-4">
-                      <div className="h-12 w-12 shrink-0 rounded-xl bg-[#5865F2]/10 flex items-center justify-center shadow-sm">
-                        <DiscordIcon className="h-6 w-6" />
+              <div className="space-y-2">
+                {isDiscordActive && (
+                  <div className="rounded-xl border bg-card px-4 py-3 flex items-center gap-3 hover:shadow-sm transition-shadow">
+                    <div className="h-9 w-9 shrink-0 rounded-lg bg-[#5865F2]/10 flex items-center justify-center">
+                      <DiscordIcon className="h-5 w-5" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-sm">Discord</span>
+                        <span className="relative flex h-2 w-2">
+                          <span className="animate-ping absolute h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                          <span className="relative rounded-full h-2 w-2 bg-emerald-500" />
+                        </span>
+                        <span className="text-emerald-600 dark:text-emerald-400 text-xs font-medium">Active</span>
                       </div>
-                      <div>
-                        <div className="flex items-center gap-2.5">
-                          <h3 className="font-semibold">Discord</h3>
-                          <Badge className="bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-0 text-[11px] font-semibold">Connected</Badge>
-                        </div>
-                        <p className="text-sm text-muted-foreground mt-1 max-w-lg">
-                          Monitor a Discord channel for product feedback. We&apos;ll post new messages through Autopilot.
-                        </p>
-                      </div>
+                      <p className="text-xs text-muted-foreground mt-0.5 truncate">
+                        #{discordChannels.find(c => c.id === discordStatus?.provider_channel_id)?.name || 'No channel'} → {boards.find(b => b.id === discordBoardId)?.name || 'No board'} · connected {discordStatus?.connected_at ? formatDate(discordStatus.connected_at) : '—'}
+                      </p>
                     </div>
                     <Popover>
                       <PopoverTrigger asChild>
-                        <Button variant="outline" size="sm" className="shrink-0 gap-2">
+                        <Button variant="outline" size="sm" className="shrink-0 gap-1.5 h-8">
                           <Settings2 className="h-3.5 w-3.5" /> Manage
                         </Button>
                       </PopoverTrigger>
@@ -630,53 +632,29 @@ function IntegrationsPageInner() {
                       </PopoverContent>
                     </Popover>
                   </div>
-                  <div className="border-t bg-muted/30 px-5 py-3.5 flex flex-wrap items-center gap-x-10 gap-y-2 text-sm">
-                    <div>
-                      <span className="text-[11px] text-muted-foreground uppercase tracking-wide block">Channel</span>
-                      <p className="font-medium flex items-center gap-1 mt-0.5">
-                        <Hash className="h-3.5 w-3.5 text-muted-foreground" />
-                        {discordChannels.find(c => c.id === discordStatus?.provider_channel_id)?.name || 'Not selected'}
-                      </p>
-                    </div>
-                    <div>
-                      <span className="text-[11px] text-muted-foreground uppercase tracking-wide block">Board</span>
-                      <p className="font-medium mt-0.5">{boards.find(b => b.id === discordBoardId)?.name || 'Not set'}</p>
-                    </div>
-                    <div>
-                      <span className="text-[11px] text-muted-foreground uppercase tracking-wide block">Connected on</span>
-                      <p className="font-medium mt-0.5">{discordStatus?.connected_at ? formatDate(discordStatus.connected_at) : '—'}</p>
-                    </div>
-                    <div className="ml-auto flex items-center gap-2">
-                      <span className="relative flex h-2 w-2">
-                        <span className="animate-ping absolute h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                        <span className="relative rounded-full h-2 w-2 bg-emerald-500" />
-                      </span>
-                      <span className="text-emerald-600 dark:text-emerald-400 font-semibold text-xs">Active</span>
-                    </div>
-                  </div>
-                </div>
-              )}
+                )}
 
-              {isIntercomActive && (
-                <div className="rounded-xl border bg-card shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden hover:shadow-md transition-shadow">
-                  <div className="p-5 flex items-start justify-between gap-4">
-                    <div className="flex items-start gap-4">
-                      <div className="h-12 w-12 shrink-0 rounded-xl bg-[#1F8DED]/10 flex items-center justify-center shadow-sm">
-                        <IntercomIcon className="h-6 w-6" />
+                {isIntercomActive && (
+                  <div className="rounded-xl border bg-card px-4 py-3 flex items-center gap-3 hover:shadow-sm transition-shadow">
+                    <div className="h-9 w-9 shrink-0 rounded-lg bg-[#1F8DED]/10 flex items-center justify-center">
+                      <IntercomIcon className="h-5 w-5" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-sm">Intercom</span>
+                        <span className="relative flex h-2 w-2">
+                          <span className="animate-ping absolute h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                          <span className="relative rounded-full h-2 w-2 bg-emerald-500" />
+                        </span>
+                        <span className="text-emerald-600 dark:text-emerald-400 text-xs font-medium">Active</span>
                       </div>
-                      <div>
-                        <div className="flex items-center gap-2.5">
-                          <h3 className="font-semibold">Intercom</h3>
-                          <Badge className="bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-0 text-[11px] font-semibold">Connected</Badge>
-                        </div>
-                        <p className="text-sm text-muted-foreground mt-1 max-w-lg">
-                          Closed conversations feed into Autopilot for feedback suggestions.
-                        </p>
-                      </div>
+                      <p className="text-xs text-muted-foreground mt-0.5 truncate">
+                        {intercomStatus?.provider_workspace_id || 'No workspace'} → {boards.find(b => b.id === intercomBoardId)?.name || 'No board'} · connected {intercomStatus?.connected_at ? formatDate(intercomStatus.connected_at) : '—'}
+                      </p>
                     </div>
                     <Popover>
                       <PopoverTrigger asChild>
-                        <Button variant="outline" size="sm" className="shrink-0 gap-2">
+                        <Button variant="outline" size="sm" className="shrink-0 gap-1.5 h-8">
                           <Settings2 className="h-3.5 w-3.5" /> Manage
                         </Button>
                       </PopoverTrigger>
@@ -724,50 +702,29 @@ function IntegrationsPageInner() {
                       </PopoverContent>
                     </Popover>
                   </div>
-                  <div className="border-t bg-muted/30 px-5 py-3.5 flex flex-wrap items-center gap-x-10 gap-y-2 text-sm">
-                    <div>
-                      <span className="text-[11px] text-muted-foreground uppercase tracking-wide block">Workspace</span>
-                      <p className="font-medium font-mono text-xs mt-0.5">{intercomStatus?.provider_workspace_id || '—'}</p>
-                    </div>
-                    <div>
-                      <span className="text-[11px] text-muted-foreground uppercase tracking-wide block">Board</span>
-                      <p className="font-medium mt-0.5">{boards.find(b => b.id === intercomBoardId)?.name || 'Not set'}</p>
-                    </div>
-                    <div>
-                      <span className="text-[11px] text-muted-foreground uppercase tracking-wide block">Connected on</span>
-                      <p className="font-medium mt-0.5">{intercomStatus?.connected_at ? formatDate(intercomStatus.connected_at) : '—'}</p>
-                    </div>
-                    <div className="ml-auto flex items-center gap-2">
-                      <span className="relative flex h-2 w-2">
-                        <span className="animate-ping absolute h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                        <span className="relative rounded-full h-2 w-2 bg-emerald-500" />
-                      </span>
-                      <span className="text-emerald-600 dark:text-emerald-400 font-semibold text-xs">Active</span>
-                    </div>
-                  </div>
-                </div>
-              )}
+                )}
 
-              {isSlackActive && (
-                <div className="rounded-xl border bg-card shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden hover:shadow-md transition-shadow">
-                  <div className="p-5 flex items-start justify-between gap-4">
-                    <div className="flex items-start gap-4">
-                      <div className="h-12 w-12 shrink-0 rounded-xl bg-[#E01E5A]/10 flex items-center justify-center shadow-sm">
-                        <SlackIcon className="h-6 w-6" />
+                {isSlackActive && (
+                  <div className="rounded-xl border bg-card px-4 py-3 flex items-center gap-3 hover:shadow-sm transition-shadow">
+                    <div className="h-9 w-9 shrink-0 rounded-lg bg-[#E01E5A]/10 flex items-center justify-center">
+                      <SlackIcon className="h-5 w-5" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-sm">Slack</span>
+                        <span className="relative flex h-2 w-2">
+                          <span className="animate-ping absolute h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                          <span className="relative rounded-full h-2 w-2 bg-emerald-500" />
+                        </span>
+                        <span className="text-emerald-600 dark:text-emerald-400 text-xs font-medium">Active</span>
                       </div>
-                      <div>
-                        <div className="flex items-center gap-2.5">
-                          <h3 className="font-semibold">Slack</h3>
-                          <Badge className="bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-0 text-[11px] font-semibold">Connected</Badge>
-                        </div>
-                        <p className="text-sm text-muted-foreground mt-1 max-w-lg">
-                          Monitor a Slack channel for product feedback. New messages feed into Autopilot.
-                        </p>
-                      </div>
+                      <p className="text-xs text-muted-foreground mt-0.5 truncate">
+                        #{slackChannels.find(c => c.id === slackStatus?.provider_channel_id)?.name || 'No channel'} → {boards.find(b => b.id === slackBoardId)?.name || 'No board'} · connected {slackStatus?.connected_at ? formatDate(slackStatus.connected_at) : '—'}
+                      </p>
                     </div>
                     <Popover>
                       <PopoverTrigger asChild>
-                        <Button variant="outline" size="sm" className="shrink-0 gap-2">
+                        <Button variant="outline" size="sm" className="shrink-0 gap-1.5 h-8">
                           <Settings2 className="h-3.5 w-3.5" /> Manage
                         </Button>
                       </PopoverTrigger>
@@ -837,32 +794,8 @@ function IntegrationsPageInner() {
                       </PopoverContent>
                     </Popover>
                   </div>
-                  <div className="border-t bg-muted/30 px-5 py-3.5 flex flex-wrap items-center gap-x-10 gap-y-2 text-sm">
-                    <div>
-                      <span className="text-[11px] text-muted-foreground uppercase tracking-wide block">Channel</span>
-                      <p className="font-medium flex items-center gap-1 mt-0.5">
-                        <Hash className="h-3.5 w-3.5 text-muted-foreground" />
-                        {slackChannels.find(c => c.id === slackStatus?.provider_channel_id)?.name || 'Not selected'}
-                      </p>
-                    </div>
-                    <div>
-                      <span className="text-[11px] text-muted-foreground uppercase tracking-wide block">Board</span>
-                      <p className="font-medium mt-0.5">{boards.find(b => b.id === slackBoardId)?.name || 'Not set'}</p>
-                    </div>
-                    <div>
-                      <span className="text-[11px] text-muted-foreground uppercase tracking-wide block">Connected on</span>
-                      <p className="font-medium mt-0.5">{slackStatus?.connected_at ? formatDate(slackStatus.connected_at) : '—'}</p>
-                    </div>
-                    <div className="ml-auto flex items-center gap-2">
-                      <span className="relative flex h-2 w-2">
-                        <span className="animate-ping absolute h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                        <span className="relative rounded-full h-2 w-2 bg-emerald-500" />
-                      </span>
-                      <span className="text-emerald-600 dark:text-emerald-400 font-semibold text-xs">Active</span>
-                    </div>
-                  </div>
-                </div>
-              )}
+                )}
+              </div>
 
               {needsDiscordReconnect && (
                 <div className="rounded-xl border border-red-200 dark:border-red-900/50 bg-red-50/50 dark:bg-red-950/20 p-4 flex items-start gap-3">
@@ -912,52 +845,36 @@ function IntegrationsPageInner() {
               <p className="text-sm text-muted-foreground mt-1">Supercharge your workflow by connecting with the tools you already use.</p>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {/* Discord */}
-              <div className="rounded-xl border bg-card p-5 flex flex-col hover:shadow-md hover:border-[#5865F2]/30 transition-all group">
-                <div className="h-10 w-10 rounded-lg bg-[#5865F2]/10 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
-                  <DiscordIcon className="h-5 w-5 text-[#5865F2]" />
-                </div>
-                <h3 className="font-semibold text-sm">Discord</h3>
-                <p className="text-xs text-muted-foreground mt-1.5 flex-1 leading-relaxed">Monitor Discord channels and convert conversations into actionable feedback.</p>
-                {isDiscordActive ? (
-                  <div className="mt-4 flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-semibold text-sm">
-                    <CheckCircle2 className="h-4 w-4" /> Connected
+              {!isDiscordActive && (
+                <div className="rounded-xl border bg-card p-5 flex flex-col hover:shadow-md hover:border-[#5865F2]/30 transition-all group">
+                  <div className="h-10 w-10 rounded-lg bg-[#5865F2]/10 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+                    <DiscordIcon className="h-5 w-5 text-[#5865F2]" />
                   </div>
-                ) : (
+                  <h3 className="font-semibold text-sm">Discord</h3>
+                  <p className="text-xs text-muted-foreground mt-1.5 flex-1 leading-relaxed">Monitor Discord channels and convert conversations into actionable feedback.</p>
                   <Button size="sm" className="mt-4 w-full bg-[#5865F2] hover:bg-[#4752C4]" onClick={handleConnectDiscord}>Connect</Button>
-                )}
-              </div>
-              {/* Intercom */}
-              <div className="rounded-xl border bg-card p-5 flex flex-col hover:shadow-md hover:border-[#1F8DED]/30 transition-all group">
-                <div className="h-10 w-10 rounded-lg bg-[#1F8DED]/10 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
-                  <IntercomIcon className="h-5 w-5 text-[#1F8DED]" />
                 </div>
-                <h3 className="font-semibold text-sm">Intercom</h3>
-                <p className="text-xs text-muted-foreground mt-1.5 flex-1 leading-relaxed">Receive closed conversation transcripts and generate feedback suggestions.</p>
-                {isIntercomActive ? (
-                  <div className="mt-4 flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-semibold text-sm">
-                    <CheckCircle2 className="h-4 w-4" /> Connected
+              )}
+              {!isIntercomActive && (
+                <div className="rounded-xl border bg-card p-5 flex flex-col hover:shadow-md hover:border-[#1F8DED]/30 transition-all group">
+                  <div className="h-10 w-10 rounded-lg bg-[#1F8DED]/10 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+                    <IntercomIcon className="h-5 w-5 text-[#1F8DED]" />
                   </div>
-                ) : (
+                  <h3 className="font-semibold text-sm">Intercom</h3>
+                  <p className="text-xs text-muted-foreground mt-1.5 flex-1 leading-relaxed">Receive closed conversation transcripts and generate feedback suggestions.</p>
                   <Button size="sm" className="mt-4 w-full bg-[#1F8DED] hover:bg-[#1a7ad4]" onClick={handleConnectIntercom}>Connect</Button>
-                )}
-              </div>
-              {/* Slack */}
-              <div className="rounded-xl border bg-card p-5 flex flex-col hover:shadow-md hover:border-[#E01E5A]/30 transition-all group">
-                <div className="h-10 w-10 rounded-lg bg-[#E01E5A]/10 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
-                  <SlackIcon className="h-5 w-5" />
                 </div>
-                <h3 className="font-semibold text-sm">Slack</h3>
-                <p className="text-xs text-muted-foreground mt-1.5 flex-1 leading-relaxed">Monitor a Slack channel and convert messages into actionable feedback.</p>
-                {isSlackActive ? (
-                  <div className="mt-4 flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-semibold text-sm">
-                    <CheckCircle2 className="h-4 w-4" /> Connected
+              )}
+              {!isSlackActive && (
+                <div className="rounded-xl border bg-card p-5 flex flex-col hover:shadow-md hover:border-[#E01E5A]/30 transition-all group">
+                  <div className="h-10 w-10 rounded-lg bg-[#E01E5A]/10 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+                    <SlackIcon className="h-5 w-5" />
                   </div>
-                ) : (
+                  <h3 className="font-semibold text-sm">Slack</h3>
+                  <p className="text-xs text-muted-foreground mt-1.5 flex-1 leading-relaxed">Monitor a Slack channel and convert messages into actionable feedback.</p>
                   <Button size="sm" className="mt-4 w-full bg-[#4A154B] hover:bg-[#3b113c]" onClick={handleConnectSlack}>Connect</Button>
-                )}
-              </div>
-              {/* Email — coming soon */}
+                </div>
+              )}
               <div className="rounded-xl border bg-card p-5 flex flex-col opacity-60 cursor-not-allowed">
                 <div className="h-10 w-10 rounded-lg bg-amber-500/10 flex items-center justify-center mb-3">
                   <Mail className="h-5 w-5 text-amber-600" />

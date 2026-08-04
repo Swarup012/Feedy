@@ -9,7 +9,7 @@ interface SuccessStepProps {
 
 export function SuccessStep({ data }: SuccessStepProps) {
   return (
-    <div className="space-y-8">
+    <div className="space-y-5">
       {/* Success Header */}
       <div className="text-center">
         <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">

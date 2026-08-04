@@ -115,7 +115,7 @@ export default function SignupPage() {
           <div className="signup-reveal">
             <Link href="/" className="inline-flex items-center gap-3">
               <Logo width={36} height={36} className="text-blue-600" />
-              <span className="text-xl font-switzer font-bold text-slate-900 dark:text-white">Faddy</span>
+              <span className="text-lg font-switzer font-bold text-slate-900 dark:text-white">Faddy</span>
             </Link>
           </div>
 
@@ -148,7 +148,7 @@ export default function SignupPage() {
 
           {/* Form Header */}
           <div className="signup-reveal mb-4">
-            <h2 className="text-2xl font-switzer font-bold text-slate-900 dark:text-white">
+            <h2 className="text-lg font-switzer font-bold text-slate-900 dark:text-white">
               Create your account
             </h2>
             <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">

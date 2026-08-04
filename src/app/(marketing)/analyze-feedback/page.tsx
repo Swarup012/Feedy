@@ -99,7 +99,7 @@ export default function AnalyzeFeedbackPage() {
 
       <div className="min-h-screen bg-[#f9f9f9] dark:bg-background">
         {/* Hero Section */}
-        <section className="relative py-20 lg:py-32 overflow-hidden bg-white dark:bg-background">
+        <section className="relative py-16 lg:py-20 overflow-hidden bg-white dark:bg-background">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <h1 className="text-3xl lg:text-4xl font-switzer font-medium text-slate-900 dark:text-white mb-6 tracking-tight">
               Analyze Feedback, Make Better Decisions
@@ -141,10 +141,10 @@ export default function AnalyzeFeedbackPage() {
         </section>
 
         {/* Faddy helps you cut through the noise */}
-        <section className="py-20 bg-[#f9f9f9] dark:bg-gray-900/50">
+        <section className="py-16 bg-[#f9f9f9] dark:bg-gray-900/50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
-              <h2 className="text-4xl font-switzer font-bold text-slate-900 dark:text-white mb-4">
+            <div className="text-center mb-12">
+              <h2 className="text-2xl font-switzer font-bold text-slate-900 dark:text-white mb-4">
                 Faddy helps you cut through the noise
               </h2>
               <p className="text-xl text-slate-600 dark:text-gray-400 max-w-3xl mx-auto">
@@ -152,10 +152,10 @@ export default function AnalyzeFeedbackPage() {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
               {/* Feature 1 */}
               <Card className="border-slate-200 dark:border-border shadow-lg hover:shadow-xl transition-all">
-                <CardContent className="p-8 text-center">
+                <CardContent className="p-5 text-center">
                   <h3 className="text-xl font-switzer font-medium text-slate-900 dark:text-white mb-3">
                     Smart Filters
                   </h3>
@@ -168,7 +168,7 @@ export default function AnalyzeFeedbackPage() {
 
               {/* Feature 2 */}
               <Card className="border-slate-200 dark:border-border shadow-lg hover:shadow-xl transition-all">
-                <CardContent className="p-8 text-center">
+                <CardContent className="p-5 text-center">
                   <h3 className="text-xl font-switzer font-medium text-slate-900 dark:text-white mb-3">
                     Vote Tracking
                   </h3>
@@ -181,7 +181,7 @@ export default function AnalyzeFeedbackPage() {
 
               {/* Feature 3 */}
               <Card className="border-slate-200 dark:border-border shadow-lg hover:shadow-xl transition-all">
-                <CardContent className="p-8 text-center">
+                <CardContent className="p-5 text-center">
                   <h3 className="text-xl font-switzer font-medium text-slate-900 dark:text-white mb-3">
                     Insights Dashboard
                   </h3>
@@ -194,7 +194,7 @@ export default function AnalyzeFeedbackPage() {
 
               {/* Feature 4 */}
               <Card className="border-slate-200 dark:border-border shadow-lg hover:shadow-xl transition-all">
-                <CardContent className="p-8 text-center">
+                <CardContent className="p-5 text-center">
                   <h3 className="text-xl font-switzer font-medium text-slate-900 dark:text-white mb-3">
                     Prioritization
                   </h3>
@@ -209,10 +209,10 @@ export default function AnalyzeFeedbackPage() {
         </section>
 
         {/* Analytics Views Section - Basic vs Expert */}
-        <section className="py-20 bg-background">
+        <section className="py-16 bg-background">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-12">
-              <h2 className="text-4xl font-switzer font-medium text-foreground mb-4">
+            <div className="text-center mb-8">
+              <h2 className="text-2xl font-switzer font-medium text-foreground mb-4">
                 Two Powerful Ways to Analyze Your Feedback
               </h2>
               <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
@@ -220,7 +220,7 @@ export default function AnalyzeFeedbackPage() {
               </p>
             </div>
 
-            <div className="space-y-16">
+            <div className="space-y-6">
               {/* Basic View - Image Left, Content Right */}
               <div className="grid md:grid-cols-2 gap-8 items-center">
                 {/* Image */}
@@ -235,7 +235,7 @@ export default function AnalyzeFeedbackPage() {
                 </div>
                 {/* Content */}
                 <div className="space-y-4">
-                  <h3 className="text-3xl font-semibold text-foreground">
+                  <h3 className="text-xl font-semibold text-foreground">
                     Basic View
                   </h3>
                   <p className="text-lg text-muted-foreground">
@@ -262,7 +262,7 @@ export default function AnalyzeFeedbackPage() {
               <div className="grid md:grid-cols-2 gap-8 items-center">
                 {/* Content */}
                 <div className="space-y-4 md:order-1">
-                  <h3 className="text-3xl font-semibold text-foreground">
+                  <h3 className="text-xl font-semibold text-foreground">
                     Expert View
                   </h3>
                   <p className="text-lg text-muted-foreground">
@@ -299,10 +299,10 @@ export default function AnalyzeFeedbackPage() {
         </section>
 
         {/* Explore the customer feedback cycle */}
-        <section className="py-20 bg-[#f9f9f9] dark:bg-background">
+        <section className="py-16 bg-[#f9f9f9] dark:bg-background">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
-              <h2 className="text-4xl font-switzer font-medium text-slate-900 dark:text-white mb-4">
+            <div className="text-center mb-12">
+              <h2 className="text-2xl font-switzer font-medium text-slate-900 dark:text-white mb-4">
                 Explore the customer feedback cycle
               </h2>
               <p className="text-xl text-slate-600 dark:text-gray-400 max-w-3xl mx-auto">
@@ -310,12 +310,12 @@ export default function AnalyzeFeedbackPage() {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
               {/* Step 1 */}
               <div className="relative">
                 <Link href="/collect-feedback">
                   <Card className="border-slate-200 dark:border-border shadow-lg h-full hover:shadow-xl transition-all cursor-pointer group">
-                    <CardContent className="p-8">
+                    <CardContent className="p-5">
                       <div className="mb-6">
                         <div className="inline-flex items-center justify-center w-12 h-12 bg-blue-600 text-white rounded-full text-xl font-bold group-hover:scale-110 transition-transform">
                           1
@@ -346,7 +346,7 @@ export default function AnalyzeFeedbackPage() {
               {/* Step 2 */}
               <div className="relative">
                 <Card className="border-blue-200 dark:border-blue-800 shadow-lg h-full bg-blue-50 dark:bg-blue-950/20">
-                  <CardContent className="p-8">
+                  <CardContent className="p-5">
                     <div className="mb-6">
                       <div className="inline-flex items-center justify-center w-12 h-12 bg-blue-600 text-white rounded-full text-xl font-bold">
                         2
@@ -375,7 +375,7 @@ export default function AnalyzeFeedbackPage() {
               {/* Step 3 */}
               <div>
                 <Card className="border-slate-200 dark:border-border shadow-lg h-full">
-                  <CardContent className="p-8">
+                  <CardContent className="p-5">
                     <div className="mb-6">
                       <div className="inline-flex items-center justify-center w-12 h-12 bg-blue-600 text-white rounded-full text-xl font-bold">
                         3

@@ -201,11 +201,11 @@ export default function FirstBoardWelcomePage() {
   if (step === "create") {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-        <div className="container mx-auto px-4 py-16">
+        <div className="container mx-auto px-4 py-10">
           {/* Back Button */}
           <button
             onClick={handleBack}
-            className="mb-8 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 flex items-center gap-2 transition-colors"
+            className="mb-5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 flex items-center gap-2 transition-colors"
             disabled={loading}
           >
             <ChevronRight className="h-4 w-4 rotate-180" />
@@ -214,11 +214,11 @@ export default function FirstBoardWelcomePage() {
 
           {/* Create Form */}
           <div className="max-w-md mx-auto">
-            <div className="text-center mb-12">
-              <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-purple-600 shadow-lg">
-                <Rocket className="h-10 w-10 text-white" />
+            <div className="text-center mb-6">
+              <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-purple-600 shadow-lg">
+                <Rocket className="h-7 w-7 text-white" />
               </div>
-              <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
                 Create Your First Board
               </h1>
               <p className="text-lg text-gray-600 dark:text-gray-400">
@@ -374,11 +374,11 @@ export default function FirstBoardWelcomePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-      <div className="container mx-auto px-4 py-16 flex justify-center">
+      <div className="container mx-auto px-4 py-10 flex justify-center">
         
         <div className="w-full max-w-md">
-          <div className="mb-8 text-center">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+          <div className="mb-5 text-center">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
               Create Your First Board
             </h1>
             <p className="text-gray-600 dark:text-gray-400">

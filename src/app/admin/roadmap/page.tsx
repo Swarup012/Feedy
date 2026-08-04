@@ -370,8 +370,8 @@ export default function AdminRoadmapPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-96">
-        <div className="h-16 w-16 border-4 border-slate-200 dark:border-gray-700 border-t-blue-600 rounded-full animate-spin"></div>
+      <div className="flex items-center justify-center h-64">
+        <div className="h-14 w-14 border-4 border-slate-200 dark:border-gray-700 border-t-blue-600 rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -379,11 +379,11 @@ export default function AdminRoadmapPage() {
   // If no boards exist, show message
   if (allBoards.length === 0) {
     return (
-      <div className="flex items-center justify-center h-96">
+      <div className="flex items-center justify-center h-64">
         <Card className="max-w-md">
           <CardContent className="pt-6 text-center space-y-4">
-            <div className="text-6xl">📋</div>
-            <h2 className="text-2xl font-bold text-gray-900">No Boards Found</h2>
+            <div className="text-4xl">📋</div>
+            <h2 className="text-lg font-bold text-gray-900">No Boards Found</h2>
             <p className="text-gray-600">
               Please create a board first before managing roadmap items.
             </p>
@@ -397,11 +397,11 @@ export default function AdminRoadmapPage() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className="container mx-auto p-4 space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Roadmap Management</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Roadmap Management</h1>
           <p className="text-gray-500 mt-1">Manage your product roadmap </p>
         </div>
         <div className="flex items-center gap-2">
@@ -537,7 +537,7 @@ export default function AdminRoadmapPage() {
       )}
 
       {/* Kanban Board View */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
         {selectedView === 'all' ? (
               <>
                 <StatusColumn
@@ -822,7 +822,7 @@ function ItemsList({ items, onStatusChange, onEdit, onDelete, onUpdate, showBoar
         />
       ))}
       {items.length === 0 && (
-        <div className="text-center py-12 text-gray-400">No items found</div>
+        <div className="text-center py-8 text-gray-400">No items found</div>
       )}
     </div>
   );

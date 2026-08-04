@@ -127,7 +127,7 @@ export default function FeedbackClient() {
   return (
     <div className="flex h-screen bg-gray-50">
       {/* Sidebar */}
-      <div className="w-64 bg-white dark:bg-background border-r border-gray-200 dark:border-border p-6 overflow-y-auto">
+      <div className="w-52 bg-white dark:bg-background border-r border-gray-200 dark:border-border p-4 overflow-y-auto">
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-lg font-bold text-gray-900">Portal</h1>
           <button className="p-2 hover:bg-gray-100 rounded-lg">
@@ -312,10 +312,10 @@ export default function FeedbackClient() {
           <div className="flex-1 overflow-y-auto">
             <div className="bg-white">
               {/* Header */}
-              <div className="border-b border-gray-200 p-6">
+              <div className="border-b border-gray-200 p-4">
                 <div className="flex items-start justify-between mb-4">
                   <div>
-                    <h1 className="text-2xl font-bold text-gray-900 mb-2">
+                    <h1 className="text-lg font-bold text-gray-900 mb-2">
                       {selectedPost.title}
                     </h1>
                     {selectedPost.description && (
@@ -331,7 +331,7 @@ export default function FeedbackClient() {
               </div>
 
               {/* Details Panel */}
-              <div className="grid grid-cols-3 gap-6 p-6 border-b border-gray-200">
+              <div className="grid grid-cols-3 gap-4 p-4 border-b border-gray-200">
                 <div>
                   <p className="text-xs font-semibold text-gray-500 mb-2">
                     DETAILS
@@ -368,7 +368,7 @@ export default function FeedbackClient() {
               </div>
 
               {/* Voting and Info */}
-              <div className="p-6 border-b border-gray-200 flex items-center justify-between">
+              <div className="p-4 border-b border-gray-200 flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   <button
                     onClick={() => toggleLike(selectedPost.id)}
@@ -394,7 +394,7 @@ export default function FeedbackClient() {
               </div>
 
               {/* Activity Feed */}
-              <div className="p-6">
+              <div className="p-4">
                 <h3 className="text-sm font-semibold text-gray-900 mb-4">
                   Activity Feed
                 </h3>

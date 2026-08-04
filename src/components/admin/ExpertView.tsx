@@ -51,10 +51,26 @@ interface ClusterTrendEntry {
   pct: number;
 }
 
-interface ClusterTrends {
+interface TrendingData {
   weeks: string[];
   rising: ClusterTrendEntry[];
   shrinking: ClusterTrendEntry[];
+}
+
+interface NeedsAttentionEntry {
+  cluster_key: string;
+  label: string;
+  severity: string;
+  postCount: number;
+  upvotes: number;
+  comments: number;
+  distinctUsers: number;
+  impactScore: number;
+}
+
+interface ClusterTrends {
+  trending: TrendingData;
+  needsAttention: NeedsAttentionEntry[];
 }
 
 interface AutopilotStats {
@@ -212,8 +228,8 @@ function PanelHeader({ icon: Icon, title, description, right }: {
   );
 }
 
-/* Panel 1 — Cluster / theme trends (rising vs shrinking) */
-function ClusterTrendsPanel({ trends }: { trends: ClusterTrends }) {
+/* Panel 1a — Cluster / theme trends (rising vs shrinking) */
+function ClusterTrendsPanel({ trends }: { trends: TrendingData }) {
   const hasData = trends.rising.length > 0 || trends.shrinking.length > 0;
   return (
     <div className="space-y-3">
@@ -272,6 +288,41 @@ function ClusterTrendsPanel({ trends }: { trends: ClusterTrends }) {
           </p>
         </div>
       )}
+    </div>
+  );
+}
+
+/* Panel 1b — Needs Attention (high-severity clusters) */
+function NeedsAttentionPanel({ entries }: { entries: NeedsAttentionEntry[] }) {
+  if (entries.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-10 text-center">
+        <AlertTriangle className="h-8 w-8 text-muted-foreground/40 mb-2" />
+        <p className="text-sm font-medium text-foreground">Nothing urgent right now</p>
+        <p className="text-xs text-muted-foreground mt-1 max-w-[240px]">
+          High-severity clusters will appear here sorted by impact score.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-2">
+      {entries.map((e) => (
+        <div key={e.cluster_key} className="flex items-center gap-2">
+          <span className="flex-1 min-w-0 text-xs font-medium text-foreground truncate">
+            {e.label}
+          </span>
+          <div className="flex items-center gap-2 shrink-0">
+            <span className="inline-flex items-center rounded-full bg-red-50 px-1.5 py-0.5 text-[10px] font-semibold text-red-600 dark:bg-red-950/40 dark:text-red-400">
+              HIGH
+            </span>
+            <span className="text-[11px] text-muted-foreground w-8 text-right">
+              {e.postCount}
+            </span>
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
@@ -613,21 +664,33 @@ export function ExpertView({ organizationId }: ExpertViewProps) {
       )}
 
       <div className="flex-1 min-h-0 grid grid-rows-[1fr_auto] lg:grid-rows-[3fr_2fr] gap-4 overflow-hidden">
-        {/* Top: cluster trends (60%) + source (40%) */}
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 min-h-0">
+        {/* Top: cluster trends (35%) + needs attention (25%) + source (40%) */}
+        <div className="grid grid-cols-1 lg:grid-cols-10 gap-4 min-h-0">
           <Card className="lg:col-span-3 flex flex-col min-h-0">
             <CardHeader className="pb-3 shrink-0">
               <PanelHeader
                 icon={Gauge}
-                title="Cluster / Theme Trends"
+                title="Trending"
                 description="Week-over-week growth by AI-grouped theme"
               />
             </CardHeader>
             <CardContent className="pt-0 flex-1 min-h-0 overflow-y-auto">
-              <ClusterTrendsPanel trends={stats?.clusterTrends || { weeks: [], rising: [], shrinking: [] }} />
+              <ClusterTrendsPanel trends={stats?.clusterTrends?.trending || { weeks: [], rising: [], shrinking: [] }} />
             </CardContent>
           </Card>
-          <Card className="lg:col-span-2 flex flex-col min-h-0">
+          <Card className="lg:col-span-3 flex flex-col min-h-0">
+            <CardHeader className="pb-3 shrink-0">
+              <PanelHeader
+                icon={AlertTriangle}
+                title="Needs Attention"
+                description="High-severity clusters by impact score"
+              />
+            </CardHeader>
+            <CardContent className="pt-0 flex-1 min-h-0 overflow-y-auto">
+              <NeedsAttentionPanel entries={stats?.clusterTrends?.needsAttention || []} />
+            </CardContent>
+          </Card>
+          <Card className="lg:col-span-4 flex flex-col min-h-0">
             <CardHeader className="pb-3 shrink-0">
               <PanelHeader
                 icon={Globe}

@@ -99,13 +99,13 @@ export default function DocsLayout({
         </div>
       </header>
 
-      <div className="container flex-1 items-start md:grid md:grid-cols-[240px_1fr] md:gap-8 lg:grid-cols-[280px_1fr] lg:gap-12 py-8">
+      <div className="container flex-1 items-start md:grid md:grid-cols-[240px_1fr] md:gap-5 lg:grid-cols-[280px_1fr] lg:gap-8 py-5">
         {/* Sidebar Navigation */}
         <aside className={cn(
           "fixed top-16 z-30 h-[calc(100vh-4rem)] w-full shrink-0 overflow-y-auto border-r border-slate-200/60 dark:border-slate-800/60 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl md:sticky md:block",
           mobileMenuOpen ? "block" : "hidden md:block"
         )}>
-          <div className="p-6 space-y-8">
+          <div className="p-4 space-y-5">
             {/* Search */}
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
@@ -116,7 +116,7 @@ export default function DocsLayout({
             </div>
 
             {/* Navigation */}
-            <nav className="space-y-6">
+            <nav className="space-y-4">
               {navigation.map((section) => (
                 <div key={section.title}>
                   <h4 className="flex items-center gap-2 mb-3 text-sm font-bold uppercase tracking-wider text-slate-900 dark:text-white">
@@ -165,7 +165,7 @@ export default function DocsLayout({
         </aside>
 
         {/* Main Content */}
-        <main className="relative py-6 lg:py-8">
+        <main className="relative py-5 lg:py-6">
           <div className="mx-auto max-w-4xl">
             {children}
           </div>

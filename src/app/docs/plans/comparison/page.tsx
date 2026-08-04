@@ -6,9 +6,9 @@ import { CheckCircle2 } from "lucide-react";
 export default function PlansComparisonPage() {
   return (
     <div className="prose prose-slate dark:prose-invert max-w-none">
-      <div className="not-prose mb-12">
-        <h1 className="text-4xl font-bold text-slate-900 dark:text-white mb-4">Plan Comparison</h1>
-        <p className="text-xl text-slate-600 dark:text-slate-400">
+      <div className="not-prose mb-8">
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">Plan Comparison</h1>
+        <p className="text-base text-slate-600 dark:text-slate-400">
           Compare features across Free, Starter, and Pro plans.
         </p>
       </div>
@@ -21,8 +21,8 @@ export default function PlansComparisonPage() {
         ].map((plan) => (
           <Card key={plan.name} className="border-2">
             <CardContent className="p-6">
-              <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">{plan.name}</h3>
-              <p className="text-3xl font-bold text-blue-600 mb-4">{plan.price}</p>
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">{plan.name}</h3>
+              <p className="text-2xl font-bold text-blue-600 mb-4">{plan.price}</p>
               <ul className="space-y-2">
                 {plan.features.map((f) => (
                   <li key={f} className="flex items-start gap-2 text-slate-600 dark:text-slate-400">

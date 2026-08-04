@@ -39,14 +39,14 @@ const processes = [
 
 export function CurrentProcessStep({ data, onUpdate }: CurrentProcessStepProps) {
   return (
-    <div className="space-y-8">
+    <div className="space-y-5">
       <div>
         <h2 className="text-2xl font-semibold text-foreground">
           How do you currently manage feedback?
         </h2>
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-4">
         {/* Process Selection */}
         <div>
           <Label className="text-sm font-medium mb-3 block">

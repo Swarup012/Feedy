@@ -115,7 +115,7 @@ export default function CollectFeedbackPage() {
 
       <div className="min-h-screen bg-[#f9f9f9] dark:bg-background">
         {/* Hero Section */}
-        <section className="relative py-20 lg:py-32 overflow-hidden bg-white dark:bg-background">
+        <section className="relative py-16 lg:py-20 overflow-hidden bg-white dark:bg-background">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <h1 className="text-3xl lg:text-4xl font-switzer  font-medium text-slate-900 dark:text-white mb-6 tracking-tight">
               Collect Feedback from Your Users, Effortlessly
@@ -157,10 +157,10 @@ export default function CollectFeedbackPage() {
         </section>
 
         {/* Problem Statement Section */}
-        <section className="py-20 bg-[#f9f9f9] dark:bg-gray-900/50">
+        <section className="py-16 bg-[#f9f9f9] dark:bg-gray-900/50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
-              <h2 className="text-4xl font-switzer font-bold text-slate-900 dark:text-white mb-4">
+            <div className="text-center mb-12">
+              <h2 className="text-2xl font-switzer font-bold text-slate-900 dark:text-white mb-4">
                 Scattered Feedback = Missed Opportunities
               </h2>
               <p className="text-xl text-slate-600 dark:text-gray-400 max-w-3xl mx-auto">
@@ -168,10 +168,10 @@ export default function CollectFeedbackPage() {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
               {/* Pain Point 1 */}
               <Card className="border-slate-200 dark:border-border shadow-lg">
-                <CardContent className="p-8 text-center">
+                <CardContent className="p-5 text-center">
                   <h3 className="text-xl font-switzer font-bold text-slate-900 dark:text-white mb-3">
                     Lost in Email Threads
                   </h3>
@@ -184,7 +184,7 @@ export default function CollectFeedbackPage() {
 
               {/* Pain Point 2 */}
               <Card className="border-slate-200 dark:border-border shadow-lg">
-                <CardContent className="p-8 text-center">
+                <CardContent className="p-5 text-center">
                   <h3 className="text-xl font-switzer font-bold text-slate-900 dark:text-white mb-3">
                     Spread Across Tools
                   </h3>
@@ -197,7 +197,7 @@ export default function CollectFeedbackPage() {
 
               {/* Pain Point 3 */}
               <Card className="border-slate-200 dark:border-border shadow-lg">
-                <CardContent className="p-8 text-center">
+                <CardContent className="p-5 text-center">
                   <h3 className="text-xl font-switzer font-bold text-slate-900 dark:text-white mb-3">
                     No Clear Picture
                   </h3>
@@ -212,20 +212,20 @@ export default function CollectFeedbackPage() {
         </section>
 
         {/* How It Works Section */}
-        <section className="py-20 bg-[#f9f9f9] dark:bg-background">
+        <section className="py-16 bg-[#f9f9f9] dark:bg-background">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
-              <h2 className="text-4xl font-switzer font-bold text-slate-900 dark:text-white mb-4">
+            <div className="text-center mb-12">
+              <h2 className="text-2xl font-switzer font-bold text-slate-900 dark:text-white mb-4">
                 Collect Feedback in 3 Simple Steps
               </h2>
             </div>
 
             {/* Step 1 */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-20">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center mb-12">
               <div className="order-2 lg:order-1">
-                <div className="bg-slate-100 dark:bg-gray-800 rounded-2xl p-8 shadow-xl">
+                <div className="bg-slate-100 dark:bg-gray-800 rounded-2xl p-5 shadow-xl">
                   {/* Mock Board Creation Interface - Matches actual CreateBoardDialog */}
-                  <div className="bg-white dark:bg-gray-900 rounded-lg p-6">
+                  <div className="bg-white dark:bg-gray-900 rounded-lg p-4">
                     <div className="space-y-6">
                       {/* Board Name Input */}
                       <div className="space-y-2">
@@ -335,7 +335,7 @@ export default function CollectFeedbackPage() {
                   <div className="flex items-center justify-center h-12 w-12 bg-blue-600 text-white rounded-full text-xl font-bold">
                     1
                   </div>
-                  <h3 className="text-3xl font-switzer font-bold text-slate-900 dark:text-white">
+                  <h3 className="text-xl font-switzer font-bold text-slate-900 dark:text-white">
                     Create Your Feedback Board
                   </h3>
                 </div>
@@ -366,13 +366,13 @@ export default function CollectFeedbackPage() {
             </div>
 
             {/* Step 2 */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-20">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center mb-12">
               <div>
                 <div className="flex items-center gap-4 mb-4">
                   <div className="flex items-center justify-center h-12 w-12 bg-blue-600 text-white rounded-full text-xl font-bold">
                     2
                   </div>
-                  <h3 className="text-3xl font-switzer font-bold text-slate-900 dark:text-white">
+                  <h3 className="text-xl font-switzer font-bold text-slate-900 dark:text-white">
                     Share with Your Users
                   </h3>
                 </div>
@@ -401,9 +401,9 @@ export default function CollectFeedbackPage() {
                 </ul>
               </div>
               <div>
-                <div className="bg-slate-100 dark:bg-gray-800 rounded-2xl p-8 shadow-xl">
+                <div className="bg-slate-100 dark:bg-gray-800 rounded-2xl p-5 shadow-xl">
                   {/* Mock Share Interface */}
-                  <div className="bg-white dark:bg-gray-900 rounded-lg p-6 space-y-4">
+                  <div className="bg-white dark:bg-gray-900 rounded-lg p-4 space-y-4">
                     <h4 className="font-semibold text-slate-900 dark:text-white mb-4">
                       Share Your Board
                     </h4>
@@ -439,11 +439,11 @@ export default function CollectFeedbackPage() {
             </div>
 
             {/* Step 3 */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
               <div className="order-2 lg:order-1">
-                <div className="bg-slate-100 dark:bg-gray-800 rounded-2xl p-8 shadow-xl">
+                <div className="bg-slate-100 dark:bg-gray-800 rounded-2xl p-5 shadow-xl">
                   {/* Mock Feedback Dashboard */}
-                  <div className="bg-white dark:bg-gray-900 rounded-lg p-6">
+                  <div className="bg-white dark:bg-gray-900 rounded-lg p-4">
                     <div className="flex items-center justify-between mb-4">
                       <h4 className="font-semibold text-slate-900 dark:text-white">
                         All Feedback
@@ -506,7 +506,7 @@ export default function CollectFeedbackPage() {
                   <div className="flex items-center justify-center h-12 w-12 bg-blue-600 text-white rounded-full text-xl font-bold">
                     3
                   </div>
-                  <h3 className="text-3xl font-switzer font-bold text-slate-900 dark:text-white">
+                  <h3 className="text-xl font-switzer font-bold text-slate-900 dark:text-white">
                     Watch Ideas Flow In
                   </h3>
                 </div>
@@ -539,10 +539,10 @@ export default function CollectFeedbackPage() {
         </section>
 
         {/* Key Features Grid */}
-        <section className="py-20 bg-[#f9f9f9] dark:bg-gray-900/50">
+        <section className="py-16 bg-[#f9f9f9] dark:bg-gray-900/50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
-              <h2 className="text-4xl font-switzer font-bold text-slate-900 dark:text-white mb-4">
+            <div className="text-center mb-12">
+              <h2 className="text-2xl font-switzer font-bold text-slate-900 dark:text-white mb-4">
                 Everything You Need to Collect Feedback
               </h2>
               <p className="text-xl text-slate-600 dark:text-gray-400">
@@ -551,10 +551,10 @@ export default function CollectFeedbackPage() {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               {/* Feature 1 */}
               <Card className="border-slate-200 dark:border-border shadow-lg hover:shadow-xl transition-shadow">
-                <CardContent className="p-8">
+                <CardContent className="p-5">
                   <h3 className="text-xl font-switzer font-bold text-slate-900 dark:text-white mb-3">
                     Public Feedback Boards
                   </h3>
@@ -567,7 +567,7 @@ export default function CollectFeedbackPage() {
 
               {/* Feature 2 */}
               <Card className="border-slate-200 dark:border-border shadow-lg hover:shadow-xl transition-shadow">
-                <CardContent className="p-8">
+                <CardContent className="p-5">
                   <h3 className="text-xl font-switzer font-bold text-slate-900 dark:text-white mb-3">
                     Multiple Input Channels
                   </h3>
@@ -580,7 +580,7 @@ export default function CollectFeedbackPage() {
 
               {/* Feature 3 */}
               <Card className="border-slate-200 dark:border-border shadow-lg hover:shadow-xl transition-shadow">
-                <CardContent className="p-8">
+                <CardContent className="p-5">
                   <h3 className="text-xl font-switzer font-bold text-slate-900 dark:text-white mb-3">
                     Smart Categorization
                   </h3>
@@ -593,7 +593,7 @@ export default function CollectFeedbackPage() {
 
               {/* Feature 4 */}
               <Card className="border-slate-200 dark:border-border shadow-lg hover:shadow-xl transition-shadow">
-                <CardContent className="p-8">
+                <CardContent className="p-5">
                   <h3 className="text-xl font-switzer font-bold text-slate-900 dark:text-white mb-3">
                     User Voting
                   </h3>
@@ -606,7 +606,7 @@ export default function CollectFeedbackPage() {
 
               {/* Feature 5 */}
               <Card className="border-slate-200 dark:border-border shadow-lg hover:shadow-xl transition-shadow">
-                <CardContent className="p-8">
+                <CardContent className="p-5">
                   <h3 className="text-xl font-switzer font-bold text-slate-900 dark:text-white mb-3">
                     Rich Submissions
                   </h3>
@@ -619,7 +619,7 @@ export default function CollectFeedbackPage() {
 
               {/* Feature 6 */}
               <Card className="border-slate-200 dark:border-border shadow-lg hover:shadow-xl transition-shadow">
-                <CardContent className="p-8">
+                <CardContent className="p-5">
                   <h3 className="text-xl font-switzer font-bold text-slate-900 dark:text-white mb-3">
                     Anonymous or Authenticated
                   </h3>
@@ -634,10 +634,10 @@ export default function CollectFeedbackPage() {
         </section>
 
         {/* Benefits Section - Redesigned */}
-        <section className="py-20 bg-[#f9f9f9] dark:bg-gray-900/50">
+        <section className="py-16 bg-[#f9f9f9] dark:bg-gray-900/50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
-              <h2 className="text-4xl font-switzer font-bold text-slate-900 dark:text-white mb-4">
+            <div className="text-center mb-12">
+              <h2 className="text-2xl font-switzer font-bold text-slate-900 dark:text-white mb-4">
                 Why Teams Love Collecting Feedback with Faddy
               </h2>
               <p className="text-xl text-slate-600 dark:text-gray-400 max-w-3xl mx-auto">
@@ -645,11 +645,11 @@ export default function CollectFeedbackPage() {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
               {/* Benefit 1 - Save Time */}
               <div className="group">
                 <Card className="border-slate-200 dark:border-border shadow-lg hover:shadow-xl transition-all h-full">
-                  <CardContent className="p-8">
+                  <CardContent className="p-5">
                     <div className="mb-6">
                       <div className="inline-flex p-4 bg-blue-600 rounded-2xl shadow-md">
                         <Clock className="h-10 w-10 text-white" />
@@ -697,7 +697,7 @@ export default function CollectFeedbackPage() {
               {/* Benefit 2 - Build Better */}
               <div className="group">
                 <Card className="border-blue-200 dark:border-blue-800 shadow-lg hover:shadow-xl transition-all h-full bg-blue-50 dark:bg-blue-950/20">
-                  <CardContent className="p-8">
+                  <CardContent className="p-5">
                     <div className="mb-6">
                       <div className="inline-flex p-4 bg-blue-600 rounded-2xl shadow-md">
                         <Target className="h-10 w-10 text-white" />
@@ -745,7 +745,7 @@ export default function CollectFeedbackPage() {
               {/* Benefit 3 - Engage Community */}
               <div className="group">
                 <Card className="border-slate-200 dark:border-border shadow-lg hover:shadow-xl transition-all h-full">
-                  <CardContent className="p-8">
+                  <CardContent className="p-5">
                     <div className="mb-6">
                       <div className="inline-flex p-4 bg-blue-600 rounded-2xl shadow-md">
                         <Heart className="h-10 w-10 text-white" />
@@ -793,18 +793,18 @@ export default function CollectFeedbackPage() {
           </div>
         </section>
         {/* Use Cases Section */}
-        <section className="py-20 bg-[#f9f9f9] dark:bg-gray-900/50">
+        <section className="py-16 bg-[#f9f9f9] dark:bg-gray-900/50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
-              <h2 className="text-4xl font-switzer font-bold text-slate-900 dark:text-white mb-4">
+            <div className="text-center mb-12">
+              <h2 className="text-2xl font-switzer font-bold text-slate-900 dark:text-white mb-4">
                 Perfect For...
               </h2>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               {/* Use Case 1 */}
               <Card className="border-slate-200 dark:border-border shadow-lg hover:shadow-xl transition-all">
-                <CardContent className="p-8 text-center">
+                <CardContent className="p-5 text-center">
                   <h3 className="text-xl font-switzer font-bold text-slate-900 dark:text-white mb-3">
                     SaaS Products
                   </h3>
@@ -819,7 +819,7 @@ export default function CollectFeedbackPage() {
 
               {/* Use Case 2 */}
               <Card className="border-slate-200 dark:border-border shadow-lg hover:shadow-xl transition-all">
-                <CardContent className="p-8 text-center">
+                <CardContent className="p-5 text-center">
                   <h3 className="text-xl font-switzer font-bold text-slate-900 dark:text-white mb-3">
                     Mobile Apps
                   </h3>
@@ -834,7 +834,7 @@ export default function CollectFeedbackPage() {
 
               {/* Use Case 3 */}
               <Card className="border-slate-200 dark:border-border shadow-lg hover:shadow-xl transition-all">
-                <CardContent className="p-8 text-center">
+                <CardContent className="p-5 text-center">
                   <h3 className="text-xl font-switzer font-bold text-slate-900 dark:text-white mb-3">
                     Web Agencies
                   </h3>
@@ -851,15 +851,15 @@ export default function CollectFeedbackPage() {
         </section>
 
         {/* Integration Callout */}
-        <section className="py-20 bg-[#f9f9f9] dark:bg-background">
+        <section className="py-16 bg-[#f9f9f9] dark:bg-background">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-12">
-              <h2 className="text-4xl font-switzer font-bold text-slate-900 dark:text-white mb-4">
+            <div className="text-center mb-8">
+              <h2 className="text-2xl font-switzer font-bold text-slate-900 dark:text-white mb-4">
                 Collect Feedback Wherever Your Users Are
               </h2>
             </div>
 
-            <div className="flex flex-wrap justify-center gap-8 mb-12">
+            <div className="flex flex-wrap justify-center gap-5 mb-8">
               {[
                 { icon: Globe, label: "Embeddable Widget", color: "blue" },
                 { icon: Link2, label: "Shareable Links", color: "purple" },
@@ -909,17 +909,17 @@ export default function CollectFeedbackPage() {
         </section>
 
         {/* Social Proof */}
-        <section className="py-20 bg-[#f9f9f9] dark:bg-gray-900/50">
+        <section className="py-16 bg-[#f9f9f9] dark:bg-gray-900/50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-12">
-              <h2 className="text-4xl font-switzer font-bold text-slate-900 dark:text-white mb-4">
+            <div className="text-center mb-8">
+              <h2 className="text-2xl font-switzer font-bold text-slate-900 dark:text-white mb-4">
                 Trusted by Teams Building Better Products
               </h2>
             </div>
 
             {/* Testimonial */}
-            <Card className="max-w-4xl mx-auto border-slate-200 dark:border-border shadow-xl mb-12">
-              <CardContent className="p-8 lg:p-12">
+            <Card className="max-w-4xl mx-auto border-slate-200 dark:border-border shadow-xl mb-8">
+              <CardContent className="p-5 lg:p-8">
                 <div className="flex gap-1 mb-4 justify-center">
                   {[1, 2, 3, 4, 5].map((i) => (
                     <Star
@@ -951,7 +951,7 @@ export default function CollectFeedbackPage() {
             </Card>
 
             {/* Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
               {[
                 { number: "∞", label: "Ideas Collected" },
                 { number: "Temcia Group", label: "Teams Using Faddy" },
@@ -971,10 +971,10 @@ export default function CollectFeedbackPage() {
         </section>
 
         {/* FAQ Section */}
-        <section className="py-20 bg-[#f9f9f9] dark:bg-background">
+        <section className="py-16 bg-[#f9f9f9] dark:bg-background">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-12">
-              <h2 className="text-4xl font-switzer font-bold text-slate-900 dark:text-white mb-4">
+            <div className="text-center mb-8">
+              <h2 className="text-2xl font-switzer font-bold text-slate-900 dark:text-white mb-4">
                 Frequently Asked Questions
               </h2>
             </div>
@@ -1035,9 +1035,9 @@ export default function CollectFeedbackPage() {
         </section>
 
         {/* Bottom CTA */}
-        <section className="py-20 bg-blue-600 dark:bg-blue-700">
+        <section className="py-16 bg-blue-600 dark:bg-blue-700">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 className="text-4xl lg:text-5xl font-bold text-white mb-6">
+            <h2 className="text-2xl lg:text-3xl font-bold text-white mb-6">
               Start Collecting Valuable Feedback Today
             </h2>
             <p className="text-xl text-blue-100 mb-8">

@@ -370,14 +370,14 @@ export default function WebhooksPage() {
 
   return (
     <ProtectedRoute allowedRoles={['owner', 'admin']}>
-      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-5 py-5 space-y-5">
 
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 mb-1">
               <WebhookIcon className="h-6 w-6 text-primary" />
-              <h1 className="text-2xl font-semibold tracking-tight">Webhooks</h1>
+              <h1 className="text-lg font-semibold tracking-tight">Webhooks</h1>
             </div>
             <p className="text-sm text-muted-foreground">
               Send real-time HTTP notifications to external services when events happen in your organization.
@@ -402,12 +402,12 @@ export default function WebhooksPage() {
         {loading ? (
           <div className="space-y-3">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="h-32 rounded-xl border bg-card animate-pulse" />
+              <div key={i} className="h-20 rounded-xl border bg-card animate-pulse" />
             ))}
           </div>
         ) : webhooks.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-border flex flex-col items-center justify-center py-20 gap-4">
-            <WebhookIcon className="h-12 w-12 text-muted-foreground/30" />
+          <div className="rounded-xl border border-dashed border-border flex flex-col items-center justify-center py-10 gap-4">
+            <WebhookIcon className="h-8 w-8 text-muted-foreground/30" />
             <div className="text-center">
               <p className="font-medium text-foreground">No webhooks yet</p>
               <p className="text-sm text-muted-foreground mt-1">Create your first webhook to start receiving real-time event notifications.</p>

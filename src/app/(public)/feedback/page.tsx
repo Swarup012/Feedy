@@ -309,8 +309,8 @@ export default function FeedbackPage() {
       <div className="container mx-auto py-8">
         <div className="flex items-center justify-center h-[60vh]">
           <div className="text-center">
-            <div className="text-6xl mb-4">📋</div>
-            <h2 className="text-2xl font-switzer font-medium mb-2">
+            <div className="text-4xl mb-4">📋</div>
+            <h2 className="text-lg font-switzer font-medium mb-2">
               No Public Boards Available
             </h2>
             <p className="text-gray-500 mb-4">
@@ -346,13 +346,13 @@ export default function FeedbackPage() {
         </div>
       )}
 
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-5 lg:py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6">
           {/* Sidebar - Filters */}
           <aside className="lg:col-span-3">
             <div className="sticky top-20 space-y-6">
               {/* Board Filter */}
-              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-6">
+              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-4">
                 <h3 className="text-sm font-switzer font-semibold mb-4 text-slate-700 dark:text-slate-300 uppercase tracking-wide">
                   Boards
                 </h3>
@@ -360,7 +360,7 @@ export default function FeedbackPage() {
                   <button
                     onClick={() => setSelectedBoard("all")}
                     className={cn(
-                      "w-full text-left px-3 py-2.5 rounded-md text-sm font-switzer font-medium transition-colors",
+                      "w-full text-left px-3 py-2 rounded-md text-sm font-switzer font-medium transition-colors",
                       selectedBoard === "all"
                         ? "bg-primary text-primary-foreground"
                         : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800",
@@ -382,7 +382,7 @@ export default function FeedbackPage() {
                         key={board.id}
                         onClick={() => setSelectedBoard(board.slug)}
                         className={cn(
-                          "w-full text-left px-3 py-2.5 rounded-md text-sm font-switzer font-medium transition-colors",
+                          "w-full text-left px-3 py-2 rounded-md text-sm font-switzer font-medium transition-colors",
                           selectedBoard === board.slug
                             ? "bg-primary text-primary-foreground"
                             : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800",
@@ -403,7 +403,7 @@ export default function FeedbackPage() {
               </div>
 
               {/* Status Filter */}
-              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-6">
+              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-4">
                 <h3 className="text-sm font-switzer font-semibold mb-4 text-slate-700 dark:text-slate-300 uppercase tracking-wide">
                   Status
                 </h3>
@@ -431,9 +431,9 @@ export default function FeedbackPage() {
           {/* Main Content */}
           <main className="lg:col-span-9">
             {/* Header with Sort and Create Post */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-5 gap-4">
               <div>
-                <h1 className="text-3xl font-switzer font-semibold text-slate-900 dark:text-white tracking-tight">
+                <h1 className="text-xl font-switzer font-semibold text-slate-900 dark:text-white tracking-tight">
                   {selectedBoard === "all"
                     ? "All Feedback"
                     : boards.find((b) => b.slug === selectedBoard)?.name}
@@ -465,7 +465,7 @@ export default function FeedbackPage() {
                 {[1, 2, 3].map((i) => (
                   <div
                     key={i}
-                    className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-6 animate-pulse"
+                    className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-4 animate-pulse"
                   >
                     <div className="h-6 bg-slate-200 dark:bg-slate-700 rounded w-3/4 mb-3"></div>
                     <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-full mb-2"></div>
@@ -474,9 +474,9 @@ export default function FeedbackPage() {
                 ))}
               </div>
             ) : filteredPosts.length === 0 ? (
-              <div className="text-center py-16">
-                <div className="text-6xl mb-4">💬</div>
-                <h3 className="text-xl font-switzer font-semibold text-slate-900 dark:text-white mb-2">
+              <div className="text-center py-10">
+                <div className="text-4xl mb-4">💬</div>
+                <h3 className="text-lg font-switzer font-semibold text-slate-900 dark:text-white mb-2">
                   No feedback yet
                 </h3>
                 <p className="text-slate-600 dark:text-slate-400">
@@ -498,7 +498,7 @@ export default function FeedbackPage() {
 
             {/* Load More */}
             {filteredPosts.length > 0 && (
-              <div className="flex items-center justify-center mt-12">
+              <div className="flex items-center justify-center mt-8">
                 <Button
                   variant="outline"
                   disabled

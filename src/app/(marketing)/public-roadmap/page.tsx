@@ -111,7 +111,7 @@ export default function PublicRoadmapPage() {
 
       <div className="min-h-screen bg-[#f9f9f9] dark:bg-background">
         {/* Hero Section */}
-        <section className="relative py-20 lg:py-32 overflow-hidden bg-white dark:bg-background">
+        <section className="relative py-16 lg:py-20 overflow-hidden bg-white dark:bg-background">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <h1 className="text-3xl lg:text-4xl font-switzer font-medium text-slate-900 dark:text-white mb-6 tracking-tight">
               Build Trust with a Public Roadmap
@@ -152,10 +152,10 @@ export default function PublicRoadmapPage() {
         </section>
 
         {/* Benefits Section - 6 Cards */}
-        <section className="py-20 bg-[#f9f9f9] dark:bg-gray-900/50">
+        <section className="py-16 bg-[#f9f9f9] dark:bg-gray-900/50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
-              <h2 className="text-4xl font-switzer font-bold text-slate-900 dark:text-white mb-4">
+            <div className="text-center mb-12">
+              <h2 className="text-2xl font-switzer font-bold text-slate-900 dark:text-white mb-4">
                 Why Public Roadmaps Matter
               </h2>
               <p className="text-xl text-slate-600 dark:text-gray-400">
@@ -163,10 +163,10 @@ export default function PublicRoadmapPage() {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               {/* Benefit 1 */}
               <Card className="border-slate-200 dark:border-border shadow-lg hover:shadow-xl transition-shadow">
-                <CardContent className="p-8">
+                <CardContent className="p-5">
                   <h3 className="text-xl font-switzer font-bold text-slate-900 dark:text-white mb-3">
                     Build Trust & Transparency
                   </h3>
@@ -178,7 +178,7 @@ export default function PublicRoadmapPage() {
 
               {/* Benefit 2 */}
               <Card className="border-slate-200 dark:border-border shadow-lg hover:shadow-xl transition-shadow">
-                <CardContent className="p-8">
+                <CardContent className="p-5">
                   <h3 className="text-xl font-switzer font-bold text-slate-900 dark:text-white mb-3">
                     Drive User Engagement
                   </h3>
@@ -190,7 +190,7 @@ export default function PublicRoadmapPage() {
 
               {/* Benefit 3 */}
               <Card className="border-slate-200 dark:border-border shadow-lg hover:shadow-xl transition-shadow">
-                <CardContent className="p-8">
+                <CardContent className="p-5">
                   <h3 className="text-xl font-switzer font-bold text-slate-900 dark:text-white mb-3">
                     Reduce Support Requests
                   </h3>
@@ -202,7 +202,7 @@ export default function PublicRoadmapPage() {
 
               {/* Benefit 4 */}
               <Card className="border-slate-200 dark:border-border shadow-lg hover:shadow-xl transition-shadow">
-                <CardContent className="p-8">
+                <CardContent className="p-5">
                   <h3 className="text-xl font-switzer font-bold text-slate-900 dark:text-white mb-3">
                     Align Stakeholders
                   </h3>
@@ -214,7 +214,7 @@ export default function PublicRoadmapPage() {
 
               {/* Benefit 5 */}
               <Card className="border-slate-200 dark:border-border shadow-lg hover:shadow-xl transition-shadow">
-                <CardContent className="p-8">
+                <CardContent className="p-5">
                   <h3 className="text-xl font-switzer font-bold text-slate-900 dark:text-white mb-3">
                     Gather Early Feedback
                   </h3>
@@ -226,7 +226,7 @@ export default function PublicRoadmapPage() {
 
               {/* Benefit 6 */}
               <Card className="border-slate-200 dark:border-border shadow-lg hover:shadow-xl transition-shadow">
-                <CardContent className="p-8">
+                <CardContent className="p-5">
                   <h3 className="text-xl font-switzer font-bold text-slate-900 dark:text-white mb-3">
                     Manage Expectations
                   </h3>
@@ -240,10 +240,10 @@ export default function PublicRoadmapPage() {
         </section>
 
         {/* Features Section - 4 Cards */}
-        <section className="py-20 bg-white dark:bg-background">
+        <section className="py-16 bg-white dark:bg-background">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
-              <h2 className="text-4xl font-switzer font-bold text-slate-900 dark:text-white mb-4">
+            <div className="text-center mb-12">
+              <h2 className="text-2xl font-switzer font-bold text-slate-900 dark:text-white mb-4">
                 Powerful Roadmap Features
               </h2>
               <p className="text-xl text-slate-600 dark:text-gray-400">
@@ -251,11 +251,11 @@ export default function PublicRoadmapPage() {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {/* Feature 1 */}
               <Card className="border-slate-200 dark:border-border shadow-lg hover:shadow-xl transition-shadow">
-                <CardContent className="p-8">
-                  <h3 className="text-2xl font-switzer font-bold text-slate-900 dark:text-white mb-4">
+                <CardContent className="p-5">
+                  <h3 className="text-xl font-switzer font-bold text-slate-900 dark:text-white mb-4">
                     Beautiful Timeline View
                   </h3>
                   <p className="text-slate-600 dark:text-gray-400 mb-6">
@@ -286,8 +286,8 @@ export default function PublicRoadmapPage() {
 
               {/* Feature 2 */}
               <Card className="border-slate-200 dark:border-border shadow-lg hover:shadow-xl transition-shadow">
-                <CardContent className="p-8">
-                  <h3 className="text-2xl font-switzer font-bold text-slate-900 dark:text-white mb-4">
+                <CardContent className="p-5">
+                  <h3 className="text-xl font-switzer font-bold text-slate-900 dark:text-white mb-4">
                     Public & Private Options
                   </h3>
                   <p className="text-slate-600 dark:text-gray-400 mb-6">
@@ -318,8 +318,8 @@ export default function PublicRoadmapPage() {
 
               {/* Feature 3 */}
               <Card className="border-slate-200 dark:border-border shadow-lg hover:shadow-xl transition-shadow">
-                <CardContent className="p-8">
-                  <h3 className="text-2xl font-switzer font-bold text-slate-900 dark:text-white mb-4">
+                <CardContent className="p-5">
+                  <h3 className="text-xl font-switzer font-bold text-slate-900 dark:text-white mb-4">
                     Voting & Comments
                   </h3>
                   <p className="text-slate-600 dark:text-gray-400 mb-6">
@@ -350,8 +350,8 @@ export default function PublicRoadmapPage() {
 
               {/* Feature 4 */}
               <Card className="border-slate-200 dark:border-border shadow-lg hover:shadow-xl transition-shadow">
-                <CardContent className="p-8">
-                  <h3 className="text-2xl font-switzer font-bold text-slate-900 dark:text-white mb-4">
+                <CardContent className="p-5">
+                  <h3 className="text-xl font-switzer font-bold text-slate-900 dark:text-white mb-4">
                     Custom Branding
                   </h3>
                   <p className="text-slate-600 dark:text-gray-400 mb-6">
@@ -384,10 +384,10 @@ export default function PublicRoadmapPage() {
         </section>
 
         {/* How It Works Section - 3 Steps */}
-        <section className="py-20 bg-[#f9f9f9] dark:bg-gray-900/50">
+        <section className="py-16 bg-[#f9f9f9] dark:bg-gray-900/50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
-              <h2 className="text-4xl font-switzer font-bold text-slate-900 dark:text-white mb-4">
+            <div className="text-center mb-12">
+              <h2 className="text-2xl font-switzer font-bold text-slate-900 dark:text-white mb-4">
                 How It Works
               </h2>
               <p className="text-xl text-slate-600 dark:text-gray-400">
@@ -396,11 +396,11 @@ export default function PublicRoadmapPage() {
             </div>
 
             {/* Step 1 */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-20">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center mb-12">
               <div className="order-2 lg:order-1">
-                <div className="bg-slate-100 dark:bg-gray-800 rounded-2xl p-8 shadow-xl">
+                <div className="bg-slate-100 dark:bg-gray-800 rounded-2xl p-5 shadow-xl">
                   {/* Mock Roadmap Creation Interface */}
-                  <div className="bg-white dark:bg-gray-900 rounded-lg p-6">
+                  <div className="bg-white dark:bg-gray-900 rounded-lg p-4">
                     <div className="space-y-6">
                       {/* Roadmap Item Creation */}
                       <div className="space-y-4">
@@ -453,7 +453,7 @@ export default function PublicRoadmapPage() {
                   <div className="flex items-center justify-center h-12 w-12 bg-blue-600 text-white rounded-full text-xl font-bold">
                     1
                   </div>
-                  <h3 className="text-3xl font-switzer font-bold text-slate-900 dark:text-white">
+                  <h3 className="text-xl font-switzer font-bold text-slate-900 dark:text-white">
                     Create Roadmap Items
                   </h3>
                 </div>
@@ -484,13 +484,13 @@ export default function PublicRoadmapPage() {
             </div>
 
             {/* Step 2 */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-20">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center mb-12">
               <div>
                 <div className="flex items-center gap-4 mb-4">
                   <div className="flex items-center justify-center h-12 w-12 bg-blue-600 text-white rounded-full text-xl font-bold">
                     2
                   </div>
-                  <h3 className="text-3xl font-switzer font-bold text-slate-900 dark:text-white">
+                  <h3 className="text-xl font-switzer font-bold text-slate-900 dark:text-white">
                     Set Status & Timeline
                   </h3>
                 </div>
@@ -519,9 +519,9 @@ export default function PublicRoadmapPage() {
                 </ul>
               </div>
               <div>
-                <div className="bg-slate-100 dark:bg-gray-800 rounded-2xl p-8 shadow-xl">
+                <div className="bg-slate-100 dark:bg-gray-800 rounded-2xl p-5 shadow-xl">
                   {/* Mock Status Management */}
-                  <div className="bg-white dark:bg-gray-900 rounded-lg p-6 space-y-4">
+                  <div className="bg-white dark:bg-gray-900 rounded-lg p-4 space-y-4">
                     <h4 className="font-semibold text-slate-900 dark:text-white mb-4">
                       Roadmap Timeline
                     </h4>
@@ -561,11 +561,11 @@ export default function PublicRoadmapPage() {
             </div>
 
             {/* Step 3 */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
               <div className="order-2 lg:order-1">
-                <div className="bg-slate-100 dark:bg-gray-800 rounded-2xl p-8 shadow-xl">
+                <div className="bg-slate-100 dark:bg-gray-800 rounded-2xl p-5 shadow-xl">
                   {/* Mock Public Roadmap View */}
-                  <div className="bg-white dark:bg-gray-900 rounded-lg p-6">
+                  <div className="bg-white dark:bg-gray-900 rounded-lg p-4">
                     <div className="flex items-center justify-between mb-4">
                       <h4 className="font-semibold text-slate-900 dark:text-white">
                         Public Roadmap
@@ -613,7 +613,7 @@ export default function PublicRoadmapPage() {
                   <div className="flex items-center justify-center h-12 w-12 bg-blue-600 text-white rounded-full text-xl font-bold">
                     3
                   </div>
-                  <h3 className="text-3xl font-switzer font-bold text-slate-900 dark:text-white">
+                  <h3 className="text-xl font-switzer font-bold text-slate-900 dark:text-white">
                     Share Publicly
                   </h3>
                 </div>
@@ -646,10 +646,10 @@ export default function PublicRoadmapPage() {
         </section>
 
         {/* CTA Section */}
-        <section className="py-20 bg-white dark:bg-background">
+        <section className="py-16 bg-white dark:bg-background">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <div className="p-12 rounded-2xl bg-blue-600 text-white">
-              <h2 className="text-4xl font-switzer font-bold mb-4">
+            <div className="p-8 rounded-2xl bg-blue-600 text-white">
+              <h2 className="text-2xl font-switzer font-bold mb-4">
                 Ready to Build Trust with Your Users?
               </h2>
               <p className="text-xl mb-8 text-blue-100">

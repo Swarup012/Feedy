@@ -9,21 +9,21 @@ export default function QuickStartPage() {
   return (
     <div className="prose prose-slate dark:prose-invert max-w-none">
       {/* Header */}
-      <div className="not-prose mb-12">
+      <div className="not-prose mb-8">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-sm font-semibold mb-4">
           <Zap className="h-3.5 w-3.5" />
           Getting Started
         </div>
-        <h1 className="text-4xl font-bold text-slate-900 dark:text-white mb-4">
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">
           Quick Start Guide
         </h1>
-        <p className="text-xl text-slate-600 dark:text-slate-400">
+        <p className="text-base text-slate-600 dark:text-slate-400">
           Get up and running with Faddy in under 5 minutes
         </p>
       </div>
 
       {/* Step-by-step Guide */}
-      <div className="not-prose space-y-8">
+      <div className="not-prose space-y-5">
         {/* Step 1 */}
         <Card className="border-2">
           <CardContent className="p-6">
@@ -32,7 +32,7 @@ export default function QuickStartPage() {
                 1
               </div>
               <div className="flex-1">
-                <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-3">
                   Create Your Account
                 </h3>
                 <p className="text-slate-600 dark:text-slate-400 mb-4">
@@ -57,7 +57,7 @@ export default function QuickStartPage() {
                 2
               </div>
               <div className="flex-1">
-                <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-3">
                   Create Your First Board
                 </h3>
                 <p className="text-slate-600 dark:text-slate-400 mb-4">
@@ -88,7 +88,7 @@ export default function QuickStartPage() {
                 3
               </div>
               <div className="flex-1">
-                <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-3">
                   Share Your Board
                 </h3>
                 <p className="text-slate-600 dark:text-slate-400 mb-4">
@@ -118,7 +118,7 @@ export default function QuickStartPage() {
                 4
               </div>
               <div className="flex-1">
-                <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-3">
                   Start Collecting Feedback
                 </h3>
                 <p className="text-slate-600 dark:text-slate-400 mb-4">
@@ -149,8 +149,8 @@ export default function QuickStartPage() {
       </div>
 
       {/* Next Steps */}
-      <div className="not-prose mt-12 p-8 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 border border-slate-300 dark:border-slate-600">
-        <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">
+      <div className="not-prose mt-8 p-5 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 border border-slate-300 dark:border-slate-600">
+        <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-4">
           🎉 You're All Set!
         </h3>
         <p className="text-slate-600 dark:text-slate-400 mb-6">

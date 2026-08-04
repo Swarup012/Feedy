@@ -161,7 +161,7 @@ function ResetPasswordForm() {
               <CheckCircle2 className="w-8 h-8 text-green-600 dark:text-green-400" />
             </div>
             
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+            <h1 className="text-xl font-bold text-gray-900 dark:text-white">
               Password Reset Successful!
             </h1>
             
@@ -191,7 +191,7 @@ function ResetPasswordForm() {
               <XCircle className="w-8 h-8 text-red-600 dark:text-red-400" />
             </div>
             
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+            <h1 className="text-xl font-bold text-gray-900 dark:text-white">
               Invalid Reset Link
             </h1>
             
@@ -227,13 +227,13 @@ function ResetPasswordForm() {
       <div className="w-full max-w-md">
         <div className="bg-white dark:bg-card rounded-2xl shadow-2xl p-8 space-y-6">
           {/* Logo */}
-          <div className="flex justify-center mb-8">
+          <div className="flex justify-center mb-5">
             <Logo />
           </div>
 
           {/* Header */}
           <div className="text-center space-y-2">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+            <h1 className="text-xl font-bold text-gray-900 dark:text-white">
               Reset Your Password
             </h1>
             <p className="text-gray-600 dark:text-gray-300">

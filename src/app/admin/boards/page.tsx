@@ -36,7 +36,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -74,6 +73,9 @@ export default function BoardsManagementPage() {
   const [selectedBoard, setSelectedBoard] = useState<Board | null>(null);
   const [showIconPicker, setShowIconPicker] = useState(false); // Icon picker state
   const [iconPickerMode, setIconPickerMode] = useState<'create' | 'edit'>('create'); // Track which form is using picker
+  const [boardDependencies, setBoardDependencies] = useState<{ id: string; provider: string; status: string }[]>([]);
+  const [loadingDependencies, setLoadingDependencies] = useState(false);
+  const [deleteConfirmed, setDeleteConfirmed] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -163,6 +165,8 @@ export default function BoardsManagementPage() {
       });
       setShowDeleteDialog(false);
       setSelectedBoard(null);
+      setBoardDependencies([]);
+      setDeleteConfirmed(false);
       loadBoards();
     } catch (error) {
       handleBoardError(error);
@@ -181,9 +185,19 @@ export default function BoardsManagementPage() {
     setShowEditDialog(true);
   };
 
-  const openDeleteDialog = (board: Board) => {
+  const openDeleteDialog = async (board: Board) => {
     setSelectedBoard(board);
+    setDeleteConfirmed(false);
     setShowDeleteDialog(true);
+    setLoadingDependencies(true);
+    try {
+      const res = await boardService.getBoardDependencies(board.id);
+      setBoardDependencies(res.data?.integrations || []);
+    } catch {
+      setBoardDependencies([]);
+    } finally {
+      setLoadingDependencies(false);
+    }
   };
 
   const resetForm = () => {
@@ -202,14 +216,14 @@ export default function BoardsManagementPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-96">
+      <div className="flex items-center justify-center h-64">
         <LoadingAnimation width={64} height={64} />
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className="container mx-auto p-4 space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
@@ -221,7 +235,7 @@ export default function BoardsManagementPage() {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Board Management</h1>
+            <h1 className="text-2xl font-bold text-gray-900">Board Management</h1>
             <p className="text-gray-500 mt-1">Create and manage feedback boards</p>
           </div>
         </div>
@@ -234,7 +248,7 @@ export default function BoardsManagementPage() {
       </div>
 
       {/* Boards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {boards.map((board) => (
           <Card key={board.id} className="hover:shadow-lg transition-shadow">
             <CardHeader className="pb-3">
@@ -313,7 +327,7 @@ export default function BoardsManagementPage() {
 
       {boards.length === 0 && (
         <Card>
-          <CardContent className="py-12">
+          <CardContent className="py-8">
             <div className="text-center">
               <LayoutDashboard className="h-16 w-16 mx-auto text-gray-400 mb-4" />
               <h3 className="text-lg font-semibold text-gray-900 mb-2">No boards yet</h3>
@@ -483,23 +497,70 @@ export default function BoardsManagementPage() {
       </Dialog>
 
       {/* Delete Confirmation Dialog */}
-      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+      <AlertDialog open={showDeleteDialog} onOpenChange={(open) => {
+        setShowDeleteDialog(open);
+        if (!open) {
+          setBoardDependencies([]);
+          setDeleteConfirmed(false);
+        }
+      }}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Board</AlertDialogTitle>
+            <AlertDialogTitle>Delete "{selectedBoard?.name}"</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete "{selectedBoard?.name}"? This action cannot be
-              undone and will delete all posts within this board.
+              This action cannot be undone. All posts in this board will be permanently deleted.
             </AlertDialogDescription>
           </AlertDialogHeader>
+
+          {loadingDependencies ? (
+            <div className="flex items-center gap-2 py-3 text-sm text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Checking integrations…
+            </div>
+          ) : boardDependencies.length > 0 ? (
+            <div className="space-y-3">
+              <div className="rounded-lg border border-amber-200 bg-amber-50/80 dark:border-amber-900/50 dark:bg-amber-950/30 p-3">
+                <p className="text-sm font-medium text-amber-800 dark:text-amber-300 mb-2">
+                  This board is connected to {boardDependencies.length} integration{boardDependencies.length > 1 ? 's' : ''}:
+                </p>
+                <ul className="space-y-1.5">
+                  {boardDependencies.map((dep) => (
+                    <li key={dep.id} className="flex items-center gap-2 text-sm">
+                      <span className={`h-2 w-2 rounded-full ${dep.status === 'active' ? 'bg-emerald-500' : 'bg-gray-400'}`} />
+                      <span className="capitalize font-medium">{dep.provider}</span>
+                      <span className="text-muted-foreground text-xs">— default board will be cleared</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <label className="flex items-start gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={deleteConfirmed}
+                  onChange={(e) => setDeleteConfirmed(e.target.checked)}
+                  className="mt-0.5 rounded border-gray-300"
+                />
+                <span className="text-sm text-muted-foreground">
+                  I understand this will disconnect the integrations listed above
+                </span>
+              </label>
+            </div>
+          ) : null}
+
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
+            <AlertDialogCancel onClick={() => {
+              setBoardDependencies([]);
+              setDeleteConfirmed(false);
+            }}>
+              Cancel
+            </AlertDialogCancel>
+            <Button
               onClick={handleDelete}
-              className="bg-red-600 hover:bg-red-700"
+              disabled={boardDependencies.length > 0 && !deleteConfirmed}
+              className="bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Delete
-            </AlertDialogAction>
+            </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

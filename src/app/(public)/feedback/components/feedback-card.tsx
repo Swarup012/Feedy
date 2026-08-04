@@ -73,12 +73,12 @@ export function FeedbackCard({ feedback, onUpvote, isUpvoted = false }: Feedback
         {/* Large Upvote Button */}
         <div className="flex items-start">
           <Button
-            variant={isUpvoted ? "default" : "outline"}
             size="sm"
             className={cn(
-              "flex-col h-auto min-w-[56px] px-2.5 py-2.5 gap-1.5 rounded-lg",
-              "hover:scale-105 transition-all",
-              isUpvoted && "bg-primary text-primary-foreground shadow-sm"
+              "flex-col h-auto min-w-[56px] px-2.5 py-2.5 gap-1.5 rounded-lg border transition-all hover:scale-105",
+              isUpvoted
+                ? "bg-primary text-primary-foreground border-primary shadow-sm hover:bg-primary/90"
+                : "bg-gray-100 border-gray-200 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700"
             )}
             onClick={handleUpvote}
             disabled={isVoting}

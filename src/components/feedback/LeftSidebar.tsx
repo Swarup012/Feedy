@@ -33,7 +33,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -43,7 +42,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus, Filter, CalendarIcon, Lock, Globe, MoreVertical, Edit2, Trash2 } from "lucide-react";
+import { Plus, Filter, CalendarIcon, Lock, Globe, MoreVertical, Edit2, Trash2, Loader2 } from "lucide-react";
 import { Board, boardService } from "@/services/boardService";
 import { cn } from "@/lib/utils";
 import { CreateBoardDialog } from "./CreateBoardDialog";
@@ -82,6 +81,9 @@ export function LeftSidebar({
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [selectedBoard, setSelectedBoard] = useState<Board | null>(null);
+  const [boardDependencies, setBoardDependencies] = useState<{ id: string; provider: string; status: string }[]>([]);
+  const [loadingDependencies, setLoadingDependencies] = useState(false);
+  const [deleteConfirmed, setDeleteConfirmed] = useState(false);
   const [showAllBoards, setShowAllBoards] = useState(false); // View All toggle
   const [showIconPicker, setShowIconPicker] = useState(false); // Icon picker state
   const [canCreateBoard, setCanCreateBoard] = useState(true); // Pre-load this
@@ -156,9 +158,19 @@ export function LeftSidebar({
     setShowEditDialog(true);
   };
 
-  const openDeleteDialog = (board: Board) => {
+  const openDeleteDialog = async (board: Board) => {
     setSelectedBoard(board);
+    setDeleteConfirmed(false);
     setShowDeleteDialog(true);
+    setLoadingDependencies(true);
+    try {
+      const res = await boardService.getBoardDependencies(board.id);
+      setBoardDependencies(res.data?.integrations || []);
+    } catch {
+      setBoardDependencies([]);
+    } finally {
+      setLoadingDependencies(false);
+    }
   };
 
   const handleEdit = async () => {
@@ -209,6 +221,8 @@ export function LeftSidebar({
       });
       setShowDeleteDialog(false);
       setSelectedBoard(null);
+      setBoardDependencies([]);
+      setDeleteConfirmed(false);
       
       // If we're currently on the deleted board, navigate to first available board
       if (currentBoardSlug === selectedBoard.slug) {
@@ -552,19 +566,65 @@ export function LeftSidebar({
       </Dialog>
 
       {/* Delete Board Dialog */}
-      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+      <AlertDialog open={showDeleteDialog} onOpenChange={(open) => {
+        setShowDeleteDialog(open);
+        if (!open) {
+          setBoardDependencies([]);
+          setDeleteConfirmed(false);
+        }
+      }}>
         <AlertDialogContent className="dark:bg-background dark:border-border">
           <AlertDialogHeader>
-            <AlertDialogTitle className="dark:text-white">Delete Board?</AlertDialogTitle>
+            <AlertDialogTitle className="dark:text-white">Delete "{selectedBoard?.name}"?</AlertDialogTitle>
             <AlertDialogDescription className="dark:text-gray-400">
-              Are you sure you want to delete "{selectedBoard?.name}"? This action cannot be undone and will delete all posts in this board.
+              This action cannot be undone and will delete all posts in this board.
             </AlertDialogDescription>
           </AlertDialogHeader>
+
+          {loadingDependencies ? (
+            <div className="flex items-center gap-2 py-3 text-sm text-muted-foreground">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Checking integrations…
+            </div>
+          ) : boardDependencies.length > 0 ? (
+            <div className="space-y-3">
+              <div className="rounded-lg border border-amber-200 bg-amber-50/80 dark:border-amber-900/50 dark:bg-amber-950/30 p-3">
+                <p className="text-sm font-medium text-amber-800 dark:text-amber-300 mb-2">
+                  This board is connected to {boardDependencies.length} integration{boardDependencies.length > 1 ? 's' : ''}:
+                </p>
+                <ul className="space-y-1.5">
+                  {boardDependencies.map((dep) => (
+                    <li key={dep.id} className="flex items-center gap-2 text-sm">
+                      <span className={`h-2 w-2 rounded-full ${dep.status === 'active' ? 'bg-emerald-500' : 'bg-gray-400'}`} />
+                      <span className="capitalize font-medium dark:text-white">{dep.provider}</span>
+                      <span className="text-muted-foreground text-xs">— default board will be cleared</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <label className="flex items-start gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={deleteConfirmed}
+                  onChange={(e) => setDeleteConfirmed(e.target.checked)}
+                  className="mt-0.5 rounded border-gray-300"
+                />
+                <span className="text-sm text-muted-foreground">
+                  I understand this will disconnect the integrations listed above
+                </span>
+              </label>
+            </div>
+          ) : null}
+
           <AlertDialogFooter>
             <AlertDialogCancel className="dark:bg-card dark:border-border dark:text-white dark:hover:bg-gray-700">Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800">
+            <Button
+              onClick={handleDelete}
+              disabled={boardDependencies.length > 0 && !deleteConfirmed}
+              className="bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
               Delete
-            </AlertDialogAction>
+            </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

@@ -168,7 +168,7 @@ export default function DashboardPage() {
       <div className="h-screen flex flex-col bg-gray-50 dark:bg-background overflow-hidden">
         {/* Navbar */}
         <nav className="fixed top-0 left-0 right-0 bg-primary border-b border-primary shadow-sm z-50 flex-shrink-0">
-          <div className="container mx-auto flex items-center justify-between px-6 py-4">
+            <div className="container mx-auto flex items-center justify-between px-4 py-4">
             {/* Left side - Brand + Org Switcher + Nav Links */}
             <div className="flex items-center gap-6">
               <Link href="/dashboard" className="text-xl font-bold tracking-tight text-white">
@@ -272,7 +272,7 @@ export default function DashboardPage() {
         ) : (
           <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-1 mt-[72px] overflow-hidden">
             {/* Notion-style Sidebar */}
-            <div className="w-64 border-r border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 p-6 flex flex-col justify-between shrink-0 h-full overflow-y-auto">
+            <div className="w-52 border-r border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 p-4 flex flex-col justify-between shrink-0 h-full overflow-y-auto">
               <div className="space-y-6">
                 {/* Workspace Header */}
                 <div className="space-y-2">
@@ -341,11 +341,11 @@ export default function DashboardPage() {
 
             {/* Content Area */}
             <div className="flex-1 overflow-y-auto bg-gray-50/50 dark:bg-zinc-900/10 h-full">
-              <div className="max-w-[1200px] mx-auto py-8 px-8 space-y-8">
+              <div className="max-w-[1200px] mx-auto py-5 px-5 space-y-5">
                 {/* Header Title */}
                 <div className="flex justify-between items-center">
                   <div>
-                    <h1 className="text-3xl font-bold font-headline text-gray-900 dark:text-white">
+                    <h1 className="text-xl font-bold font-headline text-gray-900 dark:text-white">
                       Welcome, {user?.name || user?.email || 'User'}!
                     </h1>
                     <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
@@ -366,7 +366,7 @@ export default function DashboardPage() {
                         <Building2 className="h-4 w-4 text-blue-500" />
                       </CardHeader>
                       <CardContent>
-                        <div className="text-3xl font-bold text-gray-900 dark:text-white">{stats.totalBoards}</div>
+                        <div className="text-xl font-bold text-gray-900 dark:text-white">{stats.totalBoards}</div>
                         <p className="text-xs text-gray-500 dark:text-gray-450 mt-1">
                           Total active boards
                         </p>
@@ -381,7 +381,7 @@ export default function DashboardPage() {
                         <MessageSquare className="h-4 w-4 text-indigo-500" />
                       </CardHeader>
                       <CardContent>
-                        <div className="text-3xl font-bold text-gray-900 dark:text-white">{stats.myPosts}</div>
+                        <div className="text-xl font-bold text-gray-900 dark:text-white">{stats.myPosts}</div>
                         <p className="text-xs text-gray-500 dark:text-gray-455 mt-1">
                           Total submissions
                         </p>
@@ -396,7 +396,7 @@ export default function DashboardPage() {
                         <ThumbsUp className="h-4 w-4 text-amber-500" />
                       </CardHeader>
                       <CardContent>
-                        <div className="text-3xl font-bold text-gray-900 dark:text-white">{stats.totalVotes}</div>
+                        <div className="text-xl font-bold text-gray-900 dark:text-white">{stats.totalVotes}</div>
                         <p className="text-xs text-gray-500 dark:text-gray-455 mt-1">
                           Across all submissions
                         </p>
@@ -411,7 +411,7 @@ export default function DashboardPage() {
                         <Rocket className="h-4 w-4 text-emerald-500" />
                       </CardHeader>
                       <CardContent>
-                        <div className="text-3xl font-bold text-gray-900 dark:text-white">{stats.implementedPosts}</div>
+                        <div className="text-xl font-bold text-gray-900 dark:text-white">{stats.implementedPosts}</div>
                         <p className="text-xs text-gray-500 dark:text-gray-455 mt-1">
                           Your suggestions completed
                         </p>
@@ -419,7 +419,7 @@ export default function DashboardPage() {
                     </Card>
                   </div>
 
-                  <div className="grid gap-6 md:grid-cols-3">
+                  <div className="grid gap-4 md:grid-cols-3">
                     {/* Profile & Quick Actions */}
                     <div className="md:col-span-1 space-y-6">
                       {/* Job Role Profile Card */}
@@ -510,7 +510,7 @@ export default function DashboardPage() {
                         </CardHeader>
                         <CardContent className="flex-1 overflow-auto">
                           {myPosts.length === 0 ? (
-                            <div className="text-center py-12 text-gray-500">
+                            <div className="text-center py-8 text-gray-500">
                               <p className="font-semibold text-sm">No feedback submissions yet.</p>
                               <p className="text-xs text-gray-400 mt-1">Start by creating your first post!</p>
                             </div>
@@ -562,7 +562,7 @@ export default function DashboardPage() {
                       </CardHeader>
                       <CardContent>
                         {boards.length === 0 ? (
-                          <div className="text-center py-12 text-gray-500">
+                          <div className="text-center py-8 text-gray-500">
                             <p className="text-lg font-medium">No boards available</p>
                             <p className="text-sm mt-2">Contact an admin to create boards</p>
                           </div>
@@ -638,7 +638,7 @@ export default function DashboardPage() {
                       </CardHeader>
                       <CardContent>
                         {myPosts.length === 0 ? (
-                          <div className="text-center py-12 text-gray-500">
+                          <div className="text-center py-8 text-gray-500">
                             <MessageSquare className="h-12 w-12 mx-auto mb-4 text-gray-300 dark:text-zinc-705" />
                             <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">No feedback submitted yet</p>
                             <p className="text-xs text-gray-400 mt-1">Start by posting your first feedback on any board above!</p>
@@ -724,7 +724,7 @@ export default function DashboardPage() {
                     </CardHeader>
                     <CardContent>
                       {boards.length === 0 ? (
-                        <div className="text-center py-12 text-gray-500">
+                        <div className="text-center py-8 text-gray-500">
                           <p className="text-lg font-medium">No boards available</p>
                           <p className="text-sm mt-2">Contact an admin to create boards</p>
                         </div>

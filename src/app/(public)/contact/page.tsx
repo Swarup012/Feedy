@@ -162,37 +162,37 @@ export default function ContactPage() {
     return (
       <>
         <div className="min-h-screen bg-slate-50 dark:bg-background">
-          <div className="relative max-w-3xl mx-auto px-4 py-20">
+          <div className="relative max-w-3xl mx-auto px-4 py-12">
             <Card className="border border-slate-200 dark:border-border shadow-xl">
-              <CardContent className="relative pt-16 pb-16 text-center">
+              <CardContent className="relative pt-10 pb-10 text-center">
                 {/* Success Icon */}
-                <div className="flex justify-center mb-8">
+                <div className="flex justify-center mb-5">
                   <div className="relative">
-                    <div className="p-6 rounded-full bg-green-600 shadow-lg">
+                    <div className="p-4 rounded-full bg-green-600 shadow-lg">
                       <CheckCircle2
-                        className="h-16 w-16 text-white"
+                        className="h-12 w-12 text-white"
                         strokeWidth={2.5}
                       />
                     </div>
                   </div>
                 </div>
 
-                <h2 className="text-4xl font-switzer font-medium text-slate-900 dark:text-white mb-4">
+                <h2 className="text-2xl font-switzer font-medium text-slate-900 dark:text-white mb-4">
                   Message Sent Successfully!
                 </h2>
 
-                <p className="text-xl text-slate-700 dark:text-slate-300 mb-3 font-medium">
+                <p className="text-base text-slate-700 dark:text-slate-300 mb-3 font-medium">
                   Thank you for reaching out to us.
                 </p>
 
-                <p className="text-base text-slate-600 dark:text-slate-400 mb-10 max-w-xl mx-auto leading-relaxed">
+                <p className="text-base text-slate-600 dark:text-slate-400 mb-6 max-w-xl mx-auto leading-relaxed">
                   {user
                     ? "Our support team will review your request and respond to you via email within 24-48 hours."
                     : "We'll get back to you at the email address you provided within 24-48 hours."}
                 </p>
 
                 {/* Info Cards */}
-                <div className="grid sm:grid-cols-2 gap-4 mb-10 max-w-2xl mx-auto">
+                <div className="grid sm:grid-cols-2 gap-4 mb-6 max-w-2xl mx-auto">
                   <div className="p-4 rounded-xl bg-blue-50 dark:bg-blue-950/30 border border-blue-200/50 dark:border-blue-800/50">
                     <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">
                       Response Time
@@ -251,14 +251,14 @@ export default function ContactPage() {
   return (
     <>
       <div className="min-h-screen bg-slate-50 dark:bg-background">
-        <div className="relative max-w-5xl mx-auto px-4 py-16 lg:py-20">
+        <div className="relative max-w-5xl mx-auto px-4 py-10 lg:py-12">
           {/* Header Section */}
-          <div className="text-center mb-12">
-            <h1 className="text-5xl lg:text-6xl font-switzer font-medium text-slate-900 dark:text-white mb-5 tracking-tight">
+          <div className="text-center mb-8">
+            <h1 className="text-3xl lg:text-4xl font-switzer font-medium text-slate-900 dark:text-white mb-5 tracking-tight">
               {formType}
             </h1>
 
-            <p className="text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-base text-slate-600 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed">
               {formDescription}
             </p>
 
@@ -279,10 +279,10 @@ export default function ContactPage() {
 
           {/* Contact Form Card */}
           <Card className="border border-slate-200 dark:border-border shadow-xl">
-            <CardHeader className="relative border-b border-slate-200 dark:border-border bg-slate-50 dark:bg-gray-800/50 pb-8">
+            <CardHeader className="relative border-b border-slate-200 dark:border-border bg-slate-50 dark:bg-gray-800/50 pb-5">
               <div className="flex items-start gap-4">
                 <div className="flex-1">
-                  <CardTitle className="text-3xl font-switzer font-medium tracking-tight mb-2 text-slate-900 dark:text-white">
+                  <CardTitle className="text-xl font-switzer font-medium tracking-tight mb-2 text-slate-900 dark:text-white">
                     Send Us a Message
                   </CardTitle>
                   <CardDescription className="text-base">
@@ -293,7 +293,7 @@ export default function ContactPage() {
               </div>
             </CardHeader>
 
-            <CardContent className="relative pt-8">
+            <CardContent className="relative pt-5">
               <form onSubmit={handleSubmit} className="space-y-7">
                 {/* Honeypot - Hidden field for spam protection */}
                 <input
@@ -431,9 +431,9 @@ export default function ContactPage() {
           </Card>
 
           {/* Alternative Contact Methods - Enhanced */}
-          <div className="mt-12">
-            <div className="text-center mb-8">
-              <h2 className="text-2xl font-switzer font-medium text-slate-900 dark:text-white mb-2">
+          <div className="mt-8">
+            <div className="text-center mb-5">
+              <h2 className="text-xl font-switzer font-medium text-slate-900 dark:text-white mb-2">
                 Other Ways to Reach Us
               </h2>
               <p className="text-slate-600 dark:text-slate-400">
@@ -442,7 +442,7 @@ export default function ContactPage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Card className="group text-center p-8 hover:shadow-2xl transition-all duration-300 border-2 hover:border-blue-300 dark:hover:border-blue-700 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
+              <Card className="group text-center p-5 hover:shadow-2xl transition-all duration-300 border-2 hover:border-blue-300 dark:hover:border-blue-700 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
                 <h3 className="font-switzer font-medium text-lg mb-2 text-slate-900 dark:text-white">
                   Email Us
                 </h3>
@@ -457,7 +457,7 @@ export default function ContactPage() {
                 </a>
               </Card>
 
-              <Card className="group text-center p-8 hover:shadow-2xl transition-all duration-300 border-2 hover:border-green-300 dark:hover:border-green-700 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
+              <Card className="group text-center p-5 hover:shadow-2xl transition-all duration-300 border-2 hover:border-green-300 dark:hover:border-green-700 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
                 <h3 className="font-switzer font-medium text-lg mb-2 text-slate-900 dark:text-white">
                   WhatsApp
                 </h3>
@@ -469,7 +469,7 @@ export default function ContactPage() {
                 </p>
               </Card>
 
-              <Card className="group text-center p-8 hover:shadow-2xl transition-all duration-300 border-2 hover:border-purple-300 dark:hover:border-purple-700 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
+              <Card className="group text-center p-5 hover:shadow-2xl transition-all duration-300 border-2 hover:border-purple-300 dark:hover:border-purple-700 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
                 <h3 className="font-switzer font-medium text-lg mb-2 text-slate-900 dark:text-white">
                   Help Center
                 </h3>
@@ -490,7 +490,7 @@ export default function ContactPage() {
           </div>
 
           {/* Trust Indicators */}
-          <div className="mt-12 text-center">
+          <div className="mt-8 text-center">
             <div className="inline-flex items-center px-6 py-3 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600">
               <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                 Average response time: 6 hours

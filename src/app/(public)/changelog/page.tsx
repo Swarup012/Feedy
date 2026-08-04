@@ -80,9 +80,9 @@ export default function ChangelogPage() {
 
   return (
     <div className="container mx-auto py-8 max-w-4xl">
-      <div className="text-center mb-12">
-        <h1 className="text-4xl font-switzer font-medium tracking-tight">Changelog</h1>
-        <p className="mt-2 text-lg text-muted-foreground">
+      <div className="text-center mb-8">
+        <h1 className="text-2xl font-switzer font-medium tracking-tight">Changelog</h1>
+        <p className="mt-2 text-base text-muted-foreground">
           Discover the latest features, improvements, and bug fixes.
         </p>
       </div>
@@ -94,7 +94,7 @@ export default function ChangelogPage() {
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-12">
+        <div className="space-y-6">
           {changelogs.map((changelog) => {
             const typeBadge = getTypeBadge(changelog.type);
             
@@ -102,7 +102,7 @@ export default function ChangelogPage() {
               <article key={changelog.id} className="space-y-4">
                 {/* Type Icon & Badge */}
                 <div className="flex items-center gap-3">
-                  <div className="flex items-center justify-center w-12 h-12 rounded-full bg-secondary">
+                  <div className="flex items-center justify-center w-10 h-10 rounded-full bg-secondary">
                     {getTypeIcon(changelog.type)}
                   </div>
                   <Badge variant={typeBadge.variant}>{typeBadge.label}</Badge>
@@ -110,7 +110,7 @@ export default function ChangelogPage() {
 
                 {/* Title & Date */}
                 <div>
-                  <h2 className="text-3xl font-switzer font-medium mb-2">{changelog.title}</h2>
+                  <h2 className="text-xl font-switzer font-medium mb-2">{changelog.title}</h2>
                   <time className="text-sm text-muted-foreground">
                     {changelog.published_at
                       ? format(new Date(changelog.published_at), "MMMM d, yyyy")
@@ -120,7 +120,7 @@ export default function ChangelogPage() {
 
                 {/* Description */}
                 {changelog.description && (
-                  <p className="text-lg text-muted-foreground">{changelog.description}</p>
+                  <p className="text-base text-muted-foreground">{changelog.description}</p>
                 )}
 
                 {/* Featured Image */}

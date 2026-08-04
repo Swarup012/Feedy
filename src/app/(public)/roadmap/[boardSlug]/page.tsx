@@ -194,8 +194,8 @@ export default function RoadmapPage() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center space-y-4">
-          <div className="text-6xl">📋</div>
-          <h2 className="text-2xl font-switzer font-medium text-gray-900">{error}</h2>
+          <div className="text-4xl">📋</div>
+          <h2 className="text-lg font-switzer font-medium text-gray-900">{error}</h2>
           <p className="text-gray-600">
             {error.includes('not found') 
               ? 'The board you are looking for does not exist or has no roadmap items yet.'
@@ -227,9 +227,9 @@ export default function RoadmapPage() {
         )}
 
         {/* Header */}
-        <div className="text-center space-y-2 mb-8">
-          <h1 className="text-4xl font-switzer font-medium text-gray-900">Product Roadmap</h1>
-          <p className="text-lg text-gray-600">
+        <div className="text-center space-y-2 mb-5">
+          <h1 className="text-2xl font-switzer font-medium text-gray-900">Product Roadmap</h1>
+          <p className="text-base text-gray-600">
             See what we're working on and what's coming next
           </p>
         </div>
@@ -281,7 +281,7 @@ function TimelineView({ groupedByQuarter, votedItems, onVote, user }: any) {
   const quarters = Object.keys(groupedByQuarter).sort();
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-5">
       {quarters.map((quarter) => (
         <div key={quarter}>
           <div className="flex items-center mb-4">

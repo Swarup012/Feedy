@@ -356,7 +356,7 @@ export default function WidgetManagementPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
+      <div className="flex items-center justify-center h-48">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
       </div>
     );
@@ -367,7 +367,7 @@ export default function WidgetManagementPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Widget Management</h1>
+          <h1 className="text-lg font-bold">Widget Management</h1>
           <p className="text-sm text-gray-600 mt-1">
             Create and manage embeddable feedback widgets for your products
           </p>
@@ -504,8 +504,8 @@ export default function WidgetManagementPage() {
 
       {/* Widgets List */}
       {widgets.length === 0 ? (
-        <Card className="p-12 text-center">
-          <Code className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+        <Card className="p-8 text-center">
+          <Code className="h-8 w-8 mx-auto mb-4 text-gray-400" />
           <h3 className="text-lg font-semibold mb-2">No widgets yet</h3>
           <p className="text-gray-600 mb-4">
             Create your first widget to start collecting feedback from external applications

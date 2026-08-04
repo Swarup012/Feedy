@@ -209,9 +209,9 @@ export default function LandingPage() {
 
       <main className="relative z-10">
         {/* Hero Section */}
-        <section ref={heroRef} className="relative overflow-hidden pt-20 sm:pt-24 pb-12 sm:pb-20 px-5 sm:px-6">
+        <section ref={heroRef} className="relative overflow-hidden pt-20 sm:pt-12 pb-12 sm:pb-10 px-5 sm:px-6">
           <div className="max-w-7xl mx-auto">
-            <div className="flex flex-col lg:flex-row items-start gap-10 lg:gap-16">
+            <div className="flex flex-col lg:flex-row items-start gap-10 lg:gap-8">
 
               {/* Left — Hero Copy */}
               <div className="w-full lg:w-[46%] flex flex-col items-center lg:items-start text-center lg:text-left space-y-5 sm:space-y-7">
@@ -221,7 +221,7 @@ export default function LandingPage() {
                   AI-powered customer feedback platform
                 </div>
 
-                <h1 className="hero-reveal text-[32px] sm:text-4xl md:text-[42px] font-black tracking-tight leading-[1.15] text-slate-900 dark:text-white">
+                <h1 className="hero-reveal text-[32px] sm:text-2xl md:text-[34px] font-black tracking-tight leading-[1.15] text-slate-900 dark:text-white">
                   Your users are telling you what to build.<br />
                   <span className="inline-block mt-3"><PointerHighlight>Are you listening?</PointerHighlight></span>
                 </h1>
@@ -293,12 +293,12 @@ export default function LandingPage() {
 
 
         {/* Features Section — Tabbed Showcase */}
-        <section ref={featuresRef} className="py-24 px-6 bg-slate-50/50 dark:bg-slate-900/50 border-y border-slate-100 dark:border-slate-800">
+        <section ref={featuresRef} className="py-12 px-6 bg-slate-50/50 dark:bg-slate-900/50 border-y border-slate-100 dark:border-slate-800">
           <div className="max-w-6xl mx-auto">
 
             {/* Section header */}
             <div className="text-center mb-14">
-              <h2 className="text-3xl md:text-4xl font-switzer font-medium tracking-tight text-slate-900 dark:text-white mb-4">
+              <h2 className="text-xl md:text-2xl font-switzer font-medium tracking-tight text-slate-900 dark:text-white mb-4">
                 Everything you need to manage product feedback
               </h2>
               <p className="text-lg text-slate-500 dark:text-slate-400 max-w-xl mx-auto">
@@ -312,14 +312,14 @@ export default function LandingPage() {
         </section>
 
         {/* Benefits Section */}
-        <section ref={benefitsRef} className="py-32 px-6 bg-blue-600 overflow-hidden relative">
+        <section ref={benefitsRef} className="py-16 px-6 bg-blue-600 overflow-hidden relative">
           <div className="max-w-7xl mx-auto relative z-10">
-            <div className="grid md:grid-cols-2 gap-20 items-center">
+            <div className="grid md:grid-cols-2 gap-10 items-center">
               <div className="benefit-content text-white">
-                <h2 className="text-3xl md:text-5xl font-switzer font-bold tracking-tight mb-8">
+                <h2 className="text-xl md:text-3xl font-switzer font-bold tracking-tight mb-8">
                   Stop building <br />in the dark.
                 </h2>
-                <div className="space-y-8">
+                <div className="space-y-5">
                   {[
                     "Know exactly what your users want before you write a single line of code",
                     "Public roadmap builds trust and reduces repetitive support questions",
@@ -341,12 +341,12 @@ export default function LandingPage() {
                   { label: "Built for", value: "Startups & Indie Hackers", subtext: "Not enterprise. No complexity. No per-user pricing traps.", icon: <Users /> },
                   { label: "Pricing starts at", value: "Free", subtext: "Upgrade to $19/mo when you're ready. No credit card to start.", icon: <Sparkles /> }
                 ].map((stat, i) => (
-                  <div key={i} className="benefit-stat-card p-10 bg-white/10 backdrop-blur-2xl rounded-[40px] border border-white/20">
+                  <div key={i} className="benefit-stat-card p-6 bg-white/10 backdrop-blur-2xl rounded-2xl border border-white/20">
                     <div className="flex items-center gap-4 mb-6 text-white/80">
                       {stat.icon}
                       <span className="font-bold uppercase tracking-widest text-sm">{stat.label}</span>
                     </div>
-                    <div className="text-4xl font-switzer font-black text-white leading-tight">{stat.value}</div>
+                    <div className="text-2xl font-switzer font-black text-white leading-tight">{stat.value}</div>
                     <p className="text-blue-100 mt-4 font-medium leading-relaxed text-sm">{stat.subtext}</p>
                   </div>
                 ))}
@@ -358,16 +358,16 @@ export default function LandingPage() {
         </section>
 
         {/* CTA Section */}
-        <section className="py-32 px-6">
-          <div className="max-w-5xl mx-auto rounded-[48px] bg-slate-900 dark:bg-slate-800 p-16 md:p-24 overflow-hidden relative text-center">
+        <section className="py-16 px-6">
+          <div className="max-w-5xl mx-auto rounded-3xl bg-slate-900 dark:bg-slate-800 p-8 md:p-12 overflow-hidden relative text-center">
             <div className="relative z-10">
-              <h2 className="text-3xl md:text-5xl font-switzer font-bold text-white mb-8 tracking-tighter leading-tight">
+              <h2 className="text-xl md:text-3xl font-switzer font-bold text-white mb-8 tracking-tighter leading-tight">
                 Your users are waiting to tell you what to build.
               </h2>
               <p className="text-lg text-slate-400 mb-12 max-w-2xl mx-auto leading-relaxed">
                 Start collecting feedback in minutes. Free plan available — no credit card required.
               </p>
-              <a href="/signup" className="inline-flex items-center gap-3 px-10 py-4 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-switzer font-black rounded-2xl hover:scale-105 transition-all shadow-xl shadow-white/10 text-base">
+              <a href="/signup" className="inline-flex items-center gap-3 px-6 py-4 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-switzer font-black rounded-2xl hover:scale-105 transition-all shadow-xl shadow-white/10 text-base">
                 Start Free Today
                 <ArrowRight className="w-5 h-5" />
               </a>

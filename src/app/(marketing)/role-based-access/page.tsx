@@ -187,7 +187,7 @@ export default function RoleBasedAccessPage() {
 
       <div className="min-h-screen bg-white dark:bg-gray-900">
         {/* Hero Section */}
-        <div className="pt-32 pb-20 px-4">
+        <div className="pt-20 pb-16 px-4">
           <div className="max-w-6xl mx-auto text-center">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-100 dark:bg-blue-900/30 rounded-full mb-6">
               <IconBrandTabler className="w-4 h-4 text-blue-600 dark:text-blue-400" />
@@ -224,13 +224,13 @@ export default function RoleBasedAccessPage() {
         </div>
 
         {/* Features Grid */}
-        <div className="py-20 px-4 bg-white dark:bg-gray-900/50">
+        <div className="py-16 px-4 bg-white dark:bg-gray-900/50">
           <div className="max-w-6xl mx-auto">
-            <h2 className="text-3xl font-bold text-center mb-12">
+            <h2 className="text-2xl font-bold text-center mb-8">
               Powerful Permission Management
             </h2>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
               {features.map((feature, index) => (
                 <div
                   key={index}
@@ -250,21 +250,21 @@ export default function RoleBasedAccessPage() {
         </div>
 
         {/* Role Types Section */}
-        <div className="py-20 px-4">
+        <div className="py-16 px-4">
           <div className="max-w-6xl mx-auto">
-            <h2 className="text-3xl font-bold text-center mb-4">
+            <h2 className="text-2xl font-bold text-center mb-4">
               Flexible Role Types
             </h2>
-            <p className="text-center text-gray-600 dark:text-gray-400 mb-12 max-w-2xl mx-auto">
+            <p className="text-center text-gray-600 dark:text-gray-400 mb-8 max-w-2xl mx-auto">
               Choose from predefined roles or customize permissions to fit your
               organization's needs
             </p>
 
-            <div className="grid md:grid-cols-3 gap-8">
+            <div className="grid md:grid-cols-3 gap-5">
               {roleTypes.map((role, index) => (
                 <div
                   key={index}
-                  className="p-8 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 hover:shadow-xl transition-all"
+                  className="p-5 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 hover:shadow-xl transition-all"
                 >
                   <div
                     className={`inline-block px-4 py-2 rounded-full font-semibold mb-6 ${role.color}`}
@@ -289,17 +289,17 @@ export default function RoleBasedAccessPage() {
         </div>
 
         {/* Use Cases Section */}
-        <div className="py-20 px-4 bg-white dark:bg-gray-900/50">
+        <div className="py-16 px-4 bg-white dark:bg-gray-900/50">
           <div className="max-w-6xl mx-auto">
-            <h2 className="text-3xl font-bold text-center mb-12">
+            <h2 className="text-2xl font-bold text-center mb-8">
               Perfect For Any Team Structure
             </h2>
 
-            <div className="grid md:grid-cols-3 gap-8">
+            <div className="grid md:grid-cols-3 gap-5">
               {useCases.map((useCase, index) => (
                 <div
                   key={index}
-                  className="p-8 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 hover:shadow-lg transition-all"
+                  className="p-5 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 hover:shadow-lg transition-all"
                 >
                   <h3 className="text-2xl font-bold mb-3">{useCase.title}</h3>
                   <p className="text-gray-600 dark:text-gray-400 mb-6">
@@ -323,10 +323,10 @@ export default function RoleBasedAccessPage() {
         </div>
 
         {/* CTA Section */}
-        <div className="py-20 px-4">
+        <div className="py-16 px-4">
           <div className="max-w-4xl mx-auto text-center">
-            <div className="p-12 rounded-2xl bg-blue-600 text-white">
-              <h2 className="text-4xl font-bold mb-4">
+            <div className="p-8 rounded-2xl bg-blue-600 text-white">
+              <h2 className="text-2xl font-bold mb-4">
                 Ready to secure your feedback workflow?
               </h2>
               <p className="text-xl mb-8 text-blue-100">

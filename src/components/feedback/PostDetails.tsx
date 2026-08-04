@@ -329,7 +329,17 @@ export function PostDetails({
   const [showChangelogDialog, setShowChangelogDialog] = useState(false);
   const [pendingStatus, setPendingStatus] = useState<string | null>(null);
   const [composerFocused, setComposerFocused] = useState(false);
+  const [editingCategory, setEditingCategory] = useState(false);
+  const [categoryValue, setCategoryValue] = useState("");
+  const [showCustomCategory, setShowCustomCategory] = useState(false);
+  const [customCategory, setCustomCategory] = useState("");
   const commentTextareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const predefinedCategories = [
+    { id: "1", name: "Feature Request" },
+    { id: "2", name: "Bug Report" },
+    { id: "3", name: "General Feedback" },
+  ];
 
   const autoResizeComment = () => {
     const el = commentTextareaRef.current;
@@ -767,6 +777,52 @@ export function PostDetails({
     }
   };
 
+  // Handle category update
+  const handleCategoryUpdate = async (newCategory: string) => {
+    if (!post) return;
+
+    try {
+      const response = await postService.updatePost(post.id, {
+        category: newCategory || undefined,
+      });
+      onPostUpdated(response.data.post);
+      setEditingCategory(false);
+      setShowCustomCategory(false);
+      setCustomCategory("");
+      toast({
+        title: "Success",
+        description: "Category updated successfully",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update category",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Handle category select change
+  const handleCategorySelectChange = (value: string) => {
+    if (value === "custom") {
+      setShowCustomCategory(true);
+      setCategoryValue("custom");
+    } else if (value === "none") {
+      handleCategoryUpdate("");
+    } else {
+      setShowCustomCategory(false);
+      setCategoryValue(value);
+      handleCategoryUpdate(value);
+    }
+  };
+
+  // Handle custom category save
+  const handleCustomCategorySave = () => {
+    if (customCategory.trim()) {
+      handleCategoryUpdate(customCategory.trim());
+    }
+  };
+
   // Get public link - Links to individual public post page
   const getPublicLink = () => {
     // Safety check: only run on client side
@@ -1055,7 +1111,7 @@ export function PostDetails({
                 rows={1}
                 disabled={!user && !onAuthRequired}
                 className={cn(
-                  "w-full resize-none bg-transparent border-0 outline-none shadow-none",
+                  "w-full resize-none bg-transparent border-0 outline-none shadow-none focus-visible:ring-0",
                   "text-[17px] leading-6 text-foreground placeholder:text-muted-foreground/70",
                   "py-2 min-h-[40px] max-h-[200px] overflow-y-auto",
                   "disabled:cursor-not-allowed disabled:opacity-60"
@@ -1229,12 +1285,92 @@ export function PostDetails({
               <div className="text-sm text-gray-500 dark:text-gray-400">Comming soon</div>
             </div>
 
-            {/* Category */}
+            {/* Category — editable */}
             <div>
               <label className="text-sm text-gray-600 dark:text-gray-400 block mb-2">Category</label>
-              <div className="text-sm font-medium text-gray-900 dark:text-white">
-                {post.category || currentBoard?.category || "N/A"}
-              </div>
+              {(user?.organization_role === "admin" || user?.organization_role === "owner") ? (
+                editingCategory ? (
+                  <div className="space-y-2">
+                    <Select
+                      value={showCustomCategory ? "custom" : categoryValue}
+                      onValueChange={handleCategorySelectChange}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select a category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">No Category</SelectItem>
+                        {predefinedCategories.map((cat) => (
+                          <SelectItem key={cat.id} value={cat.name}>
+                            {cat.name}
+                          </SelectItem>
+                        ))}
+                        <SelectItem value="custom">Custom Category</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    {showCustomCategory && (
+                      <div className="flex gap-2">
+                        <Input
+                          placeholder="Enter custom category"
+                          value={customCategory}
+                          onChange={(e) => setCustomCategory(e.target.value)}
+                          maxLength={100}
+                          className="text-sm"
+                          autoFocus
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") handleCustomCategorySave();
+                            if (e.key === "Escape") {
+                              setEditingCategory(false);
+                              setShowCustomCategory(false);
+                              setCustomCategory("");
+                            }
+                          }}
+                        />
+                        <Button
+                          size="sm"
+                          onClick={handleCustomCategorySave}
+                          disabled={!customCategory.trim()}
+                          className="flex-shrink-0"
+                        >
+                          Save
+                        </Button>
+                      </div>
+                    )}
+                    <div className="flex gap-2">
+                      {!showCustomCategory && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => {
+                            setEditingCategory(false);
+                            setShowCustomCategory(false);
+                            setCustomCategory("");
+                          }}
+                          className="text-xs"
+                        >
+                          Cancel
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => {
+                      setEditingCategory(true);
+                      setCategoryValue(post.category || "");
+                    }}
+                    className="text-sm font-medium text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors text-left w-full"
+                  >
+                    {post.category || currentBoard?.category || (
+                      <span className="text-gray-400 dark:text-gray-500 italic">Add category</span>
+                    )}
+                  </button>
+                )
+              ) : (
+                <div className="text-sm font-medium text-gray-900 dark:text-white">
+                  {post.category || currentBoard?.category || "N/A"}
+                </div>
+              )}
             </div>
 
             {/* Add to Roadmap Button */}

@@ -85,10 +85,10 @@ export function isAutopilotPost(post: Post): boolean {
 
 export function getSourcePlatformBadgeStyle(platform: string | null | undefined): string {
   switch (platform) {
-    case 'discord': return 'bg-[#5865F2]/10 text-[#5865F2] dark:bg-[#5865F2]/20 dark:text-[#949CF7]';
-    case 'slack': return 'bg-[#2EB67D]/10 text-[#2EB67D] dark:bg-[#2EB67D]/20 dark:text-[#4ADE80]';
-    case 'intercom': return 'bg-[#1F8DED]/10 text-[#1F8DED] dark:bg-[#1F8DED]/20 dark:text-[#60B4F0]';
-    default: return 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400';
+    case 'discord': return 'bg-[#5865F2]/15 text-[#5865F2] border border-[#5865F2]/20 dark:bg-[#5865F2]/25 dark:text-[#949CF7] dark:border-[#5865F2]/30';
+    case 'slack': return 'bg-[#2EB67D]/15 text-[#1a7d4e] border border-[#2EB67D]/20 dark:bg-[#2EB67D]/25 dark:text-[#4ADE80] dark:border-[#2EB67D]/30';
+    case 'intercom': return 'bg-[#1F8DED]/15 text-[#1a6fb5] border border-[#1F8DED]/20 dark:bg-[#1F8DED]/25 dark:text-[#60B4F0] dark:border-[#1F8DED]/30';
+    default: return 'bg-gray-100 text-gray-600 border border-gray-200 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700';
   }
 }
 

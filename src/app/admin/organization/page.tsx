@@ -344,11 +344,11 @@ export default function OrganizationSettingsPage() {
   return (
     <div className="flex min-h-[calc(100vh-70px)]">
       {/* Notion-style Sidebar */}
-      <div className="w-64 border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4 flex flex-col sticky top-0 h-[calc(100vh-70px)] overflow-y-auto shrink-0">
+      <div className="w-52 border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4 flex flex-col sticky top-0 h-[calc(100vh-70px)] overflow-y-auto shrink-0">
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
             <Building2 className="h-6 w-6 text-primary" />
-            <h1 className="text-xl font-bold">{organization.name}</h1>
+            <h1 className="text-base font-bold">{organization.name}</h1>
           </div>
           <Badge variant="outline" className="text-xs">
             {organization.plan.toUpperCase()}
@@ -433,7 +433,7 @@ export default function OrganizationSettingsPage() {
 
       {/* Main Content Area */}
       <div className="flex-1 overflow-auto">
-        <div className="container mx-auto py-8 px-8">
+        <div className="container mx-auto py-5 px-5">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
             {/* Hidden tab triggers for functionality */}
             <div className="hidden">
@@ -697,12 +697,12 @@ export default function OrganizationSettingsPage() {
 
             {/* Billing Tab */}
             <TabsContent value="billing">
-              <div className="space-y-8">
+              <div className="space-y-5">
                 {/* Current subscription status + cancel */}
                 <BillingSection />
                 {/* Full pricing cards to upgrade/downgrade */}
                 <div className="border-t pt-6">
-                  <h3 className="text-xl font-semibold mb-6">Plans & Pricing</h3>
+                  <h3 className="text-lg font-semibold mb-6">Plans & Pricing</h3>
                   <PricingContent />
                 </div>
               </div>

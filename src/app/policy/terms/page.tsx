@@ -88,8 +88,8 @@ export default function TermsOfService() {
           max-width: 1100px;
           margin: 0 auto;
           min-height: 100vh;
-          padding: 0 24px;
-          gap: 48px;
+          padding: 0 16px;
+          gap: 32px;
           background: #ffffff;
           color: #1e293b;
           font-family: 'Inter', system-ui, sans-serif;
@@ -98,7 +98,7 @@ export default function TermsOfService() {
         }
         .tos-side {
           position: sticky; top: 0; height: 100vh;
-          overflow-y: auto; padding: 48px 0;
+          overflow-y: auto; padding: 32px 0;
           border-right: 1px solid #e2e8f0;
         }
         .tos-side::-webkit-scrollbar { display: none; }
@@ -126,9 +126,9 @@ export default function TermsOfService() {
         .tos-nav a:hover, .tos-nav a.tos-active {
           background: #eef2ff; color: #4f46e5; border-left-color: #6366f1;
         }
-        .tos-main { padding: 48px 0 80px; }
+        .tos-main { padding: 32px 0 60px; }
         .tos-header {
-          margin-bottom: 48px; padding-bottom: 32px;
+          margin-bottom: 32px; padding-bottom: 20px;
           border-bottom: 1px solid #e2e8f0;
         }
         .tos-badge {
@@ -138,18 +138,18 @@ export default function TermsOfService() {
           border-radius: 99px; border: 1px solid #c7d2fe; margin-bottom: 16px;
         }
         .tos-title {
-          font-size: 32px; font-weight: 700; color: #0f172a;
+          font-size: 22px; font-weight: 700; color: #0f172a;
           line-height: 1.2; margin-bottom: 12px;
         }
         .tos-meta { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 20px; }
         .tos-meta-item { font-size: 13px; color: #94a3b8; display: flex; align-items: center; gap: 6px; }
         .tos-meta-item span { color: #64748b; font-weight: 500; }
-        .tos-section { margin-bottom: 56px; scroll-margin-top: 32px; }
+        .tos-section { margin-bottom: 40px; scroll-margin-top: 32px; }
         .tos-num {
           font-size: 11px; font-weight: 600; letter-spacing: 0.1em;
           text-transform: uppercase; color: #6366f1; margin-bottom: 8px;
         }
-        .tos-h2 { font-size: 20px; font-weight: 600; color: #0f172a; margin-bottom: 16px; }
+        .tos-h2 { font-size: 18px; font-weight: 600; color: #0f172a; margin-bottom: 16px; }
         .tos-h3 { font-size: 15px; font-weight: 600; color: #0f172a; margin: 20px 0 10px; }
         .tos-p { color: #475569; font-size: 14.5px; margin-bottom: 14px; }
         .tos-p:last-child { margin-bottom: 0; }
@@ -192,8 +192,8 @@ export default function TermsOfService() {
           text-decoration: none; transition: opacity 0.15s;
         }
         .tos-btn:hover { opacity: 0.88; }
-        .tos-hr { border: none; border-top: 1px solid #e2e8f0; margin: 0 0 56px; }
-        .tos-powered { font-size: 12px; color: #94a3b8; text-align: center; padding: 24px 0 48px; }
+        .tos-hr { border: none; border-top: 1px solid #e2e8f0; margin: 0 0 40px; }
+        .tos-powered { font-size: 12px; color: #94a3b8; text-align: center; padding: 16px 0 32px; }
         .tos-powered span { color: #64748b; font-weight: 600; }
         @media (max-width: 768px) {
           .tos-wrap { grid-template-columns: 1fr; padding: 0 16px; gap: 0; }

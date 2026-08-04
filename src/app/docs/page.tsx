@@ -17,18 +17,18 @@ import {
 
 export default function DocsHomePage() {
   return (
-    <div className="space-y-12">
+    <div className="space-y-6">
       {/* Hero Section */}
-      <section className="text-center space-y-6">
-        <div className="inline-flex p-4 rounded-2xl bg-gradient-to-br from-blue-600 to-blue-700 shadow-xl mb-4">
-          <BookOpen className="h-12 w-12 text-white" />
+      <section className="text-center space-y-4">
+        <div className="inline-flex p-3 rounded-2xl bg-gradient-to-br from-blue-600 to-blue-700 shadow-xl mb-4">
+          <BookOpen className="h-10 w-10 text-white" />
         </div>
         
-        <h1 className="text-5xl lg:text-6xl font-bold bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 dark:from-white dark:via-slate-100 dark:to-white bg-clip-text text-transparent tracking-tight">
+        <h1 className="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 dark:from-white dark:via-slate-100 dark:to-white bg-clip-text text-transparent tracking-tight">
           Faddy Documentation
         </h1>
         
-        <p className="text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed">
+        <p className="text-base text-slate-600 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed">
           Everything you need to collect feedback, build roadmaps, and ship better products.
         </p>
 
@@ -136,8 +136,8 @@ export default function DocsHomePage() {
       </section>
 
       {/* Features Overview */}
-      <section className="space-y-6">
-        <h2 className="text-3xl font-bold text-slate-900 dark:text-white">
+      <section className="space-y-4">
+        <h2 className="text-xl font-bold text-slate-900 dark:text-white">
           What You'll Learn
         </h2>
         
@@ -193,8 +193,8 @@ export default function DocsHomePage() {
       </section>
 
       {/* CTA Section */}
-      <section className="p-8 rounded-2xl bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30 border border-blue-200/50 dark:border-blue-800/50 text-center">
-        <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">
+      <section className="p-5 rounded-2xl bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30 border border-blue-200/50 dark:border-blue-800/50 text-center">
+        <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-3">
           Ready to Get Started?
         </h3>
         <p className="text-slate-600 dark:text-slate-400 mb-6 max-w-xl mx-auto">

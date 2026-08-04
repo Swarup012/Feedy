@@ -95,7 +95,7 @@ function LoginForm() {
           <div className="login-reveal">
             <Link href="/" className="inline-flex items-center gap-3">
               <Logo width={36} height={36} className="text-blue-600" />
-              <span className="text-xl font-switzer font-bold text-slate-900 dark:text-white">Faddy</span>
+              <span className="text-lg font-switzer font-bold text-slate-900 dark:text-white">Faddy</span>
             </Link>
           </div>
 
@@ -122,13 +122,13 @@ function LoginForm() {
           <div className="login-reveal lg:hidden mb-6 text-center">
             <Link href="/" className="inline-flex items-center gap-3">
               <Logo width={36} height={36} className="text-blue-600" />
-              <span className="text-xl font-switzer font-bold text-slate-900 dark:text-white">Faddy</span>
+              <span className="text-lg font-switzer font-bold text-slate-900 dark:text-white">Faddy</span>
             </Link>
           </div>
 
           {/* Form Header */}
           <div className="login-reveal mb-6">
-            <h2 className="text-2xl font-switzer font-bold text-slate-900 dark:text-white">
+            <h2 className="text-lg font-switzer font-bold text-slate-900 dark:text-white">
               Sign in to your account
             </h2>
             <p className="mt-1.5 text-sm text-slate-600 dark:text-slate-400">

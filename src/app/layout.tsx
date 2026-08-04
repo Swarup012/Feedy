@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Script from "next/script";
 import { ThemeProvider } from "@/components/theme-provider";
-import { Toaster } from "@/components/ui/toaster";
+import { ClientToaster } from "@/components/client-toaster";
 import { AuthProvider } from "@/context/AuthContext";
 import { OrganizationProvider } from "@/context/OrganizationContext";
 import "./globals.css";
@@ -61,7 +61,7 @@ export default function RootLayout({
               disableTransitionOnChange
             >
               {children}
-              <Toaster />
+              <ClientToaster />
             </ThemeProvider>
           </OrganizationProvider>
         </AuthProvider>

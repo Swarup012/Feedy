@@ -61,7 +61,7 @@ export function TeamInviteStep({ data, onUpdate }: TeamInviteStepProps) {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-5">
       <div>
         <h2 className="text-2xl font-semibold text-foreground">
           Invite your team

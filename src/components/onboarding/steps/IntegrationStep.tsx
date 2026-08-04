@@ -48,7 +48,7 @@ export function IntegrationStep({ data, onUpdate }: IntegrationStepProps) {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-5">
       <div>
         <h2 className="text-2xl font-semibold text-foreground">
           Connect your tools

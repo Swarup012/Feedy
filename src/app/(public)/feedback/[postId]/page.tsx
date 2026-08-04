@@ -570,7 +570,7 @@ export default function PostDetailPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-muted/30 to-background">
-      <div className="max-w-5xl mx-auto p-6 space-y-6">
+      <div className="max-w-5xl mx-auto p-4 space-y-4">
         {/* Back button */}
         <Button
           variant="ghost"
@@ -588,11 +588,14 @@ export default function PostDetailPage() {
               {/* Large upvote button */}
               <div className="flex flex-col items-center">
                 <Button
-                  variant={isUpvoted ? "default" : "outline"}
                   size="lg"
                   onClick={handleUpvote}
                   disabled={isUpvoting}
-                  className="w-16 h-16 flex flex-col items-center justify-center gap-1 hover:scale-105 transition-transform"
+                  className={`w-12 h-12 flex flex-col items-center justify-center gap-1 border transition-all hover:scale-105 ${
+                    isUpvoted
+                      ? 'bg-primary text-primary-foreground border-primary shadow-sm hover:bg-primary/90'
+                      : 'bg-gray-100 border-gray-200 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700'
+                  }`}
                 >
                   {isUpvoting ? (
                     <Loader2 className="h-6 w-6 animate-spin" />
@@ -622,7 +625,7 @@ export default function PostDetailPage() {
                     )}
                   </div>
 
-                  <h1 className="text-3xl font-switzer font-medium">{post.title}</h1>
+                  <h1 className="text-xl font-switzer font-medium">{post.title}</h1>
                 </div>
 
                 {post.description && (
@@ -675,7 +678,7 @@ export default function PostDetailPage() {
               </h2>
             </div>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-4">
             {/* Add comment form */}
             {isAuthenticated ? (
               <div className="space-y-3">
@@ -714,8 +717,8 @@ export default function PostDetailPage() {
                 {comments.map((comment) => renderComment(comment))}
               </div>
             ) : (
-              <div className="text-center py-12 text-muted-foreground">
-                <MessageSquare className="h-12 w-12 mx-auto mb-3 opacity-20" />
+              <div className="text-center py-8 text-muted-foreground">
+                <MessageSquare className="h-8 w-8 mx-auto mb-3 opacity-20" />
                 <p>No comments yet. Be the first to share your thoughts!</p>
               </div>
             )}

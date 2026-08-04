@@ -9,9 +9,9 @@ export function LandingFooter({ showCTA = true }: LandingFooterProps) {
   return (
     <footer className="relative bg-slate-50 dark:bg-slate-950 border-t border-slate-200/60 dark:border-slate-800/60 overflow-hidden">
       
-      <div className="relative max-w-7xl mx-auto px-6 py-12 lg:py-16">
+      <div className="relative max-w-7xl mx-auto px-4 py-10 lg:py-12">
         {/* Main Footer Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
           {/* Brand Section - Enhanced */}
           <div className="lg:col-span-5">
             <div className="mb-6">
@@ -79,7 +79,7 @@ export function LandingFooter({ showCTA = true }: LandingFooterProps) {
           </div>
 
           {/* Navigation Grid */}
-          <div className="lg:col-span-7 grid grid-cols-2 sm:grid-cols-3 gap-10 lg:gap-12">
+          <div className="lg:col-span-7 grid grid-cols-2 sm:grid-cols-3 gap-6 lg:gap-8">
             {/* Product Column */}
             <div>
               <h4 className="font-bold text-sm uppercase tracking-wider text-slate-900 dark:text-white mb-5 flex items-center gap-2">

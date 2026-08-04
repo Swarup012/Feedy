@@ -49,11 +49,11 @@ export function Footer({ variant = "default", organizationName }: FooterProps) {
       <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 via-white to-purple-50/30 dark:from-blue-950/20 dark:via-gray-950 dark:to-purple-950/10 pointer-events-none" />
 
       {/* Decorative elements */}
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-0 left-1/4 w-64 h-64 bg-blue-500/5 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-0 right-1/4 w-64 h-64 bg-purple-500/5 rounded-full blur-3xl pointer-events-none" />
 
-      <div className="container relative py-16 lg:py-20">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-12 lg:gap-8">
+      <div className="container relative py-10 lg:py-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6 lg:gap-8">
           {/* Brand Section - Enhanced */}
           <div className="lg:col-span-5">
             <div className="flex items-center gap-3 mb-6">
@@ -77,7 +77,7 @@ export function Footer({ variant = "default", organizationName }: FooterProps) {
           </div>
 
           {/* Navigation Grid - 3 columns */}
-          <div className="lg:col-span-7 grid grid-cols-2 sm:grid-cols-3 gap-8 lg:gap-12">
+          <div className="lg:col-span-7 grid grid-cols-2 sm:grid-cols-3 gap-5 lg:gap-6">
             {/* Product Links */}
             <div>
               <h4 className="font-bold text-sm uppercase tracking-wider text-gray-900 dark:text-white mb-5">

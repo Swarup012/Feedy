@@ -499,7 +499,7 @@ function MultiMetricChart({
   return (
     <Card className="transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 border-border/80 overflow-hidden">
       <CardHeader className="pb-4 border-b border-border/60 bg-gradient-to-r from-transparent to-muted/30">
-        <CardTitle className="text-xl font-switzer font-semibold">
+        <CardTitle className="text-lg font-switzer font-semibold">
           Metrics Overview
         </CardTitle>
         <CardDescription>7-day trend for all key metrics</CardDescription>
@@ -511,7 +511,7 @@ function MultiMetricChart({
             <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
               Needs Review
             </p>
-            <p className="text-3xl font-switzer font-semibold text-foreground">
+            <p className="text-xl font-switzer font-semibold text-foreground">
               {stats.pendingPosts}
             </p>
             <div className="flex items-center gap-1">
@@ -526,7 +526,7 @@ function MultiMetricChart({
             <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
               New This Week
             </p>
-            <p className="text-3xl font-switzer font-semibold text-foreground">
+            <p className="text-xl font-switzer font-semibold text-foreground">
               {stats.newThisWeek}
             </p>
             <div className="flex items-center gap-1">
@@ -541,7 +541,7 @@ function MultiMetricChart({
             <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
               Active Contributors
             </p>
-            <p className="text-3xl font-switzer font-semibold text-foreground">
+            <p className="text-xl font-switzer font-semibold text-foreground">
               {stats.activeUsers}
             </p>
             <div className="flex items-center gap-1">
@@ -556,7 +556,7 @@ function MultiMetricChart({
             <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
               Trending Feedback
             </p>
-            <p className="text-3xl font-switzer font-semibold text-foreground">
+            <p className="text-xl font-switzer font-semibold text-foreground">
               {trending.length}
             </p>
             <div className="flex items-center gap-1">
@@ -570,7 +570,7 @@ function MultiMetricChart({
         </div>
 
         {/* Multi-line Chart */}
-        <div className="h-64 w-full">
+        <div className="h-48 w-full">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={combinedData}>
               <defs>
@@ -678,7 +678,7 @@ function Metric({ title, value, trend = [], color = "blue" }) {
             <p className="text-xs font-switzer font-medium text-muted-foreground uppercase tracking-wider">
               {title}
             </p>
-            <p className={`text-3xl font-switzer font-bold mt-2 ${colors.accent}`}>
+            <p className={`text-xl font-switzer font-bold mt-2 ${colors.accent}`}>
               {value}
             </p>
           </div>
@@ -908,13 +908,13 @@ function FeedbackTrendChart({ data }) {
               <p className="text-xs text-muted-foreground uppercase tracking-wide">
                 Avg/Day
               </p>
-              <p className="text-xl font-semibold text-primary">{average}</p>
+              <p className="text-lg font-semibold text-primary">{average}</p>
             </div>
             <div className="text-right">
               <p className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">
                 Peak
               </p>
-              <p className="text-xl font-bold text-purple-600 dark:text-purple-400">
+              <p className="text-lg font-bold text-purple-600 dark:text-purple-400">
                 {peak}
               </p>
             </div>

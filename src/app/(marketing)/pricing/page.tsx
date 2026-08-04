@@ -208,7 +208,7 @@ export default function PricingPage() {
       <div className="container mx-auto px-4 py-16 pt-24">
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-3xl md:text-4xl font-switzer font-medium mb-4">
+          <h1 className="text-xl md:text-2xl font-switzer font-medium mb-4">
             <span className="text-blue-600">Transparent</span> Pricing
           </h1>
           <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
@@ -514,7 +514,7 @@ export default function PricingPage() {
         {/* Detailed Plan Comparison Table */}
         <div className="max-w-6xl mx-auto mb-16">
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold mb-2">Compare Plans</h2>
+            <h2 className="text-xl font-bold mb-2">Compare Plans</h2>
             <p className="text-gray-600 dark:text-gray-400">
               See exactly what's included in each plan
             </p>
@@ -881,8 +881,8 @@ export default function PricingPage() {
         {/* How Overage Billing Works — Professional Redesign */}
         <div className="max-w-5xl mx-auto mb-16">
           <div className="text-center mb-10">
-            <h2 className="text-3xl font-bold mb-3">How Overage Billing Works</h2>
-            <p className="text-gray-600 dark:text-gray-400 text-lg">
+            <h2 className="text-xl font-bold mb-3">How Overage Billing Works</h2>
+            <p className="text-gray-600 dark:text-gray-400 text-base">
               Simple, predictable pricing as your community grows
             </p>
           </div>
@@ -1047,7 +1047,7 @@ export default function PricingPage() {
                 ))}
                 <div className="flex items-center justify-between px-5 py-4 bg-blue-50 dark:bg-blue-900/20 border-t-2 border-blue-200 dark:border-blue-700">
                   <span className="font-bold text-gray-900 dark:text-white">Total This Month</span>
-                  <span className="text-2xl font-bold text-blue-600 tabular-nums">$25</span>
+                  <span className="text-lg font-bold text-blue-600 tabular-nums">$25</span>
                 </div>
               </div>
 
@@ -1064,7 +1064,7 @@ export default function PricingPage() {
 
         {/* FAQ Section */}
         <div className="max-w-3xl mx-auto">
-          <h2 className="text-2xl font-bold text-center mb-8">
+          <h2 className="text-lg font-bold text-center mb-8">
             Frequently Asked Questions
           </h2>
 
@@ -1151,9 +1151,9 @@ export default function PricingPage() {
         {/* CTA Section */}
         <div className="mt-16 text-center">
           <Card className="max-w-2xl mx-auto bg-blue-600 text-white border-0">
-            <CardContent className="p-8">
+            <CardContent className="p-5">
               <Zap className="w-12 h-12 mx-auto mb-4" />
-              <h3 className="text-2xl font-bold mb-2">
+              <h3 className="text-lg font-bold mb-2">
                 Ready to Grow Your Feedback Community?
               </h3>
               <p className="text-blue-100 mb-6">

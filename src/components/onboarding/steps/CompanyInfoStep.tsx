@@ -106,7 +106,7 @@ export function CompanyInfoStep({ data, onUpdate }: CompanyInfoStepProps) {
   }, [data.companyName, checkSubdomain]);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-5">
       <div>
         <h2 className="text-2xl font-semibold text-foreground">
           Set up your workspace

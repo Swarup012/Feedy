@@ -100,8 +100,8 @@ export default function PrivacyPolicy() {
           max-width: 1100px;
           margin: 0 auto;
           min-height: 100vh;
-          padding: 0 24px;
-          gap: 48px;
+          padding: 0 16px;
+          gap: 32px;
           background: #ffffff;
           color: #1e293b;
           font-family: 'Inter', system-ui, sans-serif;
@@ -113,7 +113,7 @@ export default function PrivacyPolicy() {
           top: 0;
           height: 100vh;
           overflow-y: auto;
-          padding: 48px 0;
+          padding: 32px 0;
           border-right: 1px solid #e2e8f0;
         }
         .pp-sidebar::-webkit-scrollbar { display: none; }
@@ -158,10 +158,10 @@ export default function PrivacyPolicy() {
           color: #4f46e5;
           border-left-color: #6366f1;
         }
-        .pp-main { padding: 48px 0 80px; }
+        .pp-main { padding: 32px 0 60px; }
         .pp-page-header {
-          margin-bottom: 48px;
-          padding-bottom: 32px;
+          margin-bottom: 32px;
+          padding-bottom: 20px;
           border-bottom: 1px solid #e2e8f0;
         }
         .pp-badge {
@@ -178,7 +178,7 @@ export default function PrivacyPolicy() {
           margin-bottom: 16px;
         }
         .pp-page-title {
-          font-size: 32px;
+          font-size: 22px;
           font-weight: 700;
           color: #0f172a;
           line-height: 1.2;
@@ -187,7 +187,7 @@ export default function PrivacyPolicy() {
         .pp-page-meta { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 20px; }
         .pp-meta-item { font-size: 13px; color: #94a3b8; display: flex; align-items: center; gap: 6px; }
         .pp-meta-item span { color: #64748b; font-weight: 500; }
-        .pp-section { margin-bottom: 56px; scroll-margin-top: 32px; }
+        .pp-section { margin-bottom: 40px; scroll-margin-top: 32px; }
         .pp-section-number {
           font-size: 11px;
           font-weight: 600;
@@ -197,7 +197,7 @@ export default function PrivacyPolicy() {
           margin-bottom: 8px;
         }
         .pp-section-title {
-          font-size: 20px;
+          font-size: 18px;
           font-weight: 600;
           color: #0f172a;
           margin-bottom: 16px;
@@ -293,12 +293,12 @@ export default function PrivacyPolicy() {
           white-space: nowrap;
         }
         .pp-contact-btn:hover { opacity: 0.88; }
-        .pp-divider { border: none; border-top: 1px solid #e2e8f0; margin: 0 0 56px; }
+        .pp-divider { border: none; border-top: 1px solid #e2e8f0; margin: 0 0 40px; }
         .pp-powered {
           font-size: 12px;
           color: #94a3b8;
           text-align: center;
-          padding: 24px 0 48px;
+          padding: 16px 0 32px;
         }
         .pp-powered span { color: #64748b; font-weight: 600; }
         @media (max-width: 768px) {

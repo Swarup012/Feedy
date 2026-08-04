@@ -3,12 +3,12 @@ import Link from "next/link";
 
 export default function CookiePolicyPage() {
   return (
-    <main className="min-h-screen bg-slate-50 dark:bg-slate-950 py-16 lg:py-24">
-      <div className="container max-w-4xl mx-auto px-6">
-        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 p-8 md:p-12">
+    <main className="min-h-screen bg-slate-50 dark:bg-slate-950 py-10 lg:py-12">
+      <div className="container max-w-4xl mx-auto px-4">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 p-5 md:p-8">
           
-          <div className="mb-10 pb-8 border-b border-slate-200 dark:border-slate-800">
-            <h1 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-4">
+          <div className="mb-5 pb-5 border-b border-slate-200 dark:border-slate-800">
+            <h1 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white mb-4">
               Cookie Policy
             </h1>
             <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
@@ -16,7 +16,7 @@ export default function CookiePolicyPage() {
             </p>
           </div>
 
-          <div className="space-y-8 text-slate-600 dark:text-slate-300">
+          <div className="space-y-5 text-slate-600 dark:text-slate-300">
             
             <section>
               <p className="mb-4">
@@ -106,7 +106,7 @@ export default function CookiePolicyPage() {
 
           </div>
 
-          <div className="mt-16 pt-8 border-t border-slate-200 dark:border-slate-800 text-center">
+          <div className="mt-10 pt-5 border-t border-slate-200 dark:border-slate-800 text-center">
             <p className="text-sm text-slate-500 dark:text-slate-400">
               Powered by <span className="font-semibold text-slate-700 dark:text-slate-300">Faddy</span>
             </p>

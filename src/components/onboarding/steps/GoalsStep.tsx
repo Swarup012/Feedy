@@ -47,7 +47,7 @@ export function GoalsStep({ data, onUpdate }: GoalsStepProps) {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-5">
       <div>
         <h2 className="text-2xl font-semibold text-foreground">
           What are your goals?

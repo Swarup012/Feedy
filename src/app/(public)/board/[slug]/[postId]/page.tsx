@@ -245,10 +245,10 @@ export default function PublicPostPage() {
 
   if (loading) {
     return (
-      <div className="container mx-auto py-16">
+      <div className="container mx-auto py-10">
         <div className="flex items-center justify-center h-[60vh]">
           <div className="text-center">
-            <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
+            <Loader2 className="h-10 w-10 animate-spin text-primary mx-auto mb-4" />
             <p className="text-gray-500">Loading post...</p>
           </div>
         </div>
@@ -258,11 +258,11 @@ export default function PublicPostPage() {
 
   if (!post || !board) {
     return (
-      <div className="container mx-auto py-16">
+      <div className="container mx-auto py-10">
         <div className="flex items-center justify-center h-[60vh]">
           <div className="text-center">
-            <div className="text-6xl mb-4">🔍</div>
-            <h2 className="text-2xl font-switzer font-medium mb-2">Post Not Found</h2>
+            <div className="text-4xl mb-4">🔍</div>
+            <h2 className="text-lg font-switzer font-medium mb-2">Post Not Found</h2>
             <p className="text-gray-500 mb-4">
               This post may have been deleted or moved.
             </p>
@@ -298,11 +298,14 @@ export default function PublicPostPage() {
                 {/* Upvote Button */}
                 <div className="flex flex-col items-center gap-1">
                   <Button
-                    variant={upvoted ? 'default' : 'outline'}
                     size="sm"
                     onClick={handleUpvote}
                     disabled={upvoting}
-                    className="w-12 h-12 p-0 rounded-lg"
+                    className={`w-12 h-12 p-0 rounded-lg border transition-colors ${
+                      upvoted
+                        ? 'bg-primary text-primary-foreground border-primary shadow-sm hover:bg-primary/90'
+                        : 'bg-gray-100 border-gray-200 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700'
+                    }`}
                   >
                     <ArrowUp className="h-5 w-5" />
                   </Button>
@@ -312,7 +315,7 @@ export default function PublicPostPage() {
                 {/* Post Header */}
                 <div className="flex-1 space-y-2">
                   <div className="flex items-start justify-between gap-4">
-                    <h1 className="text-2xl font-switzer font-medium">{post.title}</h1>
+                    <h1 className="text-lg font-switzer font-medium">{post.title}</h1>
                     <Badge className={cn('capitalize', STATUS_COLORS[post.status as keyof typeof STATUS_COLORS])}>
                       {post.status.replace('-', ' ')}
                     </Badge>
@@ -367,7 +370,7 @@ export default function PublicPostPage() {
                 Comments ({post.comment_count})
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-4">
               {/* Add Comment Form */}
               <div className="space-y-2">
                 <Textarea
@@ -478,7 +481,7 @@ export default function PublicPostPage() {
             <CardContent className="space-y-4">
               <div>
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="text-2xl">{board.icon}</span>
+                  <span className="text-lg">{board.icon}</span>
                   <h3 className="font-semibold">{board.name}</h3>
                 </div>
                 {board.description && (

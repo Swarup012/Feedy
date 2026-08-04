@@ -103,4 +103,15 @@ export const boardService = {
     const response = await api.get(`/api/boards/check-slug/${slug}`);
     return response.data;
   },
+
+  // Get board dependencies (integrations using this board)
+  async getBoardDependencies(
+    id: string,
+  ): Promise<{
+    success: boolean;
+    data: { integrations: { id: string; provider: string; status: string }[]; count: number };
+  }> {
+    const response = await api.get(`/api/boards/${id}/dependencies`);
+    return response.data;
+  },
 };

@@ -167,7 +167,7 @@ export default function CannyAlternativeClient() {
 
       <main>
         {/* ── Hero ───────────────────────────────────────────────── */}
-        <section className="relative overflow-hidden pt-32 pb-24 px-6">
+        <section className="relative overflow-hidden pt-20 pb-16 px-6">
           {/* Glow blobs */}
           <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-blue-100/60 dark:bg-blue-900/20 blur-[120px] rounded-full -z-10" />
           <div className="absolute bottom-0 right-0 w-80 h-80 bg-indigo-100/40 dark:bg-indigo-900/10 blur-[100px] rounded-full -z-10" />
@@ -179,7 +179,7 @@ export default function CannyAlternativeClient() {
               Canny Alternative
             </div>
 
-            <h1 className="text-4xl sm:text-5xl md:text-[62px] font-switzer font-bold tracking-tight leading-[1.1] text-slate-900 dark:text-white mb-6">
+            <h1 className="text-4xl sm:text-5xl md:text-4xl font-switzer font-bold tracking-tight leading-[1.1] text-slate-900 dark:text-white mb-6">
               The Best Canny Alternative{" "}
               <span className="text-blue-600 dark:text-blue-400">for Startups</span>
             </h1>
@@ -215,7 +215,7 @@ export default function CannyAlternativeClient() {
         </section>
 
         {/* ── Pain points ────────────────────────────────────────── */}
-        <section className="py-24 px-6 bg-slate-50 dark:bg-slate-900/50 border-y border-slate-100 dark:border-slate-800">
+        <section className="py-16 px-6 bg-slate-50 dark:bg-slate-900/50 border-y border-slate-100 dark:border-slate-800">
           <div className="max-w-5xl mx-auto">
             <div className="text-center mb-14">
               <h2 className="text-3xl md:text-4xl font-switzer font-bold text-slate-900 dark:text-white mb-4">
@@ -230,7 +230,7 @@ export default function CannyAlternativeClient() {
               {painPoints.map((point, i) => (
                 <div
                   key={i}
-                  className="group p-8 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-red-200 dark:hover:border-red-900 hover:shadow-lg transition-all duration-300"
+                  className="group p-5 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-red-200 dark:hover:border-red-900 hover:shadow-lg transition-all duration-300"
                 >
                   <div className="w-12 h-12 flex items-center justify-center bg-red-50 dark:bg-red-900/20 rounded-xl mb-5 group-hover:scale-110 transition-transform duration-300">
                     {point.icon}
@@ -248,7 +248,7 @@ export default function CannyAlternativeClient() {
         </section>
 
         {/* ── Comparison table ───────────────────────────────────── */}
-        <section className="py-24 px-6">
+        <section className="py-16 px-6">
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-switzer font-bold text-slate-900 dark:text-white mb-4">
@@ -318,7 +318,7 @@ export default function CannyAlternativeClient() {
         </section>
 
         {/* ── Pricing ────────────────────────────────────────────── */}
-        <section className="py-24 px-6 bg-slate-50 dark:bg-slate-900/50 border-y border-slate-100 dark:border-slate-800">
+        <section className="py-16 px-6 bg-slate-50 dark:bg-slate-900/50 border-y border-slate-100 dark:border-slate-800">
           <div className="max-w-5xl mx-auto">
             <div className="text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-switzer font-bold text-slate-900 dark:text-white mb-4">
@@ -333,7 +333,7 @@ export default function CannyAlternativeClient() {
               {plans.map((plan) => (
                 <div
                   key={plan.name}
-                  className={`relative flex flex-col p-8 rounded-2xl border transition-all duration-300 ${
+                  className={`relative flex flex-col p-5 rounded-2xl border transition-all duration-300 ${
                     plan.highlight
                       ? "bg-blue-600 border-blue-500 shadow-2xl shadow-blue-500/20 scale-[1.02]"
                       : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-700 hover:shadow-lg"
@@ -416,13 +416,13 @@ export default function CannyAlternativeClient() {
         </section>
 
         {/* ── Final CTA ──────────────────────────────────────────── */}
-        <section className="py-32 px-6">
-          <div className="max-w-4xl mx-auto rounded-[40px] bg-slate-900 dark:bg-slate-800 p-16 md:p-24 text-center overflow-hidden relative">
+        <section className="py-20 px-6">
+          <div className="max-w-4xl mx-auto rounded-2xl bg-slate-900 dark:bg-slate-800 p-8 md:p-16 text-center overflow-hidden relative">
             <div className="absolute -bottom-20 -left-20 w-[400px] h-[400px] bg-blue-600/20 blur-[100px] rounded-full" />
             <div className="absolute -top-20 -right-20 w-[300px] h-[300px] bg-indigo-600/15 blur-[80px] rounded-full" />
 
             <div className="relative z-10">
-              <h2 className="text-3xl md:text-5xl font-switzer font-bold text-white mb-6 leading-tight">
+              <h2 className="text-3xl md:text-4xl font-switzer font-bold text-white mb-6 leading-tight">
                 Switch to Faddy today
               </h2>
               <p className="text-lg text-slate-400 mb-10 max-w-xl mx-auto leading-relaxed">

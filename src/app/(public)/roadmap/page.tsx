@@ -218,8 +218,8 @@ export default function RoadmapIndexPage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <Card className="max-w-md">
           <CardContent className="pt-6 text-center space-y-4">
-            <div className="text-6xl">📋</div>
-            <h2 className="text-2xl font-switzer font-medium text-gray-900">No Roadmap Available</h2>
+            <div className="text-4xl">📋</div>
+            <h2 className="text-lg font-switzer font-medium text-gray-900">No Roadmap Available</h2>
             <p className="text-gray-600">
               There are no public roadmap items to display at this time.
             </p>
@@ -250,12 +250,12 @@ export default function RoadmapIndexPage() {
         )}
 
         {/* Header */}
-        <div className="text-center space-y-2 mb-8">
+        <div className="text-center space-y-2 mb-5">
           <div className="flex items-center justify-center gap-2 mb-2">
-            <Sparkles className="h-8 w-8 text-primary" />
-            <h1 className="text-4xl font-switzer font-medium text-gray-900">{organizationName} Roadmap</h1>
+            <Sparkles className="h-6 w-6 text-primary" />
+            <h1 className="text-2xl font-switzer font-medium text-gray-900">{organizationName} Roadmap</h1>
           </div>
-          <p className="text-lg text-gray-600">
+          <p className="text-base text-gray-600">
             See what we're working on and what's coming next
           </p>
         </div>
@@ -307,7 +307,7 @@ function TimelineView({ groupedByQuarter, votedItems, onVote, user }: any) {
   const quarters = Object.keys(groupedByQuarter).sort();
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-5">
       {quarters.map((quarter) => (
         <div key={quarter}>
           <div className="flex items-center mb-4">

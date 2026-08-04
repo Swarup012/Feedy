@@ -26,25 +26,25 @@ export default function BlogListPage() {
     <main className="min-h-screen bg-background">
 
       {/* ─── Hero ────────────────────────────────────────────────────────── */}
-      <section className="max-w-4xl mx-auto px-6 py-20">
+      <section className="max-w-4xl mx-auto px-4 py-10">
         <div className="mb-4">
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-widest bg-primary/10 text-primary border border-primary/20">
             From the team
           </span>
         </div>
-        <h1 className="text-4xl sm:text-5xl font-bold text-foreground leading-tight tracking-tight mb-4">
+        <h1 className="text-2xl sm:text-3xl font-bold text-foreground leading-tight tracking-tight mb-4">
           Product &amp; Growth Insights
         </h1>
-        <p className="text-lg text-muted-foreground max-w-xl leading-relaxed">
+        <p className="text-base text-muted-foreground max-w-xl leading-relaxed">
           Practical advice on collecting user feedback, building better SaaS
           products, and growing sustainably.
         </p>
       </section>
 
       {/* ─── Post List ───────────────────────────────────────────────────── */}
-      <section className="max-w-4xl mx-auto px-6 pb-24">
+      <section className="max-w-4xl mx-auto px-4 pb-12">
         {posts.length === 0 ? (
-          <p className="text-muted-foreground text-center py-16">
+          <p className="text-muted-foreground text-center py-10">
             No posts yet — check back soon.
           </p>
         ) : (
@@ -52,7 +52,7 @@ export default function BlogListPage() {
             {posts.map((post) => (
               <article
                 key={post.slug}
-                className="group py-10 flex flex-col sm:flex-row sm:items-start gap-6"
+                className="group py-5 flex flex-col sm:flex-row sm:items-start gap-4"
               >
                 {/* Date */}
                 <time
@@ -67,7 +67,7 @@ export default function BlogListPage() {
                 {/* Content */}
                 <div className="flex-1">
                   <Link href={`/blog/${post.slug}`} className="block">
-                    <h2 className="text-xl font-semibold text-foreground leading-snug group-hover:text-primary transition-colors mb-2">
+                    <h2 className="text-lg font-semibold text-foreground leading-snug group-hover:text-primary transition-colors mb-2">
                       {post.title}
                     </h2>
                     {post.description && (
@@ -91,7 +91,7 @@ export default function BlogListPage() {
 
       {/* ─── Footer ──────────────────────────────────────────────────────── */}
       <footer className="border-t border-border">
-        <div className="max-w-4xl mx-auto px-6 py-8 flex items-center justify-between text-xs text-muted-foreground">
+        <div className="max-w-4xl mx-auto px-4 py-5 flex items-center justify-between text-xs text-muted-foreground">
           <span>© {new Date().getFullYear()} Faddy</span>
           <Link href="/policy/privacy" className="hover:text-foreground transition-colors">
             Privacy Policy

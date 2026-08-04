@@ -60,9 +60,9 @@ export default async function BlogPostPage({
 
 
       {/* ─── Article ─────────────────────────────────────────────────────── */}
-      <article className="max-w-3xl mx-auto px-6 py-16 sm:py-24">
+      <article className="max-w-3xl mx-auto px-4 py-10 sm:py-12">
         {/* Meta */}
-        <header className="mb-12">
+        <header className="mb-6">
           <div className="flex items-center gap-3 mb-6">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-widest bg-primary/10 text-primary border border-primary/20">
               Blog
@@ -77,12 +77,12 @@ export default async function BlogPostPage({
             )}
           </div>
 
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground leading-tight tracking-tight mb-6">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground leading-tight tracking-tight mb-6">
             {post.title}
           </h1>
 
           {post.description && (
-            <p className="text-lg sm:text-xl text-muted-foreground leading-relaxed border-l-4 border-primary/30 pl-5">
+            <p className="text-base sm:text-lg text-muted-foreground leading-relaxed border-l-4 border-primary/30 pl-5">
               {post.description}
             </p>
           )}
@@ -95,12 +95,12 @@ export default async function BlogPostPage({
         />
 
         {/* ─── Footer CTA ────────────────────────────────────────────────── */}
-        <div className="mt-20 pt-10 border-t border-border">
-          <div className="rounded-2xl bg-primary/5 border border-primary/15 p-8 text-center">
+        <div className="mt-10 pt-5 border-t border-border">
+            <div className="rounded-2xl bg-primary/5 border border-primary/15 p-5 text-center">
             <p className="text-sm font-semibold uppercase tracking-widest text-primary mb-3">
               Try Faddy free
             </p>
-            <p className="text-xl font-semibold text-foreground mb-6 leading-snug">
+            <p className="text-lg font-semibold text-foreground mb-4 leading-snug">
               Ready to build a feedback loop that actually works?
             </p>
             <Link
@@ -113,7 +113,7 @@ export default async function BlogPostPage({
         </div>
 
         {/* ─── Back link ─────────────────────────────────────────────────── */}
-        <div className="mt-10">
+        <div className="mt-5">
           <Link
             href="/blog"
             className="text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -125,7 +125,7 @@ export default async function BlogPostPage({
 
       {/* ─── Footer ──────────────────────────────────────────────────────── */}
       <footer className="border-t border-border">
-        <div className="max-w-3xl mx-auto px-6 py-8 flex items-center justify-between text-xs text-muted-foreground">
+        <div className="max-w-3xl mx-auto px-4 py-5 flex items-center justify-between text-xs text-muted-foreground">
           <span>© {new Date().getFullYear()} Faddy</span>
           <Link
             href="/policy/privacy"

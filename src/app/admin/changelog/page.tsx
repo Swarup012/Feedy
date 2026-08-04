@@ -349,10 +349,10 @@ export default function ChangelogPage() {
     <div className="flex-1 overflow-hidden bg-background">
       {/* Hero Header */}
       <div className="border-b border-border/50 bg-gradient-to-b from-background to-muted/20">
-        <div className="max-w-3xl mx-auto px-6 py-16">
+        <div className="max-w-3xl mx-auto px-4 py-10">
           <div className="flex items-start justify-between mb-6">
             <div>
-              <h1 className="text-4xl font-bold tracking-tight text-foreground mb-3">
+              <h1 className="text-2xl font-bold tracking-tight text-foreground mb-3">
                 Changelog
               </h1>
               <p className="text-lg text-muted-foreground max-w-xl leading-relaxed">
@@ -420,7 +420,7 @@ export default function ChangelogPage() {
 
       {/* Timeline Content */}
       <div className="flex-1 overflow-y-auto">
-        <div className="max-w-3xl mx-auto px-6 py-12">
+        <div className="max-w-3xl mx-auto px-4 py-8">
           {loading ? (
             <div className="flex items-center justify-center py-24">
               <div className="text-center">
@@ -450,7 +450,7 @@ export default function ChangelogPage() {
               <div className="absolute left-[19px] top-8 bottom-0 w-[2px] bg-gradient-to-b from-border via-border to-transparent" />
 
               {/* Changelog Entries */}
-              <div className="space-y-16">
+              <div className="space-y-8">
                 {dateGroups.map(([date, logs], groupIndex) => (
                   <div key={date}>
                     {/* Date Header */}
@@ -464,7 +464,7 @@ export default function ChangelogPage() {
                     </div>
 
                     {/* Changelog Items */}
-                    <div className="space-y-12">
+                    <div className="space-y-6">
                       {logs.map((changelog, index) => {
                         const config = TYPE_CONFIG[changelog.type];
                         const Icon = config.icon;
@@ -494,7 +494,7 @@ export default function ChangelogPage() {
                             {/* Header */}
                             <div className="mb-4">
                               <div className="flex items-start gap-3 mb-2">
-                                <h3 className="text-xl font-semibold text-foreground leading-tight flex-1">
+                                <h3 className="text-lg font-semibold text-foreground leading-tight flex-1">
                                   {changelog.title}
                                 </h3>
                                 {changelog.status === "draft" && (
