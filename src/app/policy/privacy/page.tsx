@@ -334,7 +334,7 @@ export default function PrivacyPolicy() {
             <div className="pp-badge">Legal</div>
             <h1 className="pp-page-title">Privacy Policy</h1>
             <div className="pp-page-meta">
-              <div className="pp-meta-item">Last updated <span>January 23, 2026</span></div>
+              <div className="pp-meta-item">Last updated <span>August 5, 2026</span></div>
               <div className="pp-meta-item">Applies to <span>faddy.site</span></div>
             </div>
             <InfoCard>
@@ -523,8 +523,8 @@ export default function PrivacyPolicy() {
               <p>If you have questions or requests regarding this Privacy Policy, please reach out:</p>
               <div className="pp-contact-card">
                 <div className="pp-contact-text">
-                  <strong>Faddy — Privacy Team</strong>
-                  <span>Digital-only Service · Kolkata, West Bengal 743248, India</span>
+                  <strong>Faddy — Operated by Swarup Basu (Sole Proprietor)</strong>
+                  <span>Kolkata, West Bengal 743248, India</span>
                 </div>
                 <a href="mailto:support@faddy.site" className="pp-contact-btn">
                   ✉ support@faddy.site

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useOrganization } from '@/context/OrganizationContext';
+import { isPaidPlan } from '@/config/plans';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -37,12 +38,9 @@ export function OrganizationSwitcher() {
 
   // Check organization limit based on user's plan
   const getOrganizationLimit = () => {
-    // Check if user has any active starter/pro plan (must also have active status)
-    const hasStarterPlan = organizations.some(org => 
-      (org.subscription_plan === 'starter' || org.subscription_plan === 'pro') &&
-      (org.subscription_status === 'active' || org.subscription_status === 'trialing')
-    );
-    return hasStarterPlan ? 2 : 1;
+    // Check if user has any active paid plan (starter or pro)
+    const hasPaid = organizations.some(org => isPaidPlan(org));
+    return hasPaid ? 2 : 1;
   };
 
   // Count organizations owned by user

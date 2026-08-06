@@ -181,12 +181,9 @@ export function CustomDomainSettings({ organizationId }: CustomDomainSettingsPro
               Custom Domain
             </CardTitle>
             <CardDescription>
-              Use your own subdomain instead of *.faddy.site (Pro plan feature)
+              Use your own subdomain instead of *.faddy.site
             </CardDescription>
           </div>
-          <Badge variant="outline" className="bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400">
-            Pro Only
-          </Badge>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">

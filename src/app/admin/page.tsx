@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { useErrorHandler } from "@/hooks/useErrorHandler";
 import { useOrganization } from "@/context/OrganizationContext";
+import { isPaidPlan } from "@/config/plans";
 import { boardService } from "@/services/boardService";
 import api from "@/lib/api";
 
@@ -90,9 +91,7 @@ export default function AdminPage() {
   const pageRef = useRef(null);
 
   // Check if user has a paid plan (Starter or Pro)
-  // Use organization's subscription_plan field - free, starter, or pro
-  const currentPlan = organization?.subscription_plan || "free";
-  const hasPaidPlan = currentPlan === "starter" || currentPlan === "pro";
+  const hasPaidPlan = isPaidPlan(organization);
 
   // Free users are locked to basic view, paid users default to expert view
   const [isBasicView, setIsBasicView] = useState(!hasPaidPlan);

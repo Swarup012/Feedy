@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Users, TrendingUp, AlertTriangle, CheckCircle, DollarSign, Shield, ChevronRight } from 'lucide-react';
 import trackedUsersService, { TrackedUsersUsage } from '@/services/trackedUsersService';
+import { PLANS } from '@/config/plans';
 import { Skeleton } from '@/components/ui/skeleton';
 
 interface OverageStatus {
@@ -62,11 +63,12 @@ export function TrackedUsersWidget({ onUsageClick, variant = 'basic' }: TrackedU
   };
 
   const calculateOverageStatus = (usageData: TrackedUsersUsage) => {
-    const baseLimit = 125;
-    const graceBuffer = 25;
-    const graceLimit = baseLimit + graceBuffer; // 150
-    const overageBlockSize = 50;
-    const overagePricePerBlock = 6;
+    const overage = PLANS.starter.overage!;
+    const baseLimit = PLANS.starter.features.tracked_users;
+    const graceBuffer = overage.grace_buffer;
+    const graceLimit = overage.effective_limit;
+    const overageBlockSize = overage.block_size;
+    const overagePricePerBlock = overage.price_per_block;
     
     const currentUsers = usageData.count;
     const inGracePeriod = currentUsers > baseLimit && currentUsers <= graceLimit;
@@ -278,12 +280,12 @@ export function TrackedUsersWidget({ onUsageClick, variant = 'basic' }: TrackedU
                   <div className="flex justify-between items-center">
                     <span className="text-muted-foreground">Next bill estimate:</span>
                     <span className="font-semibold">
-                      ${(19 + (overageStatus.overageCost || 0)).toFixed(2)}
+                      ${(PLANS.starter.monthlyPrice + (overageStatus.overageCost || 0)).toFixed(2)}
                     </span>
                   </div>
                   {overageStatus.overageCost > 0 && (
                     <div className="text-[10px] text-muted-foreground mt-1">
-                      $19 base + ${overageStatus.overageCost} overage
+                      ${PLANS.starter.monthlyPrice} base + ${overageStatus.overageCost} overage
                     </div>
                   )}
                 </div>
@@ -406,12 +408,12 @@ export function TrackedUsersWidget({ onUsageClick, variant = 'basic' }: TrackedU
                 <div className="flex justify-between items-center">
                   <span className="text-muted-foreground">Next bill estimate:</span>
                   <span className="font-semibold">
-                    ${(19 + (overageStatus.overageCost || 0)).toFixed(2)}
+                    ${(PLANS.starter.monthlyPrice + (overageStatus.overageCost || 0)).toFixed(2)}
                   </span>
                 </div>
                 {overageStatus.overageCost > 0 && (
                   <div className="text-[10px] text-muted-foreground mt-1">
-                    $19 base + ${overageStatus.overageCost} overage
+                    ${PLANS.starter.monthlyPrice} base + ${overageStatus.overageCost} overage
                   </div>
                 )}
               </div>

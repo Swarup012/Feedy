@@ -222,7 +222,7 @@ export default function TermsOfService() {
             <div className="tos-badge">Legal</div>
             <h1 className="tos-title">Terms of Service</h1>
             <div className="tos-meta">
-              <div className="tos-meta-item">Last updated <span>January 24, 2026</span></div>
+              <div className="tos-meta-item">Last updated <span>August 5, 2026</span></div>
               <div className="tos-meta-item">Applies to <span>faddy.site</span></div>
             </div>
             <InfoBox>
@@ -233,8 +233,8 @@ export default function TermsOfService() {
           {/* 1 */}
           <section className="tos-section" id="agreement">
             <SectionHeader num="01" title="Agreement to Our Legal Terms" />
-            <P>We are <strong>Faddy</strong>, a company registered in India, operating a role-based, multi-tenant user feedback management platform at <a href="https://faddy.site" className="tos-link">faddy.site</a>. Faddy helps businesses and developers collect, track, and organise user feedback across teams and organisations.</P>
-            <P>These Terms of Service ("<strong>Terms</strong>") constitute a legally binding agreement between you ("<strong>User</strong>" or "<strong>you</strong>") and Faddy, governing your access to and use of our website, platform, and any related services (collectively, the "<strong>Services</strong>").</P>
+            <P>Faddy is a service operated by <strong>Swarup Basu</strong>, a sole proprietor based in India, providing a role-based, multi-tenant user feedback management platform at <a href="https://faddy.site" className="tos-link">faddy.site</a>. Faddy helps businesses and developers collect, track, and organise user feedback across teams and organisations.</P>
+            <P>These Terms of Service ("<strong>Terms</strong>") constitute a legally binding agreement between you ("<strong>User</strong>" or "<strong>you</strong>") and Swarup Basu, sole proprietor, operating as Faddy ("<strong>Faddy</strong>," "<strong>we</strong>," "<strong>us</strong>," or "<strong>our</strong>"), governing your access to and use of our website, platform, and any related services (collectively, the "<strong>Services</strong>").</P>
             <P>By using the Services, you confirm that you are at least 18 years old, have read and understood these Terms, and agree to be bound by them. <strong>If you do not agree, you must stop using the Services immediately.</strong></P>
             <P>We may update these Terms at any time. We will notify you of material changes via email to <a href="mailto:info@faddy.site" className="tos-link">info@faddy.site</a> or through an in-app notice. Continued use of the Services after the effective date constitutes acceptance of the updated Terms.</P>
           </section>
@@ -413,7 +413,7 @@ export default function TermsOfService() {
           <section className="tos-section" id="liability">
             <SectionHeader num="17" title="Limitations of Liability" />
             <div className="tos-warn">
-              IN NO EVENT SHALL FADDY, ITS DIRECTORS, EMPLOYEES, OR AGENTS BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES. OUR TOTAL LIABILITY TO YOU FOR ANY CAUSE SHALL NOT EXCEED THE GREATER OF THE AMOUNT YOU PAID TO US IN THE 12 MONTHS PRECEDING THE CLAIM OR ₹500 INR.
+              IN NO EVENT SHALL FADDY, ITS OPERATOR, EMPLOYEES, OR AGENTS BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES. OUR TOTAL LIABILITY TO YOU FOR ANY CAUSE SHALL NOT EXCEED THE GREATER OF THE AMOUNT YOU PAID TO US IN THE 12 MONTHS PRECEDING THE CLAIM OR ₹500 INR.
             </div>
           </section>
 
@@ -422,7 +422,7 @@ export default function TermsOfService() {
           {/* 18 */}
           <section className="tos-section" id="indemnification">
             <SectionHeader num="18" title="Indemnification" />
-            <P>You agree to defend, indemnify, and hold harmless Faddy and its officers, employees, and agents from any loss, damage, liability, or claim arising from: (1) your Contributions; (2) your use of the Services; (3) breach of these Terms; (4) violation of third-party rights; or (5) any harmful act toward another user.</P>
+            <P>You agree to defend, indemnify, and hold harmless Faddy and its operator, employees, and agents from any loss, damage, liability, or claim arising from: (1) your Contributions; (2) your use of the Services; (3) breach of these Terms; (4) violation of third-party rights; or (5) any harmful act toward another user.</P>
           </section>
 
           <Divider />
@@ -442,8 +442,8 @@ export default function TermsOfService() {
             <P>If you have questions about these Terms or need to resolve a complaint, please contact us:</P>
             <div className="tos-contact-card">
               <div className="tos-contact-text">
-                <strong>Faddy — Legal Team</strong>
-                <span>Digital-only Service · Kolkata, West Bengal 743248, India</span>
+                <strong>Faddy — Operated by Swarup Basu (Sole Proprietor)</strong>
+                <span>Kolkata, West Bengal 743248, India</span>
               </div>
               <a href="mailto:support@faddy.site" className="tos-btn">
                 ✉ support@faddy.site

@@ -5,38 +5,14 @@ import * as Collapsible from "@radix-ui/react-collapsible";
 import { Slider } from "@/components/ui/slider";
 import { ChevronDown, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { PLANS } from "@/config/plans";
 
-// ─── Constants (mirrors plan-limits.middleware.js — do NOT duplicate elsewhere) ───
-const PLAN_LIMITS = {
-  free: {
-    trackedUsers: 20,
-    monthlyPrice: 0,
-    yearlyPrice: 0,
-    overageAllowed: false,
-  },
-  starter: {
-    trackedUsers: 125,
-    monthlyPrice: 19,
-    yearlyPrice: 15, // effective per-month when billed yearly ($180/yr)
-    yearlyTotal: 180,
-    overagePrice: 6,        // $ per overage block
-    overageBlock: 50,       // users per block
-    overageGrace: 25,       // grace buffer before first charge
-    overageEffectiveLimit: 150, // 125 + 25 grace
-    overageAllowed: true,
-  },
-  pro: {
-    trackedUsers: 125,
-    monthlyPrice: 49,
-    yearlyPrice: 45, // effective per-month when billed yearly ($540/yr)
-    yearlyTotal: 540,
-    overagePrice: 6,
-    overageBlock: 50,
-    overageGrace: 25,
-    overageEffectiveLimit: 150,
-    overageAllowed: true,
-  },
-};
+// ─── Derived values from shared config ───────────────────────────────────────
+const TRACKED_USERS = PLANS.starter.features.tracked_users;   // 125
+const OVERAGE_GRACE = PLANS.starter.overage!.grace_buffer;    // 25
+const OVERAGE_EFFECTIVE = PLANS.starter.overage!.effective_limit; // 150
+const OVERAGE_BLOCK = PLANS.starter.overage!.block_size;      // 50
+const OVERAGE_PRICE = PLANS.starter.overage!.price_per_block; // $6
 
 // Stepped snap points that map to slider index 0-7
 const SNAP_POINTS = [20, 100, 250, 500, 1000, 2000, 5000, 10000] as const;
@@ -55,14 +31,8 @@ function formatUsers(n: number): string {
  * Example: 201 users → ceil((201-150)/50)*6 = ceil(1.02)*6 = 2*6 = $12/mo
  */
 function calcOverage(users: number): { extraCost: number; extraBlocks: number } {
-  const included = PLAN_LIMITS.starter.trackedUsers;         // 125
-  const graceBuffer = PLAN_LIMITS.starter.overageGrace;     // 25
-  const effectiveLimit = included + graceBuffer;            // 150
-  const blockSize = PLAN_LIMITS.starter.overageBlock;       // 50
-  const pricePerBlock = PLAN_LIMITS.starter.overagePrice;   // $6
-
-  const extraBlocks = Math.ceil(Math.max(0, users - effectiveLimit) / blockSize);
-  const extraCost = extraBlocks * pricePerBlock;
+  const extraBlocks = Math.ceil(Math.max(0, users - OVERAGE_EFFECTIVE) / OVERAGE_BLOCK);
+  const extraCost = extraBlocks * OVERAGE_PRICE;
   return { extraCost, extraBlocks };
 }
 
@@ -110,7 +80,7 @@ export function TrackedUsersExplainer({
   const selectedUsers = rawUsers;
 
   const { extraCost, extraBlocks } = calcOverage(selectedUsers);
-  const isIncluded = selectedUsers <= PLAN_LIMITS.starter.trackedUsers; // <= 125
+  const isIncluded = selectedUsers <= TRACKED_USERS; // <= 125
 
   return (
     <div className="max-w-6xl mx-auto mb-16 px-0">
@@ -182,10 +152,10 @@ export function TrackedUsersExplainer({
               </p>
               <p className="text-xs text-blue-600 dark:text-blue-400 leading-relaxed">
                 First{" "}
-                <strong>{PLAN_LIMITS.starter.overageGrace} users over the limit</strong> are
+                <strong>{OVERAGE_GRACE} users over the limit</strong> are
                 free. After that, it's{" "}
                 <strong>
-                  ${PLAN_LIMITS.starter.overagePrice} per {PLAN_LIMITS.starter.overageBlock}{" "}
+                  ${OVERAGE_PRICE} per {OVERAGE_BLOCK}{" "}
                   additional users/mo
                 </strong>
                 , billed monthly.
@@ -318,9 +288,9 @@ function OverageSummary({
     setAnimKey((k) => k + 1);
   }
 
-  // Base prices per billing cycle
-  const starterBase = billingCycle === "monthly" ? 19 : 15;
-  const proBase = billingCycle === "monthly" ? 49 : 45;
+  // Base prices per billing cycle (from shared config)
+  const starterBase = billingCycle === "monthly" ? PLANS.starter.monthlyPrice : PLANS.starter.yearlyPrice;
+  const proBase = billingCycle === "monthly" ? PLANS.pro.monthlyPrice : PLANS.pro.yearlyPrice;
 
   const starterTotal = starterBase + extraCost;
   const proTotal = proBase + extraCost;

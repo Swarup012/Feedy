@@ -6,6 +6,7 @@ import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { PaidFeatureGate } from '@/components/PaidFeatureGate';
 import { useOrganization } from '@/context/OrganizationContext';
 import { useToast } from '@/hooks/use-toast';
+import { isPlanUpgradeRequired } from '@/lib/api';
 import { boardService, type Board } from '@/services/boardService';
 import {
   autopilotService,
@@ -30,6 +31,7 @@ import {
   ExternalLink,
   Inbox,
   Sparkles,
+  Plug,
 } from 'lucide-react';
 
 type StatusFilter = AutopilotSuggestionStatus | 'all';
@@ -70,11 +72,13 @@ function AutopilotPageInner() {
       const res = await autopilotService.listSuggestions(orgId, statusFilter);
       setSuggestions(res.data?.suggestions || []);
     } catch (err: any) {
-      toast({
-        title: 'Failed to load suggestions',
-        description: err?.response?.data?.message || err.message,
-        variant: 'destructive',
-      });
+      if (!isPlanUpgradeRequired(err)) {
+        toast({
+          title: 'Failed to load suggestions',
+          description: err?.response?.data?.message || err.message,
+          variant: 'destructive',
+        });
+      }
     } finally {
       setLoadingList(false);
     }
@@ -129,11 +133,13 @@ function AutopilotPageInner() {
         }
       }
     } catch (err: any) {
-      toast({
-        title: 'Ingest failed',
-        description: err?.response?.data?.message || err.message,
-        variant: 'destructive',
-      });
+      if (!isPlanUpgradeRequired(err)) {
+        toast({
+          title: 'Failed to create suggestion',
+          description: err?.response?.data?.message || err.message,
+          variant: 'destructive',
+        });
+      }
     } finally {
       setIngesting(false);
     }
@@ -205,16 +211,24 @@ function AutopilotPageInner() {
     <div className="mx-auto h-full max-w-6xl overflow-y-auto px-4 py-6 sm:px-6">
       {/* Header */}
       <header className="mb-6 space-y-2">
-        <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
-            <Bot className="h-5 w-5 text-primary" />
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
+              <Bot className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <h1 className="font-switzer text-lg font-semibold tracking-tight">Autopilot</h1>
+              <p className="text-sm text-muted-foreground">
+                Paste raw text from chats, emails, or reviews. AI detects feedback and queues a draft for your approval.
+              </p>
+            </div>
           </div>
-          <div>
-            <h1 className="font-switzer text-lg font-semibold tracking-tight">Autopilot</h1>
-            <p className="text-sm text-muted-foreground">
-              Paste raw text from chats, emails, or reviews. AI detects feedback and queues a draft for your approval.
-            </p>
-          </div>
+          <Link href="/admin/organization?tab=integrations">
+            <Button variant="outline" size="sm" className="gap-2">
+              <Plug className="h-4 w-4" />
+              Connect Apps
+            </Button>
+          </Link>
         </div>
       </header>
 

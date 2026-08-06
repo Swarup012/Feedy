@@ -4,6 +4,7 @@ import api from '@/lib/api';
 export interface SubscriptionInfo {
   status: string;
   plan: string;
+  billingCycle?: 'monthly' | 'yearly';
   trialEndsAt: string | null;
   currentPeriodStart: string | null;
   currentPeriodEnd: string | null;
@@ -33,7 +34,6 @@ export interface PricingPlan {
     posts_per_month: number;
     team_members: number;
     custom_branding: boolean;
-    priority_support: boolean;
     advanced_analytics: boolean;
   };
 }

@@ -1,8 +1,9 @@
 // src/services/usageService.ts
 import api from '@/lib/api';
+import { type PlanTier, hasUnlimited } from '@/config/plans';
 
 export interface UsageData {
-  plan: 'free' | 'starter';
+  plan: PlanTier;
   usage: {
     boards: {
       current: number;
@@ -47,8 +48,8 @@ const usageService = {
         boardsUsage: usage.boards,
       });
 
-      if (plan === 'starter') {
-        console.log('✅ User has starter plan - unlimited boards allowed');
+      if (hasUnlimited({ subscription_plan: plan })) {
+        console.log('✅ User has paid plan - unlimited boards allowed');
         return { allowed: true };
       }
 
@@ -91,7 +92,7 @@ const usageService = {
         postsUsage: usage.posts,
       });
 
-      if (plan === 'starter') {
+      if (hasUnlimited({ subscription_plan: plan })) {
         return { allowed: true };
       }
 

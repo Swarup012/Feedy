@@ -15,6 +15,8 @@ import { LoadingAnimation } from "@/components/LoadingAnimation";
 import { GoogleAuthButton } from "@/components/auth/GoogleAuthButton";
 import gsap from "gsap";
 import { getPublicReturnUrl, clearReturnUrl } from "@/lib/returnUrl";
+import { TokenManager } from "@/lib/tokenManager";
+import { supabase } from "@/lib/supabase";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -64,6 +66,16 @@ export default function SignupPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm()) return;
+
+    // SECURITY: Purge any lingering session from a prior user before creating
+    // a new account. Without this, stale Supabase sessions and localStorage
+    // tokens from a previous login persist — allowing identity cross-contamination.
+    TokenManager.clearTokens();
+    try {
+      await supabase.auth.signOut();
+    } catch {
+      // Non-fatal — the backend will overwrite cookies on successful signup.
+    }
 
     setLoading(true);
     try {

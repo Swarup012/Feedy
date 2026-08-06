@@ -1,22 +1,21 @@
 'use client';
 
 import { useOrganization } from '@/context/OrganizationContext';
-import { isFree } from '@/config/plans';
 import { Lock, Sparkles } from 'lucide-react';
 import { useState } from 'react';
 import { UpgradeDialog } from '@/components/UpgradeDialog';
 import { Button } from '@/components/ui/button';
 
-interface PaidFeatureGateProps {
+interface ProFeatureGateProps {
   children: React.ReactNode;
   featureName?: string;
 }
 
-export function PaidFeatureGate({ children, featureName = 'this feature' }: PaidFeatureGateProps) {
+export function ProFeatureGate({ children, featureName = 'this feature' }: ProFeatureGateProps) {
   const { organization, loading } = useOrganization();
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  const showGate = !organization || isFree(organization);
+  const showGate = !organization || organization.subscription_plan !== 'pro';
 
   if (loading) return <>{children}</>;
   if (!showGate) return <>{children}</>;
@@ -38,7 +37,7 @@ export function PaidFeatureGate({ children, featureName = 'this feature' }: Paid
             <div>
               <p className="text-sm font-semibold text-foreground">{featureName}</p>
               <p className="text-xs text-muted-foreground mt-0.5">
-                Upgrade to Starter or Pro to use this feature.
+                Upgrade to Pro to use this feature.
               </p>
             </div>
             <Button size="sm" className="gap-1.5" onClick={() => setDialogOpen(true)}>

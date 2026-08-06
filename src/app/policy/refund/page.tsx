@@ -12,7 +12,7 @@ export default function RefundPolicyPage() {
               Return & Refund Policy
             </h1>
             <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
-              Last updated: June 15, 2026
+              Last updated: August 5, 2026
             </p>
           </div>
 

@@ -12,7 +12,7 @@ export default function CookiePolicyPage() {
               Cookie Policy
             </h1>
             <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
-              Last updated: February 04, 2026
+              Last updated: August 5, 2026
             </p>
           </div>
 

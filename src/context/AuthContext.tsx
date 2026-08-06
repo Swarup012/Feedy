@@ -135,6 +135,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Only redirect on protected pages
       if (typeof window !== "undefined" && !isPublicPath(pathname)) {
         console.log("🚨 Auth check failed on protected page, redirecting to /login");
+        // SECURITY: Clear Supabase session too — prevents stale identity on next signup.
+        import("@/lib/supabase").then(({ supabase }) =>
+          supabase.auth.signOut().catch(() => {})
+        );
         window.location.href = "/login";
       }
     } finally {

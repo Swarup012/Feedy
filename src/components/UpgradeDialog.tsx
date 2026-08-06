@@ -1,46 +1,43 @@
 'use client';
 
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
-import { Check, Sparkles, Zap, Crown } from 'lucide-react';
+import { Check, Sparkles, Crown, Zap } from 'lucide-react';
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import paddleService from '@/services/paddleService';
+import { PLANS, type PlanTier } from '@/config/plans';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogTrigger,
+} from '@/components/animate-ui/components/radix/dialog';
 
 export interface UpgradeDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
   featureName?: string;
   feature?: 'boards' | 'posts' | 'team_members' | 'roadmap_items';
 }
 
-const PLANS = {
-  starter: {
-    name: 'Starter',
-    monthlyPrice: 19,
-    yearlyPrice: 180,
-    effectiveMonthly: 15,
-    features: [
-      'Unlimited boards & posts',
-      '125+ tracked users',
-      'Advanced analytics & branding',
-      'Integrations, Autopilot & AI Chat',
-    ],
-  },
-  pro: {
-    name: 'Pro',
-    monthlyPrice: 49,
-    yearlyPrice: 540,
-    effectiveMonthly: 45,
-    features: [
-      'Everything in Starter',
-      'Up to 10 admins',
-      'Custom subdomain',
-      'Priority support',
-    ],
-  },
-} as const;
+const PADDLE_CLIENT_TOKEN = process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN || 'test_67753ae11c6f27e94e5909861a5';
+const IS_SANDBOX = !PADDLE_CLIENT_TOKEN.startsWith('live_');
+
+const STARTER_HIGHLIGHTS = [
+  'Unlimited boards & posts',
+  'Slack, Discord & Intercom',
+  'AI Chat & Autopilot',
+  'Webhooks & API',
+];
+
+const PRO_HIGHLIGHTS = [
+  'Everything in Starter',
+  'Autopilot Automatic Mode',
+  'AI severity classification',
+  'Slack/Discord alerts',
+];
 
 export function UpgradeDialog({
   open,
@@ -50,16 +47,16 @@ export function UpgradeDialog({
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
-  const [selectedPlan, setSelectedPlan] = useState<'starter' | 'pro'>('starter');
 
-  const plan = PLANS[selectedPlan];
-  const price = billingCycle === 'monthly' ? plan.monthlyPrice : plan.effectiveMonthly;
+  const starterPrice = billingCycle === 'monthly' ? PLANS.starter.monthlyPrice : PLANS.starter.yearlyPrice;
+  const proPrice = billingCycle === 'monthly' ? PLANS.pro.monthlyPrice : PLANS.pro.yearlyPrice;
+  const starterSavings = Math.round((1 - PLANS.starter.yearlyPrice / PLANS.starter.monthlyPrice) * 100);
 
-  const handleUpgrade = async () => {
+  const handleUpgrade = async (plan: PlanTier) => {
     try {
       setLoading(true);
       const response = await paddleService.createCheckoutSession({
-        plan: selectedPlan,
+        plan,
         billingCycle,
         skipTrial: false,
       });
@@ -79,8 +76,8 @@ export function UpgradeDialog({
               });
             }
             const Paddle = (window as any).Paddle;
-            Paddle.Environment.set('sandbox');
-            Paddle.Setup({ token: 'test_67753ae11c6f27e94e5909861a5' });
+            if (IS_SANDBOX) Paddle.Environment.set('sandbox');
+            Paddle.Setup({ token: PADDLE_CLIENT_TOKEN });
             Paddle.Checkout.open({
               transactionId: response.data.transactionId,
               settings: {
@@ -89,7 +86,7 @@ export function UpgradeDialog({
                 successUrl: window.location.origin + '/admin?checkout=success',
               },
             });
-            onOpenChange(false);
+            onOpenChange?.(false);
             setLoading(false);
             return;
           } catch {
@@ -106,106 +103,139 @@ export function UpgradeDialog({
     }
   };
 
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[400px] p-6 gap-0">
-        <VisuallyHidden>
-          <DialogTitle>Upgrade Plan</DialogTitle>
-        </VisuallyHidden>
+  const dialogContent = (
+    <DialogContent
+      className="sm:max-w-[520px] p-0 gap-0 overflow-hidden border-border/50 bg-card"
+      from="bottom"
+    >
+      <DialogHeader className="px-5 pt-5 pb-2">
+        <DialogTitle className="flex items-center gap-2 text-base">
+          <Sparkles className="w-4 h-4 text-primary" />
+          Upgrade to unlock {featureName}
+        </DialogTitle>
+        <DialogDescription>
+          14-day free trial on both plans. No credit card required.
+        </DialogDescription>
+      </DialogHeader>
 
-        {/* Header */}
-        <div className="flex items-start gap-3 mb-5">
-          <div className="mt-0.5 w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-            <Sparkles className="w-4 h-4 text-primary" />
-          </div>
-          <div>
-            <h2 className="text-base font-semibold text-foreground leading-tight">
-              Upgrade to unlock {featureName}
-            </h2>
-            <p className="text-sm text-muted-foreground mt-0.5">
-              Start a 14-day free trial. No credit card required.
-            </p>
-          </div>
-        </div>
-
-        {/* Plan selector */}
-        <div className="flex rounded-lg border border-border overflow-hidden mb-4">
-          {(['starter', 'pro'] as const).map((p) => (
-            <button
-              key={p}
-              onClick={() => setSelectedPlan(p)}
-              className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-sm font-medium transition-colors ${
-                selectedPlan === p
-                  ? 'bg-primary text-primary-foreground'
-                  : 'text-muted-foreground hover:bg-muted'
-              }`}
-            >
-              {p === 'starter' ? <Zap className="w-3.5 h-3.5" /> : <Crown className="w-3.5 h-3.5" />}
-              {PLANS[p].name}
-            </button>
-          ))}
-        </div>
-
-        {/* Billing cycle */}
-        <div className="flex rounded-lg border border-border overflow-hidden mb-5">
+      {/* Billing toggle */}
+      <div className="px-5 pb-4">
+        <div className="inline-flex rounded-lg bg-muted/60 p-0.5">
           {(['monthly', 'yearly'] as const).map((cycle) => (
             <button
               key={cycle}
               onClick={() => setBillingCycle(cycle)}
-              className={`flex-1 flex items-center justify-center gap-2 py-2 text-sm font-medium transition-colors ${
+              className={`relative px-3 py-1.5 text-xs font-medium rounded-md transition-all duration-200 ${
                 billingCycle === cycle
-                  ? 'bg-muted text-foreground'
-                  : 'text-muted-foreground hover:bg-muted/50'
+                  ? 'bg-background text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               {cycle === 'monthly' ? 'Monthly' : 'Yearly'}
               {cycle === 'yearly' && (
-                <span className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 px-1.5 py-0.5 rounded-full">
-                  −21%
+                <span className="ml-1.5 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
+                  −{starterSavings}%
                 </span>
               )}
             </button>
           ))}
         </div>
+      </div>
 
-        {/* Price + features */}
-        <div className="rounded-lg border border-border bg-muted/30 p-4 mb-5">
+      {/* Plan cards — side by side */}
+      <div className="px-5 pb-5 grid grid-cols-2 gap-3">
+        {/* Starter */}
+        <div className="relative rounded-xl border border-border/60 bg-muted/20 p-4 flex flex-col">
+          <div className="flex items-center gap-1.5 mb-3">
+            <Zap className="w-3.5 h-3.5 text-blue-500" />
+            <span className="text-xs font-semibold text-foreground uppercase tracking-wide">Starter</span>
+          </div>
           <div className="flex items-baseline gap-1 mb-3">
-            <span className="text-2xl font-bold text-foreground">${price}</span>
-            <span className="text-sm text-muted-foreground">/mo</span>
-            {billingCycle === 'yearly' && (
-              <span className="ml-auto text-xs text-muted-foreground">
-                ${plan.yearlyPrice}/yr
-              </span>
-            )}
+            <span className="text-2xl font-bold text-foreground">${starterPrice}</span>
+            <span className="text-xs text-muted-foreground">/mo</span>
           </div>
-          <div className="space-y-2">
-            {plan.features.map((feat, i) => (
-              <div key={i} className="flex items-center gap-2">
-                <Check className="w-3.5 h-3.5 text-primary flex-shrink-0" strokeWidth={2.5} />
-                <span className="text-sm text-foreground">{feat}</span>
-              </div>
+          {billingCycle === 'yearly' && (
+            <p className="text-[10px] text-muted-foreground -mt-2 mb-3">
+              ${PLANS.starter.yearlyTotal}/yr · save ${PLANS.starter.monthlyPrice * 12 - PLANS.starter.yearlyTotal}/yr
+            </p>
+          )}
+          <ul className="space-y-1.5 mb-4 flex-1">
+            {STARTER_HIGHLIGHTS.map((feat, i) => (
+              <li key={i} className="flex items-start gap-1.5">
+                <Check className="w-3 h-3 text-primary mt-0.5 flex-shrink-0" strokeWidth={2.5} />
+                <span className="text-xs text-foreground leading-snug">{feat}</span>
+              </li>
             ))}
-          </div>
+          </ul>
+          <Button
+            onClick={() => handleUpgrade('starter')}
+            disabled={loading}
+            variant="outline"
+            className="w-full h-8 text-xs font-semibold border-border/60"
+          >
+            {loading ? '...' : 'Start Free Trial'}
+          </Button>
         </div>
 
-        {/* Actions */}
-        <Button
-          onClick={handleUpgrade}
-          disabled={loading}
-          className="w-full h-10 text-sm font-semibold mb-2"
-        >
-          {loading
-            ? 'Opening checkout…'
-            : `Start ${plan.name} Free Trial`}
+        {/* Pro — highlighted */}
+        <div className="relative rounded-xl border border-primary/40 bg-primary/[0.03] p-4 flex flex-col ring-1 ring-primary/10">
+          <div className="absolute -top-2.5 left-1/2 -translate-x-1/2">
+            <span className="text-[10px] font-bold uppercase tracking-wider bg-primary text-primary-foreground px-2 py-0.5 rounded-full">
+              Recommended
+            </span>
+          </div>
+          <div className="flex items-center gap-1.5 mb-3 mt-1">
+            <Crown className="w-3.5 h-3.5 text-amber-500" />
+            <span className="text-xs font-semibold text-foreground uppercase tracking-wide">Pro</span>
+          </div>
+          <div className="flex items-baseline gap-1 mb-3">
+            <span className="text-2xl font-bold text-foreground">${proPrice}</span>
+            <span className="text-xs text-muted-foreground">/mo</span>
+          </div>
+          {billingCycle === 'yearly' && (
+            <p className="text-[10px] text-muted-foreground -mt-2 mb-3">
+              ${PLANS.pro.yearlyTotal}/yr · save ${PLANS.pro.monthlyPrice * 12 - PLANS.pro.yearlyTotal}/yr
+            </p>
+          )}
+          <ul className="space-y-1.5 mb-4 flex-1">
+            {PRO_HIGHLIGHTS.map((feat, i) => (
+              <li key={i} className="flex items-start gap-1.5">
+                <Check className="w-3 h-3 text-primary mt-0.5 flex-shrink-0" strokeWidth={2.5} />
+                <span className="text-xs text-foreground leading-snug">{feat}</span>
+              </li>
+            ))}
+          </ul>
+          <Button
+            onClick={() => handleUpgrade('pro')}
+            disabled={loading}
+            className="w-full h-8 text-xs font-semibold"
+          >
+            {loading ? '...' : 'Start Free Trial'}
+          </Button>
+        </div>
+      </div>
+    </DialogContent>
+  );
+
+  // Controlled mode: when open/onOpenChange are provided
+  if (open !== undefined || onOpenChange !== undefined) {
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        {dialogContent}
+      </Dialog>
+    );
+  }
+
+  // Standalone mode: wraps children with a trigger
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button size="sm" className="gap-1.5">
+          <Sparkles className="w-3.5 h-3.5" />
+          Upgrade
         </Button>
-        <button
-          onClick={() => onOpenChange(false)}
-          className="w-full text-xs text-muted-foreground hover:text-foreground transition-colors py-1"
-        >
-          Maybe later
-        </button>
-      </DialogContent>
+      </DialogTrigger>
+      {dialogContent}
     </Dialog>
   );
 }

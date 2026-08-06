@@ -29,10 +29,18 @@ export const TokenManager = {
     // Intentionally empty — the backend sets HttpOnly cookies via Set-Cookie.
   },
 
-  /** Clears the user cache only. The backend clears auth cookies on logout. */
+  /**
+   * Clears ALL client-side auth artifacts: user-profile cache AND any
+   * legacy localStorage tokens that may still be present from Google OAuth
+   * or prior sessions. The backend clears HttpOnly cookies separately.
+   */
   clearTokens(): void {
     if (typeof window === "undefined") return;
     localStorage.removeItem(USER_CACHE_KEY);
+    // Legacy tokens from Google OAuth callback (src/app/auth/callback/page.tsx)
+    // and any prior session storage — must be removed to prevent stale identity.
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("token");
   },
 
   // ─── User-profile cache (localStorage, NOT used for auth) ───────────────────

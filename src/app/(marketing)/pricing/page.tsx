@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { useOrganization } from "@/context/OrganizationContext";
+import { PLANS, resolvePlan, getPlanFeatureDisplay, type PlanTier } from "@/config/plans";
 import {
   Card,
   CardContent,
@@ -144,62 +145,11 @@ export default function PricingPage() {
     }
   };
 
-  const plans = {
-    free: {
-      name: "Free",
-      price: 0,
-      description: "For solo builders just getting started with structured feedback.",
-      features: [
-        { text: "3 feedback boards", included: true },
-        { text: "5 posts per board", included: true },
-        { text: "20 tracked users", included: true },
-        { text: "3 team members", included: true },
-        { text: "1 roadmap", included: true },
-        { text: "Basic analytics", included: true },
-      ],
-      cta: "Current Plan",
-      highlight: false,
-    },
-    starter: {
-      name: "Starter",
-      monthlyPrice: 19,
-      yearlyPrice: 180,
-      effectiveMonthlyYearly: 15,
-      savings: 48,
-      description: "For indie founders and small teams ready to put their brand front and center.",
-      features: [
-        { text: "Unlimited Feedback Boards + Posts", included: true },
-        { text: "Unlimited team members", included: true, highlight: true },
-        { text: "Up to 5 admins", included: true, highlight: true },
-        { text: "1 roadmap", included: true },
-        { text: "125+ tracked users", included: true },
-        { text: "Advanced analytics", included: true },
-        { text: "Custom branding", included: true },
-      ],
-      cta: "Start Free Trial",
-      highlight: true,
-    },
-    pro: {
-      name: "Pro",
-      monthlyPrice: 49,
-      yearlyPrice: 540,
-      effectiveMonthlyYearly: 45,
-      savings: 48,
-      description: "Turn scattered feedback into clear priorities with AI-powered clustering and automation.",
-      features: [
-        { text: 'All Starter features, plus:', included: true, bold: true },
-        { text: 'Up to 10 admins', included: true, highlight: true },
-        { text: '1 custom Subdomain', included: true, highlight: true },
-        { text: 'Priority support', included: true, highlight: true },
-        { text: 'Custom integrations', included: true },
-        { text: 'Advanced security features', included: true },
-      ],
-      cta: "Start Pro Trial",
-      highlight: false,
-    },
-  };
+  const freePlan = getPlanFeatureDisplay("free");
+  const starterPlan = getPlanFeatureDisplay("starter");
+  const proPlan = getPlanFeatureDisplay("pro");
 
-  const currentPlan = organization?.plan || "free";
+  const currentPlan: PlanTier = resolvePlan(organization);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
@@ -237,7 +187,7 @@ export default function PricingPage() {
             >
               Yearly
               <Badge className="bg-green-500 text-white text-xs px-2 py-0.5">
-                Save $48
+                Save ${starterPlan.savings}
               </Badge>
             </button>
           </div>
@@ -249,19 +199,19 @@ export default function PricingPage() {
           <Card className="relative">
             <CardHeader>
               <div className="flex items-center justify-between mb-2">
-                <CardTitle className="text-2xl">{plans.free.name}</CardTitle>
+                <CardTitle className="text-2xl">{freePlan.name}</CardTitle>
               </div>
               <div className="mb-4">
                 <div className="flex items-baseline gap-1">
                   <span className="text-4xl font-bold">
-                    ${plans.free.price}
+                    ${freePlan.monthlyPrice}
                   </span>
                   <span className="text-gray-600 dark:text-gray-400">
                     /month
                   </span>
                 </div>
               </div>
-              <CardDescription>{plans.free.description}</CardDescription>
+              <CardDescription>For solo builders just getting started with structured feedback.</CardDescription>
             </CardHeader>
             <CardContent>
               <Button
@@ -276,7 +226,7 @@ export default function PricingPage() {
               </Button>
 
               <div className="space-y-3">
-                {plans.free.features.map((feature, idx) => (
+                {freePlan.features.map((feature, idx) => (
                   <div key={idx} className="flex items-start gap-3">
                     {feature.included ? (
                       <Check className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
@@ -304,7 +254,7 @@ export default function PricingPage() {
 
             <CardHeader>
               <div className="flex items-center justify-between mb-2">
-                <CardTitle className="text-2xl">{plans.starter.name}</CardTitle>
+                <CardTitle className="text-2xl">{starterPlan.name}</CardTitle>
                 <div className="relative group">
                   <div className="absolute -inset-0.5 bg-gradient-to-r from-amber-400 to-orange-500 rounded-full blur opacity-30 group-hover:opacity-60 transition duration-200"></div>
                   <Badge className="relative bg-white dark:bg-gray-900 text-orange-600 dark:text-amber-400 border border-orange-200 dark:border-amber-800/60 shadow-sm font-bold uppercase tracking-wider text-[10px] px-2.5 py-0.5 flex items-center gap-1">
@@ -317,7 +267,7 @@ export default function PricingPage() {
                 {billingCycle === "monthly" ? (
                   <div className="flex items-baseline gap-1">
                     <span className="text-4xl font-bold">
-                      ${plans.starter.monthlyPrice}
+                      ${starterPlan.monthlyPrice}
                     </span>
                     <span className="text-gray-600 dark:text-gray-400">
                       /month
@@ -327,19 +277,19 @@ export default function PricingPage() {
                   <div>
                     <div className="flex items-baseline gap-1">
                       <span className="text-4xl font-bold">
-                        ${plans.starter.effectiveMonthlyYearly}
+                        ${starterPlan.yearlyPrice}
                       </span>
                       <span className="text-gray-600 dark:text-gray-400">
                         /month
                       </span>
                     </div>
                     <div className="text-sm text-blue-600 mt-1">
-                      Billed yearly (${plans.starter.yearlyPrice}/year)
+                      Billed yearly (${starterPlan.yearlyTotal}/year)
                     </div>
                   </div>
                 )}
               </div>
-              <CardDescription>{plans.starter.description}</CardDescription>
+              <CardDescription>For indie founders and small teams ready to put their brand front and center.</CardDescription>
             </CardHeader>
             <CardContent>
               {currentPlan === "free" ? (
@@ -370,7 +320,7 @@ export default function PricingPage() {
               )}
 
               <div className="space-y-3">
-                {plans.starter.features.map((feature, idx) => (
+                {starterPlan.features.map((feature, idx) => (
                   <div key={idx} className="flex items-start gap-3">
                     {feature.included ? (
                       <Check
@@ -408,7 +358,7 @@ export default function PricingPage() {
 
             <CardHeader>
               <div className="flex items-center justify-between mb-2">
-                <CardTitle className="text-2xl">{plans.pro.name}</CardTitle>
+                <CardTitle className="text-2xl">{proPlan.name}</CardTitle>
                 <div className="relative group">
                   <div className="absolute -inset-0.5 bg-gradient-to-r from-amber-400 to-orange-500 rounded-full blur opacity-30 group-hover:opacity-60 transition duration-200"></div>
                   <Badge className="relative bg-white dark:bg-gray-900 text-orange-600 dark:text-amber-400 border border-orange-200 dark:border-amber-800/60 shadow-sm font-bold uppercase tracking-wider text-[10px] px-2.5 py-0.5 flex items-center gap-1">
@@ -421,7 +371,7 @@ export default function PricingPage() {
                 {billingCycle === "monthly" ? (
                   <div className="flex items-baseline gap-1">
                     <span className="text-4xl font-bold">
-                      ${plans.pro.monthlyPrice}
+                      ${proPlan.monthlyPrice}
                     </span>
                     <span className="text-gray-600 dark:text-gray-400">
                       /month
@@ -431,19 +381,19 @@ export default function PricingPage() {
                   <div>
                     <div className="flex items-baseline gap-1">
                       <span className="text-4xl font-bold">
-                        ${plans.pro.effectiveMonthlyYearly}
+                        ${proPlan.yearlyPrice}
                       </span>
                       <span className="text-gray-600 dark:text-gray-400">
                         /month
                       </span>
                     </div>
                     <div className="text-sm text-blue-600 mt-1">
-                      Billed yearly (${plans.pro.yearlyPrice}/year)
+                      Billed yearly (${proPlan.yearlyTotal}/year)
                     </div>
                   </div>
                 )}
               </div>
-              <CardDescription>{plans.pro.description}</CardDescription>
+              <CardDescription>Turn scattered feedback into clear priorities with AI-powered clustering and automation.</CardDescription>
             </CardHeader>
             <CardContent>
               {currentPlan === "free" ? (
@@ -472,7 +422,7 @@ export default function PricingPage() {
               )}
 
               <div className="space-y-3">
-                {plans.pro.features.map((feature, idx) => (
+                {proPlan.features.map((feature, idx) => (
                   <div key={idx} className="flex items-start gap-3">
                     {feature.included ? (
                       <Check
@@ -573,24 +523,24 @@ export default function PricingPage() {
                         $0
                       </td>
                       <td className="py-4 px-6 text-center text-sm text-gray-900 dark:text-white font-semibold bg-blue-50/50 dark:bg-blue-900/10">
-                        $19
+                        ${starterPlan.monthlyPrice}
                       </td>
                       <td className="py-4 px-6 text-center text-sm text-gray-900 dark:text-white font-semibold">
-                        $49
+                        ${proPlan.monthlyPrice}
                       </td>
                     </tr>
                     <tr>
                       <td className="py-4 px-6 text-sm text-gray-900 dark:text-white">
-                        Yearly Price (save $48)
+                        Yearly Price (save ${starterPlan.savings})
                       </td>
                       <td className="py-4 px-6 text-center text-sm text-gray-500">
                         -
                       </td>
                       <td className="py-4 px-6 text-center text-sm text-gray-900 dark:text-white font-semibold bg-blue-50/50 dark:bg-blue-900/10">
-                        $15/mo
+                        ${starterPlan.yearlyPrice}/mo
                       </td>
                       <td className="py-4 px-6 text-center text-sm text-gray-900 dark:text-white font-semibold">
-                        $45/mo
+                        ${proPlan.yearlyPrice}/mo
                       </td>
                     </tr>
 
@@ -1033,7 +983,7 @@ export default function PricingPage() {
               {/* Invoice breakdown */}
               <div className="rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden">
                 {[
-                  { dot: "bg-green-500", label: "Base Plan (125 users included)", value: "$19", valueClass: "" },
+                  { dot: "bg-green-500", label: "Base Plan (125 users included)", value: "$25", valueClass: "" },
                   { dot: "bg-blue-400", label: "Grace Buffer (26–150 users)", value: "$0", valueClass: "text-green-600" },
                   { dot: "bg-blue-600", label: "Overage (30 users = 1 block × $6)", value: "+$6", valueClass: "" },
                 ].map((row, i) => (
@@ -1047,7 +997,7 @@ export default function PricingPage() {
                 ))}
                 <div className="flex items-center justify-between px-5 py-4 bg-blue-50 dark:bg-blue-900/20 border-t-2 border-blue-200 dark:border-blue-700">
                   <span className="font-bold text-gray-900 dark:text-white">Total This Month</span>
-                  <span className="text-lg font-bold text-blue-600 tabular-nums">$25</span>
+                  <span className="text-lg font-bold text-blue-600 tabular-nums">$31</span>
                 </div>
               </div>
 
@@ -1125,7 +1075,7 @@ export default function PricingPage() {
               <CardContent>
                 <p className="text-gray-600 dark:text-gray-400">
                   Yes! You can upgrade to yearly billing at any time to save
-                  $48/year. The change will take effect at your next billing
+                  ${starterPlan.savings}/year. The change will take effect at your next billing
                   cycle.
                 </p>
               </CardContent>

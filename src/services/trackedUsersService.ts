@@ -14,6 +14,7 @@ export interface TrackedUsersUsage {
   limit: number;
   usage_percent: number;
   current_period: string;
+  plan_type: 'free' | 'starter' | 'pro';
   days_remaining: number;
   breakdown: {
     posts: number;

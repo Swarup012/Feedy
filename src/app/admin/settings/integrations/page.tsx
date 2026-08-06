@@ -7,6 +7,8 @@ import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { PaidFeatureGate } from '@/components/PaidFeatureGate';
 import { useOrganization } from '@/context/OrganizationContext';
 import { useToast } from '@/hooks/use-toast';
+import { planAllowsFeature, resolvePlan } from '@/config/plans';
+import { isPlanUpgradeRequired } from '@/lib/api';
 import {
   intercomService,
   type IntercomStatus,
@@ -108,6 +110,8 @@ function IntegrationsPageInner() {
   const { toast } = useToast();
   const searchParams = useSearchParams();
   const orgId = organization?.id;
+  const currentPlan = resolvePlan(organization);
+  const canUseAutoMode = planAllowsFeature(currentPlan, 'autopilot_auto');
 
   const [intercomStatus, setIntercomStatus] = useState<IntercomStatus | null>(null);
   const [discordStatus, setDiscordStatus] = useState<DiscordStatus | null>(null);
@@ -166,11 +170,13 @@ function IntegrationsPageInner() {
           console.error("Failed to load Slack channels:", err);
         });
       }
-    } catch (err: unknown) {
-      toast({
-        title: 'Failed to load integration status',
-        variant: 'destructive',
-      });
+    } catch (err: any) {
+      if (!isPlanUpgradeRequired(err)) {
+        toast({
+          title: 'Failed to load integration status',
+          variant: 'destructive',
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -608,7 +614,7 @@ function IntegrationsPageInner() {
                                 <p className="text-[11px] text-muted-foreground leading-tight">Bypass review & publish instantly.</p>
                                 {!discordBoardId && <p className="text-[10px] text-amber-600 dark:text-amber-500 mt-0.5 font-medium">Select a board below first.</p>}
                               </div>
-                              <Switch checked={discordAutopilot?.autopilot_mode === 'automatic'} disabled={savingDiscordAutopilot || !discordBoardId} onCheckedChange={(checked) => handleAutopilotModeToggle('discord', checked)} />
+                               <Switch checked={discordAutopilot?.autopilot_mode === 'automatic'} disabled={savingDiscordAutopilot || !discordBoardId || !canUseAutoMode} onCheckedChange={(checked) => handleAutopilotModeToggle('discord', checked)} />
                             </div>
 
                             <div className="space-y-2 pt-1 border-t">
@@ -672,7 +678,7 @@ function IntegrationsPageInner() {
                                 <p className="text-[11px] text-muted-foreground leading-tight">Bypass review & publish instantly.</p>
                                 {!intercomBoardId && <p className="text-[10px] text-amber-600 dark:text-amber-500 mt-0.5 font-medium">Select a board below first.</p>}
                               </div>
-                              <Switch checked={intercomAutopilot?.autopilot_mode === 'automatic'} disabled={savingIntercomAutopilot || !intercomBoardId} onCheckedChange={(checked) => handleAutopilotModeToggle('intercom', checked)} />
+                               <Switch checked={intercomAutopilot?.autopilot_mode === 'automatic'} disabled={savingIntercomAutopilot || !intercomBoardId || !canUseAutoMode} onCheckedChange={(checked) => handleAutopilotModeToggle('intercom', checked)} />
                             </div>
 
                             <div className="space-y-2 pt-1 border-t">
@@ -761,7 +767,7 @@ function IntegrationsPageInner() {
                                 <p className="text-[11px] text-muted-foreground leading-tight">Bypass review & publish instantly.</p>
                                 {!slackBoardId && <p className="text-[10px] text-amber-600 dark:text-amber-500 mt-0.5 font-medium">Select a board below first.</p>}
                               </div>
-                              <Switch checked={slackAutopilot?.autopilot_mode === 'automatic'} disabled={savingSlackAutopilot || !slackBoardId} onCheckedChange={(checked) => handleAutopilotModeToggle('slack', checked)} />
+                               <Switch checked={slackAutopilot?.autopilot_mode === 'automatic'} disabled={savingSlackAutopilot || !slackBoardId || !canUseAutoMode} onCheckedChange={(checked) => handleAutopilotModeToggle('slack', checked)} />
                             </div>
 
                             {slackAutopilot?.autopilot_mode === 'automatic' && (

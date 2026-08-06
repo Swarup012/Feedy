@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { useOrganization } from '@/context/OrganizationContext';
+import { resolvePlan } from '@/config/plans';
 import { useAuth } from '@/hooks/useAuth';
 import api from '@/lib/api';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -43,6 +44,7 @@ import {
   Briefcase,
   Plug,
   User,
+  Bell,
 } from 'lucide-react';
 import { OrganizationSkeleton, MembersTableSkeleton } from '@/components/admin/OrganizationSkeleton';
 import { InviteMemberModal } from '@/components/organization/InviteMemberModal';
@@ -56,6 +58,43 @@ import { ProfileTab } from '@/components/organization/ProfileTab';
 import { BillingSection } from '@/components/BillingSection';
 import PricingContent from '@/components/PricingContent';
 import { CustomDomainSettings } from '@/components/organization/CustomDomainSettings';
+import { NotificationsTab } from '@/components/organization/NotificationsTab';
+import { PaidFeatureGate } from '@/components/PaidFeatureGate';
+import { ProFeatureGate } from '@/components/ProFeatureGate';
+import { motion } from 'motion/react';
+
+interface SidebarNavItemProps {
+  isActive: boolean;
+  onClick: () => void;
+  children: ReactNode;
+}
+
+function SidebarNavItem({ isActive, onClick, children }: SidebarNavItemProps) {
+  return (
+    <motion.button
+      onClick={onClick}
+      className={`w-full flex items-center gap-3 px-3 py-2 rounded-md transition-colors text-left text-sm relative ${
+        isActive
+          ? 'text-foreground font-medium'
+          : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+      }`}
+      whileHover={{ x: 2 }}
+      whileTap={{ scale: 0.98 }}
+      transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+    >
+      {isActive && (
+        <motion.div
+          layoutId="sidebar-active"
+          className="absolute inset-0 bg-muted rounded-md"
+          transition={{ type: 'spring', stiffness: 350, damping: 30 }}
+        />
+      )}
+      <span className="relative z-10 flex items-center gap-3">
+        {children}
+      </span>
+    </motion.button>
+  );
+}
 
 interface Member {
   id: string;
@@ -343,91 +382,40 @@ export default function OrganizationSettingsPage() {
 
   return (
     <div className="flex min-h-[calc(100vh-70px)]">
-      {/* Notion-style Sidebar */}
+      {/* Animated Sidebar */}
       <div className="w-52 border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4 flex flex-col sticky top-0 h-[calc(100vh-70px)] overflow-y-auto shrink-0">
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
             <Building2 className="h-6 w-6 text-primary" />
-            <h1 className="text-base font-bold">{organization.name}</h1>
+            <h1 className="text-base font-bold truncate">{organization.name}</h1>
           </div>
           <Badge variant="outline" className="text-xs">
-            {organization.plan.toUpperCase()}
+            {resolvePlan(organization).toUpperCase()}
           </Badge>
         </div>
 
         <nav className="space-y-1 flex-1">
-          <button
-            onClick={() => setActiveTab('profile')}
-            className={`w-full flex items-center gap-3 px-3 py-2 rounded-md transition-colors text-left text-sm ${activeTab === 'profile' ? 'bg-gray-100 dark:bg-gray-800' : 'hover:bg-gray-50 dark:hover:bg-gray-800'
-              }`}
-          >
-            <User className="h-4 w-4 text-gray-500" />
-            <span className="text-gray-700 dark:text-gray-300">Profile</span>
-          </button>
-          <button
-            onClick={() => setActiveTab('general')}
-            className={`w-full flex items-center gap-3 px-3 py-2 rounded-md transition-colors text-left text-sm ${activeTab === 'general' ? 'bg-gray-100 dark:bg-gray-800' : 'hover:bg-gray-50 dark:hover:bg-gray-800'
-              }`}
-          >
-            <Settings className="h-4 w-4 text-gray-500" />
-            <span className="text-gray-700 dark:text-gray-300">General</span>
-          </button>
-          <button
-            onClick={() => setActiveTab('members')}
-            className={`w-full flex items-center gap-3 px-3 py-2 rounded-md transition-colors text-left text-sm ${activeTab === 'members' ? 'bg-gray-100 dark:bg-gray-800' : 'hover:bg-gray-50 dark:hover:bg-gray-800'
-              }`}
-          >
-            <Users className="h-4 w-4 text-gray-500" />
-            <span className="text-gray-700 dark:text-gray-300">Members ({members.length})</span>
-          </button>
-          <button
-            onClick={() => setActiveTab('roles')}
-            className={`w-full flex items-center gap-3 px-3 py-2 rounded-md transition-colors text-left text-sm ${activeTab === 'roles' ? 'bg-gray-100 dark:bg-gray-800' : 'hover:bg-gray-50 dark:hover:bg-gray-800'
-              }`}
-          >
-            <Briefcase className="h-4 w-4 text-gray-500" />
-            <span className="text-gray-700 dark:text-gray-300">Job Roles</span>
-          </button>
-          <button
-            onClick={() => setActiveTab('subdomain')}
-            className={`w-full flex items-center gap-3 px-3 py-2 rounded-md transition-colors text-left text-sm ${activeTab === 'subdomain' ? 'bg-gray-100 dark:bg-gray-800' : 'hover:bg-gray-50 dark:hover:bg-gray-800'
-              }`}
-          >
-            <ExternalLink className="h-4 w-4 text-gray-500" />
-            <span className="text-gray-700 dark:text-gray-300">Subdomain</span>
-          </button>
-          <button
-            onClick={() => setActiveTab('webhooks')}
-            className={`w-full flex items-center gap-3 px-3 py-2 rounded-md transition-colors text-left text-sm ${activeTab === 'webhooks' ? 'bg-gray-100 dark:bg-gray-800' : 'hover:bg-gray-50 dark:hover:bg-gray-800'
-              }`}
-          >
-            <Webhook className="h-4 w-4 text-gray-500" />
-            <span className="text-gray-700 dark:text-gray-300">Webhooks</span>
-          </button>
-          <button
-            onClick={() => setActiveTab('widgets')}
-            className={`w-full flex items-center gap-3 px-3 py-2 rounded-md transition-colors text-left text-sm ${activeTab === 'widgets' ? 'bg-gray-100 dark:bg-gray-800' : 'hover:bg-gray-50 dark:hover:bg-gray-800'
-              }`}
-          >
-            <Code className="h-4 w-4 text-gray-500" />
-            <span className="text-gray-700 dark:text-gray-300">Widgets</span>
-          </button>
-          <button
-            onClick={() => setActiveTab('integrations')}
-            className={`w-full flex items-center gap-3 px-3 py-2 rounded-md transition-colors text-left text-sm ${activeTab === 'integrations' ? 'bg-gray-100 dark:bg-gray-800' : 'hover:bg-gray-50 dark:hover:bg-gray-800'
-              }`}
-          >
-            <Plug className="h-4 w-4 text-gray-500" />
-            <span className="text-gray-700 dark:text-gray-300">Integrations</span>
-          </button>
-          <button
-            onClick={() => setActiveTab('billing')}
-            className={`w-full flex items-center gap-3 px-3 py-2 rounded-md transition-colors text-left text-sm ${activeTab === 'billing' ? 'bg-gray-100 dark:bg-gray-800' : 'hover:bg-gray-50 dark:hover:bg-gray-800'
-              }`}
-          >
-            <CreditCard className="h-4 w-4 text-gray-500" />
-            <span className="text-gray-700 dark:text-gray-300">Billing</span>
-          </button>
+          {[
+            { tab: 'profile', icon: User, label: 'Profile' },
+            { tab: 'general', icon: Settings, label: 'General' },
+            { tab: 'members', icon: Users, label: `Members (${members.length})` },
+            { tab: 'roles', icon: Briefcase, label: 'Job Roles' },
+            { tab: 'subdomain', icon: ExternalLink, label: 'Subdomain' },
+            { tab: 'webhooks', icon: Webhook, label: 'Webhooks' },
+            { tab: 'widgets', icon: Code, label: 'Widgets' },
+            { tab: 'integrations', icon: Plug, label: 'Integrations' },
+            { tab: 'notifications', icon: Bell, label: 'Notifications' },
+            { tab: 'billing', icon: CreditCard, label: 'Billing' },
+          ].map(({ tab, icon: Icon, label }) => (
+            <SidebarNavItem
+              key={tab}
+              isActive={activeTab === tab}
+              onClick={() => setActiveTab(tab)}
+            >
+              <Icon className="h-4 w-4" />
+              <span>{label}</span>
+            </SidebarNavItem>
+          ))}
         </nav>
       </div>
 
@@ -446,6 +434,7 @@ export default function OrganizationSettingsPage() {
                 <TabsTrigger value="webhooks" id="tab-webhooks">Webhooks</TabsTrigger>
                 <TabsTrigger value="widgets" id="tab-widgets">Widgets</TabsTrigger>
                 <TabsTrigger value="integrations" id="tab-integrations">Integrations</TabsTrigger>
+                <TabsTrigger value="notifications" id="tab-notifications">Notifications</TabsTrigger>
                 <TabsTrigger value="billing" id="tab-billing">Billing</TabsTrigger>
               </TabsList>
             </div>
@@ -670,14 +659,18 @@ export default function OrganizationSettingsPage() {
                   </CardContent>
                 </Card>
 
-                {/* Custom Domain Settings */}
-                <CustomDomainSettings organizationId={organization.id} />
+                {/* Custom Domain Settings — Pro only */}
+                <ProFeatureGate featureName="Custom Domains">
+                  <CustomDomainSettings organizationId={organization.id} />
+                </ProFeatureGate>
               </div>
             </TabsContent>
 
             {/* Webhooks Tab */}
             <TabsContent value="webhooks">
-              <WebhooksPage />
+              <PaidFeatureGate featureName="Webhooks">
+                <WebhooksPage />
+              </PaidFeatureGate>
             </TabsContent>
 
             {/* Widgets Tab */}
@@ -693,6 +686,13 @@ export default function OrganizationSettingsPage() {
             {/* Integrations Tab */}
             <TabsContent value="integrations">
               <IntegrationsPage />
+            </TabsContent>
+
+            {/* Notifications Tab */}
+            <TabsContent value="notifications">
+              <ProFeatureGate featureName="Notifications">
+                <NotificationsTab />
+              </ProFeatureGate>
             </TabsContent>
 
             {/* Billing Tab */}

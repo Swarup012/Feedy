@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { PaidFeatureGate } from '@/components/PaidFeatureGate';
 import { useOrganization } from '@/context/OrganizationContext';
-import api from '@/lib/api';
+import api, { isPlanUpgradeRequired } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import {
   Send, AlertCircle,
@@ -270,7 +270,11 @@ function AiChatContent() {
           setActiveConvId(convs[0].id);
         }
       })
-      .catch(err => console.error('Failed to load conversations:', err))
+      .catch(err => {
+        if (!isPlanUpgradeRequired(err)) {
+          console.error('Failed to load conversations:', err);
+        }
+      })
       .finally(() => setConvLoading(false));
   }, [orgId]);
 

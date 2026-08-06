@@ -3,6 +3,8 @@ import axios, {
   AxiosInstance,
   InternalAxiosRequestConfig,
 } from "axios";
+import { supabase } from "@/lib/supabase";
+import { TokenManager } from "@/lib/tokenManager";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
@@ -39,14 +41,8 @@ const api: AxiosInstance = axios.create({
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     if (config.headers && typeof window !== "undefined") {
-      // Fallback: for Google OAuth users whose token is stored in localStorage
-      // by the auth callback page (legacy approach, still in use).
-      // Cookies are the primary auth mechanism; this is a bridge fallback.
-      const localToken =
-        localStorage.getItem("access_token") || localStorage.getItem("token");
-      if (localToken) {
-        config.headers.Authorization = `Bearer ${localToken}`;
-      }
+      // Auth is via HttpOnly cookies only — no Authorization header attached.
+      // The browser sends the cookie automatically; the proxy extracts it.
 
       const hostname = window.location.hostname;
       const parts = hostname.split(".");
@@ -147,6 +143,11 @@ api.interceptors.response.use(
             requestUrl.includes("/api/invitations/");
 
           if (!isPublicOrAuth) {
+            // SECURITY: Fully invalidate the session before redirecting.
+            // Without this, stale tokens in localStorage and Supabase session
+            // persist — allowing a subsequent signup to merge identities.
+            TokenManager.clearTokens();
+            supabase.auth.signOut().catch(() => {});
             window.location.href = "/login";
           }
         }
@@ -157,5 +158,16 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+// ─── Helper: check if error is a plan-gate 403 ──────────────────────────────
+// The backend requirePlan() middleware returns { code: 'PLAN_UPGRADE_REQUIRED' }.
+// PaidFeatureGate/ProFeatureGate already shows the upgrade banner, so callers
+// should suppress toasts for these errors to avoid the redundant notification.
+export function isPlanUpgradeRequired(error: any): boolean {
+  return (
+    error?.response?.status === 403 &&
+    error?.response?.data?.code === 'PLAN_UPGRADE_REQUIRED'
+  );
+}
 
 export default api;

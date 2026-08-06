@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
+import { isPlanUpgradeRequired } from '@/lib/api';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -294,8 +295,10 @@ export default function WebhooksPage() {
     try {
       const data = await webhookService.listWebhooks();
       setWebhooks(data);
-    } catch {
-      toast({ title: 'Failed to load webhooks', variant: 'destructive' });
+    } catch (err: any) {
+      if (!isPlanUpgradeRequired(err)) {
+        toast({ title: 'Failed to load webhooks', variant: 'destructive' });
+      }
     } finally {
       setLoading(false);
     }
