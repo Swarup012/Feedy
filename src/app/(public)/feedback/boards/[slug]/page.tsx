@@ -1,12 +1,17 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
-import { Board, boardService } from "@/services/boardService";
-import { Post, postService } from "@/services/postService";
+import { Board } from "@/services/boardService";
+import { Post } from "@/services/postService";
 import { useBoardRealtime } from "@/hooks/useBoardRealtime";
 import { useAuth } from "@/hooks/useAuth";
+import {
+  usePublicBoards,
+  usePublicBoard,
+  usePublicBoardPosts,
+} from "@/hooks/useFeedbackData";
 
 // Import components
 import { LeftSidebar } from "@/components/feedback/LeftSidebar";
@@ -16,14 +21,15 @@ import { CreatePostDialog } from "@/components/feedback/CreatePostDialog";
 import { UpgradeDialog } from "@/components/UpgradeDialog";
 import usageService from "@/services/usageService";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { LogIn, UserPlus } from "lucide-react";
 import { saveReturnUrl } from "@/lib/returnUrl";
-
-// 🔥 GLOBAL in-memory cache
-const postsCache: Record<string, Post[]> = {};
-let boardsCache: Board[] | null = null;
-const currentBoardCache: Record<string, Board> = {};
 
 export default function PublicBoardPage() {
   const params = useParams();
@@ -32,44 +38,35 @@ export default function PublicBoardPage() {
   const { toast } = useToast();
   const { user } = useAuth();
 
-  const [boards, setBoards] = useState<Board[]>([]);
-  const [currentBoard, setCurrentBoard] = useState<Board | null>(null);
+  // ── SWR data ──
+  const { boards: allBoards, isLoading: boardsLoading } = usePublicBoards();
+  const { board: currentBoard, isLoading: boardLoading } = usePublicBoard(slug);
+  const {
+    posts: swrPosts,
+    isLoading: postsLoading,
+    refresh: refreshPosts,
+    mutate: mutatePosts,
+  } = usePublicBoardPosts(slug, {
+    sortBy: "created_at",
+    sortOrder: "desc",
+  });
+
+  // Public page only shows non-private boards
+  const boards = allBoards.filter((b) => !b.is_private);
+
+  // ── Local UI state ──
   const [posts, setPosts] = useState<Post[]>([]);
   const [allPosts, setAllPosts] = useState<Post[]>([]);
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
-  
-  const cachedPosts = postsCache[slug];
-  const cachedBoards = boardsCache;
-  const cachedCurrentBoard = currentBoardCache[slug];
-  
-  const [loading, setLoading] = useState(() => !cachedPosts || cachedPosts.length === 0);
+  const [loading, setLoading] = useState(true);
   const [showCreatePost, setShowCreatePost] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
   const [selectedBoards, setSelectedBoards] = useState<string[]>([]);
-  
-  // Pre-load post creation limits for instant popup
   const [canCreatePost, setCanCreatePost] = useState(true);
   const [postLimitReason, setPostLimitReason] = useState<string>("");
-  
-  // Track if we're currently fetching to prevent duplicate calls
-  const isFetchingPosts = useRef(false);
 
-  // Pre-load usage data on component mount (only if user is authenticated)
-  useEffect(() => {
-    if (!user || !slug) return; // Skip if not logged in or no slug
-    
-    const loadUsage = async () => {
-      const { allowed, reason } = await usageService.canCreatePost(slug);
-      setCanCreatePost(allowed);
-      if (!allowed && reason) {
-        setPostLimitReason(reason);
-      }
-    };
-    loadUsage();
-  }, [posts.length, user, slug]); // Re-check when posts change, user logs in, or slug changes
-
-  // Filters
+  // ── Filters ──
   const [filters, setFilters] = useState({
     status: "",
     search: "",
@@ -79,276 +76,190 @@ export default function PublicBoardPage() {
     sortOrder: "desc",
   });
 
-  // 🚀 INSTANT LOAD: Populate from cache
+  // ── Pre-load usage data (only if authenticated) ──
   useEffect(() => {
-    if (cachedBoards && cachedBoards.length > 0 && boards.length === 0) {
-      setBoards(cachedBoards.filter(b => !b.is_private)); // Only show public boards
+    if (!user || !slug) return;
+    usageService.canCreatePost(slug).then(({ allowed, reason }) => {
+      setCanCreatePost(allowed);
+      if (!allowed && reason) setPostLimitReason(reason);
+    });
+  }, [posts.length, user, slug]);
+
+  // ── Check private board access ──
+  useEffect(() => {
+    if (currentBoard?.is_private && !user) {
+      toast({
+        title: "Private Board",
+        description: "Please login to access this board",
+        variant: "destructive",
+      });
+      saveReturnUrl();
+      router.push("/login");
     }
-    
-    if (cachedCurrentBoard && !currentBoard) {
-      setCurrentBoard(cachedCurrentBoard);
+  }, [currentBoard, user, toast, router]);
+
+  // ── Sync SWR posts → local filtered state ──
+  useEffect(() => {
+    if (postsLoading) {
+      setLoading(true);
+      return;
     }
-    
-    if (cachedPosts && cachedPosts.length > 0 && posts.length === 0) {
-      setAllPosts(cachedPosts);
-      setPosts(cachedPosts);
+    if (selectedBoards.length === 0) {
+      setAllPosts(swrPosts);
+      setPosts(applyFilters(swrPosts));
       setLoading(false);
     }
-  }, [slug]);
+  }, [swrPosts, postsLoading, selectedBoards]);
 
-  // Real-time updates
+  // ── Multi-board path ──
+  useEffect(() => {
+    if (selectedBoards.length === 0) return;
+    let cancelled = false;
+
+    (async () => {
+      setLoading(true);
+      try {
+        const { postService } = await import("@/services/postService");
+        const boardsToFetch = boards.filter((b) => selectedBoards.includes(b.id));
+        const results = await Promise.all(
+          boardsToFetch.map((b) =>
+            postService.getPostsByBoard(b.slug, {
+              sortBy: "created_at",
+              sortOrder: "desc",
+            }),
+          ),
+        );
+        if (cancelled) return;
+        const combined = results.flatMap((r) => r.data.posts);
+        setAllPosts(combined);
+        setPosts(applyFilters(combined));
+      } catch {
+        if (!cancelled)
+          toast({
+            title: "Error",
+            description: "Failed to load posts",
+            variant: "destructive",
+          });
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedBoards, boards, toast]);
+
+  // ── Re-apply filters when filter state changes ──
+  useEffect(() => {
+    if (allPosts.length > 0) setPosts(applyFilters(allPosts));
+  }, [filters, allPosts]);
+
+  // ── Client-side filter logic ──
+  function applyFilters(postsToFilter: Post[]) {
+    let filtered = [...postsToFilter];
+    if (filters.status)
+      filtered = filtered.filter((p) => p.status === filters.status);
+    if (filters.search) {
+      const q = filters.search.toLowerCase();
+      filtered = filtered.filter(
+        (p) =>
+          p.title.toLowerCase().includes(q) ||
+          p.description?.toLowerCase().includes(q),
+      );
+    }
+    if (filters.startDate)
+      filtered = filtered.filter(
+        (p) => new Date(p.created_at) >= new Date(filters.startDate),
+      );
+    if (filters.endDate)
+      filtered = filtered.filter(
+        (p) => new Date(p.created_at) <= new Date(filters.endDate),
+      );
+    filtered.sort((a, b) => {
+      const av = a[filters.sortBy as keyof Post];
+      const bv = b[filters.sortBy as keyof Post];
+      return filters.sortOrder === "asc" ? (av > bv ? 1 : -1) : av < bv ? 1 : -1;
+    });
+    return filtered;
+  }
+
+  // ── Real-time updates ──
   useBoardRealtime({
     boardSlug: slug,
     onPostCreated: (post) => {
-      setPosts((prev: any) => [post, ...prev]);
-      setAllPosts((prev: any) => [post, ...prev]);
+      setPosts((prev) => [post, ...prev]);
+      setAllPosts((prev) => [post, ...prev]);
     },
     onPostDeleted: (postId) => {
-      setPosts((prev: any) => prev.filter((p: any) => p.id !== postId));
-      setAllPosts((prev: any) => prev.filter((p: any) => p.id !== postId));
+      setPosts((prev) => prev.filter((p: any) => p.id !== postId));
+      setAllPosts((prev) => prev.filter((p: any) => p.id !== postId));
     },
     onPostStatusChanged: (data) => {
-      setPosts((prev: any) => prev.map((p: any) => 
-        p.id === data.postId ? { ...p, status: data.newStatus } : p
-      ));
-      setAllPosts((prev: any) => prev.map((p: any) => 
-        p.id === data.postId ? { ...p, status: data.newStatus } : p
-      ));
+      const patch = (arr: Post[]) =>
+        arr.map((p: any) =>
+          p.id === data.postId ? { ...p, status: data.newStatus } : p,
+        );
+      setPosts(patch);
+      setAllPosts(patch);
     },
     onCommentCountChanged: (data) => {
-      setPosts((prev: any) => prev.map((p: any) => 
-        p.id === data.postId ? { ...p, comment_count: data.commentCount } : p
-      ));
-      setAllPosts((prev: any) => prev.map((p: any) => 
-        p.id === data.postId ? { ...p, comment_count: data.commentCount } : p
-      ));
+      const patch = (arr: Post[]) =>
+        arr.map((p: any) =>
+          p.id === data.postId
+            ? { ...p, comment_count: data.commentCount }
+            : p,
+        );
+      setPosts(patch);
+      setAllPosts(patch);
     },
     onPostUpvoted: (data) => {
-      setPosts((prev: any) => prev.map((p: any) => 
-        p.id === data.postId ? { ...p, upvotes: data.upvoteCount } : p
-      ));
-      setAllPosts((prev: any) => prev.map((p: any) => 
-        p.id === data.postId ? { ...p, upvotes: data.upvoteCount } : p
-      ));
+      const patch = (arr: Post[]) =>
+        arr.map((p: any) =>
+          p.id === data.postId ? { ...p, upvotes: data.upvoteCount } : p,
+        );
+      setPosts(patch);
+      setAllPosts(patch);
     },
   });
 
-  // Fetch all PUBLIC boards
-  const fetchBoards = async () => {
-    try {
-      if (boardsCache && boardsCache.length > 0) {
-        const publicBoards = boardsCache.filter(b => !b.is_private);
-        setBoards(publicBoards);
-        
-        // Background refresh
-        boardService.getPublicBoards()
-          .then(response => {
-            const freshBoards = response.data.boards;
-            boardsCache = freshBoards;
-            setBoards(freshBoards);
-          })
-          .catch(console.error);
-        return;
-      }
-
-      const response = await boardService.getPublicBoards();
-      const fetchedBoards = response.data.boards;
-      boardsCache = fetchedBoards;
-      setBoards(fetchedBoards);
-    } catch (error: any) {
-      console.error("Failed to load boards:", error);
-      toast({
-        title: "Error",
-        description: "Failed to load boards",
-        variant: "destructive",
-      });
-    }
-  };
-
-  // Fetch current board
-  const fetchCurrentBoard = async () => {
-    try {
-      if (currentBoardCache[slug]) {
-        setCurrentBoard(currentBoardCache[slug]);
-        
-        // Background refresh - use public endpoint for guests
-        const refreshMethod = user ? boardService.getBoardBySlug : boardService.getPublicBoardBySlug;
-        refreshMethod(slug)
-          .then(response => {
-            const freshBoard = response.data.board;
-            currentBoardCache[slug] = freshBoard;
-            setCurrentBoard(freshBoard);
-          })
-          .catch(console.error);
-        return;
-      }
-
-      // Use public endpoint for guests, authenticated endpoint for logged-in users
-      const fetchMethod = user ? boardService.getBoardBySlug : boardService.getPublicBoardBySlug;
-      const response = await fetchMethod(slug);
-      const board = response.data.board;
-      
-      // Check if board is private - redirect if guest
-      if (board.is_private && !user) {
-        toast({
-          title: "Private Board",
-          description: "Please login to access this board",
-          variant: "destructive",
-        });
-        saveReturnUrl(); // Save current page before redirecting
-        router.push('/login');
-        return;
-      }
-      
-      currentBoardCache[slug] = board;
-      setCurrentBoard(board);
-    } catch (error: any) {
-      console.error("Failed to load board:", error);
-      toast({
-        title: "Error",
-        description: error.response?.data?.error || "Failed to load board",
-        variant: "destructive",
-      });
-    }
-  };
-
-  // Fetch posts for current board
-  const fetchPosts = async () => {
-    if (!currentBoard || isFetchingPosts.current) return;
-
-    try {
-      isFetchingPosts.current = true;
-      setLoading(true);
-      
-      if (cachedPosts && cachedPosts.length > 0) {
-        setAllPosts(cachedPosts);
-        setPosts(cachedPosts);
-        setLoading(false);
-        isFetchingPosts.current = false;
-        
-        // Background refresh - use public endpoint for guests
-        const refreshMethod = user ? postService.getPostsByBoard : postService.getPublicBoardPosts;
-        refreshMethod(slug)
-          .then(response => {
-            const freshPosts = response.data.posts;
-            postsCache[slug] = freshPosts;
-            setAllPosts(freshPosts);
-            setPosts(freshPosts);
-          })
-          .catch(console.error);
-        return;
-      }
-
-      // Use public endpoint for guests, authenticated endpoint for logged-in users
-      const fetchMethod = user ? postService.getPostsByBoard : postService.getPublicBoardPosts;
-      const response = await fetchMethod(slug);
-      const fetchedPosts = response.data.posts;
-      postsCache[slug] = fetchedPosts;
-      setAllPosts(fetchedPosts);
-      setPosts(fetchedPosts);
-    } catch (error: any) {
-      console.error("Failed to load posts:", error);
-      toast({
-        title: "Error",
-        description: error.response?.data?.error || "Failed to load posts",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-      isFetchingPosts.current = false;
-    }
-  };
-
-  // Load data on mount and slug change
-  useEffect(() => {
-    isFetchingPosts.current = false; // Reset fetching state when slug changes
-    fetchBoards();
-    fetchCurrentBoard();
-  }, [slug]);
-
-  useEffect(() => {
-    if (currentBoard && currentBoard.id) {
-      fetchPosts();
-    }
-  }, [currentBoard?.id]);
-
-  // Apply filters
-  useEffect(() => {
-    let filtered = [...allPosts];
-
-    // Board filter
-    if (selectedBoards.length > 0) {
-      filtered = filtered.filter(post => selectedBoards.includes(post.board_id));
-    }
-
-    // Status filter
-    if (filters.status) {
-      filtered = filtered.filter((post) => post.status === filters.status);
-    }
-
-    // Search filter
-    if (filters.search) {
-      const searchLower = filters.search.toLowerCase();
-      filtered = filtered.filter(
-        (post) =>
-          post.title.toLowerCase().includes(searchLower) ||
-          post.description?.toLowerCase().includes(searchLower)
-      );
-    }
-
-    // Date filters
-    if (filters.startDate) {
-      filtered = filtered.filter(
-        (post) => new Date(post.created_at) >= new Date(filters.startDate)
-      );
-    }
-    if (filters.endDate) {
-      filtered = filtered.filter(
-        (post) => new Date(post.created_at) <= new Date(filters.endDate)
-      );
-    }
-
-    // Sort
-    filtered.sort((a, b) => {
-      const order = filters.sortOrder === "asc" ? 1 : -1;
-      if (filters.sortBy === "created_at") {
-        return (new Date(a.created_at).getTime() - new Date(b.created_at).getTime()) * order;
-      } else if (filters.sortBy === "upvotes") {
-        return (a.upvotes - b.upvotes) * order;
-      } else if (filters.sortBy === "comments") {
-        return (a.comment_count - b.comment_count) * order;
-      }
-      return 0;
-    });
-
-    setPosts(filtered);
-  }, [allPosts, filters, selectedBoards]);
-
-  // Handle board navigation
+  // ── Board navigation ──
   const handleBoardClick = (boardSlug: string) => {
     router.push(`/feedback/boards/${boardSlug}`);
   };
 
-  // Handle create post - show auth modal if not logged in
+  // ── Create post — show auth modal if guest ──
   const handleCreatePost = () => {
     if (!user) {
       setShowAuthModal(true);
       return;
     }
-    
-    // Check post limit instantly using pre-loaded data
     if (!canCreatePost) {
       setShowUpgradeDialog(true);
       return;
     }
-    
     setShowCreatePost(true);
   };
 
+  // ── Post CRUD handlers ──
   const handlePostCreated = (post: Post) => {
-    setPosts([post, ...posts]);
-    setAllPosts([post, ...allPosts]);
-    postsCache[slug] = [post, ...(postsCache[slug] || [])];
+    setSelectedPost(post);
+    setShowCreatePost(false);
+    mutatePosts((current) => {
+      if (!current) return current;
+      return {
+        ...current,
+        data: {
+          ...current.data,
+          posts: [post, ...current.data.posts],
+          count: current.data.count + 1,
+        },
+      };
+    }, { revalidate: false });
+    setAllPosts((prev) => [post, ...prev]);
+    setPosts((prev) => [post, ...prev]);
+    refreshPosts();
+    toast({ title: "Success!", description: "Post created successfully" });
   };
 
   return (
@@ -363,15 +274,13 @@ export default function PublicBoardPage() {
         selectedBoards={selectedBoards}
         onBoardSelectionChange={setSelectedBoards}
         onCreateBoard={(board) => {
-          setBoards([...boards, board]);
-          boardsCache = [...boards, board];
+          refreshPosts();
+          toast({
+            title: "Success!",
+            description: `Board "${board.name}" created successfully`,
+          });
         }}
-        onDeleteBoard={(boardId) => {
-          setBoards(boards.filter(b => b.id !== boardId));
-          if (boardsCache) {
-            boardsCache = boardsCache.filter(b => b.id !== boardId);
-          }
-        }}
+        onDeleteBoard={() => {}}
       />
 
       {/* Middle - Posts List */}
@@ -390,14 +299,43 @@ export default function PublicBoardPage() {
         post={selectedPost}
         currentBoard={currentBoard}
         onPostUpdated={(updatedPost) => {
-          setPosts(posts.map(p => p.id === updatedPost.id ? updatedPost : p));
-          setAllPosts(allPosts.map(p => p.id === updatedPost.id ? updatedPost : p));
           setSelectedPost(updatedPost);
+          mutatePosts((current) => {
+            if (!current) return current;
+            return {
+              ...current,
+              data: {
+                ...current.data,
+                posts: current.data.posts.map((p) =>
+                  p.id === updatedPost.id ? updatedPost : p,
+                ),
+              },
+            };
+          }, { revalidate: false });
+          setAllPosts((prev) =>
+            prev.map((p) => (p.id === updatedPost.id ? updatedPost : p)),
+          );
+          setPosts((prev) =>
+            prev.map((p) => (p.id === updatedPost.id ? updatedPost : p)),
+          );
+          refreshPosts();
         }}
         onPostDeleted={(postId) => {
-          setPosts(posts.filter(p => p.id !== postId));
-          setAllPosts(allPosts.filter(p => p.id !== postId));
           setSelectedPost(null);
+          mutatePosts((current) => {
+            if (!current) return current;
+            return {
+              ...current,
+              data: {
+                ...current.data,
+                posts: current.data.posts.filter((p) => p.id !== postId),
+                count: current.data.count - 1,
+              },
+            };
+          }, { revalidate: false });
+          setAllPosts((prev) => prev.filter((p) => p.id !== postId));
+          setPosts((prev) => prev.filter((p) => p.id !== postId));
+          refreshPosts();
         }}
         onAuthRequired={() => setShowAuthModal(true)}
       />
@@ -424,12 +362,12 @@ export default function PublicBoardPage() {
               Create an account or sign in to post feedback, vote, and comment
             </DialogDescription>
           </DialogHeader>
-          
+
           <div className="flex flex-col gap-3 py-4">
             <Button
               onClick={() => {
-                saveReturnUrl(); // Save current page before redirecting
-                router.push('/signup');
+                saveReturnUrl();
+                router.push("/signup");
               }}
               size="lg"
               className="w-full text-lg h-12"
@@ -437,11 +375,11 @@ export default function PublicBoardPage() {
               <UserPlus className="mr-2 h-5 w-5" />
               Create Account
             </Button>
-            
+
             <Button
               onClick={() => {
-                saveReturnUrl(); // Save current page before redirecting
-                router.push('/login');
+                saveReturnUrl();
+                router.push("/login");
               }}
               variant="outline"
               size="lg"
@@ -451,7 +389,7 @@ export default function PublicBoardPage() {
               Sign In
             </Button>
           </div>
-          
+
           <div className="text-center text-sm text-gray-500 dark:text-gray-400">
             You can browse all public boards as a guest
           </div>
@@ -463,7 +401,10 @@ export default function PublicBoardPage() {
         open={showUpgradeDialog}
         onOpenChange={setShowUpgradeDialog}
         limitType="posts"
-        message={postLimitReason || "This board has reached its post limit. Upgrade to Starter for unlimited posts."}
+        message={
+          postLimitReason ||
+          "This board has reached its post limit. Upgrade to Starter for unlimited posts."
+        }
       />
     </div>
   );

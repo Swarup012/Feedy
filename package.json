@@ -65,6 +65,7 @@
     "remark-html": "^16.0.1",
     "socket.io-client": "^4.8.1",
     "styled-components": "^6.1.19",
+    "swr": "^2.3.3",
     "tailwind-merge": "^3.4.0",
     "tailwindcss-animate": "^1.0.7",
     "use-sync-external-store": "^1.6.0",
