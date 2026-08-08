@@ -102,6 +102,7 @@ export function useBoardPosts(
   const { data, error, isLoading, mutate } = useSWR<PostsResponse>(
     key,
     fetcher,
+    { refreshInterval: 10_000 },
   );
 
   return {
@@ -168,6 +169,7 @@ export function usePublicBoardPosts(
   const { data, error, isLoading, mutate } = useSWR<PostsResponse>(
     key,
     fetcher,
+    { refreshInterval: 10_000 },
   );
 
   return {

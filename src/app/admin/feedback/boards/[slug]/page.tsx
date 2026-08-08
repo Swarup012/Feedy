@@ -1,12 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams } from "next/navigation";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { useToast } from "@/hooks/use-toast";
 import { Board, boardService } from "@/services/boardService";
 import { Post, postService } from "@/services/postService";
-import { useBoardRealtime } from "@/hooks/useBoardRealtime";
 import { useBoards, useBoard, useBoardPosts } from "@/hooks/useFeedbackData";
 
 // Import components
@@ -36,6 +35,8 @@ export default function BoardPage() {
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
   const [showCreatePost, setShowCreatePost] = useState(false);
+  // Track optimistic post IDs that SWR revalidation may not yet include
+  const pendingOptimisticIds = useRef(new Set<string>());
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
   const [selectedBoards, setSelectedBoards] = useState<string[]>([]);
   const [canCreatePost, setCanCreatePost] = useState(true);
@@ -73,11 +74,33 @@ export default function BoardPage() {
     }
     // Single-board path: derive from SWR data
     if (selectedBoards.length === 0) {
-      setAllPosts(swrPosts);
-      setPosts(applyFilters(swrPosts));
+      // Merge: keep any optimistic posts that revalidation hasn't confirmed yet
+      const pending = [...pendingOptimisticIds.current];
+      const serverIds = new Set(swrPosts.map((p) => p.id));
+      const unconfirmed = pending.filter((id) => !serverIds.has(id));
+      const merged = unconfirmed.length > 0
+        ? [...swrPosts, ...unconfirmed
+            .map((id) => posts.find((p) => p.id === id))
+            .filter(Boolean) as Post[]]
+        : swrPosts;
+      // Remove from pending once confirmed by server
+      for (const id of pending) {
+        if (serverIds.has(id)) pendingOptimisticIds.current.delete(id);
+      }
+      setAllPosts(merged);
+      setPosts(applyFilters(merged));
       setLoading(false);
     }
   }, [swrPosts, postsLoading, selectedBoards]);
+
+  // ── Expire stale optimistic entries after 30s ──
+  useEffect(() => {
+    if (pendingOptimisticIds.current.size === 0) return;
+    const timer = setTimeout(() => {
+      pendingOptimisticIds.current.clear();
+    }, 30_000);
+    return () => clearTimeout(timer);
+  }, [posts.length]);
 
   // ── Multi-board path: manual fetch when board selection changes ──
   useEffect(() => {
@@ -135,46 +158,12 @@ export default function BoardPage() {
     return filtered;
   }
 
-  // ── Real-time board updates ──
-  useBoardRealtime({
-    boardSlug: slug,
-    onPostCreated: (post) => {
-      setPosts((prev) => [post, ...prev]);
-      setAllPosts((prev) => [post, ...prev]);
-    },
-    onPostDeleted: (postId) => {
-      setPosts((prev) => prev.filter((p: any) => p.id !== postId));
-      setAllPosts((prev) => prev.filter((p: any) => p.id !== postId));
-    },
-    onPostStatusChanged: (data) => {
-      const patch = (arr: Post[]) =>
-        arr.map((p: any) => (p.id === data.postId ? { ...p, status: data.newStatus } : p));
-      setPosts(patch);
-      setAllPosts(patch);
-    },
-    onCommentCountChanged: (data) => {
-      const patch = (arr: Post[]) =>
-        arr.map((p: any) =>
-          p.id === data.postId ? { ...p, comment_count: data.commentCount } : p,
-        );
-      setPosts(patch);
-      setAllPosts(patch);
-    },
-    onPostUpvoted: (data) => {
-      const patch = (arr: Post[]) =>
-        arr.map((p: any) => (p.id === data.postId ? { ...p, upvotes: data.upvoteCount } : p));
-      setPosts(patch);
-      setAllPosts(patch);
-    },
-  });
-
   // ── Post CRUD handlers ────────────────────────────────────────────────
-  // Uses mutatePosts (instant SWR cache write) instead of refreshPosts
-  // (network revalidation) so the UI updates in < 50 ms.
   const handlePostCreated = (post: Post) => {
     setSelectedPost(post);
     setShowCreatePost(false);
-    // Instant SWR cache update (no network round-trip)
+    // Track as optimistic so the merge-guard keeps it if revalidation is stale
+    pendingOptimisticIds.current.add(post.id);
     mutatePosts((current) => {
       if (!current) return current;
       return {
@@ -186,11 +175,8 @@ export default function BoardPage() {
         },
       };
     }, { revalidate: false });
-    // Sync local filtered state (used by multi-board path + client filters)
     setAllPosts((prev) => [post, ...prev]);
     setPosts((prev) => [post, ...prev]);
-    // Background revalidation to catch any server-side side-effects
-    refreshPosts();
     toast({ title: "Success!", description: "Post created successfully" });
   };
 
@@ -212,7 +198,6 @@ export default function BoardPage() {
     }, { revalidate: false });
     setAllPosts((prev) => prev.map((p) => (p.id === updatedPost.id ? updatedPost : p)));
     setPosts((prev) => prev.map((p) => (p.id === updatedPost.id ? updatedPost : p)));
-    refreshPosts();
   };
 
   const handlePostDeleted = (postId: string) => {
@@ -230,7 +215,6 @@ export default function BoardPage() {
     }, { revalidate: false });
     setAllPosts((prev) => prev.filter((p) => p.id !== postId));
     setPosts((prev) => prev.filter((p) => p.id !== postId));
-    refreshPosts();
   };
 
   return (
