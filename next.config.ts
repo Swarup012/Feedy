@@ -16,29 +16,12 @@ const nextConfig: NextConfig = {
       use: ['@svgr/webpack'],
     });
     
-    // Handle video files (mp4, webm, ogg)
-    config.module.rules.push({
-      test: /\.(mp4|webm|ogg)$/,
-      type: 'asset/resource',
-      generator: {
-        filename: 'static/videos/[name].[hash][ext]',
-      },
-    });
-    
     return config;
   },
   turbopack: {
     rules: {
       '*.svg': {
         loaders: ['@svgr/webpack'],
-        as: '*.js',
-      },
-      '*.mp4': {
-        loaders: ['file-loader'],
-        as: '*.js',
-      },
-      '*.webm': {
-        loaders: ['file-loader'],
         as: '*.js',
       },
     },

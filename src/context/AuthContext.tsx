@@ -32,6 +32,7 @@ const PUBLIC_PATHS: Array<string | { prefix: string }> = [
   "/canny-alternative",
   "/collect-feedback",
   "/analyze-feedback",
+  "/autopilot",
   "/share-updates",
   "/role-based-access",
   "/public-roadmap",

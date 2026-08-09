@@ -23,6 +23,10 @@ import {
   type SlackStatus,
   type SlackChannel,
 } from '@/services/slackService';
+import {
+  githubService,
+  type GitHubStatus,
+} from '@/services/githubService';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -38,6 +42,7 @@ import {
   Zap,
   Globe,
   Mail,
+  GitBranch,
 } from 'lucide-react';
 import { autopilotService, type AutopilotSettings } from '@/services/autopilotService';
 import { boardService, type Board } from '@/services/boardService';
@@ -71,6 +76,12 @@ const IntercomIcon = ({ className }: { className?: string }) => (
 
 const SlackIcon = ({ className }: { className?: string }) => (
   <img src="/images/icons/slack-new.svg" alt="Slack" className={className} />
+);
+
+const GitHubIcon = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+    <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+  </svg>
 );
 
 function StatusBadge({ status }: { status: string | null }) {
@@ -116,26 +127,31 @@ function IntegrationsPageInner() {
   const [intercomStatus, setIntercomStatus] = useState<IntercomStatus | null>(null);
   const [discordStatus, setDiscordStatus] = useState<DiscordStatus | null>(null);
   const [slackStatus, setSlackStatus] = useState<SlackStatus | null>(null);
+  const [githubStatus, setGithubStatus] = useState<GitHubStatus | null>(null);
   const [discordChannels, setDiscordChannels] = useState<DiscordChannel[]>([]);
   const [slackChannels, setSlackChannels] = useState<SlackChannel[]>([]);
 
   const [intercomAutopilot, setIntercomAutopilot] = useState<AutopilotSettings | null>(null);
   const [discordAutopilot, setDiscordAutopilot] = useState<AutopilotSettings | null>(null);
   const [slackAutopilot, setSlackAutopilot] = useState<AutopilotSettings | null>(null);
+  const [githubAutopilot, setGithubAutopilot] = useState<AutopilotSettings | null>(null);
 
   const [boards, setBoards] = useState<Board[]>([]);
 
   const [intercomBoardId, setIntercomBoardId] = useState<string | null>(null);
   const [discordBoardId, setDiscordBoardId] = useState<string | null>(null);
   const [slackBoardId, setSlackBoardId] = useState<string | null>(null);
+  const [githubBoardId, setGithubBoardId] = useState<string | null>(null);
 
   const [loading, setLoading] = useState(true);
   const [disconnectingIntercom, setDisconnectingIntercom] = useState(false);
   const [disconnectingDiscord, setDisconnectingDiscord] = useState(false);
   const [disconnectingSlack, setDisconnectingSlack] = useState(false);
+  const [disconnectingGithub, setDisconnectingGithub] = useState(false);
   const [savingIntercomAutopilot, setSavingIntercomAutopilot] = useState(false);
   const [savingDiscordAutopilot, setSavingDiscordAutopilot] = useState(false);
   const [savingSlackAutopilot, setSavingSlackAutopilot] = useState(false);
+  const [savingGithubAutopilot, setSavingGithubAutopilot] = useState(false);
   const [savingDiscordChannel, setSavingDiscordChannel] = useState(false);
   const [savingSlackChannel, setSavingSlackChannel] = useState(false);
 
@@ -143,15 +159,17 @@ function IntegrationsPageInner() {
     if (!orgId) return;
     setLoading(true);
     try {
-      const [intercomRes, discordRes, slackRes] = await Promise.all([
+      const [intercomRes, discordRes, slackRes, githubRes] = await Promise.all([
         intercomService.getStatus(orgId).catch(() => null),
         discordService.getStatus(orgId).catch(() => null),
         slackService.getStatus(orgId).catch(() => null),
+        githubService.getStatus(orgId).catch(() => null),
       ]);
 
       if (intercomRes) setIntercomStatus(intercomRes.data);
       if (discordRes) setDiscordStatus(discordRes.data);
       if (slackRes) setSlackStatus(slackRes.data);
+      if (githubRes) setGithubStatus(githubRes.data);
 
       // Load Discord channels if connected
       if (discordRes?.data?.status === 'active' && discordRes.data.provider_workspace_id) {
@@ -187,10 +205,11 @@ function IntegrationsPageInner() {
     if (!orgId) return;
     (async () => {
       try {
-        const [intercomRes, discordRes, slackRes] = await Promise.all([
+        const [intercomRes, discordRes, slackRes, githubRes] = await Promise.all([
           autopilotService.getSettings(orgId, 'intercom').catch(() => null),
           autopilotService.getSettings(orgId, 'discord').catch(() => null),
           autopilotService.getSettings(orgId, 'slack').catch(() => null),
+          autopilotService.getSettings(orgId, 'github').catch(() => null),
         ]);
 
         if (intercomRes?.data?.settings) {
@@ -213,6 +232,13 @@ function IntegrationsPageInner() {
             setSlackBoardId(slackRes.data.settings.default_board_id);
           }
         }
+
+        if (githubRes?.data?.settings) {
+          setGithubAutopilot(githubRes.data.settings);
+          if (githubRes.data.settings.default_board_id) {
+            setGithubBoardId(githubRes.data.settings.default_board_id);
+          }
+        }
       } catch {
         // non-fatal.
       }
@@ -232,12 +258,13 @@ function IntegrationsPageInner() {
     })();
   }, [orgId]);
 
-  const handleAutopilotModeToggle = async (provider: 'intercom' | 'discord' | 'slack', enable: boolean) => {
+  const handleAutopilotModeToggle = async (provider: 'intercom' | 'discord' | 'slack' | 'github', enable: boolean) => {
     if (!orgId) return;
 
     const selectedBoardId =
       provider === 'intercom' ? intercomBoardId :
       provider === 'discord' ? discordBoardId :
+      provider === 'github' ? githubBoardId :
       slackBoardId;
 
     if (enable && !selectedBoardId) {
@@ -257,6 +284,7 @@ function IntegrationsPageInner() {
     const setSaving =
       provider === 'intercom' ? setSavingIntercomAutopilot :
       provider === 'discord' ? setSavingDiscordAutopilot :
+      provider === 'github' ? setSavingGithubAutopilot :
       setSavingSlackAutopilot;
     setSaving(true);
     try {
@@ -265,6 +293,8 @@ function IntegrationsPageInner() {
         setIntercomAutopilot(res.data.settings);
       } else if (provider === 'discord') {
         setDiscordAutopilot(res.data.settings);
+      } else if (provider === 'github') {
+        setGithubAutopilot(res.data.settings);
       } else {
         setSlackAutopilot(res.data.settings);
       }
@@ -285,11 +315,13 @@ function IntegrationsPageInner() {
     }
   };
 
-  const handleBoardChange = async (provider: 'intercom' | 'discord' | 'slack', boardId: string) => {
+  const handleBoardChange = async (provider: 'intercom' | 'discord' | 'slack' | 'github', boardId: string) => {
     if (provider === 'intercom') {
       setIntercomBoardId(boardId);
     } else if (provider === 'discord') {
       setDiscordBoardId(boardId);
+    } else if (provider === 'github') {
+      setGithubBoardId(boardId);
     } else {
       setSlackBoardId(boardId);
     }
@@ -297,12 +329,14 @@ function IntegrationsPageInner() {
     const autopilotSettings =
       provider === 'intercom' ? intercomAutopilot :
       provider === 'discord' ? discordAutopilot :
+      provider === 'github' ? githubAutopilot :
       slackAutopilot;
 
     if (autopilotSettings?.autopilot_mode === 'automatic' && orgId) {
       const setSaving =
         provider === 'intercom' ? setSavingIntercomAutopilot :
         provider === 'discord' ? setSavingDiscordAutopilot :
+        provider === 'github' ? setSavingGithubAutopilot :
         setSavingSlackAutopilot;
       setSaving(true);
       try {
@@ -314,6 +348,8 @@ function IntegrationsPageInner() {
           setIntercomAutopilot(res.data.settings);
         } else if (provider === 'discord') {
           setDiscordAutopilot(res.data.settings);
+        } else if (provider === 'github') {
+          setGithubAutopilot(res.data.settings);
         } else {
           setSlackAutopilot(res.data.settings);
         }
@@ -387,6 +423,7 @@ function IntegrationsPageInner() {
     const intercomResult = searchParams.get('intercom');
     const discordResult = searchParams.get('discord');
     const slackResult = searchParams.get('slack');
+    const githubResult = searchParams.get('github');
     const message = searchParams.get('message');
 
     if (intercomResult === 'connected') {
@@ -430,12 +467,27 @@ function IntegrationsPageInner() {
       });
     }
 
-    if (intercomResult || discordResult || slackResult) {
+    if (githubResult === 'connected') {
+      toast({
+        title: 'GitHub connected',
+        description: 'Issues and pull requests will now feed into Autopilot.',
+      });
+      loadStatus();
+    } else if (githubResult === 'error') {
+      toast({
+        title: 'GitHub connection failed',
+        description: message || 'Please try again.',
+        variant: 'destructive',
+      });
+    }
+
+    if (intercomResult || discordResult || slackResult || githubResult) {
       // Clean query string without full reload
       const url = new URL(window.location.href);
       url.searchParams.delete('intercom');
       url.searchParams.delete('discord');
       url.searchParams.delete('slack');
+      url.searchParams.delete('github');
       url.searchParams.delete('message');
       window.history.replaceState({}, '', url.pathname);
     }
@@ -454,6 +506,11 @@ function IntegrationsPageInner() {
   const handleConnectSlack = () => {
     if (!orgId) return;
     slackService.startConnect(orgId);
+  };
+
+  const handleConnectGithub = () => {
+    if (!orgId) return;
+    githubService.startConnect(orgId);
   };
 
   const handleDisconnectIntercom = async () => {
@@ -521,6 +578,27 @@ function IntegrationsPageInner() {
     }
   };
 
+  const handleDisconnectGithub = async () => {
+    if (!orgId) return;
+    setDisconnectingGithub(true);
+    try {
+      await githubService.disconnect(orgId);
+      toast({
+        title: 'GitHub disconnected',
+        description: 'Issues and pull requests will no longer be ingested. Note: the GitHub App is not uninstalled from your GitHub account.',
+      });
+      await loadStatus();
+    } catch (err: unknown) {
+      toast({
+        title: 'Disconnect failed',
+        description: (err as Error)?.message || 'Disconnect failed',
+        variant: 'destructive',
+      });
+    } finally {
+      setDisconnectingGithub(false);
+    }
+  };
+
   if (orgLoading || !orgId) {
     return (
       <div className="flex items-center justify-center min-h-[40vh]">
@@ -538,6 +616,9 @@ function IntegrationsPageInner() {
   const isSlackActive = slackStatus?.status === 'active';
   const needsSlackReconnect = slackStatus?.status === 'error';
 
+  const isGithubActive = githubStatus?.status === 'active';
+  const needsGithubReconnect = githubStatus?.status === 'error';
+
   return (
     <PaidFeatureGate featureName="Integrations">
     <div className="space-y-6">
@@ -553,10 +634,10 @@ function IntegrationsPageInner() {
       ) : (
         <>
           {/* ── Connected Integrations ── */}
-          {(isDiscordActive || isIntercomActive || isSlackActive) && (
+          {(isDiscordActive || isIntercomActive || isSlackActive || isGithubActive) && (
             <section className="space-y-3">
               <h2 className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
-                Connected · {[isDiscordActive, isIntercomActive, isSlackActive].filter(Boolean).length}
+                Connected · {[isDiscordActive, isIntercomActive, isSlackActive, isGithubActive].filter(Boolean).length}
               </h2>
 
               <div className="space-y-2">
@@ -801,6 +882,88 @@ function IntegrationsPageInner() {
                     </Popover>
                   </div>
                 )}
+
+                {isGithubActive && (
+                  <div className="rounded-xl border bg-card px-4 py-3 flex items-center gap-3 hover:shadow-sm transition-shadow">
+                    <div className="h-9 w-9 shrink-0 rounded-lg bg-[#24292F]/10 dark:bg-[#f0f6fc]/10 flex items-center justify-center">
+                      <GitHubIcon className="h-5 w-5 text-[#24292F] dark:text-[#f0f6fc]" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-sm">GitHub</span>
+                        <span className="relative flex h-2 w-2">
+                          <span className="animate-ping absolute h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                          <span className="relative rounded-full h-2 w-2 bg-emerald-500" />
+                        </span>
+                        <span className="text-emerald-600 dark:text-emerald-400 text-xs font-medium">Active</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-0.5 truncate">
+                        Installation #{githubStatus?.provider_workspace_id || '—'} → {boards.find(b => b.id === githubBoardId)?.name || 'No board'} · connected {githubStatus?.connected_at ? formatDate(githubStatus.connected_at) : '—'}
+                      </p>
+                    </div>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button variant="outline" size="sm" className="shrink-0 gap-1.5 h-8">
+                          <Settings2 className="h-3.5 w-3.5" /> Manage
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent align="end" className="w-80 p-0 overflow-hidden rounded-xl border bg-card shadow-lg">
+                        <div className="bg-muted/50 px-4 py-3 border-b">
+                          <h4 className="font-semibold text-sm flex items-center gap-2">
+                            <GitHubIcon className="h-4 w-4" /> GitHub Settings
+                          </h4>
+                        </div>
+                        <div className="p-4 space-y-5">
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between gap-4">
+                              <div className="space-y-0.5">
+                                <Label className="text-sm font-medium flex items-center gap-1.5"><Zap className="h-3.5 w-3.5 text-amber-500" /> Automatic Mode</Label>
+                                <p className="text-[11px] text-muted-foreground leading-tight">Bypass review & publish instantly.</p>
+                                {!githubBoardId && <p className="text-[10px] text-amber-600 dark:text-amber-500 mt-0.5 font-medium">Select a board below first.</p>}
+                              </div>
+                               <Switch checked={githubAutopilot?.autopilot_mode === 'automatic'} disabled={savingGithubAutopilot || !githubBoardId || !canUseAutoMode} onCheckedChange={(checked) => handleAutopilotModeToggle('github', checked)} />
+                            </div>
+
+                            {githubAutopilot?.autopilot_mode === 'automatic' && (
+                              <div className="rounded-lg border border-amber-200 bg-amber-50/80 dark:border-amber-900/50 dark:bg-amber-950/30 px-3 py-2.5 flex gap-2">
+                                <AlertTriangle className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                                <p className="text-[11px] text-amber-800 dark:text-amber-300 leading-relaxed">
+                                  Issues and pull requests will publish directly to the board without manual review.
+                                </p>
+                              </div>
+                            )}
+
+                            <div className="space-y-2 pt-1 border-t">
+                              <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mt-2 block">Default Board</Label>
+                              <Select value={githubBoardId || undefined} onValueChange={(val) => handleBoardChange('github', val)} disabled={savingGithubAutopilot}>
+                                <SelectTrigger className="h-9"><SelectValue placeholder="Select a board…" /></SelectTrigger>
+                                <SelectContent>
+                                  {boards.map(b => (<SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
+
+                          <div className="rounded-lg bg-muted/50 border border-dashed px-3 py-2.5">
+                            <p className="text-[10px] text-muted-foreground leading-relaxed">
+                              Subscribe to <code className="font-mono text-[9px] bg-muted px-1 py-0.5 rounded">issues</code> and <code className="font-mono text-[9px] bg-muted px-1 py-0.5 rounded">pull_request</code> events in your GitHub App settings and point to your public webhook endpoint.
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="border-t bg-red-50/50 dark:bg-red-950/20 p-4">
+                          <Button variant="destructive" size="sm" className="w-full gap-2" onClick={handleDisconnectGithub} disabled={disconnectingGithub}>
+                            {disconnectingGithub ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Unplug className="h-3.5 w-3.5" />}
+                            Disconnect GitHub
+                          </Button>
+                          <p className="text-[10px] text-muted-foreground text-center mt-2">
+                            This only disconnects Faddy. You must uninstall the App from GitHub separately.
+                          </p>
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                )}
               </div>
 
               {needsDiscordReconnect && (
@@ -837,6 +1000,19 @@ function IntegrationsPageInner() {
                     <p className="text-sm text-red-600/80 dark:text-red-400/80 mt-0.5">Auth error — reconnect to restore.</p>
                   </div>
                   <Button size="sm" variant="outline" className="border-red-300 text-red-700 hover:bg-red-100 dark:border-red-800 dark:text-red-300" onClick={handleConnectSlack}>
+                    <Plug className="h-3.5 w-3.5 mr-1.5" /> Reconnect
+                  </Button>
+                </div>
+              )}
+
+              {needsGithubReconnect && (
+                <div className="rounded-xl border border-red-200 dark:border-red-900/50 bg-red-50/50 dark:bg-red-950/20 p-4 flex items-start gap-3">
+                  <AlertTriangle className="h-5 w-5 text-red-500 shrink-0 mt-0.5" />
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-red-800 dark:text-red-300">GitHub connection lost</p>
+                    <p className="text-sm text-red-600/80 dark:text-red-400/80 mt-0.5">Connection error — reconnect to restore.</p>
+                  </div>
+                  <Button size="sm" variant="outline" className="border-red-300 text-red-700 hover:bg-red-100 dark:border-red-800 dark:text-red-300" onClick={handleConnectGithub}>
                     <Plug className="h-3.5 w-3.5 mr-1.5" /> Reconnect
                   </Button>
                 </div>
@@ -879,6 +1055,16 @@ function IntegrationsPageInner() {
                   <h3 className="font-semibold text-sm">Slack</h3>
                   <p className="text-xs text-muted-foreground mt-1.5 flex-1 leading-relaxed">Monitor a Slack channel and convert messages into actionable feedback.</p>
                   <Button size="sm" className="mt-4 w-full bg-[#4A154B] hover:bg-[#3b113c]" onClick={handleConnectSlack}>Connect</Button>
+                </div>
+              )}
+              {!isGithubActive && (
+                <div className="rounded-xl border bg-card p-5 flex flex-col hover:shadow-md hover:border-[#24292F]/30 dark:hover:border-[#f0f6fc]/30 transition-all group">
+                  <div className="h-10 w-10 rounded-lg bg-[#24292F]/10 dark:bg-[#f0f6fc]/10 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+                    <GitHubIcon className="h-5 w-5 text-[#24292F] dark:text-[#f0f6fc]" />
+                  </div>
+                  <h3 className="font-semibold text-sm">GitHub</h3>
+                  <p className="text-xs text-muted-foreground mt-1.5 flex-1 leading-relaxed">Track issues and pull requests as feedback via GitHub App webhooks.</p>
+                  <Button size="sm" className="mt-4 w-full bg-[#24292F] hover:bg-[#1a1e22] dark:bg-[#f0f6fc] dark:text-[#24292F] dark:hover:bg-[#e0e6ea]" onClick={handleConnectGithub}>Connect</Button>
                 </div>
               )}
               <div className="rounded-xl border bg-card p-5 flex flex-col opacity-60 cursor-not-allowed">

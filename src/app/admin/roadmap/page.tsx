@@ -152,8 +152,6 @@ export default function AdminRoadmapPage() {
         }
         
         const itemsRes = await roadmapService.getRoadmapItems(boardSlug);
-        console.log('🔍 Items fetched:', itemsRes.data.items);
-        console.log('🔍 Items count:', itemsRes.data.items.length);
         setItems(itemsRes.data.items);
       }
       
@@ -330,6 +328,8 @@ export default function AdminRoadmapPage() {
   };
 
   const filteredItems = items.filter((item) => {
+    // Filter by roadmap
+    if (selectedRoadmap && (item as any).roadmap_id !== selectedRoadmap) return false;
     // Filter by board first
     if (selectedBoardFilter !== 'all') {
       if (item.board?.slug !== selectedBoardFilter) return false;
@@ -339,30 +339,29 @@ export default function AdminRoadmapPage() {
     return item.status === selectedView;
   });
 
-  console.log('🔍 Total items:', items.length);
-  console.log('🔍 Selected board filter:', selectedBoardFilter);
-  console.log('🔍 Selected view:', selectedView);
-  console.log('🔍 Filtered items:', filteredItems.length);
-  console.log('🔍 Items sample:', items[0]);
-
   const groupedByStatus = {
     planned: items.filter((i) => {
+      if (selectedRoadmap && (i as any).roadmap_id !== selectedRoadmap) return false;
       if (selectedBoardFilter !== 'all' && i.board?.slug !== selectedBoardFilter) return false;
       return i.status === 'planned';
     }),
     in_progress: items.filter((i) => {
+      if (selectedRoadmap && (i as any).roadmap_id !== selectedRoadmap) return false;
       if (selectedBoardFilter !== 'all' && i.board?.slug !== selectedBoardFilter) return false;
       return i.status === 'in_progress';
     }),
     in_review: items.filter((i) => {
+      if (selectedRoadmap && (i as any).roadmap_id !== selectedRoadmap) return false;
       if (selectedBoardFilter !== 'all' && i.board?.slug !== selectedBoardFilter) return false;
       return i.status === 'in_review';
     }),
     completed: items.filter((i) => {
+      if (selectedRoadmap && (i as any).roadmap_id !== selectedRoadmap) return false;
       if (selectedBoardFilter !== 'all' && i.board?.slug !== selectedBoardFilter) return false;
       return i.status === 'completed';
     }),
     cancelled: items.filter((i) => {
+      if (selectedRoadmap && (i as any).roadmap_id !== selectedRoadmap) return false;
       if (selectedBoardFilter !== 'all' && i.board?.slug !== selectedBoardFilter) return false;
       return i.status === 'cancelled';
     }),

@@ -82,6 +82,7 @@ export default function CollectFeedbackPage() {
           items: [
             { name: "Collect Feedback", link: "/collect-feedback" },
             { name: "Analyze Feedback", link: "/analyze-feedback" },
+            { name: "Autopilot", link: "/autopilot" },
             { name: "Share Updates", link: "/share-updates" },
           ]
         },

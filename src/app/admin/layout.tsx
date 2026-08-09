@@ -27,7 +27,7 @@ export default function AdminLayout({
 
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [viewMode, setViewMode] = useState<"admin" | "public">("admin");
-  const [feedbackPath, setFeedbackPath] = useState('/admin/feedback/welcome'); // Default to welcome page
+  const [feedbackPath, setFeedbackPath] = useState('/admin/feedback'); // Default to redirect page (handles board routing)
   const [boardsLoaded, setBoardsLoaded] = useState(false);
 
   useEffect(() => {

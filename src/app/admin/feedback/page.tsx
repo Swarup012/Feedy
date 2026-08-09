@@ -13,56 +13,77 @@ export default function FeedbackPage() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [boards, setBoards] = useState<Board[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
   // Fetch boards and redirect
   useEffect(() => {
-    const checkBoards = async () => {
+    let cancelled = false;
+
+    const checkBoards = async (retryCount = 0) => {
       try {
-        // First time or no history - fetch boards
         setLoading(true);
+        setError(null);
         const response = await boardService.getAllBoards();
         const fetchedBoards = response.data.boards;
+
+        if (cancelled) return;
         setBoards(fetchedBoards);
 
         if (fetchedBoards.length > 0) {
-          // 🔥 Check localStorage for last visited board
           const lastBoardSlug = localStorage.getItem('lastVisitedBoard');
-          
-          // Verify the last board still exists
           const lastBoardExists = lastBoardSlug && fetchedBoards.some(b => b.slug === lastBoardSlug);
-          
+
           if (lastBoardExists) {
-            // Instant redirect to last visited board
-            console.log('🚀 Instant redirect to last board:', lastBoardSlug);
             router.replace(`/admin/feedback/boards/${lastBoardSlug}`);
           } else {
-            // Last board doesn't exist anymore, use first board
             localStorage.setItem('lastVisitedBoard', fetchedBoards[0].slug);
             router.replace(`/admin/feedback/boards/${fetchedBoards[0].slug}`);
           }
         } else {
-          // No boards exist - redirect to welcome page
           localStorage.removeItem('lastVisitedBoard');
           router.replace('/admin/feedback/welcome');
         }
-      } catch (error: any) {
+      } catch (err: any) {
+        if (cancelled) return;
+
+        // Retry once on transient errors
+        if (retryCount < 1) {
+          setTimeout(() => checkBoards(retryCount + 1), 1000);
+          return;
+        }
+
+        setError(err.message || "Failed to load boards");
         toast({
           title: "Error",
-          description: error.message || "Failed to load boards",
+          description: err.message || "Failed to load boards",
           variant: "destructive",
         });
-        // On error, redirect to welcome page for board creation
-        localStorage.removeItem('lastVisitedBoard');
-        router.replace('/admin/feedback/welcome');
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
 
     checkBoards();
+
+    return () => { cancelled = true; };
   }, [router, toast]);
 
-  // 🔄 Loading State
+  // Error State
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen gap-4">
+        <p className="text-red-600 font-medium">{error}</p>
+        <button
+          onClick={() => window.location.reload()}
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
+
+  // Loading State
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center h-screen">
@@ -72,7 +93,7 @@ export default function FeedbackPage() {
     );
   }
 
-  // ✅ Fallback (if somehow no redirect happened)
+  // Fallback (if somehow no redirect happened)
   return (
     <div className="flex flex-col items-center justify-center h-screen">
       <Loader2 className="h-8 w-8 animate-spin text-blue-600 mb-4" />

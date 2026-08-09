@@ -72,6 +72,7 @@ export default function PublicRoadmapPage() {
           items: [
             { name: "Collect Feedback", link: "/collect-feedback" },
             { name: "Analyze Feedback", link: "/analyze-feedback" },
+            { name: "Autopilot", link: "/autopilot" },
             { name: "Share Updates", link: "/share-updates" },
           ],
         },

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Sparkles, TrendingUp, Map, Megaphone, ThumbsUp, Bell, ChevronRight } from "lucide-react";
 
 const tabs = [
@@ -106,14 +106,25 @@ export function FeatureTabSection() {
 /* ─────────────────────────── Mockups ─────────────────────────── */
 
 function VideoMockup() {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (video) {
+      video.play().catch(() => {/* autoplay may be blocked */});
+    }
+  }, []);
+
   return (
     <div className="relative w-full aspect-video bg-black overflow-hidden">
       <video
+        ref={videoRef}
         src="/videos/SaaS_ai_landing.mp4"
         autoPlay
         muted
         loop
         playsInline
+        preload="auto"
         className="w-full h-full object-cover"
       />
     </div>

@@ -56,7 +56,7 @@ export default function RootLayout({
           <OrganizationProvider>
             <ThemeProvider
               attribute="class"
-              defaultTheme="system"
+              defaultTheme="light"
               enableSystem
               disableTransitionOnChange
             >
