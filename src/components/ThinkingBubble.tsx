@@ -31,29 +31,9 @@ export function ThinkingBubble({
   }, [index, text])
 
   return (
-    <div
-      style={{
-        background: "#ABDADC",
-        padding: "8px 12px",
-        borderRadius: 12,
-        fontSize: 14,
-        fontWeight: 500,
-        boxShadow: "0 6px 20px rgba(0,0,0,0.15)",
-        whiteSpace: "nowrap",
-      }}
-    >
+    <div className="bg-secondary text-secondary-foreground px-3 py-2 rounded-xl text-sm font-medium shadow-md whitespace-nowrap">
       {visibleText}
-      <span className="blink">|</span>
-
-      <style>{`
-        .blink {
-          animation: blink 1s infinite;
-        }
-        @keyframes blink {
-          0%, 50% { opacity: 1 }
-          51%, 100% { opacity: 0 }
-        }
-      `}</style>
+      <span className="animate-pulse">|</span>
     </div>
   )
 }

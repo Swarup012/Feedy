@@ -5,14 +5,10 @@ import { useEffect, useRef } from "react"
 
 type EyesProps = {
   scale?: number
-  eyeColor?: string
-  pupilColor?: string
 }
 
 export default function Eyes({
   scale = 1,
-  eyeColor = "#fff",
-  pupilColor = "#000",
 }: EyesProps) {
   const left = useRef<HTMLDivElement>(null)
   const right = useRef<HTMLDivElement>(null)
@@ -38,35 +34,17 @@ export default function Eyes({
 
   return (
     <div
-      style={{
-        display: "flex",
-        gap: 20,
-        transform: `scale(${scale})`,
-        transformOrigin: "center",
-      }}
+      className="flex gap-5 origin-center"
+      style={{ transform: `scale(${scale})` }}
     >
       {[left, right].map((ref, i) => (
         <div
           key={i}
-          style={{
-            width: 40,
-            height: 56,
-            background: eyeColor,   // 👈 configurable
-            borderRadius: 999,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
+          className="w-10 h-14 bg-white dark:bg-slate-100 rounded-full flex items-center justify-center"
         >
           <div
             ref={ref}
-            style={{
-              width: 16,
-              height: 16,
-              background: pupilColor, // 👈 configurable
-              borderRadius: "50%",
-              transition: "transform 0.08s linear",
-            }}
+            className="w-4 h-4 bg-black dark:bg-slate-900 rounded-full transition-transform duration-75 linear"
           />
         </div>
       ))}

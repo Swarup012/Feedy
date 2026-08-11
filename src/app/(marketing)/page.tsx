@@ -1,29 +1,10 @@
 "use client"
-import React, { useEffect, useState, useRef } from 'react';
-import {
-  ArrowRight,
-  MessageSquare,
-  Lightbulb,
-  Zap,
-  CheckCircle,
-  Star,
-  Users,
-  TrendingUp,
-  Sparkles,
-  ChevronRight,
-  ExternalLink
-} from 'lucide-react';
-import { Logo } from '@/components/logo';
+import React, { useEffect, useRef } from 'react';
+import { ArrowRight, CheckCircle, Users, Sparkles } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
-import LandingButton from '@/components/ui/LandingButton.tsx';
-import { LayoutTextFlip } from '@/components/ui/layout-text-flip.tsx'
-import Eyes from '@/components/Eyes.tsx'
-import { ThinkingBubble } from '@/components/ThinkingBubble.tsx'
-import { ThemeToggle } from '@/components/theme-toggle';
-import FaddyLandingImage from '@/assets/images/Faddy_Landing.png'
 import { PointerHighlight } from '@/components/ui/pointer-highlight.tsx'
 import { LandingFooter } from '@/components/ui/landing-footer';
 import { FeatureTabSection } from '@/components/FeatureTabSection';
@@ -35,8 +16,6 @@ if (typeof window !== 'undefined') {
 export default function LandingPage() {
   const router = useRouter();
   const { user, loading } = useAuth();
-  const [checkingBoards, setCheckingBoards] = useState(false);
-  const [hasSubdomain, setHasSubdomain] = useState(false);
 
   const handleClick = () => {
     router.push("/signup");
@@ -70,8 +49,6 @@ export default function LandingPage() {
       subdomain = parts[0];
     }
 
-    setHasSubdomain(!!subdomain);
-
     const redirectLogic = async () => {
       // If HAS subdomain, redirect to that organization's public feedback
       // This allows users to view ANY organization's public pages
@@ -84,26 +61,15 @@ export default function LandingPage() {
           if (publicBoards.length > 0) {
             router.push('/feedback');
             return;
-          } else {
-            setCheckingBoards(false);
-            return;
           }
         } catch (error) {
           console.error('Error loading public boards:', error);
-          setCheckingBoards(false);
-          return;
         }
       }
 
       // If NO subdomain and user is authenticated, go to their admin dashboard
       if (!loading && user && !subdomain) {
         router.push('/admin');
-        return;
-      }
-
-      // If NO subdomain and not authenticated, show landing page
-      if (!loading && !user && !subdomain) {
-        setCheckingBoards(false);
         return;
       }
     };
@@ -113,7 +79,7 @@ export default function LandingPage() {
 
   // --- GSAP ANIMATION ENGINE ---
   useEffect(() => {
-    if (!checkingBoards && !loading) {
+    if (!loading) {
       const ctx = gsap.context(() => {
         // Hero Animation
         const tl = gsap.timeline();
@@ -173,7 +139,7 @@ export default function LandingPage() {
       });
       return () => ctx.revert();
     }
-  }, [checkingBoards, loading]);
+  }, [loading]);
 
   // Play video when it enters the viewport, pause when it leaves.
   useEffect(() => {
@@ -202,7 +168,7 @@ export default function LandingPage() {
     <div className="min-h-screen bg-white dark:bg-slate-950 font-sans text-slate-900 dark:text-slate-100 antialiased selection:bg-blue-100 dark:selection:bg-blue-900 selection:text-blue-900 dark:selection:text-blue-100">
       {/* Visual background texture */}
       <div className="fixed inset-0 z-0 opacity-[0.03] pointer-events-none">
-        <div className="absolute inset-0" style={{ backgroundImage: `radial-gradient(#000 1px, transparent 1px)`, backgroundSize: '40px 40px' }}></div>
+        <div className="absolute inset-0" style={{ backgroundImage: `radial-gradient(currentColor 1px, transparent 1px)`, backgroundSize: '40px 40px' }}></div>
       </div>
 
       {/* Resizable Navbar */}
