@@ -51,7 +51,6 @@ export default function AdminPage() {
   });
 
   const [recentPosts, setRecentPosts] = useState([]);
-  const [mostUpvoted, setMostUpvoted] = useState([]);
   const [trending, setTrending] = useState([]);
   const [topBoards, setTopBoards] = useState([]);
   const [topContributors, setTopContributors] = useState([]);
@@ -114,7 +113,6 @@ export default function AdminPage() {
       });
 
       setRecentPosts(data.recentPosts || []);
-      setMostUpvoted(data.mostUpvoted || []);
       setTrending(data.trending || []);
       setTopBoards(data.topBoards || []);
       setTopContributors(data.topContributors || []);
@@ -220,8 +218,8 @@ export default function AdminPage() {
                 ))}
               </div>
               {/* Two-column skeleton */}
-              <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-                <div className="lg:col-span-3 space-y-4">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div className="space-y-4">
                   <div className="rounded-xl border border-border bg-card overflow-hidden">
                     <div className="px-5 py-4 border-b border-border flex items-center justify-between">
                       <div className="space-y-1.5">
@@ -245,25 +243,28 @@ export default function AdminPage() {
                     </div>
                   </div>
                   <div className="rounded-xl border border-border bg-card overflow-hidden">
-                    <div className="px-5 py-4 border-b border-border">
-                      <Skeleton className="h-4 w-32" />
-                      <Skeleton className="h-3 w-36 mt-1.5" />
+                    <div className="px-5 py-4 border-b border-border flex items-center justify-between">
+                      <Skeleton className="h-4 w-28" />
+                      <Skeleton className="h-5 w-16 rounded-full" />
                     </div>
-                    <div className="divide-y divide-border">
-                      {[0, 1, 2, 3].map((i) => (
-                        <div
-                          key={i}
-                          className="px-5 py-3 flex items-center gap-3"
-                        >
-                          <Skeleton className="w-5 h-4 flex-shrink-0" />
-                          <Skeleton className="h-4 flex-1" />
-                          <Skeleton className="h-3 w-8 flex-shrink-0" />
-                        </div>
-                      ))}
+                    <div className="px-5 py-4 space-y-4">
+                      <div className="flex items-baseline gap-2">
+                        <Skeleton className="h-8 w-16" />
+                        <Skeleton className="h-4 w-20" />
+                      </div>
+                      <Skeleton className="h-2 w-full rounded-full" />
+                      <div className="grid grid-cols-3 gap-2 pt-2 border-t border-border">
+                        {[0, 1, 2].map((i) => (
+                          <div key={i} className="rounded-lg bg-muted/40 py-2 text-center space-y-1">
+                            <Skeleton className="h-3 w-10 mx-auto" />
+                            <Skeleton className="h-4 w-8 mx-auto" />
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </div>
-                <div className="lg:col-span-2 space-y-4">
+                <div className="space-y-4">
                   <div className="rounded-xl border border-border bg-card overflow-hidden">
                     <div className="px-5 py-4 border-b border-border flex items-center justify-between">
                       <div className="space-y-1.5">
@@ -302,6 +303,27 @@ export default function AdminPage() {
                           <Skeleton className="h-1.5 w-full rounded-full" />
                         </div>
                       ))}
+                    </div>
+                  </div>
+                  <div className="rounded-xl border border-border bg-card overflow-hidden">
+                    <div className="px-5 py-4 border-b border-border flex items-center justify-between">
+                      <Skeleton className="h-4 w-28" />
+                      <Skeleton className="h-5 w-16 rounded-full" />
+                    </div>
+                    <div className="px-5 py-4 space-y-4">
+                      <div className="flex items-baseline gap-2">
+                        <Skeleton className="h-8 w-16" />
+                        <Skeleton className="h-4 w-20" />
+                      </div>
+                      <Skeleton className="h-2 w-full rounded-full" />
+                      <div className="grid grid-cols-3 gap-2 pt-2 border-t border-border">
+                        {[0, 1, 2].map((i) => (
+                          <div key={i} className="rounded-lg bg-muted/40 py-2 text-center space-y-1">
+                            <Skeleton className="h-3 w-10 mx-auto" />
+                            <Skeleton className="h-4 w-8 mx-auto" />
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -369,9 +391,9 @@ export default function AdminPage() {
               </div>
 
               {/* ── Two-column layout ── */}
-              <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-                {/* Left — Recent Posts + Top Upvoted */}
-                <div className="lg:col-span-3 space-y-4">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                {/* Left — Recent Posts + Tracked Users */}
+                <div className="space-y-4">
                   {/* Recent Posts */}
                   <div className="rounded-xl border border-border bg-card overflow-hidden">
                     <div className="px-5 py-4 border-b border-border flex items-center justify-between">
@@ -433,47 +455,15 @@ export default function AdminPage() {
                     </div>
                   </div>
 
-                  {/* Top Upvoted */}
-                  <div className="rounded-xl border border-border bg-card overflow-hidden">
-                    <div className="px-5 py-4 border-b border-border">
-                      <h3 className="text-sm font-semibold text-foreground">
-                        Most Requested
-                      </h3>
-                      <p className="text-xs text-muted-foreground mt-0.5">
-                        Posts with the most votes
-                      </p>
-                    </div>
-                    <div className="divide-y divide-border">
-                      {mostUpvoted.length > 0 ? (
-                        mostUpvoted.slice(0, 4).map((p: any, i: number) => (
-                          <div
-                            key={p.id}
-                            className="px-5 py-3 flex items-center gap-3 hover:bg-muted/40 transition-colors"
-                          >
-                            <span className="w-5 text-center text-xs font-bold text-muted-foreground flex-shrink-0">
-                              #{i + 1}
-                            </span>
-                            <span className="flex-1 text-sm font-medium text-foreground truncate">
-                              {p.title}
-                            </span>
-                            <div className="flex items-center gap-1 text-xs font-semibold text-muted-foreground flex-shrink-0">
-                              <ThumbsUp className="w-3 h-3" />
-                              {p.vote_count ?? 0}
-                            </div>
-                          </div>
-                        ))
-                      ) : (
-                        <div className="px-5 py-8 text-center text-sm text-muted-foreground">
-                          No votes yet — votes show what your users care about
-                          most
-                        </div>
-                      )}
-                    </div>
-                  </div>
+                  {/* Tracked Users */}
+                  <TrackedUsersWidget
+                    variant="basic"
+                    onUsageClick={() => router.push("/admin/tracked-users")}
+                  />
                 </div>
 
                 {/* Right — Boards + Status */}
-                <div className="lg:col-span-2 space-y-4">
+                <div className="space-y-4">
                   {/* Boards */}
                   <div className="rounded-xl border border-border bg-card overflow-hidden">
                     <div className="px-5 py-4 border-b border-border flex items-center justify-between">
@@ -597,12 +587,6 @@ export default function AdminPage() {
                       )}
                     </div>
                   </div>
-
-                  {/* Tracked Users */}
-                  <TrackedUsersWidget
-                    variant="basic"
-                    onUsageClick={() => router.push("/admin/tracked-users")}
-                  />
                 </div>
               </div>
             </div>

@@ -207,7 +207,7 @@ export function TrackedUsersWidget({ onUsageClick, variant = 'basic' }: TrackedU
   if (variant === 'basic') {
     return (
       <Card
-        className={`cursor-pointer transition-all hover:shadow-md flex flex-col h-full ${
+        className={`cursor-pointer transition-all hover:shadow-md flex flex-col ${
           overageStatus?.overageCost > 0 ? 'border-red-500' :
           overageStatus?.inGracePeriod ? 'border-yellow-500' :
           usage.status === 'exceeded' ? 'border-red-500' :
@@ -216,7 +216,7 @@ export function TrackedUsersWidget({ onUsageClick, variant = 'basic' }: TrackedU
         }`}
         onClick={onUsageClick}
       >
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 shrink-0">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <div className="flex items-center gap-2">
             <CardTitle className="text-sm font-medium">Tracked Users</CardTitle>
             <div className={getStatusColor(usage.status, overageStatus?.overageCost! > 0)}>
@@ -225,75 +225,42 @@ export function TrackedUsersWidget({ onUsageClick, variant = 'basic' }: TrackedU
           </div>
           {getStatusBadge(usage.status, usage.usage_percent, overageStatus)}
         </CardHeader>
-        <CardContent className="flex-1 min-h-0 overflow-y-auto">
-          <div className="space-y-4">
-            {/* Row 1: Hero count — the single most important number */}
-            <div className="flex items-baseline gap-2">
-              <div className="text-2xl font-bold">
-                {usage.count.toLocaleString()}
+        <CardContent className="pt-0">
+          <div className="space-y-3">
+            {/* Hero count + period in one row */}
+            <div className="flex items-baseline justify-between">
+              <div className="flex items-baseline gap-2">
+                <div className="text-2xl font-bold">
+                  {usage.count.toLocaleString()}
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  / {usage.plan_type === 'starter' ? '125' : usage.limit.toLocaleString()}
+                  {usage.plan_type === 'starter' && <span className="text-xs ml-1">(+25 grace)</span>}
+                </div>
               </div>
-              <div className="text-sm text-muted-foreground">
-                / {usage.plan_type === 'starter' ? '125' : usage.limit.toLocaleString()}
-                {usage.plan_type === 'starter' && <span className="text-xs ml-1">(+25 grace)</span>}
-              </div>
+              <span className="text-xs text-muted-foreground">{usage.days_remaining}d left</span>
             </div>
 
-            {/* Overage Status - Starter Plan Only (distinct callout band) */}
-            {usage.plan_type === 'starter' && overageStatus && (
-              <div className="space-y-2">
-                {/* Grace Period Warning */}
-                {overageStatus.inGracePeriod && (
-                  <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3">
-                    <div className="flex items-start gap-2">
-                      <Shield className="h-4 w-4 text-yellow-600 flex-shrink-0 mt-0.5" />
-                      <div className="text-xs">
-                        <div className="font-semibold text-yellow-900 dark:text-yellow-100">
-                          Grace Period Active
-                        </div>
-                        <div className="text-yellow-800 dark:text-yellow-200 mt-0.5">
-                          {overageStatus.graceRemaining} users remaining before overage charges
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Overage Charges */}
-                {overageStatus.overageCost > 0 && (
-                  <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3">
-                    <div className="flex items-start gap-2">
-                      <DollarSign className="h-4 w-4 text-red-600 flex-shrink-0 mt-0.5" />
-                      <div className="text-xs">
-                        <div className="font-semibold text-red-900 dark:text-red-100">
-                          Overage This Month: ${overageStatus.overageCost}
-                        </div>
-                        <div className="text-red-800 dark:text-red-200 mt-0.5">
-                          {overageStatus.overageUsers} users over limit ({overageStatus.overageBlocks} block{overageStatus.overageBlocks > 1 ? 's' : ''} × $6)
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Next Bill Preview */}
-                <div className="bg-gray-50 dark:bg-card rounded-lg p-2 text-xs">
-                  <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground">Next bill estimate:</span>
-                    <span className="font-semibold">
-                      ${(PLANS.starter.monthlyPrice + (overageStatus.overageCost || 0)).toFixed(2)}
-                    </span>
-                  </div>
-                  {overageStatus.overageCost > 0 && (
-                    <div className="text-[10px] text-muted-foreground mt-1">
-                      ${PLANS.starter.monthlyPrice} base + ${overageStatus.overageCost} overage
-                    </div>
-                  )}
-                </div>
+            {/* Overage Status — compact single-row banner */}
+            {usage.plan_type === 'starter' && overageStatus && overageStatus.inGracePeriod && (
+              <div className="flex items-center gap-2 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg px-3 py-2">
+                <Shield className="h-3.5 w-3.5 text-yellow-600 flex-shrink-0" />
+                <span className="text-xs text-yellow-800 dark:text-yellow-200">
+                  {overageStatus.graceRemaining} users before overage charges
+                </span>
+              </div>
+            )}
+            {usage.plan_type === 'starter' && overageStatus && overageStatus.overageCost > 0 && (
+              <div className="flex items-center gap-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg px-3 py-2">
+                <DollarSign className="h-3.5 w-3.5 text-red-600 flex-shrink-0" />
+                <span className="text-xs text-red-800 dark:text-red-200">
+                  ${overageStatus.overageCost} overage ({overageStatus.overageUsers} users)
+                </span>
               </div>
             )}
 
-            {/* Row 2: Full-width usage bar with labeled axis */}
-            <div className="space-y-1.5">
+            {/* Progress bar */}
+            <div className="space-y-1">
               <Progress
                 value={Math.min(usage.usage_percent, 100)}
                 className={
@@ -305,13 +272,9 @@ export function TrackedUsersWidget({ onUsageClick, variant = 'basic' }: TrackedU
                   ''
                 }
               />
-              <div className="flex justify-between text-xs text-muted-foreground">
-                <span>{usage.current_period}</span>
-                <span>{usage.days_remaining} days left</span>
-              </div>
             </div>
 
-            {/* Row 3: Breakdown — three equal stat tiles */}
+            {/* Breakdown tiles */}
             {usage.breakdown && (
               <div className="grid grid-cols-3 gap-2 pt-2 border-t">
                 <div className="rounded-lg bg-muted/40 py-2 text-center">
