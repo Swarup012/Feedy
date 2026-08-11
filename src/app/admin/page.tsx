@@ -193,7 +193,7 @@ export default function AdminPage() {
                   {organization?.name || "Dashboard"}
                 </h1>
                 <p className="text-sm text-muted-foreground mt-0.5">
-                  Here's what's happening with your organization
+                  What needs your attention right now
                 </p>
               </div>
             </div>
@@ -227,7 +227,7 @@ export default function AdminPage() {
                 className="gap-2 h-11 px-5 transition-all"
               >
                 <Users className="h-4 w-4" />
-                <span className="font-semibold">Member View</span>
+                <span className="font-semibold">Preview member view</span>
               </Button>
             </div>
           </section>
@@ -304,7 +304,7 @@ export default function AdminPage() {
                         onClick={() => router.push('/admin/feedback')}
                         className="text-xs text-primary hover:underline font-medium"
                       >
-                        View all →
+                        View all feedback →
                       </button>
                     </div>
                     <div className="divide-y divide-border">
@@ -320,22 +320,22 @@ export default function AdminPage() {
                           };
                           return (
                             <div key={p.id} className="px-5 py-3 flex items-center gap-3 hover:bg-muted/40 transition-colors">
-                              <span className={`w-2 h-2 rounded-full flex-shrink-0 ${statusDot[p.status] || 'bg-gray-300'}`} />
-                              <span className="flex-1 text-sm font-medium text-foreground truncate">{p.title}</span>
-                              <div className="flex items-center gap-3 flex-shrink-0">
-                                <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                                  <ThumbsUp className="w-3 h-3" />{p.vote_count ?? 0}
-                                </span>
-                                <span className="text-[11px] text-muted-foreground capitalize hidden sm:block">
+                              <div className="flex items-center gap-2 flex-shrink-0">
+                                <span className={`w-2 h-2 rounded-full ${statusDot[p.status] || 'bg-gray-300'}`} />
+                                <span className="text-[11px] text-muted-foreground capitalize">
                                   {(p.status || 'open').replace('-', ' ')}
                                 </span>
                               </div>
+                              <span className="flex-1 text-sm font-medium text-foreground truncate">{p.title}</span>
+                              <span className="flex items-center gap-1 text-xs text-muted-foreground flex-shrink-0">
+                                <ThumbsUp className="w-3 h-3" />{p.vote_count ?? 0}
+                              </span>
                             </div>
                           );
                         })
                       ) : (
                         <div className="px-5 py-8 text-center text-sm text-muted-foreground">
-                          No posts yet
+                          No posts yet — submit your first piece of feedback to get started
                         </div>
                       )}
                     </div>
@@ -359,7 +359,7 @@ export default function AdminPage() {
                           </div>
                         ))
                       ) : (
-                        <div className="px-5 py-8 text-center text-sm text-muted-foreground">No votes yet</div>
+                        <div className="px-5 py-8 text-center text-sm text-muted-foreground">No votes yet — votes show what your users care about most</div>
                       )}
                     </div>
                   </div>
@@ -379,7 +379,7 @@ export default function AdminPage() {
                         onClick={() => router.push('/admin/feedback')}
                         className="text-xs text-primary hover:underline font-medium"
                       >
-                        Manage →
+                        See all boards →
                       </button>
                     </div>
                     <div className="divide-y divide-border">
@@ -399,7 +399,7 @@ export default function AdminPage() {
                         ))
                       ) : (
                         <div className="px-5 py-6 text-center space-y-2">
-                          <p className="text-sm text-muted-foreground">No boards yet</p>
+                          <p className="text-sm text-muted-foreground">No boards yet — a board is where feedback lives</p>
                           <button
                             onClick={() => router.push('/admin/feedback/welcome')}
                             className="text-xs text-primary hover:underline font-medium"
