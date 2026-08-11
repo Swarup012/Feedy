@@ -275,11 +275,11 @@ export function LeftSidebar({
             />
             <Label
               htmlFor="select-all"
-              className="text-sm font-medium cursor-pointer flex-1 text-gray-900 dark:text-white"
+              className="text-sm font-medium cursor-pointer flex-1 text-foreground"
             >
               {isAllSelected ? 'Deselect All' : 'Select All Boards'}
             </Label>
-            <span className="text-xs text-gray-500 dark:text-gray-400">
+            <span className="text-xs text-muted-foreground">
               {selectedBoards.length}/{boards.length}
             </span>
           </div>
@@ -290,7 +290,7 @@ export function LeftSidebar({
             key={board.id}
             className={cn(
               "w-full text-left p-3 rounded-lg mb-1 transition-colors",
-              "hover:bg-gray-100 dark:hover:bg-gray-800 flex items-center gap-3",
+              "hover:bg-gray-100 dark:hover:bg-muted flex items-center gap-3",
               currentBoardSlug === board.slug &&
                 "bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500",
             )}
@@ -319,14 +319,14 @@ export function LeftSidebar({
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1">
-                  <p className="font-medium text-sm truncate text-gray-900 dark:text-white">{board.name}</p>
+                  <p className="font-medium text-sm truncate text-foreground">{board.name}</p>
                   {board.is_private ? (
-                    <Lock className="h-3 w-3 text-gray-400 dark:text-gray-500 flex-shrink-0" />
+                    <Lock className="h-3 w-3 text-muted-foreground flex-shrink-0" />
                   ) : (
-                    <Globe className="h-3 w-3 text-gray-400 dark:text-gray-500 flex-shrink-0" />
+                    <Globe className="h-3 w-3 text-muted-foreground flex-shrink-0" />
                   )}
                 </div>
-                <p className="text-xs text-gray-500 dark:text-gray-400">{board.post_count} posts</p>
+                <p className="text-xs text-muted-foreground">{board.post_count} posts</p>
               </div>
             </button>
 
@@ -337,21 +337,21 @@ export function LeftSidebar({
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-8 w-8 p-0 hover:bg-gray-200 dark:hover:bg-gray-700"
+                    className="h-8 w-8 p-0 hover:bg-muted"
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <MoreVertical className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                    <MoreVertical className="h-4 w-4 text-muted-foreground" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="bg-white dark:bg-card border-gray-200 dark:border-border">
-                  <DropdownMenuItem onClick={() => openEditDialog(board)} className="dark:text-white dark:hover:bg-gray-700">
+                  <DropdownMenuItem onClick={() => openEditDialog(board)} className="text-foreground dark:hover:bg-muted">
                     <Edit2 className="mr-2 h-4 w-4" />
                     Edit Board
                   </DropdownMenuItem>
-                  <DropdownMenuSeparator className="dark:bg-gray-700" />
+                  <DropdownMenuSeparator className="dark:bg-border" />
                   <DropdownMenuItem
                     onClick={() => openDeleteDialog(board)}
-                    className="text-red-600 dark:text-red-400 dark:hover:bg-gray-700"
+                    className="text-destructive dark:hover:bg-muted"
                   >
                     <Trash2 className="mr-2 h-4 w-4" />
                     Delete Board
@@ -382,13 +382,13 @@ export function LeftSidebar({
       <div className="p-4 border-t border-gray-200 dark:border-border mt-4">
         <button
           onClick={() => setShowFilters(!showFilters)}
-          className="flex items-center justify-between w-full mb-3 text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300"
+          className="flex items-center justify-between w-full mb-3 text-foreground hover:text-foreground/80 dark:hover:text-foreground/80"
         >
           <h3 className="font-semibold text-sm flex items-center gap-2">
             <Filter className="h-4 w-4" />
             Filters
           </h3>
-          <span className="text-xs text-gray-500 dark:text-gray-400">
+          <span className="text-xs text-muted-foreground">
             {showFilters ? "Hide" : "Show"}
           </span>
         </button>
@@ -397,7 +397,7 @@ export function LeftSidebar({
           <div className="space-y-3">
             {/* Status Filter */}
             <div>
-              <Label className="text-xs text-gray-700 dark:text-gray-300">Status</Label>
+              <Label className="text-xs text-foreground">Status</Label>
               <Select
                 value={filters.status}
                 onValueChange={(value) =>
@@ -411,20 +411,20 @@ export function LeftSidebar({
                   <SelectValue placeholder="All statuses" />
                 </SelectTrigger>
                 <SelectContent className="dark:bg-card dark:border-border">
-                  <SelectItem value="all" className="dark:text-white dark:hover:bg-gray-700">All statuses</SelectItem>
-                  <SelectItem value="open" className="dark:text-white dark:hover:bg-gray-700">Open</SelectItem>
-                  <SelectItem value="under-review" className="dark:text-white dark:hover:bg-gray-700">Under Review</SelectItem>
-                  <SelectItem value="planned" className="dark:text-white dark:hover:bg-gray-700">Planned</SelectItem>
-                  <SelectItem value="in-progress" className="dark:text-white dark:hover:bg-gray-700">In Progress</SelectItem>
-                  <SelectItem value="completed" className="dark:text-white dark:hover:bg-gray-700">Completed</SelectItem>
-                  <SelectItem value="closed" className="dark:text-white dark:hover:bg-gray-700">Closed</SelectItem>
+                  <SelectItem value="all" className="text-foreground dark:hover:bg-muted">All statuses</SelectItem>
+                  <SelectItem value="open" className="text-foreground dark:hover:bg-muted">Open</SelectItem>
+                  <SelectItem value="under-review" className="text-foreground dark:hover:bg-muted">Under Review</SelectItem>
+                  <SelectItem value="planned" className="text-foreground dark:hover:bg-muted">Planned</SelectItem>
+                  <SelectItem value="in-progress" className="text-foreground dark:hover:bg-muted">In Progress</SelectItem>
+                  <SelectItem value="completed" className="text-foreground dark:hover:bg-muted">Completed</SelectItem>
+                  <SelectItem value="closed" className="text-foreground dark:hover:bg-muted">Closed</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             {/* Date Range */}
             <div>
-              <Label className="text-xs text-gray-700 dark:text-gray-300">Date Range</Label>
+              <Label className="text-xs text-foreground">Date Range</Label>
               <div className="space-y-2">
                 <Input
                   type="date"
@@ -449,7 +449,7 @@ export function LeftSidebar({
 
             {/* Sort By */}
             <div>
-              <Label className="text-xs text-gray-700 dark:text-gray-300">Sort By</Label>
+              <Label className="text-xs text-foreground">Sort By</Label>
               <Select
                 value={filters.sortBy}
                 onValueChange={(value) =>
@@ -460,9 +460,9 @@ export function LeftSidebar({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="dark:bg-card dark:border-border">
-                  <SelectItem value="created_at" className="dark:text-white dark:hover:bg-gray-700">Newest First</SelectItem>
-                  <SelectItem value="upvotes" className="dark:text-white dark:hover:bg-gray-700">Most Upvoted</SelectItem>
-                  <SelectItem value="comments" className="dark:text-white dark:hover:bg-gray-700">Most Commented</SelectItem>
+                  <SelectItem value="created_at" className="text-foreground dark:hover:bg-muted">Newest First</SelectItem>
+                  <SelectItem value="upvotes" className="text-foreground dark:hover:bg-muted">Most Upvoted</SelectItem>
+                  <SelectItem value="comments" className="text-foreground dark:hover:bg-muted">Most Commented</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -504,14 +504,14 @@ export function LeftSidebar({
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
         <DialogContent className="dark:bg-background dark:border-border">
           <DialogHeader>
-            <DialogTitle className="dark:text-white">Edit Board</DialogTitle>
-            <DialogDescription className="dark:text-gray-400">
+            <DialogTitle className="text-foreground">Edit Board</DialogTitle>
+            <DialogDescription className="text-muted-foreground">
               Update your board's information
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div>
-              <Label htmlFor="edit-name" className="dark:text-gray-300">Name *</Label>
+              <Label htmlFor="edit-name" className="text-foreground">Name *</Label>
               <Input
                 id="edit-name"
                 value={editFormData.name}
@@ -521,7 +521,7 @@ export function LeftSidebar({
               />
             </div>
             <div>
-              <Label htmlFor="edit-description" className="dark:text-gray-300">Description</Label>
+              <Label htmlFor="edit-description" className="text-foreground">Description</Label>
               <Textarea
                 id="edit-description"
                 value={editFormData.description}
@@ -532,12 +532,12 @@ export function LeftSidebar({
               />
             </div>
             <div>
-              <Label htmlFor="edit-icon" className="dark:text-gray-300">Icon</Label>
+              <Label htmlFor="edit-icon" className="text-foreground">Icon</Label>
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => setShowIconPicker(true)}
-                className="w-full mt-1 justify-start dark:bg-card dark:border-border dark:text-white dark:hover:bg-gray-700"
+                className="w-full mt-1 justify-start dark:bg-card dark:border-border dark:text-foreground dark:hover:bg-muted"
               >
                 <div className="h-6 w-6 rounded-lg bg-primary/10 flex items-center justify-center mr-2">
                   <IconDisplay iconName={editFormData.icon} className="h-4 w-4 text-primary" />
@@ -551,11 +551,11 @@ export function LeftSidebar({
                 checked={editFormData.is_private}
                 onCheckedChange={(checked) => setEditFormData({ ...editFormData, is_private: checked })}
               />
-              <Label htmlFor="edit-private" className="dark:text-gray-300">Private Board</Label>
+              <Label htmlFor="edit-private" className="text-foreground">Private Board</Label>
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowEditDialog(false)} className="dark:bg-card dark:border-border dark:text-white dark:hover:bg-gray-700">
+            <Button variant="outline" onClick={() => setShowEditDialog(false)} className="dark:bg-card dark:border-border dark:text-foreground dark:hover:bg-muted">
               Cancel
             </Button>
             <Button onClick={handleEdit}>
@@ -576,7 +576,7 @@ export function LeftSidebar({
         <AlertDialogContent className="dark:bg-background dark:border-border">
           <AlertDialogHeader>
             <AlertDialogTitle className="dark:text-white">Delete "{selectedBoard?.name}"?</AlertDialogTitle>
-            <AlertDialogDescription className="dark:text-gray-400">
+            <AlertDialogDescription className="text-muted-foreground">
               This action cannot be undone and will delete all posts in this board.
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -617,7 +617,7 @@ export function LeftSidebar({
           ) : null}
 
           <AlertDialogFooter>
-            <AlertDialogCancel className="dark:bg-card dark:border-border dark:text-white dark:hover:bg-gray-700">Cancel</AlertDialogCancel>
+            <AlertDialogCancel className="dark:bg-card dark:border-border dark:text-foreground dark:hover:bg-muted">Cancel</AlertDialogCancel>
             <Button
               onClick={handleDelete}
               disabled={boardDependencies.length > 0 && !deleteConfirmed}

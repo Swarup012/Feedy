@@ -221,7 +221,7 @@ export function CreateBoardDialog({
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             disabled={creating}
             autoFocus
-            className="h-11 text-base rounded-xl bg-gray-50 dark:bg-gray-800/60 border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-blue-400"
+            className="h-11 text-base rounded-xl bg-gray-50 dark:bg-muted border-gray-200 dark:border-border focus:ring-2 focus:ring-primary"
             maxLength={100}
             required
           />
@@ -243,11 +243,11 @@ export function CreateBoardDialog({
             disabled={creating}
             className="flex gap-5"
           >
-            <label htmlFor="d-public" className="flex items-center gap-2 cursor-pointer text-sm text-gray-700 dark:text-gray-300">
+            <label htmlFor="d-public" className="flex items-center gap-2 cursor-pointer text-sm text-foreground">
               <RadioGroupItem value="public" id="d-public" />
               public
             </label>
-            <label htmlFor="d-private" className="flex items-center gap-2 cursor-pointer text-sm text-gray-700 dark:text-gray-300">
+            <label htmlFor="d-private" className="flex items-center gap-2 cursor-pointer text-sm text-foreground">
               <RadioGroupItem value="private" id="d-private" />
               private
             </label>
@@ -269,7 +269,7 @@ export function CreateBoardDialog({
                     className={`px-3 py-1 rounded-full border text-xs font-medium transition-colors ${
                       selected
                         ? "bg-blue-500 text-white border-blue-500"
-                        : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:border-blue-400"
+                        : "bg-white dark:bg-muted text-muted-foreground border-gray-300 dark:border-border hover:border-primary"
                     }`}
                   >
                     {role.name}
@@ -286,7 +286,7 @@ export function CreateBoardDialog({
               type="button"
               onClick={() => setShowIconPicker(true)}
               disabled={creating}
-              className="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 flex flex-col items-center justify-center gap-1 hover:border-blue-400 transition-colors"
+              className="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-border bg-gray-50 dark:bg-muted flex flex-col items-center justify-center gap-1 hover:border-primary transition-colors"
             >
               <div
                 className="h-8 w-8 rounded-lg flex items-center justify-center"
@@ -299,7 +299,7 @@ export function CreateBoardDialog({
 
             {/* Board preview */}
             <div
-              className="flex-1 rounded-xl border bg-gray-50 dark:bg-gray-800/60 p-3 flex items-center justify-center min-h-[64px]"
+              className="flex-1 rounded-xl border bg-gray-50 dark:bg-muted p-3 flex items-center justify-center min-h-[64px]"
               style={{ borderColor: formData.name ? formData.color : undefined }}
             >
               {formData.name ? (
@@ -311,7 +311,7 @@ export function CreateBoardDialog({
                     <IconDisplay iconName={formData.icon} className="h-4 w-4" style={{ color: formData.color }} />
                   </div>
                   <div>
-                    <p className="text-sm font-semibold leading-tight flex items-center gap-1 text-gray-900 dark:text-white">
+                    <p className="text-sm font-semibold leading-tight flex items-center gap-1 text-foreground">
                       {formData.name}
                       {formData.is_private && <Lock className="h-3 w-3 text-gray-400" />}
                     </p>
@@ -340,7 +340,7 @@ export function CreateBoardDialog({
             <Button
               type="submit"
               disabled={creating || !formData.name.trim() || slugAvailable === false}
-              className="rounded-full px-6 h-10 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium shadow-md"
+              className="rounded-full px-6 h-10 bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-medium shadow-md"
             >
               {creating ? (
                 <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Creating...</>

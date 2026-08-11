@@ -133,7 +133,7 @@ export function ImageUpload({
             "border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors",
             dragActive
               ? "border-primary bg-primary/5"
-              : "border-gray-300 dark:border-gray-700 hover:border-primary hover:bg-gray-50 dark:hover:bg-gray-900"
+              : "border-gray-300 dark:border-border hover:border-primary hover:bg-gray-50 dark:hover:bg-muted/50"
           )}
           onDragEnter={handleDrag}
           onDragLeave={handleDrag}

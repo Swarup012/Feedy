@@ -115,10 +115,10 @@ export function FirstBoardWelcomeDialog({
                     <MessageSquare className="h-5 w-5 text-blue-600" />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-sm text-gray-900 dark:text-gray-100">
+                    <h4 className="font-semibold text-sm text-foreground">
                       Collect Feedback
                     </h4>
-                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                    <p className="text-xs text-muted-foreground mt-1">
                       Let users submit ideas, bugs, and feature requests
                     </p>
                   </div>
@@ -130,10 +130,10 @@ export function FirstBoardWelcomeDialog({
                     <Target className="h-5 w-5 text-purple-600" />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-sm text-gray-900 dark:text-gray-100">
+                    <h4 className="font-semibold text-sm text-foreground">
                       Track Progress
                     </h4>
-                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                    <p className="text-xs text-muted-foreground mt-1">
                       Manage status from planned to completed
                     </p>
                   </div>
@@ -145,10 +145,10 @@ export function FirstBoardWelcomeDialog({
                     <Lightbulb className="h-5 w-5 text-green-600" />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-sm text-gray-900 dark:text-gray-100">
+                    <h4 className="font-semibold text-sm text-foreground">
                       Prioritize Ideas
                     </h4>
-                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                    <p className="text-xs text-muted-foreground mt-1">
                       See what your users want most with voting
                     </p>
                   </div>
@@ -160,10 +160,10 @@ export function FirstBoardWelcomeDialog({
                     <CheckCircle2 className="h-5 w-5 text-orange-600" />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-sm text-gray-900 dark:text-gray-100">
+                    <h4 className="font-semibold text-sm text-foreground">
                       Engage Users
                     </h4>
-                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                    <p className="text-xs text-muted-foreground mt-1">
                       Keep your community updated and involved
                     </p>
                   </div>
@@ -171,7 +171,7 @@ export function FirstBoardWelcomeDialog({
               </div>
 
               <div className="bg-gray-50 dark:bg-card rounded-lg p-4 mt-6">
-                <p className="text-sm text-gray-600 dark:text-gray-400 text-center">
+                <p className="text-sm text-muted-foreground text-center">
                   💡 <strong>Pro tip:</strong> You can create multiple boards for different products, features, or teams!
                 </p>
               </div>
@@ -234,7 +234,7 @@ export function FirstBoardWelcomeDialog({
               </div>
 
               <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900 rounded-lg p-3">
-                <p className="text-xs text-gray-600 dark:text-gray-400">
+                <p className="text-xs text-muted-foreground">
                   <strong>Examples:</strong> "Feature Requests", "Bug Reports", "Mobile App Feedback", "Customer Support Ideas"
                 </p>
               </div>

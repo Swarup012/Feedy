@@ -82,10 +82,10 @@ export function PostsList({
 
         {/* Search */}
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search posts..."
-            className="pl-10 dark:bg-card dark:border-border dark:text-white dark:placeholder:text-gray-500"
+            className="pl-10 dark:bg-card dark:border-border dark:text-white dark:placeholder:text-muted-foreground"
             onChange={(e) => onSearchChange(e.target.value)}
           />
         </div>
@@ -98,8 +98,8 @@ export function PostsList({
         ) : posts.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center p-6">
             <div className="text-6xl mb-4">📝</div>
-            <h3 className="font-semibold text-lg mb-2 text-gray-900 dark:text-white">No posts yet</h3>
-            <p className="text-gray-500 dark:text-gray-400 mb-4">Be the first to create a post!</p>
+            <h3 className="font-semibold text-lg mb-2 text-foreground">No posts yet</h3>
+            <p className="text-muted-foreground mb-4">Be the first to create a post!</p>
             <Button 
               onClick={onCreatePost}
               variant="outline"
@@ -110,32 +110,32 @@ export function PostsList({
             </Button>
           </div>
         ) : (
-          <div className="divide-y divide-gray-200 dark:divide-gray-700">
+          <div className="divide-y divide-gray-200 dark:divide-border">
             {posts.map((post) => (
               <button
                 key={post.id}
                 onClick={() => onPostSelect(post)}
                 className={cn(
-                  "w-full text-left p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors",
+                  "w-full text-left p-4 hover:bg-gray-50 dark:hover:bg-muted transition-colors",
                   selectedPost?.id === post.id &&
                     "bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500",
                 )}
               >
                 <div className="space-y-2">
                   {/* Title */}
-                  <h3 className="font-semibold text-sm line-clamp-2 text-gray-900 dark:text-white">
+                  <h3 className="font-semibold text-sm line-clamp-2 text-foreground">
                     {post.title}
                   </h3>
 
                   {/* Description */}
                   {post.description && (
-                    <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2">
+                    <p className="text-xs text-muted-foreground line-clamp-2">
                       {post.description}
                     </p>
                   )}
 
                   {/* Meta */}
-                  <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
+                  <div className="flex items-center gap-3 text-xs text-muted-foreground">
                     <Badge
                       variant="secondary"
                       className={cn("text-xs", STATUS_COLORS[post.status])}
@@ -162,7 +162,7 @@ export function PostsList({
 
                   {/* Author - shows internal user, widget user, or external platform source */}
                   {(post.author || post.external_author || post.org_end_user || post.source_platform) && (
-                    <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
+                    <p className="text-xs text-muted-foreground flex items-center gap-1.5">
                       by{" "}
                       <span className="font-medium">{getPostAuthorDisplayName(post)}</span>
                       {post.source_platform && (
