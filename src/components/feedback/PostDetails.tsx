@@ -168,7 +168,7 @@ function CommentItem({
                   variant="ghost"
                   size="sm"
                   onClick={() => handleDeleteComment(comment.id)}
-                  className="h-7 w-7 p-0 text-gray-400 hover:text-red-500 dark:hover:text-red-400"
+                  className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive dark:hover:text-destructive"
                 >
                   <Trash2 className="h-3.5 w-3.5" />
                 </Button>
@@ -879,8 +879,8 @@ export function PostDetails({
   if (!post) {
     return (
       <div className="flex-1 border-l border-gray-200 dark:border-border bg-gray-50 dark:bg-background flex items-center justify-center">
-        <div className="text-center text-gray-500 dark:text-gray-400">
-          <MessageSquare className="h-12 w-12 mx-auto mb-3 text-gray-300 dark:text-gray-600" />
+        <div className="text-center text-muted-foreground">
+          <MessageSquare className="h-12 w-12 mx-auto mb-3 text-muted-foreground/50" />
           <p>Select a post to view details</p>
         </div>
       </div>
@@ -911,25 +911,25 @@ export function PostDetails({
                   disabled={upvoting}
                   className={cn(
                     "h-8 w-8 p-0 rounded-md",
-                    upvoted ? "text-blue-600 bg-blue-50 dark:bg-blue-900/20" : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    upvoted ? "text-primary bg-primary/10 dark:bg-primary/20" : "text-muted-foreground hover:bg-muted dark:hover:bg-muted/50"
                   )}
                 >
                   <ArrowUp className="h-4 w-4" />
                 </Button>
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{post.upvotes}</span>
+                <span className="text-sm font-medium text-foreground">{post.upvotes}</span>
               </div>
 
               {/* Post Title and Info */}
               <div className="flex-1 space-y-2">
                 <div className="flex items-start justify-between gap-2">
-                  <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{post.title}</h1>
+                  <h1 className="text-2xl font-bold text-foreground">{post.title}</h1>
                   {(user?.organization_role === "admin" || user?.organization_role === "owner" || post.author?.id === user?.id) && (
                     <div className="flex gap-1">
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={openEditDialog}
-                        className="h-8 w-8 p-0 text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                        className="h-8 w-8 p-0 text-muted-foreground hover:text-primary dark:hover:text-primary hover:bg-primary/10 dark:hover:bg-primary/20"
                       >
                         <Edit2 className="h-4 w-4" />
                       </Button>
@@ -937,7 +937,7 @@ export function PostDetails({
                         variant="ghost"
                         size="sm"
                         onClick={handleDeletePost}
-                        className="h-8 w-8 p-0 text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+                        className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive dark:hover:text-destructive hover:bg-destructive/10 dark:hover:bg-destructive/20"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -947,7 +947,7 @@ export function PostDetails({
 
                 {/* Author and time — widget posts use external_author or org_end_user;
                     Posts with source_platform show the original submitter + platform badge */}
-                <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 flex-wrap">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground flex-wrap">
                   {(isAutopilotPost(post) || post.source_platform) ? (
                     <>
                       <Avatar className="h-6 w-6">
@@ -988,7 +988,7 @@ export function PostDetails({
 
                 {/* Description */}
                 {post.description && (
-                  <p className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap mt-3">
+                  <p className="text-foreground/80 dark:text-foreground/70 leading-relaxed whitespace-pre-wrap mt-3">
                     {post.description}
                   </p>
                 )}
@@ -996,7 +996,7 @@ export function PostDetails({
                 {/* Images Gallery */}
                 {post.images && post.images.length > 0 && (
                   <div className="mt-4 space-y-2">
-                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                    <p className="text-sm font-medium text-muted-foreground">
                       Attachments ({post.images.length})
                     </p>
                     <div className={cn(
@@ -1041,7 +1041,7 @@ export function PostDetails({
 
             {loadingComments ? (
               <div className="flex justify-center py-10">
-                <Loader2 className="h-6 w-6 animate-spin text-gray-400 dark:text-gray-500" />
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
               </div>
             ) : comments.length === 0 ? (
               <div className="py-10 text-center">
@@ -1081,7 +1081,7 @@ export function PostDetails({
           <div className="flex gap-3">
             <Avatar className="h-10 w-10 flex-shrink-0 mt-0.5">
               <AvatarImage src={user?.avatar_url || undefined} alt={user?.name || "You"} />
-              <AvatarFallback className="text-sm bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300 font-semibold">
+              <AvatarFallback className="text-sm bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 font-semibold">
                 {userInitial}
               </AvatarFallback>
             </Avatar>
@@ -1143,8 +1143,8 @@ export function PostDetails({
                   size="sm"
                   className={cn(
                     "rounded-full h-9 px-4 font-bold text-[15px] shadow-none",
-                    "bg-sky-500 hover:bg-sky-600 text-white",
-                    "disabled:bg-sky-500/50 disabled:text-white/80 disabled:opacity-100"
+                    "bg-primary hover:bg-primary/90 text-primary-foreground",
+                    "disabled:bg-primary/50 disabled:text-primary-foreground/80 disabled:opacity-100"
                   )}
                 >
                   {submittingComment ? (
@@ -1161,14 +1161,14 @@ export function PostDetails({
       {/* End of Main Content */}
 
       {/* Details Sidebar - Right Side */}
-      <div className="w-80 bg-white dark:bg-gray-900 border-l border-gray-200 dark:border-gray-800 flex-shrink-0 overflow-y-auto min-h-screen">
+      <div className="w-80 bg-white dark:bg-card border-l border-gray-200 dark:border-border flex-shrink-0 overflow-y-auto min-h-screen">
         <div className="p-6 space-y-6">
-          <h3 className="font-semibold text-lg text-gray-900 dark:text-white">Details</h3>
+          <h3 className="font-semibold text-lg text-foreground">Details</h3>
 
           <div className="space-y-4">
             {/* Public Link */}
             <div>
-              <label className="text-sm font-bold text-gray-900 dark:text-white block mb-3">
+              <label className="text-sm font-bold text-foreground block mb-3">
                 🔗 Public Board Link
               </label>
               <div className="flex gap-2">
@@ -1177,7 +1177,7 @@ export function PostDetails({
                   value={getPublicLink()}
                   readOnly
                   placeholder="Loading link..."
-                  className="flex-1 text-sm bg-gray-100 dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-700 rounded-lg px-4 py-3 truncate text-primary font-medium"
+                  className="flex-1 text-sm bg-gray-100 dark:bg-muted border-2 border-gray-300 dark:border-border rounded-lg px-4 py-3 truncate text-primary font-medium"
                 />
                 <Button
                   size="sm"
@@ -1206,15 +1206,15 @@ export function PostDetails({
 
             {/* Board */}
             <div>
-              <label className="text-sm text-gray-600 dark:text-gray-400 block mb-2">Board</label>
-              <div className="text-sm font-medium text-gray-900 dark:text-white">
+              <label className="text-sm text-muted-foreground block mb-2">Board</label>
+              <div className="text-sm font-medium text-foreground">
                 {currentBoard?.name || post.board?.name || "—"}
               </div>
             </div>
 
             {/* Status */}
             <div>
-              <label className="text-sm text-gray-600 dark:text-gray-400 block mb-2">Status</label>
+              <label className="text-sm text-muted-foreground block mb-2">Status</label>
               {(user?.organization_role === "admin" || user?.organization_role === "owner") ? (
                 <Select value={post.status} onValueChange={handleStatusChange}>
                   <SelectTrigger className="w-full">
@@ -1229,7 +1229,7 @@ export function PostDetails({
                   </SelectContent>
                 </Select>
               ) : (
-                <div className="text-sm font-medium text-gray-900 dark:text-white">
+                <div className="text-sm font-medium text-foreground">
                   {STATUS_OPTIONS.find(s => s.value === post.status)?.label || post.status}
                 </div>
               )}
@@ -1237,8 +1237,8 @@ export function PostDetails({
 
             {/* Owner - Placeholder */}
             <div>
-              <label className="text-sm text-gray-600 dark:text-gray-400 block mb-2">Owner</label>
-              <div className="text-sm text-gray-500 dark:text-gray-400">
+              <label className="text-sm text-muted-foreground block mb-2">Owner</label>
+              <div className="text-sm text-muted-foreground">
                 {(isAutopilotPost(post) || post.source_platform) ? (
                   <>
                     <span>{getPostAuthorDisplayName(post)}</span>
@@ -1252,7 +1252,7 @@ export function PostDetails({
                   <>
                     {getPostAuthorDisplayName(post)}
                     {(post.external_author || post.org_end_user) && (
-                      <span className="ml-2 inline-flex items-center rounded-full bg-violet-100 px-1.5 py-0.5 text-[10px] font-medium text-violet-700 dark:bg-violet-900/40 dark:text-violet-300">
+                        <span className="ml-2 inline-flex items-center rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary dark:bg-primary/20 dark:text-primary">
                         via Widget
                       </span>
                     )}
@@ -1265,12 +1265,12 @@ export function PostDetails({
             {(post.org_end_user?.custom_fields || post.external_author?.context) &&
               Object.keys(post.org_end_user?.custom_fields || post.external_author?.context || {}).length > 0 && (
               <div>
-                <label className="text-sm text-gray-600 dark:text-gray-400 block mb-3">User Attributes</label>
+                <label className="text-sm text-muted-foreground block mb-3">User Attributes</label>
                 <div className="flex flex-col gap-2">
                   {Object.entries(post.org_end_user?.custom_fields || post.external_author?.context || {}).map(([key, val]) => (
-                    <div key={key} className="flex flex-col bg-gray-50 dark:bg-gray-800/50 rounded-md p-2 border border-gray-100 dark:border-gray-800">
-                      <span className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">{key}</span>
-                      <span className="text-sm font-medium text-gray-900 dark:text-gray-100 break-words font-mono text-[13px]">
+                    <div key={key} className="flex flex-col bg-gray-50 dark:bg-muted/50 rounded-md p-2 border border-gray-100 dark:border-border">
+                      <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1">{key}</span>
+                      <span className="text-sm font-medium text-foreground break-words font-mono text-[13px]">
                         {typeof val === 'object' ? JSON.stringify(val) : String(val)}
                       </span>
                     </div>
@@ -1281,13 +1281,13 @@ export function PostDetails({
 
             {/* Estimated - Placeholder */}
             <div>
-              <label className="text-sm text-gray-600 dark:text-gray-400 block mb-2">Estimated</label>
-              <div className="text-sm text-gray-500 dark:text-gray-400">Comming soon</div>
+              <label className="text-sm text-muted-foreground block mb-2">Estimated</label>
+              <div className="text-sm text-muted-foreground">Comming soon</div>
             </div>
 
             {/* Category — editable */}
             <div>
-              <label className="text-sm text-gray-600 dark:text-gray-400 block mb-2">Category</label>
+              <label className="text-sm text-muted-foreground block mb-2">Category</label>
               {(user?.organization_role === "admin" || user?.organization_role === "owner") ? (
                 editingCategory ? (
                   <div className="space-y-2">
@@ -1359,15 +1359,15 @@ export function PostDetails({
                       setEditingCategory(true);
                       setCategoryValue(post.category || "");
                     }}
-                    className="text-sm font-medium text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors text-left w-full"
+                    className="text-sm font-medium text-foreground hover:text-primary dark:hover:text-primary transition-colors text-left w-full"
                   >
                     {post.category || currentBoard?.category || (
-                      <span className="text-gray-400 dark:text-gray-500 italic">Add category</span>
+                      <span className="text-muted-foreground italic">Add category</span>
                     )}
                   </button>
                 )
               ) : (
-                <div className="text-sm font-medium text-gray-900 dark:text-white">
+                <div className="text-sm font-medium text-foreground">
                   {post.category || currentBoard?.category || "N/A"}
                 </div>
               )}
@@ -1376,11 +1376,11 @@ export function PostDetails({
             {/* Add to Roadmap Button */}
             {(user?.organization_role === "admin" || user?.organization_role === "owner") && (
               <div>
-                <label className="text-sm text-gray-600 dark:text-gray-400 block mb-2">Roadmap</label>
+                <label className="text-sm text-muted-foreground block mb-2">Roadmap</label>
                 <Button
                   onClick={() => setShowRoadmapModal(true)}
                   variant="outline"
-                  className="w-full justify-start gap-2 dark:border-border dark:hover:bg-gray-800"
+                  className="w-full justify-start gap-2 dark:border-border dark:hover:bg-muted"
                   size="sm"
                 >
                   <svg
@@ -1404,15 +1404,15 @@ export function PostDetails({
 
           {/* Tags Section */}
           <div>
-            <label className="text-sm text-gray-600 dark:text-gray-400 block mb-2">Tags</label>
-            <button className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">Comming soon</button>
+            <label className="text-sm text-muted-foreground block mb-2">Tags</label>
+            <button className="text-sm text-muted-foreground hover:text-foreground transition-colors">Comming soon</button>
           </div>
 
           {/* Voter Section */}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <label className="text-sm text-gray-600 dark:text-gray-400">{post.upvotes} Voter{post.upvotes !== 1 ? 's' : ''}</label>
-              <button className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">Comming soon</button>
+              <label className="text-sm text-muted-foreground">{post.upvotes} Voter{post.upvotes !== 1 ? 's' : ''}</label>
+            <button className="text-sm text-muted-foreground hover:text-foreground transition-colors">Comming soon</button>
             </div>
           </div>
         </div>
@@ -1423,14 +1423,14 @@ export function PostDetails({
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
         <DialogContent className="dark:bg-background dark:border-border">
           <DialogHeader>
-            <DialogTitle className="dark:text-white">Edit Post</DialogTitle>
-            <DialogDescription className="dark:text-gray-400">
+            <DialogTitle className="text-foreground">Edit Post</DialogTitle>
+            <DialogDescription className="text-muted-foreground">
               Update the title and description of this post
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div>
-              <Label htmlFor="edit-title" className="dark:text-gray-300">Title *</Label>
+              <Label htmlFor="edit-title" className="text-foreground">Title *</Label>
               <Input
                 id="edit-title"
                 value={editFormData.title}
@@ -1440,7 +1440,7 @@ export function PostDetails({
               />
             </div>
             <div>
-              <Label htmlFor="edit-description" className="dark:text-gray-300">Description</Label>
+              <Label htmlFor="edit-description" className="text-foreground">Description</Label>
               <Textarea
                 id="edit-description"
                 value={editFormData.description}
@@ -1452,7 +1452,7 @@ export function PostDetails({
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowEditDialog(false)} className="dark:bg-card dark:border-border dark:text-white dark:hover:bg-gray-700">
+            <Button variant="outline" onClick={() => setShowEditDialog(false)} className="dark:bg-card dark:border-border dark:text-foreground dark:hover:bg-muted">
               Cancel
             </Button>
             <Button onClick={handleEditPost}>
