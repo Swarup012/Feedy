@@ -168,7 +168,7 @@ function TypingDots() {
 function MessageBubble({ msg }: { msg: UiMessage }) {
   if (msg.role === "user") {
     return (
-      <div className="flex justify-end mb-4">
+      <div className="flex justify-end mb-4" style={{ animation: "msg-enter 150ms cubic-bezier(0.16, 1, 0.3, 1) both" }}>
         <div className="max-w-[75%] rounded-2xl rounded-tr-sm bg-card border border-border text-foreground px-3 py-2 shadow-sm">
           <p className="text-sm leading-relaxed">{msg.text}</p>
         </div>
@@ -176,7 +176,7 @@ function MessageBubble({ msg }: { msg: UiMessage }) {
     );
   }
   return (
-    <div className="flex justify-start mb-4">
+    <div className="flex justify-start mb-4" style={{ animation: "msg-enter 200ms cubic-bezier(0.16, 1, 0.3, 1) both" }}>
       <div className="flex gap-3 max-w-[85%]">
         <div className="flex-shrink-0 w-8 h-8 mt-0.5">
           <img
@@ -192,7 +192,7 @@ function MessageBubble({ msg }: { msg: UiMessage }) {
             {msg.isStreaming && msg.text === "" ? (
               <TypingDots />
             ) : msg.isError ? (
-              <div className="flex items-start gap-2">
+              <div className="flex items-start gap-2" style={{ animation: "msg-enter 200ms cubic-bezier(0.16, 1, 0.3, 1) both" }}>
                 <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
                 <p className="text-sm text-red-700 dark:text-red-400">
                   {msg.text}
@@ -207,7 +207,7 @@ function MessageBubble({ msg }: { msg: UiMessage }) {
             )}
           </div>
           {msg.contextMeta && !msg.isStreaming && (
-            <div className="flex items-center gap-2 mt-1.5 ml-1">
+            <div className="flex items-center gap-2 mt-1.5 ml-1" style={{ animation: "meta-enter 300ms cubic-bezier(0.16, 1, 0.3, 1) 100ms both" }}>
               <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground">
                 <Layers className="w-2.5 h-2.5" />
                 {msg.contextMeta.clustersUsed} clusters
@@ -707,6 +707,16 @@ function AiChatContent() {
 
   return (
     <PaidFeatureGate featureName="AI Feedback Chat">
+      <style>{`
+        @keyframes msg-enter {
+          from { opacity: 0; transform: translateY(6px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes meta-enter {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+      `}</style>
       <div className="h-full flex bg-background overflow-hidden">
         {/* Mobile sidebar toggle */}
         <button
@@ -750,14 +760,14 @@ function AiChatContent() {
               ) : (
                 messages.map((msg) => <MessageBubble key={msg.id} msg={msg} />)
               )}
-              {rateLimitError && (
-                <div className="flex items-start gap-2 mt-2 p-2.5 rounded-xl border border-amber-200 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-800">
-                  <AlertCircle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
-                  <p className="text-xs text-amber-700 dark:text-amber-400">
-                    {rateLimitError}
-                  </p>
-                </div>
-              )}
+            {rateLimitError && (
+              <div className="flex items-start gap-2 mt-2 p-2.5 rounded-xl border border-amber-200 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-800" style={{ animation: "msg-enter 200ms cubic-bezier(0.16, 1, 0.3, 1) both" }}>
+                <AlertCircle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+                <p className="text-xs text-amber-700 dark:text-amber-400">
+                  {rateLimitError}
+                </p>
+              </div>
+            )}
               <div ref={messagesEndRef} />
             </div>
           </div>
