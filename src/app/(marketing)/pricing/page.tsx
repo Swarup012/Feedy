@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import * as Collapsible from "@radix-ui/react-collapsible";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { useOrganization } from "@/context/OrganizationContext";
@@ -39,6 +40,7 @@ import {
   LayoutGrid,
   MessageSquare,
   Crown,
+  ChevronDown,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import paddleService from "@/services/paddleService";
@@ -54,6 +56,7 @@ export default function PricingPage() {
   );
   const [loading, setLoading] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [overageOpen, setOverageOpen] = useState(false);
 
   // Navbar Actions Component
   const NavbarActions = ({ visible }: { visible?: boolean }) => (
@@ -159,7 +162,7 @@ export default function PricingPage() {
       <div className="container mx-auto px-4 py-16 pt-24">
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-xl md:text-2xl font-switzer font-medium mb-4">
+          <h1 className="text-3xl md:text-4xl font-switzer font-medium mb-4">
             <span className="text-blue-600">Transparent</span> Pricing
           </h1>
           <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
@@ -188,7 +191,7 @@ export default function PricingPage() {
             >
               Yearly
               <Badge className="bg-green-500 text-white text-xs px-2 py-0.5">
-                Save ${starterPlan.savings}
+                Save ${starterPlan.savings}–${proPlan.savings}
               </Badge>
             </button>
           </div>
@@ -223,7 +226,7 @@ export default function PricingPage() {
                   if (!user) router.push("/signup");
                 }}
               >
-                {!user ? "Start FREE" : currentPlan === "free" ? "Current Plan" : "Downgrade"}
+                {!user ? "Start FREE" : currentPlan === "free" ? "Current Plan" : "Switch to Free"}
               </Button>
 
               <div className="space-y-3">
@@ -316,7 +319,7 @@ export default function PricingPage() {
                   onClick={() => handleUpgrade("starter", billingCycle, false)}
                   disabled={loading}
                 >
-                  Downgrade to Starter
+                  Switch to Starter
                 </Button>
               )}
 
@@ -360,13 +363,6 @@ export default function PricingPage() {
             <CardHeader>
               <div className="flex items-center justify-between mb-2">
                 <CardTitle className="text-2xl">{proPlan.name}</CardTitle>
-                <div className="relative group">
-                  <div className="absolute -inset-0.5 bg-gradient-to-r from-amber-400 to-orange-500 rounded-full blur opacity-30 group-hover:opacity-60 transition duration-200"></div>
-                  <Badge className="relative bg-white dark:bg-gray-900 text-orange-600 dark:text-amber-400 border border-orange-200 dark:border-amber-800/60 shadow-sm font-bold uppercase tracking-wider text-[10px] px-2.5 py-0.5 flex items-center gap-1">
-                    <Zap className="w-3 h-3 fill-orange-500 dark:fill-amber-500 text-orange-500 dark:text-amber-500" />
-                    Early Access
-                  </Badge>
-                </div>
               </div>
               <div className="mb-4">
                 {billingCycle === "monthly" ? (
@@ -491,18 +487,18 @@ export default function PricingPage() {
                       </th>
                       <th
                         scope="col"
+                        className="py-4 px-6 text-center text-sm font-semibold text-gray-900 dark:text-white"
+                      >
+                        Starter
+                      </th>
+                      <th
+                        scope="col"
                         className="py-4 px-6 text-center text-sm font-semibold text-gray-900 dark:text-white bg-blue-50 dark:bg-blue-900/20"
                       >
                         <div className="flex items-center justify-center gap-2">
                           <Crown className="w-4 h-4 text-blue-600" />
-                          Starter
+                          Pro
                         </div>
-                      </th>
-                      <th
-                        scope="col"
-                        className="py-4 px-6 text-center text-sm font-semibold text-gray-900 dark:text-white"
-                      >
-                        Pro
                       </th>
                     </tr>
                   </thead>
@@ -523,24 +519,24 @@ export default function PricingPage() {
                       <td className="py-4 px-6 text-center text-sm text-gray-900 dark:text-white font-semibold">
                         $0
                       </td>
-                      <td className="py-4 px-6 text-center text-sm text-gray-900 dark:text-white font-semibold bg-blue-50/50 dark:bg-blue-900/10">
+                      <td className="py-4 px-6 text-center text-sm text-gray-900 dark:text-white font-semibold">
                         ${starterPlan.monthlyPrice}
                       </td>
-                      <td className="py-4 px-6 text-center text-sm text-gray-900 dark:text-white font-semibold">
+                      <td className="py-4 px-6 text-center text-sm text-gray-900 dark:text-white font-semibold bg-blue-50/50 dark:bg-blue-900/10">
                         ${proPlan.monthlyPrice}
                       </td>
                     </tr>
                     <tr>
                       <td className="py-4 px-6 text-sm text-gray-900 dark:text-white">
-                        Yearly Price (save ${starterPlan.savings})
+                        Yearly Price (save ${starterPlan.savings}–${proPlan.savings})
                       </td>
                       <td className="py-4 px-6 text-center text-sm text-gray-500">
                         -
                       </td>
-                      <td className="py-4 px-6 text-center text-sm text-gray-900 dark:text-white font-semibold bg-blue-50/50 dark:bg-blue-900/10">
+                      <td className="py-4 px-6 text-center text-sm text-gray-900 dark:text-white font-semibold">
                         ${starterPlan.yearlyPrice}/mo
                       </td>
-                      <td className="py-4 px-6 text-center text-sm text-gray-900 dark:text-white font-semibold">
+                      <td className="py-4 px-6 text-center text-sm text-gray-900 dark:text-white font-semibold bg-blue-50/50 dark:bg-blue-900/10">
                         ${proPlan.yearlyPrice}/mo
                       </td>
                     </tr>
@@ -575,10 +571,10 @@ export default function PricingPage() {
                       <td className="py-4 px-6 text-center text-sm text-gray-700 dark:text-gray-300">
                         Included in 3
                       </td>
-                      <td className="py-4 px-6 text-center text-sm font-semibold text-blue-600 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-900/10">
+                      <td className="py-4 px-6 text-center text-sm font-semibold text-blue-600 dark:text-blue-400">
                         Up to 5 admins
                       </td>
-                      <td className="py-4 px-6 text-center text-sm font-semibold text-blue-600 dark:text-blue-400">
+                      <td className="py-4 px-6 text-center text-sm font-semibold text-blue-600 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-900/10">
                         Up to 10 admins
                       </td>
                     </tr>
@@ -589,10 +585,10 @@ export default function PricingPage() {
                       <td className="py-4 px-6 text-center">
                         <Check className="w-5 h-5 text-green-500 mx-auto" />
                       </td>
-                      <td className="py-4 px-6 text-center bg-blue-50/50 dark:bg-blue-900/10">
+                      <td className="py-4 px-6 text-center">
                         <Check className="w-5 h-5 text-green-500 mx-auto" />
                       </td>
-                      <td className="py-4 px-6 text-center">
+                      <td className="py-4 px-6 text-center bg-blue-50/50 dark:bg-blue-900/10">
                         <Check className="w-5 h-5 text-green-500 mx-auto" />
                       </td>
                     </tr>
@@ -627,10 +623,10 @@ export default function PricingPage() {
                       <td className="py-4 px-6 text-center text-sm text-gray-700 dark:text-gray-300">
                         5 posts
                       </td>
-                      <td className="py-4 px-6 text-center text-sm font-semibold text-blue-600 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-900/10">
+                      <td className="py-4 px-6 text-center text-sm font-semibold text-blue-600 dark:text-blue-400">
                         Unlimited
                       </td>
-                      <td className="py-4 px-6 text-center text-sm font-semibold text-blue-600 dark:text-blue-400">
+                      <td className="py-4 px-6 text-center text-sm font-semibold text-blue-600 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-900/10">
                         Unlimited
                       </td>
                     </tr>
@@ -641,10 +637,10 @@ export default function PricingPage() {
                       <td className="py-4 px-6 text-center text-sm text-gray-700 dark:text-gray-300">
                         20 users
                       </td>
-                      <td className="py-4 px-6 text-center text-sm font-semibold text-blue-600 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-900/10">
+                      <td className="py-4 px-6 text-center text-sm font-semibold text-blue-600 dark:text-blue-400">
                         125+ users
                       </td>
-                      <td className="py-4 px-6 text-center text-sm font-semibold text-blue-600 dark:text-blue-400">
+                      <td className="py-4 px-6 text-center text-sm font-semibold text-blue-600 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-900/10">
                         125+ users
                       </td>
                     </tr>
@@ -655,10 +651,10 @@ export default function PricingPage() {
                       <td className="py-4 px-6 text-center text-sm text-gray-700 dark:text-gray-300">
                         1 roadmap
                       </td>
-                      <td className="py-4 px-6 text-center text-sm font-semibold text-blue-600 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-900/10">
+                      <td className="py-4 px-6 text-center text-sm font-semibold text-blue-600 dark:text-blue-400">
                         1 roadmap
                       </td>
-                      <td className="py-4 px-6 text-center text-sm font-semibold text-blue-600 dark:text-blue-400">
+                        <td className="py-4 px-6 text-center text-sm font-semibold text-blue-600 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-900/10">
                         Unlimited
                       </td>
                     </tr>
@@ -693,10 +689,10 @@ export default function PricingPage() {
                       <td className="py-4 px-6 text-center">
                         <X className="w-5 h-5 text-gray-300 mx-auto" />
                       </td>
-                      <td className="py-4 px-6 text-center bg-blue-50/50 dark:bg-blue-900/10">
+                      <td className="py-4 px-6 text-center">
                         <X className="w-5 h-5 text-gray-300 mx-auto" />
                       </td>
-                      <td className="py-4 px-6 text-center">
+                      <td className="py-4 px-6 text-center bg-blue-50/50 dark:bg-blue-900/10">
                         <span className="text-sm font-semibold text-blue-600 dark:text-blue-400">1 subdomain</span>
                       </td>
                     </tr>
@@ -707,10 +703,10 @@ export default function PricingPage() {
                       <td className="py-4 px-6 text-center text-sm text-gray-700 dark:text-gray-300">
                         Basic
                       </td>
-                      <td className="py-4 px-6 text-center text-sm font-semibold text-blue-600 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-900/10">
+                      <td className="py-4 px-6 text-center text-sm font-semibold text-blue-600 dark:text-blue-400">
                         Advanced
                       </td>
-                      <td className="py-4 px-6 text-center text-sm font-semibold text-blue-600 dark:text-blue-400">
+                      <td className="py-4 px-6 text-center text-sm font-semibold text-blue-600 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-900/10">
                         Advanced
                       </td>
                     </tr>
@@ -721,10 +717,10 @@ export default function PricingPage() {
                       <td className="py-4 px-6 text-center">
                         <X className="w-5 h-5 text-gray-300 mx-auto" />
                       </td>
-                      <td className="py-4 px-6 text-center bg-blue-50/50 dark:bg-blue-900/10">
+                      <td className="py-4 px-6 text-center">
                         <X className="w-5 h-5 text-gray-300 mx-auto" />
                       </td>
-                      <td className="py-4 px-6 text-center">
+                      <td className="py-4 px-6 text-center bg-blue-50/50 dark:bg-blue-900/10">
                         <Check className="w-5 h-5 text-green-500 mx-auto" />
                       </td>
                     </tr>
@@ -735,10 +731,10 @@ export default function PricingPage() {
                       <td className="py-4 px-6 text-center">
                         <X className="w-5 h-5 text-gray-300 mx-auto" />
                       </td>
-                      <td className="py-4 px-6 text-center bg-blue-50/50 dark:bg-blue-900/10">
+                      <td className="py-4 px-6 text-center">
                         <X className="w-5 h-5 text-gray-300 mx-auto" />
                       </td>
-                      <td className="py-4 px-6 text-center">
+                      <td className="py-4 px-6 text-center bg-blue-50/50 dark:bg-blue-900/10">
                         <Check className="w-5 h-5 text-green-500 mx-auto" />
                       </td>
                     </tr>
@@ -749,10 +745,10 @@ export default function PricingPage() {
                       <td className="py-4 px-6 text-center">
                         <X className="w-5 h-5 text-gray-300 mx-auto" />
                       </td>
-                      <td className="py-4 px-6 text-center bg-blue-50/50 dark:bg-blue-900/10">
+                      <td className="py-4 px-6 text-center">
                         <X className="w-5 h-5 text-gray-300 mx-auto" />
                       </td>
-                      <td className="py-4 px-6 text-center">
+                      <td className="py-4 px-6 text-center bg-blue-50/50 dark:bg-blue-900/10">
                         <Check className="w-5 h-5 text-green-500 mx-auto" />
                       </td>
                     </tr>
@@ -787,10 +783,10 @@ export default function PricingPage() {
                       <td className="py-4 px-6 text-center text-sm text-gray-500">
                         -
                       </td>
-                      <td className="py-4 px-6 text-center text-sm text-gray-700 dark:text-gray-300 bg-blue-50/50 dark:bg-blue-900/10">
+                      <td className="py-4 px-6 text-center text-sm text-gray-700 dark:text-gray-300">
                         20% (25 users)
                       </td>
-                      <td className="py-4 px-6 text-center text-sm text-gray-700 dark:text-gray-300">
+                      <td className="py-4 px-6 text-center text-sm text-gray-900 dark:text-white bg-blue-50/50 dark:bg-blue-900/10">
                         20% (25 users)
                       </td>
                     </tr>
@@ -801,10 +797,10 @@ export default function PricingPage() {
                       <td className="py-4 px-6 text-center text-sm text-gray-500">
                         -
                       </td>
-                      <td className="py-4 px-6 text-center text-sm text-gray-700 dark:text-gray-300 bg-blue-50/50 dark:bg-blue-900/10">
+                      <td className="py-4 px-6 text-center text-sm text-gray-700 dark:text-gray-300">
                         $6 per 50 users
                       </td>
-                      <td className="py-4 px-6 text-center text-sm text-gray-700 dark:text-gray-300">
+                      <td className="py-4 px-6 text-center text-sm text-gray-900 dark:text-white bg-blue-50/50 dark:bg-blue-900/10">
                         $6 per 50 users
                       </td>
                     </tr>
@@ -815,10 +811,10 @@ export default function PricingPage() {
                       <td className="py-4 px-6 text-center text-sm text-gray-500">
                         -
                       </td>
-                      <td className="py-4 px-6 text-center text-sm font-semibold text-blue-600 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-900/10">
+                      <td className="py-4 px-6 text-center text-sm font-semibold text-blue-600 dark:text-blue-400">
                         14 days
                       </td>
-                      <td className="py-4 px-6 text-center text-sm font-semibold text-blue-600 dark:text-blue-400">
+                      <td className="py-4 px-6 text-center text-sm font-semibold text-blue-600 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-900/10">
                         14 days
                       </td>
                     </tr>
@@ -829,14 +825,24 @@ export default function PricingPage() {
           </div>
         </div>
 
-        {/* How Overage Billing Works — Professional Redesign */}
+        {/* How Overage Billing Works — Collapsible */}
         <div className="max-w-5xl mx-auto mb-16">
-          <div className="text-center mb-10">
-            <h2 className="text-xl font-bold mb-3">How Overage Billing Works</h2>
-            <p className="text-gray-600 dark:text-gray-400 text-base">
-              Simple, predictable pricing as your community grows
-            </p>
-          </div>
+          <Collapsible.Root open={overageOpen} onOpenChange={setOverageOpen}>
+            <div className="text-center mb-6">
+              <Collapsible.Trigger asChild>
+                <button className="inline-flex items-center gap-2 text-xl font-bold mb-3 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                  How Overage Billing Works
+                  <ChevronDown
+                    className={`w-5 h-5 transition-transform duration-200 ${overageOpen ? "rotate-180" : ""}`}
+                  />
+                </button>
+              </Collapsible.Trigger>
+              <p className="text-gray-600 dark:text-gray-400 text-base">
+                Simple, predictable pricing as your community grows
+              </p>
+            </div>
+
+            <Collapsible.Content className="overflow-hidden data-[state=open]:animate-accordion-down data-[state=closed]:animate-accordion-up">
 
           {/* Three-zone usage bar */}
           <div className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm overflow-hidden mb-6">
@@ -1011,6 +1017,8 @@ export default function PricingPage() {
               </div>
             </div>
           </div>
+          </Collapsible.Content>
+          </Collapsible.Root>
         </div>
 
         {/* FAQ Section */}
@@ -1113,12 +1121,22 @@ export default function PricingPage() {
               <Button
                 size="lg"
                 variant="secondary"
-                onClick={() => handleUpgrade("starter", billingCycle, false)}
-                disabled={loading || currentPlan !== "free"}
+                onClick={() => {
+                  if (currentPlan === "free") {
+                    handleUpgrade("starter", billingCycle, false);
+                  } else if (currentPlan === "starter") {
+                    handleUpgrade("pro", billingCycle, false);
+                  } else {
+                    router.push("/admin/settings");
+                  }
+                }}
+                disabled={loading}
               >
-                {currentPlan !== "free"
-                  ? "Already Subscribed"
-                  : "Start Free Trial"}
+                {currentPlan === "free"
+                  ? "Start Free Trial"
+                  : currentPlan === "starter"
+                    ? "Upgrade to Pro"
+                    : "Manage Subscription"}
               </Button>
             </CardContent>
           </Card>
