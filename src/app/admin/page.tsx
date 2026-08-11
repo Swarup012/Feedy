@@ -398,7 +398,7 @@ export default function AdminPage() {
                           </div>
                         ))
                       ) : (
-                        <div className="px-5 py-6 text-center space-y-2">
+                        <div className="px-5 py-8 text-center space-y-2">
                           <p className="text-sm text-muted-foreground">No boards yet — a board is where feedback lives</p>
                           <button
                             onClick={() => router.push('/admin/feedback/welcome')}
