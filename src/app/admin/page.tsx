@@ -247,40 +247,36 @@ export default function AdminPage() {
                     value: stats.totalPosts,
                     sub: `${stats.newThisWeek} new this week`,
                     icon: FileText,
-                    color: 'text-blue-600',
-                    bg: 'bg-blue-50 dark:bg-blue-950/30',
+                    accent: false,
                   },
                   {
                     label: 'Needs Review',
                     value: stats.pendingPosts,
                     sub: 'Waiting for your action',
                     icon: Clock,
-                    color: 'text-amber-600',
-                    bg: 'bg-amber-50 dark:bg-amber-950/30',
+                    accent: true,
                   },
                   {
                     label: 'Total Votes',
                     value: stats.totalVotes,
                     sub: 'Across all boards',
                     icon: ThumbsUp,
-                    color: 'text-emerald-600',
-                    bg: 'bg-emerald-50 dark:bg-emerald-950/30',
+                    accent: false,
                   },
                   {
                     label: 'Active Users',
                     value: stats.activeUsers,
                     sub: 'Contributing members',
                     icon: Users,
-                    color: 'text-violet-600',
-                    bg: 'bg-violet-50 dark:bg-violet-950/30',
+                    accent: false,
                   },
-                ].map(({ label, value, sub, icon: Icon, color, bg }) => (
+                ].map(({ label, value, sub, icon: Icon, accent }) => (
                   <div
                     key={label}
                     className="rounded-xl border border-border bg-card p-4 flex items-start gap-3"
                   >
-                    <div className={`mt-0.5 w-9 h-9 rounded-lg ${bg} flex items-center justify-center flex-shrink-0`}>
-                      <Icon className={`w-4 h-4 ${color}`} />
+                    <div className={`mt-0.5 w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${accent ? 'bg-primary/10' : 'bg-muted'}`}>
+                      <Icon className={`w-4 h-4 ${accent ? 'text-primary' : 'text-muted-foreground'}`} />
                     </div>
                     <div className="min-w-0">
                       <p className="text-2xl font-bold text-foreground leading-none">{value ?? 0}</p>
@@ -357,7 +353,7 @@ export default function AdminPage() {
                           <div key={p.id} className="px-5 py-3 flex items-center gap-3 hover:bg-muted/40 transition-colors">
                             <span className="w-5 text-center text-xs font-bold text-muted-foreground flex-shrink-0">#{i + 1}</span>
                             <span className="flex-1 text-sm font-medium text-foreground truncate">{p.title}</span>
-                            <div className="flex items-center gap-1 text-xs font-semibold text-amber-600 dark:text-amber-400 flex-shrink-0">
+                            <div className="flex items-center gap-1 text-xs font-semibold text-muted-foreground flex-shrink-0">
                               <ThumbsUp className="w-3 h-3" />{p.vote_count ?? 0}
                             </div>
                           </div>
