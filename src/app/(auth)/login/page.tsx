@@ -102,13 +102,13 @@ function LoginForm() {
   };
 
   return (
-    <div ref={formRef} className="h-screen overflow-hidden flex bg-white dark:bg-slate-950">
+    <div ref={formRef} className="h-screen overflow-hidden flex bg-background">
       {/* Left Side - Branding */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
         {/* Decorative elements */}
         <div className="absolute inset-0 opacity-40 dark:opacity-20 pointer-events-none">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-200/50 dark:bg-blue-900/30 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-slate-200/50 dark:bg-slate-800/30 rounded-full blur-3xl"></div>
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/30 dark:bg-primary/20 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-muted/50 dark:bg-muted/30 rounded-full blur-3xl"></div>
         </div>
         
         {/* Content */}
@@ -116,8 +116,8 @@ function LoginForm() {
           {/* Logo */}
           <div className="login-reveal">
             <Link href="/" className="inline-flex items-center gap-3">
-              <Logo width={36} height={36} className="text-blue-600" />
-              <span className="text-lg font-switzer font-bold text-slate-900 dark:text-white">Faddy</span>
+              <Logo width={36} height={36} className="text-primary" />
+              <span className="text-lg font-switzer font-bold text-foreground">Faddy</span>
             </Link>
           </div>
 
@@ -131,7 +131,7 @@ function LoginForm() {
           </div>
 
           {/* Footer */}
-          <div className="login-reveal text-sm text-slate-500 dark:text-slate-400">
+          <div className="login-reveal text-sm text-muted-foreground">
             © 2026 Faddy. All rights reserved.
           </div>
         </div>
@@ -143,17 +143,17 @@ function LoginForm() {
           {/* Mobile Logo */}
           <div className="login-reveal lg:hidden mb-6 text-center">
             <Link href="/" className="inline-flex items-center gap-3">
-              <Logo width={36} height={36} className="text-blue-600" />
-              <span className="text-lg font-switzer font-bold text-slate-900 dark:text-white">Faddy</span>
+              <Logo width={36} height={36} className="text-primary" />
+              <span className="text-lg font-switzer font-bold text-foreground">Faddy</span>
             </Link>
           </div>
 
           {/* Form Header */}
           <div className="login-reveal mb-6">
-            <h2 className="text-lg font-switzer font-bold text-slate-900 dark:text-white">
+            <h2 className="text-lg font-switzer font-bold text-foreground">
               Sign in to your account
             </h2>
-            <p className="mt-1.5 text-sm text-slate-600 dark:text-slate-400">
+            <p className="mt-1.5 text-sm text-muted-foreground">
               Enter your credentials to access your dashboard
             </p>
           </div>
@@ -171,10 +171,10 @@ function LoginForm() {
               
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t border-slate-300 dark:border-slate-700" />
+                  <span className="w-full border-t border-border" />
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-white dark:bg-slate-950 px-2 text-slate-500 dark:text-slate-400">
+                  <span className="bg-background px-2 text-muted-foreground">
                     Or continue with email
                   </span>
                 </div>
@@ -183,11 +183,11 @@ function LoginForm() {
 
             {/* Email */}
             <div>
-              <Label htmlFor="email" className="text-sm font-medium text-slate-700 dark:text-slate-300">
+              <Label htmlFor="email" className="text-sm font-medium text-foreground">
                 Email address
               </Label>
               <div className="relative mt-2">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
                 <Input
                   id="email"
                   type="email"
@@ -201,11 +201,11 @@ function LoginForm() {
                   required
                   aria-invalid={!!errors.email}
                   aria-describedby={errors.email ? "email-error" : undefined}
-                  className="pl-10 h-12 bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 rounded-lg font-switzer"
+                  className="pl-10 h-12 bg-card border-border text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-lg font-switzer"
                 />
               </div>
               {errors.email && (
-                <p id="email-error" className="text-xs mt-2 text-red-600 dark:text-red-400">
+                <p id="email-error" className="text-xs mt-2 text-destructive">
                   {errors.email}
                 </p>
               )}
@@ -214,18 +214,18 @@ function LoginForm() {
             {/* Password */}
             <div>
               <div className="flex items-center justify-between mb-2">
-                <Label htmlFor="password" className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                <Label htmlFor="password" className="text-sm font-medium text-foreground">
                   Password
                 </Label>
                 <Link 
                   href="/forgot-password"
-                  className="text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors"
+                  className="text-sm text-primary hover:text-primary/80 font-medium transition-colors"
                 >
                   Forgot password?
                 </Link>
               </div>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
@@ -238,20 +238,20 @@ function LoginForm() {
                   required
                   aria-invalid={!!errors.password}
                   aria-describedby={errors.password ? "password-error" : undefined}
-                  className="pl-10 pr-12 h-12 bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 rounded-lg font-switzer"
+                  className="pl-10 pr-12 h-12 bg-card border-border text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-lg font-switzer"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(p => !p)}
                   aria-label={showPassword ? "Hide password" : "Show password"}
                   aria-pressed={showPassword}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                 >
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
               </div>
               {errors.password && (
-                <p id="password-error" className="text-xs mt-2 text-red-600 dark:text-red-400">
+                <p id="password-error" className="text-xs mt-2 text-destructive">
                   {errors.password}
                 </p>
               )}
@@ -261,7 +261,7 @@ function LoginForm() {
             <Button
               type="submit"
               disabled={loading}
-              className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-switzer font-semibold rounded-lg transition-all duration-200 shadow-lg shadow-blue-600/25 hover:shadow-blue-600/40 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-switzer font-semibold rounded-lg transition-all duration-200 shadow-lg shadow-primary/25 hover:shadow-primary/40 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? (
                 <LoadingAnimation width={20} height={20} />
@@ -275,22 +275,22 @@ function LoginForm() {
           </form>
 
           {/* Sign up link */}
-          <p className="login-reveal text-center mt-6 text-sm text-slate-600 dark:text-slate-400">
+          <p className="login-reveal text-center mt-6 text-sm text-muted-foreground">
             Don't have an account?{" "}
-            <Link href="/signup" className="text-blue-600 hover:text-blue-700 font-semibold transition-colors">
+            <Link href="/signup" className="text-primary hover:text-primary/80 font-semibold transition-colors">
               Create account
             </Link>
           </p>
 
           {/* Privacy links */}
-          <div className="login-reveal mt-6 pt-6 border-t border-slate-200 dark:border-slate-800">
-            <p className="text-xs text-center text-slate-500 dark:text-slate-500">
+          <div className="login-reveal mt-6 pt-6 border-t border-border">
+            <p className="text-xs text-center text-muted-foreground">
               By signing in, you agree to our{" "}
-              <Link href="/policy/terms" className="text-blue-600 hover:text-blue-700 hover:underline">
+              <Link href="/policy/terms" className="text-primary hover:text-primary/80 hover:underline">
                 Terms
               </Link>
               {" "}and{" "}
-              <Link href="/policy/privacy" className="text-blue-600 hover:text-blue-700 hover:underline">
+              <Link href="/policy/privacy" className="text-primary hover:text-primary/80 hover:underline">
                 Privacy Policy
               </Link>
             </p>
@@ -304,7 +304,7 @@ function LoginForm() {
 export default function LoginPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <LoadingAnimation width={40} height={40} />
       </div>
     }>

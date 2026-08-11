@@ -52,7 +52,7 @@ export const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({ mode = 'logi
       onClick={handleGoogleAuth}
       disabled={loading}
       aria-label={buttonText}
-      className="w-full flex items-center justify-center gap-3 px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+      className="w-full flex items-center justify-center gap-3 px-4 py-3 border border-border rounded-lg hover:bg-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
     >
       <svg className="w-5 h-5" viewBox="0 0 24 24" aria-hidden="true">
         <path
