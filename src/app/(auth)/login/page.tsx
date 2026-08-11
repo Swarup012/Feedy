@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Logo } from "@/components/logo";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { Eye, EyeOff, ArrowRight, Lock, Mail, CheckCircle2, Zap, Users } from "lucide-react";
+import { Eye, EyeOff, ArrowRight, Lock, Mail } from "lucide-react";
 import { LoadingAnimation } from "@/components/LoadingAnimation";
 import { GoogleAuthButton } from "@/components/auth/GoogleAuthButton";
 import gsap from "gsap";
@@ -53,8 +53,17 @@ function LoginForm() {
 
   const validateForm = () => {
     const e: Record<string, string> = {};
-    if (!formData.email) e.email = "Email is required";
-    if (!formData.password) e.password = "Password is required";
+    const email = formData.email.trim();
+    if (!email) {
+      e.email = "Email is required";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      e.email = "Please enter a valid email address";
+    }
+    if (!formData.password) {
+      e.password = "Password is required";
+    } else if (formData.password.length < 6) {
+      e.password = "Password must be at least 6 characters";
+    }
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -70,12 +79,21 @@ function LoginForm() {
     if (!validateForm()) return;
     setLoading(true);
     try {
-      await login(formData.email, formData.password);
+      await login(formData.email.trim(), formData.password);
       toast({ title: "Welcome back" });
     } catch (err: any) {
+      const message = err?.message || "Login failed";
+      let description = message;
+      if (message.includes("Invalid login credentials") || message.includes("invalid")) {
+        description = "Invalid email or password. Please try again.";
+      } else if (message.includes("network") || message.includes("fetch")) {
+        description = "Network error. Check your connection and try again.";
+      } else if (message.includes("rate") || message.includes("429")) {
+        description = "Too many attempts. Please wait a moment and try again.";
+      }
       toast({
         title: "Login failed",
-        description: err.message,
+        description,
         variant: "destructive",
       });
     } finally {
@@ -141,7 +159,12 @@ function LoginForm() {
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="login-reveal space-y-5">
+          <form onSubmit={handleSubmit} className="login-reveal space-y-5" noValidate>
+            <div aria-live="polite" className="sr-only">
+              {Object.values(errors).filter(Boolean).length > 0 && (
+                <span>{Object.values(errors).filter(Boolean).join(". ")}</span>
+              )}
+            </div>
             {/* Google Sign In */}
             <div className="space-y-3">
               <GoogleAuthButton mode="login" />
@@ -172,6 +195,10 @@ function LoginForm() {
                   onChange={handleChange}
                   disabled={loading}
                   placeholder="you@company.com"
+                  autoComplete="email"
+                  inputMode="email"
+                  maxLength={254}
+                  required
                   aria-invalid={!!errors.email}
                   aria-describedby={errors.email ? "email-error" : undefined}
                   className="pl-10 h-12 bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 rounded-lg font-switzer"
@@ -206,6 +233,9 @@ function LoginForm() {
                   onChange={handleChange}
                   disabled={loading}
                   placeholder="••••••••"
+                  autoComplete="current-password"
+                  maxLength={128}
+                  required
                   aria-invalid={!!errors.password}
                   aria-describedby={errors.password ? "password-error" : undefined}
                   className="pl-10 pr-12 h-12 bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 rounded-lg font-switzer"
