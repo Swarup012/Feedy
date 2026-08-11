@@ -25,25 +25,29 @@ function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  // Entrance animation
+  // Entrance animation — respects prefers-reduced-motion
   useEffect(() => {
+    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const ctx = gsap.context(() => {
-      gsap.from(".login-reveal", {
-        y: 12,
-        opacity: 0,
-        scale: 0.98,
-        duration: 0.8,
-        stagger: 0.08,
-        ease: "power3.out",
-      });
+      if (prefersReduced) {
+        gsap.set(".login-reveal", { opacity: 1 });
+      } else {
+        gsap.from(".login-reveal", {
+          y: 12,
+          opacity: 0,
+          scale: 0.98,
+          duration: 0.8,
+          stagger: 0.08,
+          ease: "power3.out",
+        });
+      }
     }, formRef);
     return () => ctx.revert();
   }, []);
 
   useEffect(() => {
     try {
-      const token = localStorage.getItem("pendingInviteToken");
-      if (token) console.log("🎫 Pending invite token:", token);
+      localStorage.getItem("pendingInviteToken");
     } catch {}
   }, [searchParams]);
 
@@ -168,11 +172,13 @@ function LoginForm() {
                   onChange={handleChange}
                   disabled={loading}
                   placeholder="you@company.com"
+                  aria-invalid={!!errors.email}
+                  aria-describedby={errors.email ? "email-error" : undefined}
                   className="pl-10 h-12 bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 rounded-lg font-switzer"
                 />
               </div>
               {errors.email && (
-                <p className="text-xs mt-2 text-red-600 dark:text-red-400">
+                <p id="email-error" className="text-xs mt-2 text-red-600 dark:text-red-400">
                   {errors.email}
                 </p>
               )}
@@ -200,18 +206,22 @@ function LoginForm() {
                   onChange={handleChange}
                   disabled={loading}
                   placeholder="••••••••"
+                  aria-invalid={!!errors.password}
+                  aria-describedby={errors.password ? "password-error" : undefined}
                   className="pl-10 pr-12 h-12 bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 rounded-lg font-switzer"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(p => !p)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  aria-pressed={showPassword}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
                 >
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
               </div>
               {errors.password && (
-                <p className="text-xs mt-2 text-red-600 dark:text-red-400">
+                <p id="password-error" className="text-xs mt-2 text-red-600 dark:text-red-400">
                   {errors.password}
                 </p>
               )}
