@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { PaidFeatureGate } from "@/components/PaidFeatureGate";
 import { useOrganization } from "@/context/OrganizationContext";
@@ -165,7 +165,7 @@ function TypingDots() {
   );
 }
 
-function MessageBubble({ msg }: { msg: UiMessage }) {
+const MessageBubble = React.memo(function MessageBubble({ msg }: { msg: UiMessage }) {
   if (msg.role === "user") {
     return (
       <div className="flex justify-end mb-4" style={{ animation: "msg-enter 150ms cubic-bezier(0.16, 1, 0.3, 1) both" }}>
@@ -222,7 +222,7 @@ function MessageBubble({ msg }: { msg: UiMessage }) {
       </div>
     </div>
   );
-}
+});
 
 function WelcomeState({
   orgName,
@@ -410,11 +410,23 @@ function AiChatContent() {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const abortRef = useRef<AbortController | null>(null);
   const isCreatingConvRef = useRef(false);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const rafRef = useRef<number>(0);
+  const accumulatedTextRef = useRef("");
   const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
-  // Auto-scroll
+  // Auto-scroll only if user is near bottom
+  const isNearBottom = useCallback(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return true;
+    const threshold = 120;
+    return container.scrollHeight - container.scrollTop - container.clientHeight < threshold;
+  }, []);
+
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (isNearBottom()) {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
   }, [messages]);
 
   // ── Load conversations on mount / org change ──────────────────────────────
@@ -525,8 +537,21 @@ function AiChatContent() {
       setIsStreaming(true);
 
       abortRef.current = new AbortController();
-      let accumulated = "";
+      accumulatedTextRef.current = "";
       let contextMeta: UiMessage["contextMeta"] = undefined;
+      let rafPending = false;
+
+      const flushUpdate = () => {
+        rafPending = false;
+        const text = accumulatedTextRef.current;
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === aiMsgId
+              ? { ...m, text, isStreaming: true }
+              : m,
+          ),
+        );
+      };
 
       try {
         const response = await fetch(
@@ -571,21 +596,20 @@ function AiChatContent() {
               const parsed = JSON.parse(line.slice(6));
               if (parsed.event === "context") contextMeta = parsed.data;
               else if (parsed.event === "chunk") {
-                accumulated += parsed.data;
-                setMessages((prev) =>
-                  prev.map((m) =>
-                    m.id === aiMsgId
-                      ? { ...m, text: accumulated, isStreaming: true }
-                      : m,
-                  ),
-                );
+                accumulatedTextRef.current += parsed.data;
+                if (!rafPending) {
+                  rafPending = true;
+                  rafRef.current = requestAnimationFrame(flushUpdate);
+                }
               } else if (parsed.event === "done") {
+                cancelAnimationFrame(rafRef.current);
+                const finalText = accumulatedTextRef.current;
                 setMessages((prev) =>
                   prev.map((m) =>
                     m.id === aiMsgId
                       ? {
                           ...m,
-                          text: accumulated,
+                          text: finalText,
                           isStreaming: false,
                           contextMeta,
                         }
@@ -593,6 +617,7 @@ function AiChatContent() {
                   ),
                 );
               } else if (parsed.event === "error") {
+                cancelAnimationFrame(rafRef.current);
                 setMessages((prev) =>
                   prev.map((m) =>
                     m.id === aiMsgId
@@ -613,14 +638,14 @@ function AiChatContent() {
         }
 
         // ── Persist to DB after streaming completes ──────────────────────────
-        if (accumulated && convId) {
+        const finalText = accumulatedTextRef.current;
+        if (finalText && convId) {
           try {
             await api.post(
               `/api/organizations/${orgId}/ai-chat/conversations/${convId}/messages`,
               {
                 userText: messageText,
-                assistantText: accumulated,
-                // pass last 8 history items for context (AI already answered, just saving)
+                assistantText: finalText,
               },
             );
             // Update conversation's position in sidebar (it will have fresh updated_at)
@@ -742,7 +767,7 @@ function AiChatContent() {
         {/* Main area */}
         <div className="flex-1 flex flex-col min-w-0">
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto min-h-0">
+          <div ref={scrollContainerRef} className="flex-1 overflow-y-auto min-h-0">
             <div className="max-w-3xl mx-auto px-4 py-4">
               {msgsLoading ? (
                 <div
