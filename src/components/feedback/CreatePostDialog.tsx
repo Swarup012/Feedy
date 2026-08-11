@@ -176,7 +176,7 @@ export function CreatePostDialog({
         const token = TokenManager.getAccessToken();
         if (!token) throw new Error("Not authenticated");
 
-        const response = await fetch("http://localhost:3000/api/upload/image", {
+        const response = await fetch("/api/upload/image", {
           method: "POST",
           body: uploadFormData,
           headers: { Authorization: `Bearer ${token}` },
