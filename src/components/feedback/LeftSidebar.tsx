@@ -188,8 +188,7 @@ export function LeftSidebar({
     try {
       await boardService.updateBoard(selectedBoard.id, editFormData);
       toast({
-        title: 'Success',
-        description: 'Board updated successfully',
+        title: 'Board updated',
       });
       setShowEditDialog(false);
       setSelectedBoard(null);
@@ -216,8 +215,7 @@ export function LeftSidebar({
       }
       
       toast({
-        title: 'Success',
-        description: 'Board deleted successfully',
+        title: 'Board deleted',
       });
       setShowDeleteDialog(false);
       setSelectedBoard(null);
@@ -493,10 +491,6 @@ export function LeftSidebar({
         onOpenChange={setShowCreateDialog}
         onBoardCreated={(board) => {
           onCreateBoard(board);
-          toast({
-            title: "Board created",
-            description: `Board "${board.name}" has been added`,
-          });
         }}
       />
 

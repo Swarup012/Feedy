@@ -128,8 +128,7 @@ export function CompletionChangelogDialog({
       if (!file) return;
 
       toast({
-        title: "Uploading image...",
-        description: "Please wait while we upload your image",
+        title: "Uploading…",
       });
 
       try {
@@ -137,8 +136,7 @@ export function CompletionChangelogDialog({
         const imageUrl = await uploadService.uploadImage(file, "changelog");
         insertMarkdown(`\n![Image](${imageUrl})\n`, "");
         toast({
-          title: "Success",
-          description: "Image uploaded successfully",
+          title: "Image inserted",
         });
       } catch (error: any) {
         toast({
@@ -171,8 +169,8 @@ export function CompletionChangelogDialog({
   const handleSave = async () => {
     if (!formData.title.trim()) {
       toast({
-        title: "Title required",
-        description: "Please enter a title for the changelog",
+        title: "Missing title",
+        description: "Enter a title so users know what changed.",
         variant: "destructive",
       });
       return;
@@ -180,8 +178,8 @@ export function CompletionChangelogDialog({
 
     if (!formData.content.trim()) {
       toast({
-        title: "Content required",
-        description: "Please enter content for the changelog",
+        title: "Missing content",
+        description: "Add a description of what was completed.",
         variant: "destructive",
       });
       return;
@@ -194,8 +192,7 @@ export function CompletionChangelogDialog({
 
       if (response.success) {
         toast({
-          title: "Changelog created!",
-          description: "The changelog entry has been published successfully.",
+          title: "Changelog published",
         });
 
         if (onChangelogCreated) {

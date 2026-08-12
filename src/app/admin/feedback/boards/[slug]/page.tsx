@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams } from "next/navigation";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { useToast } from "@/hooks/use-toast";
@@ -41,6 +41,8 @@ export default function BoardPage() {
   const [selectedBoards, setSelectedBoards] = useState<string[]>([]);
   const [canCreatePost, setCanCreatePost] = useState(true);
   const [postLimitReason, setPostLimitReason] = useState<string>("");
+  const [mobileView, setMobileView] = useState<"list" | "detail">("list");
+  const [showSidebar, setShowSidebar] = useState(false);
 
   // ── Filters ──
   const [filters, setFilters] = useState({
@@ -136,8 +138,8 @@ export default function BoardPage() {
     if (allPosts.length > 0) setPosts(applyFilters(allPosts));
   }, [filters, allPosts]);
 
-  // ── Client-side filter logic ──
-  function applyFilters(postsToFilter: Post[]) {
+  // ── Client-side filter logic (memoized) ──
+  const applyFilters = useCallback((postsToFilter: Post[]) => {
     let filtered = [...postsToFilter];
     if (filters.status) filtered = filtered.filter((p) => p.status === filters.status);
     if (filters.search) {
@@ -156,13 +158,12 @@ export default function BoardPage() {
       return filters.sortOrder === "asc" ? (av > bv ? 1 : -1) : av < bv ? 1 : -1;
     });
     return filtered;
-  }
+  }, [filters]);
 
-  // ── Post CRUD handlers ────────────────────────────────────────────────
-  const handlePostCreated = (post: Post) => {
+  // ── Post CRUD handlers (memoized) ────────────────────────────────────────
+  const handlePostCreated = useCallback((post: Post) => {
     setSelectedPost(post);
     setShowCreatePost(false);
-    // Track as optimistic so the merge-guard keeps it if revalidation is stale
     pendingOptimisticIds.current.add(post.id);
     mutatePosts((current) => {
       if (!current) return current;
@@ -177,12 +178,19 @@ export default function BoardPage() {
     }, { revalidate: false });
     setAllPosts((prev) => [post, ...prev]);
     setPosts((prev) => [post, ...prev]);
-    toast({ title: "Success!", description: "Post created successfully" });
-  };
+    toast({ title: "Post created" });
+  }, [mutatePosts, toast]);
 
-  const handlePostSelect = (post: Post) => setSelectedPost(post);
+  const handlePostSelect = useCallback((post: Post) => {
+    setSelectedPost(post);
+    setMobileView("detail");
+  }, []);
 
-  const handlePostUpdated = (updatedPost: Post) => {
+  const handleBackToList = useCallback(() => {
+    setMobileView("list");
+  }, []);
+
+  const handlePostUpdated = useCallback((updatedPost: Post) => {
     setSelectedPost(updatedPost);
     mutatePosts((current) => {
       if (!current) return current;
@@ -198,9 +206,9 @@ export default function BoardPage() {
     }, { revalidate: false });
     setAllPosts((prev) => prev.map((p) => (p.id === updatedPost.id ? updatedPost : p)));
     setPosts((prev) => prev.map((p) => (p.id === updatedPost.id ? updatedPost : p)));
-  };
+  }, [mutatePosts]);
 
-  const handlePostDeleted = (postId: string) => {
+  const handlePostDeleted = useCallback((postId: string) => {
     setSelectedPost(null);
     mutatePosts((current) => {
       if (!current) return current;
@@ -215,50 +223,95 @@ export default function BoardPage() {
     }, { revalidate: false });
     setAllPosts((prev) => prev.filter((p) => p.id !== postId));
     setPosts((prev) => prev.filter((p) => p.id !== postId));
-  };
+  }, [mutatePosts]);
+
+  const handleCreateBoard = useCallback((newBoard: any) => {
+    refreshBoards();
+    setShowSidebar(false);
+    toast({
+      title: "Board created",
+      description: `"${newBoard.name}" is ready to use.`,
+    });
+  }, [refreshBoards, toast]);
+
+  const handleDeleteBoard = useCallback(() => {
+    refreshBoards();
+    setShowSidebar(false);
+  }, [refreshBoards]);
+
+  const handleCreatePost = useCallback(() => {
+    if (!canCreatePost) setShowUpgradeDialog(true);
+    else setShowCreatePost(true);
+  }, [canCreatePost]);
+
+  const handleSearchChange = useCallback((search: string) => {
+    setFilters((prev) => ({ ...prev, search }));
+  }, []);
 
   return (
     <ProtectedRoute allowedRoles={["owner", "admin", "member"]}>
       <div className="flex h-full overflow-hidden bg-white">
-        {/* LEFT SIDEBAR - Boards & Filters */}
-        <LeftSidebar
-          boards={boards}
-          currentBoardSlug={slug}
-          filters={filters}
-          onFilterChange={setFilters}
-          onCreateBoard={(newBoard) => {
-            refreshBoards();
-            toast({
-              title: "Success!",
-              description: `Board "${newBoard.name}" created successfully`,
-            });
-          }}
-          onDeleteBoard={() => refreshBoards()}
-          selectedBoards={selectedBoards}
-          onBoardSelectionChange={setSelectedBoards}
-        />
+        {/* ── Sidebar: overlay on mobile, persistent on desktop ── */}
+        <div className={`
+          max-md:fixed max-md:inset-y-0 max-md:left-0 max-md:z-40
+          max-md:transition-transform max-md:duration-300 max-md:ease-in-out
+          ${showSidebar ? "max-md:translate-x-0" : "max-md:-translate-x-full"}
+          md:relative md:translate-x-0
+        `}>
+          <LeftSidebar
+            boards={boards}
+            currentBoardSlug={slug}
+            filters={filters}
+            onFilterChange={setFilters}
+            onCreateBoard={handleCreateBoard}
+            onDeleteBoard={handleDeleteBoard}
+            selectedBoards={selectedBoards}
+            onBoardSelectionChange={setSelectedBoards}
+          />
+        </div>
 
-        {/* MIDDLE - Posts List */}
-        <PostsList
-          posts={posts}
-          selectedPost={selectedPost}
-          loading={loading}
-          currentBoard={currentBoard}
-          onPostSelect={handlePostSelect}
-          onCreatePost={() => {
-            if (!canCreatePost) setShowUpgradeDialog(true);
-            else setShowCreatePost(true);
-          }}
-          onSearchChange={(search) => setFilters({ ...filters, search })}
-        />
+        {/* ── Sidebar backdrop on mobile ── */}
+        {showSidebar && (
+          <div
+            className="max-md:fixed max-md:inset-0 max-md:z-30 max-md:bg-black/40 max-md:backdrop-blur-sm"
+            onClick={() => setShowSidebar(false)}
+          />
+        )}
 
-        {/* RIGHT - Post Details */}
-        <PostDetails
-          post={selectedPost}
-          currentBoard={currentBoard}
-          onPostUpdated={handlePostUpdated}
-          onPostDeleted={handlePostDeleted}
-        />
+        {/* ── Posts List: hidden when viewing detail on mobile ── */}
+        <div className={`
+          max-md:absolute max-md:inset-0 max-md:z-10
+          ${mobileView === "detail" ? "max-md:hidden" : "max-md:block"}
+          md:block md:relative md:flex-shrink-0
+        `}>
+          <PostsList
+            posts={posts}
+            selectedPost={selectedPost}
+            loading={loading}
+            currentBoard={currentBoard}
+            onPostSelect={handlePostSelect}
+            onCreatePost={handleCreatePost}
+            onSearchChange={handleSearchChange}
+            onMenuClick={() => setShowSidebar(true)}
+            isMobile
+          />
+        </div>
+
+        {/* ── Post Details: full-width overlay on mobile when viewing ── */}
+        <div className={`
+          max-md:absolute max-md:inset-0 max-md:z-20
+          ${mobileView === "detail" ? "max-md:block" : "max-md:hidden"}
+          md:block md:flex-1 md:min-w-0
+        `}>
+          <PostDetails
+            post={selectedPost}
+            currentBoard={currentBoard}
+            onPostUpdated={handlePostUpdated}
+            onPostDeleted={handlePostDeleted}
+            onBack={handleBackToList}
+            isMobile
+          />
+        </div>
 
         {/* Create Post Dialog */}
         <CreatePostDialog

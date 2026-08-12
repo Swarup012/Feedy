@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
@@ -24,10 +24,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import {
   ArrowUp,
+  ArrowLeft,
   MessageSquare,
   ExternalLink,
   Trash2,
@@ -35,7 +36,6 @@ import {
   Loader2,
   Eye,
   Edit2,
-  Pencil,
   Heart,
   Reply,
   BotMessageSquare,
@@ -52,6 +52,12 @@ import { usePostRealtime } from "@/hooks/usePostRealtime";
 // 🔥 GLOBAL cache for comments (persists across post switches!)
 const commentsCache: Record<string, Comment[]> = {};
 
+const PREDEFINED_CATEGORIES = [
+  { id: "1", name: "Feature Request" },
+  { id: "2", name: "Bug Report" },
+  { id: "3", name: "General Feedback" },
+];
+
 interface PostDetailsProps {
   post: Post | null;
   currentBoard: Board | null;
@@ -59,6 +65,8 @@ interface PostDetailsProps {
   onPostUpdated: (post: Post) => void;
   onPostDeleted: (postId: string) => void;
   onAuthRequired?: () => void; // Optional callback for when auth is required
+  onBack?: () => void;
+  isMobile?: boolean;
 }
 
 const STATUS_OPTIONS = [
@@ -169,6 +177,7 @@ function CommentItem({
                   size="sm"
                   onClick={() => handleDeleteComment(comment.id)}
                   className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive dark:hover:text-destructive"
+                  aria-label="Delete comment"
                 >
                   <Trash2 className="h-3.5 w-3.5" />
                 </Button>
@@ -307,6 +316,8 @@ export function PostDetails({
   onPostUpdated,
   onPostDeleted,
   onAuthRequired,
+  onBack,
+  isMobile,
 }: PostDetailsProps) {
   const { toast } = useToast();
   const { user } = useAuth();
@@ -333,13 +344,9 @@ export function PostDetails({
   const [categoryValue, setCategoryValue] = useState("");
   const [showCustomCategory, setShowCustomCategory] = useState(false);
   const [customCategory, setCustomCategory] = useState("");
+  const [confirmDeleteComment, setConfirmDeleteComment] = useState<string | null>(null);
+  const [confirmDeletePost, setConfirmDeletePost] = useState(false);
   const commentTextareaRef = useRef<HTMLTextAreaElement>(null);
-
-  const predefinedCategories = [
-    { id: "1", name: "Feature Request" },
-    { id: "2", name: "Bug Report" },
-    { id: "3", name: "General Feedback" },
-  ];
 
   const autoResizeComment = () => {
     const el = commentTextareaRef.current;
@@ -352,67 +359,47 @@ export function PostDetails({
   usePostRealtime({
     postId: post?.id || '',
     onCommentNew: (comment) => {
-      console.log('💬 [PostDetails] Real-time: New comment received', comment);
-      
       setComments((prev) => {
-        // Check if comment already exists (avoid duplicates)
         const exists = prev.some(c => c.id === comment.id);
-        if (exists) {
-          console.log('💬 [PostDetails] Comment already exists, skipping duplicate');
-          return prev;
-        }
+        if (exists) return prev;
         
-        console.log('💬 [PostDetails] Adding comment to state');
         const updated = [...prev, comment];
-        
-        // Update cache
         if (post?.id && commentsCache[post.id]) {
           commentsCache[post.id] = updated;
-          console.log('✅ Added comment to cache');
         }
-        
         return updated;
       });
     },
     onCommentDeleted: (commentId) => {
-      console.log('🗑️ [PostDetails] Real-time: Comment deleted', commentId);
       setComments((prev) => {
         const updated = prev.filter((c) => c.id !== commentId);
-        
-        // Update cache
         if (post?.id && commentsCache[post.id]) {
           commentsCache[post.id] = updated;
-          console.log('✅ Deleted comment from cache');
         }
-        
         return updated;
       });
     },
     onPostUpvoted: (data) => {
-      console.log('⬆️ [PostDetails] Real-time: Post upvoted', data);
       if (post) {
         onPostUpdated({ ...post, upvotes: data.upvoteCount });
       }
     },
     onCommentCountChanged: (commentCount) => {
-      console.log('💬 [PostDetails] Real-time: Comment count changed to', commentCount);
       if (post) {
         onPostUpdated({ ...post, comment_count: commentCount });
       }
     },
   });
 
-  // Helper function to organize comments into a tree structure
-  const organizeComments = (comments: Comment[]): Comment[] => {
+  // Organize comments into a tree structure (memoized)
+  const organizedComments = useMemo(() => {
     const commentMap = new Map<string, Comment>();
     const rootComments: Comment[] = [];
 
-    // First pass: create a map of all comments with empty replies array
     comments.forEach(comment => {
       commentMap.set(comment.id, { ...comment, replies: [] });
     });
 
-    // Second pass: organize into tree structure
     comments.forEach(comment => {
       const commentWithReplies = commentMap.get(comment.id)!;
       if (comment.parent_id) {
@@ -420,7 +407,6 @@ export function PostDetails({
         if (parent) {
           parent.replies!.push(commentWithReplies);
         } else {
-          // If parent not found, treat as root comment
           rootComments.push(commentWithReplies);
         }
       } else {
@@ -429,28 +415,23 @@ export function PostDetails({
     });
 
     return rootComments;
-  };
+  }, [comments]);
 
   // Fetch comments when post changes
   useEffect(() => {
     if (post) {
-      // 🚀 Check cache first
       if (commentsCache[post.id]) {
-        console.log('⚡ Comments cache HIT for post:', post.id, commentsCache[post.id].length, 'comments');
         setComments(commentsCache[post.id]);
         setLoadingPost(false);
         
-        // Background refresh (silent update) - use public endpoint for guests
         const refreshMethod = user ? postService.getComments : postService.getPublicPostComments;
         refreshMethod(post.id)
           .then(response => {
             commentsCache[post.id] = response.data.comments;
             setComments(response.data.comments);
-            console.log('🔄 Comments background refresh complete');
           })
-          .catch(err => console.log('⚠️ Comments background refresh failed:', err));
+          .catch(() => {});
       } else {
-        console.log('📡 Comments cache MISS - Fetching for post:', post.id);
         setLoadingPost(true);
         fetchComments().finally(() => setLoadingPost(false));
       }
@@ -462,14 +443,11 @@ export function PostDetails({
 
     try {
       setLoadingComments(true);
-      // Use public endpoint for guests, authenticated endpoint for logged-in users
       const fetchMethod = user ? postService.getComments : postService.getPublicPostComments;
       const response = await fetchMethod(post.id);
-      commentsCache[post.id] = response.data.comments; // Cache it
+      commentsCache[post.id] = response.data.comments;
       setComments(response.data.comments);
-      console.log('💾 Cached comments for post:', post.id, response.data.comments.length);
     } catch (error: any) {
-      console.error('❌ Error fetching comments:', error);
       toast({
         title: "Error",
         description: "Failed to load comments",
@@ -504,7 +482,7 @@ export function PostDetails({
       onPostUpdated(response.data.post);
       toast({
         title: "Success",
-        description: "Status updated successfully",
+        description: "Status updated",
       });
     } catch (error: any) {
       toast({
@@ -593,9 +571,9 @@ export function PostDetails({
       // This prevents duplicate comments when the socket event fires
 
       toast({
-        title: "Success",
-        description: "Comment added successfully",
-      });
+      title: "Comment added",
+      description: "Your reply has been posted.",
+    });
     } catch (error: any) {
       toast({
         title: "Error",
@@ -611,7 +589,11 @@ export function PostDetails({
   const handleDeleteComment = async (commentId: string) => {
     if (!post) return;
 
-    if (!confirm("Are you sure you want to delete this comment?")) return;
+    setConfirmDeleteComment(commentId);
+  };
+
+  const executeDeleteComment = async (commentId: string) => {
+    if (!post) return;
 
     try {
       await postService.deleteComment(post.id, commentId);
@@ -620,8 +602,7 @@ export function PostDetails({
       // This prevents issues when the socket event fires
 
       toast({
-        title: "Success",
-        description: "Comment deleted successfully",
+        title: "Comment deleted",
       });
     } catch (error: any) {
       toast({
@@ -662,7 +643,6 @@ export function PostDetails({
       // Update cache
       if (commentsCache[post.id]) {
         commentsCache[post.id] = updatedComments;
-        console.log('✅ Updated comment like in cache');
       }
     } catch (error: any) {
       toast({
@@ -693,8 +673,7 @@ export function PostDetails({
       // This prevents duplicate comments when the socket event fires
 
       toast({
-        title: "Success",
-        description: "Reply added successfully",
+        title: "Reply added",
       });
     } catch (error: any) {
       toast({
@@ -711,19 +690,17 @@ export function PostDetails({
   const handleDeletePost = async () => {
     if (!post) return;
 
-    if (
-      !confirm(
-        "Are you sure you want to delete this post? This action cannot be undone.",
-      )
-    )
-      return;
+    setConfirmDeletePost(true);
+  };
+
+  const executeDeletePost = async () => {
+    if (!post) return;
 
     try {
       await postService.deletePost(post.id);
       onPostDeleted(post.id);
       toast({
-        title: "Success",
-        description: "Post deleted successfully",
+        title: "Post deleted",
       });
     } catch (error: any) {
       toast({
@@ -765,8 +742,7 @@ export function PostDetails({
       onPostUpdated(response.data.post);
       setShowEditDialog(false);
       toast({
-        title: "Success",
-        description: "Post updated successfully",
+        title: "Post updated",
       });
     } catch (error: any) {
       toast({
@@ -790,8 +766,7 @@ export function PostDetails({
       setShowCustomCategory(false);
       setCustomCategory("");
       toast({
-        title: "Success",
-        description: "Category updated successfully",
+        title: "Category updated",
       });
     } catch (error: any) {
       toast({
@@ -894,13 +869,28 @@ export function PostDetails({
     "U";
 
   return (
-    <div className="flex-1 border-l border-gray-200 dark:border-border bg-gray-50 dark:bg-background flex overflow-hidden" style={{ height: 'calc(100vh - 64px)' }}>
+    <div className="flex-1 border-l border-gray-200 dark:border-border bg-gray-50 dark:bg-background flex overflow-hidden max-md:border-l-0" style={{ height: 'calc(100vh - 64px)' }}>
       {/* Main Content - Left Side: post + comments as one continuous thread */}
       <div className="flex-1 flex flex-col overflow-hidden bg-white dark:bg-background" style={{ height: '100%' }}>
         {/* Unified scroll: post content flows directly into comments */}
         <div className="flex-1 overflow-y-auto min-h-0">
+          {/* Mobile back button */}
+          {isMobile && (
+            <div className="px-4 pt-3 pb-0 md:hidden">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onBack}
+                className="gap-1.5 text-muted-foreground hover:text-foreground"
+                aria-label="Back to posts list"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Back
+              </Button>
+            </div>
+          )}
           {/* Post Header with Upvote */}
-          <div className="px-6 pt-6 pb-5">
+          <div className="px-6 pt-6 pb-5 max-md:px-4 max-md:pt-4">
             <div className="flex gap-4">
               {/* Upvote Button - Left Side */}
               <div className="flex flex-col items-center gap-1">
@@ -913,6 +903,7 @@ export function PostDetails({
                     "h-8 w-8 p-0 rounded-md",
                     upvoted ? "text-primary bg-primary/10 dark:bg-primary/20" : "text-muted-foreground hover:bg-muted dark:hover:bg-muted/50"
                   )}
+                  aria-label={upvoted ? "Remove upvote" : "Upvote post"}
                 >
                   <ArrowUp className="h-4 w-4" />
                 </Button>
@@ -930,6 +921,7 @@ export function PostDetails({
                         size="sm"
                         onClick={openEditDialog}
                         className="h-8 w-8 p-0 text-muted-foreground hover:text-primary dark:hover:text-primary hover:bg-primary/10 dark:hover:bg-primary/20"
+                        aria-label="Edit post"
                       >
                         <Edit2 className="h-4 w-4" />
                       </Button>
@@ -938,6 +930,7 @@ export function PostDetails({
                         size="sm"
                         onClick={handleDeletePost}
                         className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive dark:hover:text-destructive hover:bg-destructive/10 dark:hover:bg-destructive/20"
+                        aria-label="Delete post"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -1055,7 +1048,7 @@ export function PostDetails({
               </div>
             ) : (
               <div className="divide-y divide-border/60">
-                {organizeComments(comments).map((comment) => (
+                {organizedComments.map((comment) => (
                   <CommentItem
                     key={comment.id}
                     comment={comment}
@@ -1110,6 +1103,7 @@ export function PostDetails({
                 }}
                 rows={1}
                 disabled={!user && !onAuthRequired}
+                aria-label="Write a comment"
                 className={cn(
                   "w-full resize-none bg-transparent border-0 outline-none shadow-none focus-visible:ring-0",
                   "text-[17px] leading-6 text-foreground placeholder:text-muted-foreground/70",
@@ -1160,19 +1154,20 @@ export function PostDetails({
       </div>
       {/* End of Main Content */}
 
-      {/* Details Sidebar - Right Side */}
-      <div className="w-80 bg-white dark:bg-card border-l border-gray-200 dark:border-border flex-shrink-0 overflow-y-auto min-h-screen">
+      {/* Details Sidebar - Right Side (hidden on mobile) */}
+      <div className="w-80 bg-white dark:bg-card border-l border-gray-200 dark:border-border flex-shrink-0 overflow-y-auto min-h-screen max-md:hidden">
         <div className="p-6 space-y-6">
           <h3 className="font-semibold text-lg text-foreground">Details</h3>
 
           <div className="space-y-4">
             {/* Public Link */}
             <div>
-              <label className="text-sm font-bold text-foreground block mb-3">
-                🔗 Public Board Link
+              <label htmlFor="public-link" className="text-sm font-bold text-foreground block mb-3">
+                Public link
               </label>
               <div className="flex gap-2">
                 <input
+                  id="public-link"
                   type="text"
                   value={getPublicLink()}
                   readOnly
@@ -1190,6 +1185,7 @@ export function PostDetails({
                     });
                   }}
                   className="flex-shrink-0"
+                  aria-label="Copy public link"
                 >
                   <ExternalLink className="h-4 w-4" />
                 </Button>
@@ -1198,6 +1194,7 @@ export function PostDetails({
                   variant="ghost"
                   onClick={() => window.open(getPublicLink())}
                   className="flex-shrink-0"
+                  aria-label="Open public link in new tab"
                 >
                   <Eye className="h-4 w-4" />
                 </Button>
@@ -1214,10 +1211,10 @@ export function PostDetails({
 
             {/* Status */}
             <div>
-              <label className="text-sm text-muted-foreground block mb-2">Status</label>
+              <label htmlFor="post-status" className="text-sm text-muted-foreground block mb-2">Status</label>
               {(user?.organization_role === "admin" || user?.organization_role === "owner") ? (
                 <Select value={post.status} onValueChange={handleStatusChange}>
-                  <SelectTrigger className="w-full">
+                  <SelectTrigger id="post-status" className="w-full">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -1281,13 +1278,13 @@ export function PostDetails({
 
             {/* Estimated - Placeholder */}
             <div>
-              <label className="text-sm text-muted-foreground block mb-2">Estimated</label>
-              <div className="text-sm text-muted-foreground">Comming soon</div>
+              <label className="text-sm text-muted-foreground block mb-2">Estimated completion</label>
+              <div className="text-sm text-muted-foreground">Coming soon</div>
             </div>
 
             {/* Category — editable */}
             <div>
-              <label className="text-sm text-muted-foreground block mb-2">Category</label>
+              <label htmlFor="post-category" className="text-sm text-muted-foreground block mb-2">Category</label>
               {(user?.organization_role === "admin" || user?.organization_role === "owner") ? (
                 editingCategory ? (
                   <div className="space-y-2">
@@ -1295,12 +1292,12 @@ export function PostDetails({
                       value={showCustomCategory ? "custom" : categoryValue}
                       onValueChange={handleCategorySelectChange}
                     >
-                      <SelectTrigger className="w-full">
+                      <SelectTrigger id="post-category" className="w-full">
                         <SelectValue placeholder="Select a category" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="none">No Category</SelectItem>
-                        {predefinedCategories.map((cat) => (
+                        {PREDEFINED_CATEGORIES.map((cat) => (
                           <SelectItem key={cat.id} value={cat.name}>
                             {cat.name}
                           </SelectItem>
@@ -1311,6 +1308,7 @@ export function PostDetails({
                     {showCustomCategory && (
                       <div className="flex gap-2">
                         <Input
+                          id="custom-category-input"
                           placeholder="Enter custom category"
                           value={customCategory}
                           onChange={(e) => setCustomCategory(e.target.value)}
@@ -1360,6 +1358,7 @@ export function PostDetails({
                       setCategoryValue(post.category || "");
                     }}
                     className="text-sm font-medium text-foreground hover:text-primary dark:hover:text-primary transition-colors text-left w-full"
+                    aria-label="Edit category"
                   >
                     {post.category || currentBoard?.category || (
                       <span className="text-muted-foreground italic">Add category</span>
@@ -1368,7 +1367,7 @@ export function PostDetails({
                 )
               ) : (
                 <div className="text-sm font-medium text-foreground">
-                  {post.category || currentBoard?.category || "N/A"}
+                  {post.category || currentBoard?.category || "No category"}
                 </div>
               )}
             </div>
@@ -1405,14 +1404,14 @@ export function PostDetails({
           {/* Tags Section */}
           <div>
             <label className="text-sm text-muted-foreground block mb-2">Tags</label>
-            <button className="text-sm text-muted-foreground hover:text-foreground transition-colors">Comming soon</button>
+            <button className="text-sm text-muted-foreground hover:text-foreground transition-colors" disabled>Coming soon</button>
           </div>
 
           {/* Voter Section */}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <label className="text-sm text-muted-foreground">{post.upvotes} Voter{post.upvotes !== 1 ? 's' : ''}</label>
-            <button className="text-sm text-muted-foreground hover:text-foreground transition-colors">Comming soon</button>
+              <label className="text-sm text-muted-foreground">{post.upvotes} Upvote{post.upvotes !== 1 ? 's' : ''}</label>
+            <button className="text-sm text-muted-foreground hover:text-foreground transition-colors" disabled>Coming soon</button>
             </div>
           </div>
         </div>
@@ -1480,6 +1479,31 @@ export function PostDetails({
         postId={post.id}
         onChangelogCreated={handleChangelogCreated}
         onSkip={handleSkipChangelog}
+      />
+
+      {/* Confirm: Delete Comment */}
+      <ConfirmDialog
+        open={confirmDeleteComment !== null}
+        onOpenChange={(open) => { if (!open) setConfirmDeleteComment(null); }}
+        title="Delete comment"
+        description="Are you sure you want to delete this comment? This action cannot be undone."
+        confirmLabel="Delete"
+        variant="destructive"
+        onConfirm={() => {
+          if (confirmDeleteComment) executeDeleteComment(confirmDeleteComment);
+          setConfirmDeleteComment(null);
+        }}
+      />
+
+      {/* Confirm: Delete Post */}
+      <ConfirmDialog
+        open={confirmDeletePost}
+        onOpenChange={setConfirmDeletePost}
+        title="Delete post"
+        description="Are you sure you want to delete this post? This action cannot be undone."
+        confirmLabel="Delete"
+        variant="destructive"
+        onConfirm={executeDeletePost}
       />
     </div>
   );

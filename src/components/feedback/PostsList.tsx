@@ -1,9 +1,10 @@
 "use client";
 
+import { useRef, useCallback, memo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Search, ArrowUp, MessageSquare, Loader2 } from "lucide-react";
+import { Plus, Search, ArrowUp, MessageSquare, Menu } from "lucide-react";
 import { Post, getPostAuthorDisplayName, getSourcePlatformBadgeStyle } from "@/services/postService";
 import { Board } from "@/services/boardService";
 import { cn } from "@/lib/utils";
@@ -19,6 +20,8 @@ interface PostsListProps {
   onPostSelect: (post: Post) => void;
   onCreatePost: () => void;
   onSearchChange: (search: string) => void;
+  onMenuClick?: () => void;
+  isMobile?: boolean;
 }
 
 const STATUS_COLORS: Record<string, string> = {
@@ -39,7 +42,7 @@ const STATUS_LABELS: Record<string, string> = {
   closed: "Closed",
 };
 
-export function PostsList({
+export const PostsList = memo(function PostsList({
   posts,
   selectedPost,
   loading,
@@ -47,13 +50,34 @@ export function PostsList({
   onPostSelect,
   onCreatePost,
   onSearchChange,
+  onMenuClick,
+  isMobile,
 }: PostsListProps) {
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleSearch = useCallback((value: string) => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      onSearchChange(value);
+    }, 250);
+  }, [onSearchChange]);
   return (
-    <div className="flex flex-col bg-white dark:bg-background border-r border-gray-200 dark:border-border" style={{ width: '360px', minWidth: '360px' }}>
+    <div className="flex flex-col h-full bg-white dark:bg-background border-r border-gray-200 dark:border-border max-md:w-full md:w-[360px] md:min-w-[360px]">
       {/* Header */}
       <div className="p-4 border-b border-gray-200 dark:border-border space-y-3 sticky top-0 bg-white dark:bg-background z-10">
         <div className="flex items-center justify-between">
-          <div>
+          <div className="flex items-center gap-2">
+            {isMobile && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onMenuClick}
+                className="h-9 w-9 p-0 md:hidden"
+                aria-label="Open board menu"
+              >
+                <Menu className="h-5 w-5" />
+              </Button>
+            )}
             {currentBoard && (
               <div className="flex items-center gap-2">
                 <div
@@ -66,7 +90,7 @@ export function PostsList({
                     style={{ color: currentBoard.color }} 
                   />
                 </div>
-                <h1 className="text-xl font-bold text-gray-900 dark:text-white">{currentBoard.name}</h1>
+                <h1 className="text-xl font-bold text-foreground">{currentBoard.name}</h1>
               </div>
             )}
           </div>
@@ -76,7 +100,7 @@ export function PostsList({
             className="bg-background text-primary hover:bg-accent border-border"
           >
             <Plus className="mr-2 h-4 w-4" />
-            New Post
+            <span className="max-sm:hidden">New Post</span>
           </Button>
         </div>
 
@@ -86,7 +110,8 @@ export function PostsList({
           <Input
             placeholder="Search posts..."
             className="pl-10 dark:bg-card dark:border-border dark:text-white dark:placeholder:text-muted-foreground"
-            onChange={(e) => onSearchChange(e.target.value)}
+            onChange={(e) => handleSearch(e.target.value)}
+            aria-label="Search posts"
           />
         </div>
       </div>
@@ -185,4 +210,4 @@ export function PostsList({
       </div>
     </div>
   );
-}
+});

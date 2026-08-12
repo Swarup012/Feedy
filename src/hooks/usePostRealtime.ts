@@ -43,12 +43,8 @@ export function usePostRealtime({
   // Memoize callbacks to prevent unnecessary re-subscriptions
   const handleCommentNew = useCallback(
     (data: any) => {
-      console.log('💬 [usePostRealtime] comment:new event received:', data);
       if (data.comment) {
-        console.log('💬 Calling onCommentNew with:', data.comment);
         onCommentNew?.(data.comment);
-      } else {
-        console.error('❌ comment:new event missing comment data!', data);
       }
     },
     [onCommentNew]
@@ -56,7 +52,6 @@ export function usePostRealtime({
 
   const handleCommentDeleted = useCallback(
     ({ commentId }: { postId: string; commentId: string }) => {
-      console.log('🗑️  Comment deleted:', commentId);
       onCommentDeleted?.(commentId);
     },
     [onCommentDeleted]
@@ -64,7 +59,6 @@ export function usePostRealtime({
 
   const handleCommentLiked = useCallback(
     (data: { postId: string; commentId: string; liked: boolean; likeCount: number }) => {
-      console.log('👍 Comment like toggled:', data);
       onCommentLiked?.({ commentId: data.commentId, liked: data.liked, likeCount: data.likeCount });
     },
     [onCommentLiked]
@@ -72,7 +66,6 @@ export function usePostRealtime({
 
   const handlePostUpvoted = useCallback(
     (data: { postId: string; upvoted: boolean; upvoteCount: number }) => {
-      console.log('⬆️  Post upvote toggled:', data);
       onPostUpvoted?.({ upvoted: data.upvoted, upvoteCount: data.upvoteCount });
     },
     [onPostUpvoted]
@@ -80,7 +73,6 @@ export function usePostRealtime({
 
   const handleCommentCount = useCallback(
     ({ commentCount }: { postId: string; commentCount: number }) => {
-      console.log('💬 Comment count updated:', commentCount);
       onCommentCountChanged?.(commentCount);
     },
     [onCommentCountChanged]
@@ -88,25 +80,10 @@ export function usePostRealtime({
 
   useEffect(() => {
     const socket = getSocket();
-    if (!socket || !postId) {
-      console.warn('⚠️ [usePostRealtime] Socket not initialized or postId missing', { 
-        hasSocket: !!socket, 
-        postId,
-        socketConnected: socket?.connected 
-      });
-      return;
-    }
+    if (!socket || !postId) return;
 
-    // Function to setup room and events
     const setupRealtime = () => {
-      console.log(`📝 [usePostRealtime] Setting up real-time for post: ${postId}`);
-      console.log(`🔌 Socket connected: ${socket.connected}, Socket ID: ${socket.id}`);
-
-      // Join post room
       joinPostRoom(postId);
-
-      // Subscribe to events
-      console.log('👂 [usePostRealtime] Subscribing to events...');
       socket.on('comment:new', handleCommentNew);
       socket.on('comment:deleted', handleCommentDeleted);
       socket.on('comment:liked', handleCommentLiked);
@@ -114,21 +91,13 @@ export function usePostRealtime({
       socket.on('post:comment_count', handleCommentCount);
     };
 
-    // If already connected, setup immediately
     if (socket.connected) {
       setupRealtime();
     } else {
-      // Wait for connection
-      console.log('⏳ [usePostRealtime] Waiting for socket to connect...');
-      socket.once('connect', () => {
-        console.log('✅ [usePostRealtime] Socket connected, setting up now...');
-        setupRealtime();
-      });
+      socket.once('connect', setupRealtime);
     }
 
-    // Cleanup
     return () => {
-      console.log('🧹 [usePostRealtime] Cleaning up...');
       leavePostRoom(postId);
       socket.off('comment:new', handleCommentNew);
       socket.off('comment:deleted', handleCommentDeleted);

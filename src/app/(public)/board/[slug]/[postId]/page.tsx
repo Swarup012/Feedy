@@ -14,6 +14,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import {
   ArrowUp,
   MessageSquare,
@@ -53,6 +54,7 @@ export default function PublicPostPage() {
   const [submittingComment, setSubmittingComment] = useState(false);
   const [upvoted, setUpvoted] = useState(false);
   const [upvoting, setUpvoting] = useState(false);
+  const [confirmDeleteComment, setConfirmDeleteComment] = useState<string | null>(null);
 
   // 🐛 Debug: Log when component mounts with postId
   useEffect(() => {
@@ -222,7 +224,11 @@ export default function PublicPostPage() {
   const handleDeleteComment = async (commentId: string) => {
     if (!post) return;
 
-    if (!confirm('Are you sure you want to delete this comment?')) return;
+    setConfirmDeleteComment(commentId);
+  };
+
+  const executeDeleteComment = async (commentId: string) => {
+    if (!post) return;
 
     try {
       await postService.deleteComment(post.id, commentId);
@@ -519,6 +525,20 @@ export default function PublicPostPage() {
           </Card>
         </div>
       </div>
+
+      {/* Confirm: Delete Comment */}
+      <ConfirmDialog
+        open={confirmDeleteComment !== null}
+        onOpenChange={(open) => { if (!open) setConfirmDeleteComment(null); }}
+        title="Delete comment"
+        description="Are you sure you want to delete this comment? This action cannot be undone."
+        confirmLabel="Delete"
+        variant="destructive"
+        onConfirm={() => {
+          if (confirmDeleteComment) executeDeleteComment(confirmDeleteComment);
+          setConfirmDeleteComment(null);
+        }}
+      />
     </div>
   );
 }

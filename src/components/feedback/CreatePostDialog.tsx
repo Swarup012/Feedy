@@ -145,7 +145,7 @@ export function CreatePostDialog({
     if (formData.images.length + files.length > 5) {
       toast({
         title: "Too many images",
-        description: "Maximum 5 images allowed",
+        description: "You can attach up to 5 images per post.",
         variant: "destructive",
       });
       return;
@@ -160,12 +160,12 @@ export function CreatePostDialog({
         const file = files[i];
 
         if (!file.type.startsWith("image/")) {
-          toast({ title: "Invalid file", description: `${file.name} is not an image`, variant: "destructive" });
+          toast({ title: "Unsupported file type", description: `${file.name} is not an image. Attach JPG, PNG, GIF, or WebP.`, variant: "destructive" });
           continue;
         }
 
         if (file.size > 5 * 1024 * 1024) {
-          toast({ title: "File too large", description: `${file.name} exceeds 5MB`, variant: "destructive" });
+          toast({ title: "File too large", description: `${file.name} exceeds the 5 MB limit. Try a smaller image.`, variant: "destructive" });
           continue;
         }
 
@@ -189,9 +189,9 @@ export function CreatePostDialog({
       }
 
       setFormData({ ...formData, images: [...formData.images, ...newImageUrls] });
-      toast({ title: "Success", description: `${newImageUrls.length} image(s) uploaded` });
+      toast({ title: "Image uploaded", description: `${newImageUrls.length} file${newImageUrls.length > 1 ? 's' : ''} attached.` });
     } catch (error: any) {
-      toast({ title: "Upload failed", description: error.message, variant: "destructive" });
+      toast({ title: "Upload failed", description: error.message || "Could not upload the image. Try again.", variant: "destructive" });
     } finally {
       setUploading(false);
     }
