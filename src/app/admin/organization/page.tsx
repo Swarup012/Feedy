@@ -45,6 +45,7 @@ import {
   Plug,
   User,
   Bell,
+  Loader2,
 } from 'lucide-react';
 import { OrganizationSkeleton, MembersTableSkeleton } from '@/components/admin/OrganizationSkeleton';
 import { InviteMemberModal } from '@/components/organization/InviteMemberModal';
@@ -55,8 +56,12 @@ const WebhooksPage = dynamic(() => import('@/app/admin/webhooks/page'), { ssr: f
 const WidgetsPage = dynamic(() => import('@/app/admin/widgets/page'), { ssr: false });
 const IntegrationsPage = dynamic(() => import('@/app/admin/settings/integrations/page'), { ssr: false });
 import { ProfileTab } from '@/components/organization/ProfileTab';
-import { BillingSection } from '@/components/BillingSection';
-import PricingContent from '@/components/PricingContent';
+// Billing components moved from old BillingSection
+import paddleService, { SubscriptionInfo, Invoice } from '@/services/paddleService';
+import { PlanCard } from '@/components/billing/PlanCard';
+import { UpgradeDialog } from '@/components/billing/UpgradeDialog';
+import { CancelFlow } from '@/components/billing/CancelFlow';
+import { InvoiceHistory } from '@/components/billing/InvoiceHistory';
 import { CustomDomainSettings } from '@/components/organization/CustomDomainSettings';
 import { NotificationsTab } from '@/components/organization/NotificationsTab';
 import { PaidFeatureGate } from '@/components/PaidFeatureGate';
@@ -128,6 +133,14 @@ export default function OrganizationSettingsPage() {
 
   // Remove member confirmation dialog state
   const [removeMemberTarget, setRemoveMemberTarget] = useState<{ id: string; name: string } | null>(null);
+
+  // Billing state
+  const [billingSubscription, setBillingSubscription] = useState<SubscriptionInfo | null>(null);
+  const [billingInvoices, setBillingInvoices] = useState<Invoice[]>([]);
+  const [billingLoading, setBillingLoading] = useState(true);
+  const [billingActionLoading, setBillingActionLoading] = useState(false);
+  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
+  const [showCancelFlow, setShowCancelFlow] = useState(false);
   const [removing, setRemoving] = useState(false);
 
   // Form state
@@ -176,6 +189,79 @@ export default function OrganizationSettingsPage() {
       fetchMembers();
     }
   }, [organization]);
+
+  // Load billing data
+  useEffect(() => {
+    if (activeTab === 'billing') {
+      loadBillingData();
+    }
+  }, [activeTab]);
+
+  const loadBillingData = async () => {
+    try {
+      setBillingLoading(true);
+      const [subResponse, invoicesResponse] = await Promise.all([
+        paddleService.getSubscription(),
+        paddleService.getInvoices(10),
+      ]);
+
+      if (subResponse.success) {
+        setBillingSubscription(subResponse.data);
+      } else {
+        setBillingSubscription({
+          status: 'free',
+          plan: 'free',
+          trialEndsAt: null,
+          currentPeriodStart: null,
+          currentPeriodEnd: null,
+          cancelAtPeriodEnd: false,
+          hasActiveSubscription: false,
+          billingProvider: 'paddle',
+        });
+      }
+
+      if (invoicesResponse.success && invoicesResponse.data.invoices) {
+        setBillingInvoices(invoicesResponse.data.invoices);
+      }
+    } catch (error) {
+      console.error('Error loading billing data:', error);
+      setBillingSubscription({
+        status: 'free',
+        plan: 'free',
+        trialEndsAt: null,
+        currentPeriodStart: null,
+        currentPeriodEnd: null,
+        cancelAtPeriodEnd: false,
+        hasActiveSubscription: false,
+        billingProvider: 'paddle',
+      });
+    } finally {
+      setBillingLoading(false);
+    }
+  };
+
+  const handleManageBilling = async () => {
+    try {
+      setBillingActionLoading(true);
+      const response = await fetch('/api/paddle/portal', { method: 'POST' });
+      const data = await response.json();
+      if (data.url) {
+        window.open(data.url, '_blank');
+      } else {
+        toast({
+          title: 'Portal unavailable',
+          description: 'Contact support@faddy.site for billing changes.',
+        });
+      }
+    } catch {
+      toast({
+        title: 'Portal unavailable',
+        description: 'Contact support@faddy.site for billing changes.',
+      });
+    } finally {
+      setBillingActionLoading(false);
+    }
+  };
 
   const fetchMembers = async () => {
     if (!organization) return;
@@ -697,15 +783,45 @@ export default function OrganizationSettingsPage() {
 
             {/* Billing Tab */}
             <TabsContent value="billing">
-              <div className="space-y-5">
-                {/* Current subscription status + cancel */}
-                <BillingSection />
-                {/* Full pricing cards to upgrade/downgrade */}
-                <div className="border-t pt-6">
-                  <h3 className="text-lg font-semibold mb-6">Plans & Pricing</h3>
-                  <PricingContent />
+              {billingLoading ? (
+                <div className="flex items-center justify-center py-12">
+                  <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
                 </div>
-              </div>
+              ) : (
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div className="lg:col-span-2">
+                      <PlanCard
+                        subscription={billingSubscription!}
+                        onUpgrade={() => setShowUpgradeDialog(true)}
+                        onDowngrade={() => setShowUpgradeDialog(true)}
+                        onCancel={() => setShowCancelFlow(true)}
+                        onManageBilling={handleManageBilling}
+                        actionLoading={billingActionLoading}
+                      />
+                    </div>
+                    <div>
+                      <InvoiceHistory invoices={billingInvoices} />
+                    </div>
+                  </div>
+
+                  <UpgradeDialog
+                    open={showUpgradeDialog}
+                    onOpenChange={setShowUpgradeDialog}
+                    currentPlan={billingSubscription?.plan}
+                    onSuccess={loadBillingData}
+                  />
+
+                  {billingSubscription && (
+                    <CancelFlow
+                      open={showCancelFlow}
+                      onOpenChange={setShowCancelFlow}
+                      subscription={billingSubscription}
+                      onSuccess={loadBillingData}
+                    />
+                  )}
+                </div>
+              )}
             </TabsContent>
 
           </Tabs>
