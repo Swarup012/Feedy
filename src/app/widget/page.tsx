@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -63,9 +63,71 @@ export default function WidgetPage() {
   const apiKey = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("apiKey") : "";
   const widgetId = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("widgetId") : "";
 
+  // --- Origin-validated postMessage ---
+  // The parent origin is unknown at mount time. We capture it from the first
+  // legitimate IDENTIFY message's event.origin. Outbound messages are queued
+  // until that handshake completes — nothing is ever broadcast to "*".
+  const verifiedOriginRef = useRef<string | null>(null);
+  const pendingMessagesRef = useRef<Array<{ message: Record<string, unknown>; targetOrigin: string }>>([]);
+
+  const flushQueue = useCallback((origin: string) => {
+    for (const { message } of pendingMessagesRef.current) {
+      window.parent.postMessage(message, origin);
+    }
+    pendingMessagesRef.current = [];
+  }, []);
+
+  const postToParent = useCallback((message: Record<string, unknown>) => {
+    const origin = verifiedOriginRef.current;
+    if (origin) {
+      window.parent.postMessage(message, origin);
+    } else {
+      pendingMessagesRef.current.push({ message, targetOrigin: "" });
+    }
+  }, []);
+
+  const handleMessage = useCallback(
+    (event: MessageEvent) => {
+      const { type, data } = event.data ?? {};
+      if (typeof type !== "string") return;
+
+      // First message must be IDENTIFY — capture its origin as the single
+      // source of truth for all future outbound communication.
+      if (!verifiedOriginRef.current) {
+        if (type !== "IDENTIFY") return;
+
+        verifiedOriginRef.current = event.origin;
+        flushQueue(event.origin);
+
+        setCurrentUser(data);
+        identifyUser(data);
+        return;
+      }
+
+      // All subsequent messages must come from the verified origin.
+      if (event.origin !== verifiedOriginRef.current) return;
+
+      switch (type) {
+        case "IDENTIFY":
+          setCurrentUser(data);
+          identifyUser(data);
+          break;
+        case "SHOW_PROMPT": {
+          const { title, description } = data ?? {};
+          setNewFeedback({ title: title || "", description: description || "" });
+          setShowCreateForm(true);
+          break;
+        }
+        // OPEN / CLOSE / TRACK — acknowledged but no action needed inside iframe
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [flushQueue]
+  );
+
   useEffect(() => {
     if (!apiKey) {
-      console.error("❌ No API key provided");
+      console.error("No API key provided");
       setLoading(false);
       return;
     }
@@ -73,39 +135,14 @@ export default function WidgetPage() {
     loadConfig();
     loadFeedback();
 
-    // Listen for messages from parent
+    // Bootstrap: READY is unidirectional and contains no sensitive data.
+    // It signals the parent SDK to send IDENTIFY, which is where we capture
+    // the verified origin. Sent to "*" because origin is still unknown here.
+    window.parent.postMessage({ type: "READY" }, "*");
+
     window.addEventListener("message", handleMessage);
-
-    return () => {
-      window.removeEventListener("message", handleMessage);
-    };
-  }, [apiKey, widgetId]);
-
-  const handleMessage = (event: MessageEvent) => {
-    // Verify origin (in production, check against your domain)
-    if (event.data.type === "IDENTIFY") {
-      console.log("👤 User identified:", event.data.data);
-      setCurrentUser(event.data.data);
-      identifyUser(event.data.data);
-    } else if (event.data.type === "OPEN") {
-      console.log("📖 Widget opened");
-    } else if (event.data.type === "CLOSE") {
-      console.log("📕 Widget closed");
-    } else if (event.data.type === "SHOW_PROMPT") {
-      console.log("📝 Show feedback prompt requested", event.data.data);
-      const { title, description, category } = event.data.data || {};
-      
-      // Pre-fill the form and open it
-      setNewFeedback({
-        title: title || "",
-        description: description || ""
-      });
-      setShowCreateForm(true);
-    } else if (event.data.type === "TRACK") {
-      console.log("📊 Track event:", event.data.data);
-      // In a real app, you would send this to your backend analytics endpoint
-    }
-  };
+    return () => window.removeEventListener("message", handleMessage);
+  }, [apiKey, widgetId, handleMessage]);
 
   const loadConfig = async () => {
     try {
@@ -114,11 +151,9 @@ export default function WidgetPage() {
 
       if (data.success) {
         setConfig(data.data);
-        // Notify parent that widget is ready
-        window.parent.postMessage({ type: "READY" }, "*");
       }
     } catch (error) {
-      console.error("❌ Failed to load widget config:", error);
+      console.error("Failed to load widget config:", error);
     }
   };
 
@@ -183,13 +218,10 @@ export default function WidgetPage() {
         setNewFeedback({ title: "", description: "" });
         setShowCreateForm(false);
         // Notify parent
-        window.parent.postMessage(
-          {
-            type: "FEEDBACK_SUBMITTED",
-            data: data.data.feedback,
-          },
-          "*"
-        );
+        postToParent({
+          type: "FEEDBACK_SUBMITTED",
+          data: data.data.feedback,
+        });
       }
     } catch (error) {
       console.error("❌ Failed to create feedback:", error);
@@ -275,7 +307,7 @@ export default function WidgetPage() {
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => window.parent.postMessage({ type: "CLOSE" }, "*")}
+          onClick={() => postToParent({ type: "CLOSE" })}
           className="text-white hover:bg-white/20"
         >
           <X className="h-4 w-4" />
