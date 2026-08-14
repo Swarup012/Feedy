@@ -72,10 +72,10 @@ export default function FeedbackPage() {
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center h-screen gap-4">
-        <p className="text-red-600 font-medium">{error}</p>
+        <p className="text-destructive font-medium">{error}</p>
         <button
           onClick={() => window.location.reload()}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
         >
           Retry
         </button>
@@ -87,8 +87,8 @@ export default function FeedbackPage() {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600 mb-4" />
-        <p className="text-gray-600">Loading your boards...</p>
+        <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
+        <p className="text-muted-foreground">Loading your boards...</p>
       </div>
     );
   }
@@ -96,8 +96,8 @@ export default function FeedbackPage() {
   // Fallback (if somehow no redirect happened)
   return (
     <div className="flex flex-col items-center justify-center h-screen">
-      <Loader2 className="h-8 w-8 animate-spin text-blue-600 mb-4" />
-      <p className="text-gray-600">Redirecting...</p>
+      <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
+      <p className="text-muted-foreground">Redirecting...</p>
     </div>
   );
 }

@@ -250,7 +250,7 @@ export default function BoardPage() {
 
   return (
     <ProtectedRoute allowedRoles={["owner", "admin", "member"]}>
-      <div className="flex h-full overflow-hidden bg-white">
+      <div className="flex h-full overflow-hidden bg-background">
         {/* ── Sidebar: overlay on mobile, persistent on desktop ── */}
         <div className={`
           max-md:fixed max-md:inset-y-0 max-md:left-0 max-md:z-40

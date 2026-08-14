@@ -6,7 +6,7 @@ export function PostsListSkeleton() {
       {[...Array(5)].map((_, index) => (
         <div
           key={index}
-          className="p-4 hover:bg-gray-50 transition-colors"
+          className="p-4 hover:bg-muted/50 transition-colors"
         >
           {/* Title and upvotes */}
           <div className="flex items-start gap-3">

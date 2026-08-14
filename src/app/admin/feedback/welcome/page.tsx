@@ -200,12 +200,12 @@ export default function FirstBoardWelcomePage() {
 
   if (step === "create") {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-background dark:via-background dark:to-background">
         <div className="container mx-auto px-4 py-10">
           {/* Back Button */}
           <button
             onClick={handleBack}
-            className="mb-5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 flex items-center gap-2 transition-colors"
+            className="mb-5 text-muted-foreground hover:text-foreground flex items-center gap-2 transition-colors"
             disabled={loading}
           >
             <ChevronRight className="h-4 w-4 rotate-180" />
@@ -218,15 +218,15 @@ export default function FirstBoardWelcomePage() {
               <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-purple-600 shadow-lg">
                 <Rocket className="h-7 w-7 text-white" />
               </div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
+              <h1 className="text-2xl font-bold text-foreground mb-3">
                 Create Your First Board
               </h1>
-              <p className="text-lg text-gray-600 dark:text-gray-400">
+              <p className="text-lg text-muted-foreground">
                 Give your board a name and description. You can always change these later.
               </p>
             </div>
 
-            <Card className="shadow-xl border border-gray-100 dark:border-gray-800 rounded-2xl">
+            <Card className="shadow-xl border border-border rounded-2xl">
               <CardContent className="p-6 space-y-5">
 
                 {/* Board Name */}
@@ -237,17 +237,17 @@ export default function FirstBoardWelcomePage() {
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   disabled={loading}
                   autoFocus
-                  className="h-11 text-base rounded-xl bg-gray-50 dark:bg-gray-800/60 border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-blue-400"
+                  className="h-11 text-base rounded-xl bg-muted border-border focus:ring-2 focus:ring-ring"
                   maxLength={100}
                 />
 
                 {/* URL slug feedback */}
                 {slug && (
-                  <div className="flex items-center gap-2 text-xs text-gray-400 -mt-2 px-1">
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground/70 -mt-2 px-1">
                     <span>/board/{slug}</span>
                     {checkingSlug && <Loader2 className="h-3 w-3 animate-spin" />}
                     {!checkingSlug && slugAvailable === true && <Check className="h-3 w-3 text-green-500" />}
-                    {!checkingSlug && slugAvailable === false && <span className="text-red-400">Already taken</span>}
+                    {!checkingSlug && slugAvailable === false && <span className="text-destructive">Already taken</span>}
                   </div>
                 )}
 
@@ -258,11 +258,11 @@ export default function FirstBoardWelcomePage() {
                   disabled={loading}
                   className="flex gap-5"
                 >
-                  <label htmlFor="c-public" className="flex items-center gap-2 cursor-pointer text-sm text-gray-700 dark:text-gray-300">
+                  <label htmlFor="c-public" className="flex items-center gap-2 cursor-pointer text-sm text-foreground">
                     <RadioGroupItem value="public" id="c-public" />
                     public
                   </label>
-                  <label htmlFor="c-private" className="flex items-center gap-2 cursor-pointer text-sm text-gray-700 dark:text-gray-300">
+                  <label htmlFor="c-private" className="flex items-center gap-2 cursor-pointer text-sm text-foreground">
                     <RadioGroupItem value="private" id="c-private" />
                     private
                   </label>
@@ -271,7 +271,7 @@ export default function FirstBoardWelcomePage() {
                 {/* Job Role Chips */}
                 <div className="flex flex-wrap gap-2">
                   {rolesLoading ? (
-                    <span className="text-xs text-gray-400">Loading roles...</span>
+                    <span className="text-xs text-muted-foreground/70">Loading roles...</span>
                   ) : (
                     jobRoles.map((role) => {
                       const selected = formData.visible_to_roles.includes(role.key);
@@ -283,8 +283,8 @@ export default function FirstBoardWelcomePage() {
                           onClick={() => handleRoleToggle(role.key)}
                           className={`px-3 py-1 rounded-full border text-xs font-medium transition-colors ${
                             selected
-                              ? "bg-blue-500 text-white border-blue-500"
-                              : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:border-blue-400"
+                              ? "bg-primary text-primary-foreground border-primary"
+                              : "bg-card text-muted-foreground border-border hover:border-primary"
                           }`}
                         >
                           {role.name}
@@ -301,7 +301,7 @@ export default function FirstBoardWelcomePage() {
                     type="button"
                     onClick={() => setShowIconPicker(true)}
                     disabled={loading}
-                    className="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 flex flex-col items-center justify-center gap-1 hover:border-blue-400 transition-colors"
+                    className="flex-shrink-0 w-16 h-16 rounded-xl border border-border bg-muted flex flex-col items-center justify-center gap-1 hover:border-primary transition-colors"
                   >
                     <div
                       className="h-8 w-8 rounded-lg flex items-center justify-center"
@@ -309,12 +309,12 @@ export default function FirstBoardWelcomePage() {
                     >
                       <IconDisplay iconName={formData.icon} className="h-5 w-5" style={{ color: formData.color }} />
                     </div>
-                    <span className="text-[10px] text-gray-400">icon</span>
+                    <span className="text-[10px] text-muted-foreground/70">icon</span>
                   </button>
 
                   {/* Board preview */}
                   <div
-                    className="flex-1 rounded-xl border bg-gray-50 dark:bg-gray-800/60 p-3 flex items-center justify-center min-h-[64px]"
+                    className="flex-1 rounded-xl border bg-muted p-3 flex items-center justify-center min-h-[64px]"
                     style={{ borderColor: formData.name ? formData.color : undefined }}
                   >
                     {formData.name ? (
@@ -328,15 +328,15 @@ export default function FirstBoardWelcomePage() {
                         <div>
                           <p className="text-sm font-semibold leading-tight flex items-center gap-1">
                             {formData.name}
-                            {formData.is_private && <Lock className="h-3 w-3 text-gray-400" />}
+                            {formData.is_private && <Lock className="h-3 w-3 text-muted-foreground/70" />}
                           </p>
                           {formData.description && (
-                            <p className="text-xs text-gray-400 line-clamp-1">{formData.description}</p>
+                            <p className="text-xs text-muted-foreground/70 line-clamp-1">{formData.description}</p>
                           )}
                         </div>
                       </div>
                     ) : (
-                      <p className="text-xs text-gray-400 text-center">how the board look like<br />with icon should be here</p>
+                      <p className="text-xs text-muted-foreground/70 text-center">how the board look like<br />with icon should be here</p>
                     )}
                   </div>
                 </div>
@@ -346,7 +346,7 @@ export default function FirstBoardWelcomePage() {
                   <Button
                     onClick={handleCreateBoard}
                     disabled={loading || !formData.name.trim() || slugAvailable === false}
-                    className="rounded-full px-6 h-10 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium shadow-md"
+                    className="rounded-full px-6 h-10 bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-medium shadow-md"
                   >
                     {loading ? (
                       <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Creating...</>
@@ -373,21 +373,21 @@ export default function FirstBoardWelcomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-background dark:via-background dark:to-background">
       <div className="container mx-auto px-4 py-10 flex justify-center">
         
         <div className="w-full max-w-md">
           <div className="mb-5 text-center">
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+            <h1 className="text-2xl font-bold text-foreground mb-2">
               Create Your First Board
             </h1>
-            <p className="text-gray-600 dark:text-gray-400">
+            <p className="text-muted-foreground">
               Set up your first board to start collecting feedback.
             </p>
           </div>
           
           <div className="max-h-[calc(100vh-12rem)] overflow-y-auto pr-2">
-            <Card className="shadow-xl border border-gray-100 dark:border-gray-800 rounded-2xl">
+            <Card className="shadow-xl border border-border rounded-2xl">
               <CardContent className="p-6 space-y-5">
 
                 {/* Board Name */}
@@ -398,17 +398,17 @@ export default function FirstBoardWelcomePage() {
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   disabled={loading}
                   autoFocus
-                  className="h-11 text-base rounded-xl bg-gray-50 dark:bg-gray-800/60 border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-blue-400"
+                  className="h-11 text-base rounded-xl bg-muted border-border focus:ring-2 focus:ring-ring"
                   maxLength={100}
                 />
 
                 {/* URL slug feedback */}
                 {slug && (
-                  <div className="flex items-center gap-2 text-xs text-gray-400 -mt-2 px-1">
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground/70 -mt-2 px-1">
                     <span>/board/{slug}</span>
                     {checkingSlug && <Loader2 className="h-3 w-3 animate-spin" />}
                     {!checkingSlug && slugAvailable === true && <Check className="h-3 w-3 text-green-500" />}
-                    {!checkingSlug && slugAvailable === false && <span className="text-red-400">Already taken</span>}
+                    {!checkingSlug && slugAvailable === false && <span className="text-destructive">Already taken</span>}
                   </div>
                 )}
 
@@ -419,11 +419,11 @@ export default function FirstBoardWelcomePage() {
                   disabled={loading}
                   className="flex gap-5"
                 >
-                  <label htmlFor="w-public" className="flex items-center gap-2 cursor-pointer text-sm text-gray-700 dark:text-gray-300">
+                  <label htmlFor="w-public" className="flex items-center gap-2 cursor-pointer text-sm text-foreground">
                     <RadioGroupItem value="public" id="w-public" />
                     public
                   </label>
-                  <label htmlFor="w-private" className="flex items-center gap-2 cursor-pointer text-sm text-gray-700 dark:text-gray-300">
+                  <label htmlFor="w-private" className="flex items-center gap-2 cursor-pointer text-sm text-foreground">
                     <RadioGroupItem value="private" id="w-private" />
                     private
                   </label>
@@ -432,7 +432,7 @@ export default function FirstBoardWelcomePage() {
                 {/* Job Role Chips */}
                 <div className="flex flex-wrap gap-2">
                   {rolesLoading ? (
-                    <span className="text-xs text-gray-400">Loading roles...</span>
+                    <span className="text-xs text-muted-foreground/70">Loading roles...</span>
                   ) : (
                     jobRoles.map((role) => {
                       const selected = formData.visible_to_roles.includes(role.key);
@@ -444,8 +444,8 @@ export default function FirstBoardWelcomePage() {
                           onClick={() => handleRoleToggle(role.key)}
                           className={`px-3 py-1 rounded-full border text-xs font-medium transition-colors ${
                             selected
-                              ? "bg-blue-500 text-white border-blue-500"
-                              : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:border-blue-400"
+                              ? "bg-primary text-primary-foreground border-primary"
+                              : "bg-card text-muted-foreground border-border hover:border-primary"
                           }`}
                         >
                           {role.name}
@@ -462,7 +462,7 @@ export default function FirstBoardWelcomePage() {
                     type="button"
                     onClick={() => setShowIconPicker(true)}
                     disabled={loading}
-                    className="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 flex flex-col items-center justify-center gap-1 hover:border-blue-400 transition-colors"
+                    className="flex-shrink-0 w-16 h-16 rounded-xl border border-border bg-muted flex flex-col items-center justify-center gap-1 hover:border-primary transition-colors"
                   >
                     <div
                       className="h-8 w-8 rounded-lg flex items-center justify-center"
@@ -470,12 +470,12 @@ export default function FirstBoardWelcomePage() {
                     >
                       <IconDisplay iconName={formData.icon} className="h-5 w-5" style={{ color: formData.color }} />
                     </div>
-                    <span className="text-[10px] text-gray-400">icon</span>
+                    <span className="text-[10px] text-muted-foreground/70">icon</span>
                   </button>
 
                   {/* Board preview */}
                   <div
-                    className="flex-1 rounded-xl border bg-gray-50 dark:bg-gray-800/60 p-3 flex items-center justify-center min-h-[64px]"
+                    className="flex-1 rounded-xl border bg-muted p-3 flex items-center justify-center min-h-[64px]"
                     style={{ borderColor: formData.name ? formData.color : undefined }}
                   >
                     {formData.name ? (
@@ -489,15 +489,15 @@ export default function FirstBoardWelcomePage() {
                         <div>
                           <p className="text-sm font-semibold leading-tight flex items-center gap-1">
                             {formData.name}
-                            {formData.is_private && <Lock className="h-3 w-3 text-gray-400" />}
+                            {formData.is_private && <Lock className="h-3 w-3 text-muted-foreground/70" />}
                           </p>
                           {formData.description && (
-                            <p className="text-xs text-gray-400 line-clamp-1">{formData.description}</p>
+                            <p className="text-xs text-muted-foreground/70 line-clamp-1">{formData.description}</p>
                           )}
                         </div>
                       </div>
                     ) : (
-                      <p className="text-xs text-gray-400 text-center">how the board look like<br />with icon should be here</p>
+                      <p className="text-xs text-muted-foreground/70 text-center">how the board look like<br />with icon should be here</p>
                     )}
                   </div>
                 </div>
@@ -507,7 +507,7 @@ export default function FirstBoardWelcomePage() {
                   <Button
                     onClick={handleCreateBoard}
                     disabled={loading || !formData.name.trim() || slugAvailable === false}
-                    className="rounded-full px-6 h-10 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium shadow-md"
+                    className="rounded-full px-6 h-10 bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-medium shadow-md"
                   >
                     {loading ? (
                       <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Creating...</>
