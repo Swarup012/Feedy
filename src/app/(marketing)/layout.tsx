@@ -108,6 +108,7 @@ export default function MarketingLayout({
           </MobileNavHeader>
 
           <MobileNavMenu
+            id="mobile-nav-menu"
             isOpen={isMobileMenuOpen}
             onClose={() => setIsMobileMenuOpen(false)}
           >
@@ -115,7 +116,7 @@ export default function MarketingLayout({
               <div key={`mobile-link-${idx}`} className="mb-4">
                 {item.dropdown ? (
                   <div>
-                    <span className="block text-lg font-medium text-neutral-600 dark:text-neutral-300 mb-2">
+                    <span className="block text-lg font-medium text-muted-foreground mb-2">
                       {item.name}
                     </span>
                     {item.dropdown.map((section, sectionIdx) => (
@@ -123,7 +124,7 @@ export default function MarketingLayout({
                         key={`mobile-section-${sectionIdx}`}
                         className="ml-4 mt-3"
                       >
-                        <div className="text-xs font-bold text-slate-400 dark:text-gray-500 uppercase tracking-wider mb-2">
+                        <div className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">
                           {section.section}
                         </div>
                         <div className="space-y-2">
@@ -132,7 +133,7 @@ export default function MarketingLayout({
                               key={`mobile-dropdown-${itemIdx}`}
                               href={dropdownItem.link}
                               onClick={() => setIsMobileMenuOpen(false)}
-                              className="block text-sm text-neutral-600 dark:text-neutral-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors py-1"
+                              className="block text-sm text-muted-foreground hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset rounded transition-colors py-1"
                             >
                               {dropdownItem.name}
                             </a>
@@ -145,7 +146,7 @@ export default function MarketingLayout({
                   <a
                     href={item.link}
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className="relative text-neutral-600 dark:text-neutral-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                    className="relative text-muted-foreground hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset rounded transition-colors"
                   >
                     <span className="block text-lg font-medium">
                       {item.name}
@@ -155,8 +156,8 @@ export default function MarketingLayout({
               </div>
             ))}
             <div className="flex w-full flex-col gap-3 mt-4">
-              <div className="flex items-center gap-2 pb-2 border-b border-neutral-200 dark:border-neutral-800">
-                <span className="text-sm font-medium text-neutral-600 dark:text-neutral-300">
+              <div className="flex items-center gap-2 pb-2 border-b border-border">
+                <span className="text-sm font-medium text-muted-foreground">
                   Theme:
                 </span>
                 <ThemeToggleDebug />

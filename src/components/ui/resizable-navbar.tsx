@@ -8,7 +8,7 @@ import {
   useMotionValueEvent,
 } from "motion/react";
 
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect, useCallback } from "react";
 import { Logo } from "@/components/logo";
 
 
@@ -52,6 +52,7 @@ interface MobileNavMenuProps {
   className?: string;
   isOpen: boolean;
   onClose: () => void;
+  id?: string;
 }
 
 export const Navbar = ({ children, className }: NavbarProps) => {
@@ -73,7 +74,6 @@ export const Navbar = ({ children, className }: NavbarProps) => {
   return (
     <motion.div
       ref={ref}
-      // IMPORTANT: Change this to class of `fixed` if you want the navbar to be fixed
       className={cn("sticky inset-x-0 top-0 z-40 w-full", className)}
     >
       {React.Children.map(children, (child) =>
@@ -92,8 +92,8 @@ export const NavBody = ({ children, className, visible }: NavBodyProps) => {
   return (
     <motion.div
       animate={{
-        backdropFilter: "none",
-        boxShadow: "none",
+        backdropFilter: visible ? "blur(12px)" : "none",
+        boxShadow: visible ? "0 1px 3px rgba(0,0,0,0.08)" : "none",
         width: visible ? "70%" : "100%",
         y: visible ? 20 : 0,
       }}
@@ -102,12 +102,9 @@ export const NavBody = ({ children, className, visible }: NavBodyProps) => {
         stiffness: 200,
         damping: 50,
       }}
-      style={{
-        minWidth: "800px",
-      }}
       className={cn(
-        "relative z-[60] mx-auto hidden w-full max-w-full flex-row items-center justify-between self-start rounded-full px-8 py-3 lg:flex bg-white dark:bg-background",
-        visible && "bg-white dark:bg-background",
+        "relative z-[60] mx-auto hidden w-full max-w-full flex-row items-center justify-between self-start rounded-full px-8 py-3 lg:flex bg-card dark:bg-background",
+        visible && "bg-card/80 dark:bg-background/80",
         className,
       )}
     >
@@ -125,10 +122,96 @@ export const NavBody = ({ children, className, visible }: NavBodyProps) => {
 
 export const NavItems = ({ items, className, onItemClick }: NavItemsProps) => {
   const [hovered, setHovered] = useState<number | null>(null);
+  const [focusedIdx, setFocusedIdx] = useState<number | null>(null);
+  const triggerRefs = useRef<(HTMLButtonElement | HTMLAnchorElement)[]>([]);
+
+  const openDropdown = useCallback((idx: number) => {
+    setHovered(idx);
+    setFocusedIdx(idx);
+  }, []);
+
+  const closeDropdown = useCallback(() => {
+    setHovered(null);
+    setFocusedIdx(null);
+  }, []);
+
+  const handleTriggerKeyDown = useCallback(
+    (e: React.KeyboardEvent, idx: number, hasDropdown: boolean) => {
+      if (!hasDropdown) return;
+
+      switch (e.key) {
+        case "ArrowDown":
+        case "Enter":
+        case " ":
+          e.preventDefault();
+          openDropdown(idx);
+          // Focus first link in dropdown after render
+          setTimeout(() => {
+            const dropdown = triggerRefs.current[idx]
+              ?.closest("[data-nav-item]")
+              ?.querySelectorAll("[data-dropdown-link]");
+            (dropdown?.[0] as HTMLElement)?.focus();
+          }, 50);
+          break;
+        case "Escape":
+          e.preventDefault();
+          closeDropdown();
+          triggerRefs.current[idx]?.focus();
+          break;
+      }
+    },
+    [openDropdown, closeDropdown],
+  );
+
+  const handleDropdownKeyDown = useCallback(
+    (e: React.KeyboardEvent, idx: number, _sectionCount: number, _itemCount: number) => {
+      switch (e.key) {
+        case "Escape":
+          e.preventDefault();
+          closeDropdown();
+          triggerRefs.current[idx]?.focus();
+          break;
+        case "ArrowDown": {
+          e.preventDefault();
+          const target = e.currentTarget as HTMLElement;
+          const next = target.nextElementSibling as HTMLElement | null;
+          if (next) {
+            next.focus();
+          } else {
+            // Wrap to first item in next section or first item overall
+            const container = target.closest("[data-dropdown-container]");
+            const firstLink = container?.querySelector("[data-dropdown-link]") as HTMLElement;
+            firstLink?.focus();
+          }
+          break;
+        }
+        case "ArrowUp": {
+          e.preventDefault();
+          const target = e.currentTarget as HTMLElement;
+          const prev = target.previousElementSibling as HTMLElement | null;
+          if (prev && prev.hasAttribute("data-dropdown-link")) {
+            prev.focus();
+          } else {
+            // Move focus back to trigger
+            closeDropdown();
+            triggerRefs.current[idx]?.focus();
+          }
+          break;
+        }
+        case "Tab":
+          // Allow natural tab but close dropdown when leaving
+          if (e.shiftKey) {
+            closeDropdown();
+          }
+          break;
+      }
+    },
+    [closeDropdown],
+  );
 
   return (
     <motion.div
-      onMouseLeave={() => setHovered(null)}
+      onMouseLeave={() => closeDropdown()}
       className={cn(
         "absolute inset-0 hidden flex-1 flex-row items-center justify-center space-x-2 text-base font-medium transition duration-200 lg:flex lg:space-x-2",
         className,
@@ -137,53 +220,142 @@ export const NavItems = ({ items, className, onItemClick }: NavItemsProps) => {
       {items.map((item, idx) => (
         <div
           key={`nav-item-${idx}`}
+          data-nav-item
           className="relative"
-          onMouseEnter={() => setHovered(idx)}
+          onMouseEnter={() => openDropdown(idx)}
         >
-          <a
-            onClick={onItemClick}
-            className="relative px-5 py-2 text-slate-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 cursor-pointer inline-block"
-            href={item.dropdown ? undefined : item.link}
-          >
-            {hovered === idx && !item.dropdown && (
-              <motion.div
-                layoutId="hovered"
-                className="absolute inset-0 h-full w-full rounded-full bg-slate-100 dark:bg-white/10"
-              />
-            )}
-            <span className="relative z-20">{item.name}</span>
-          </a>
-          
-          {/* Dropdown Menu */}
-          {item.dropdown && hovered === idx && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 10 }}
-              transition={{ duration: 0.2 }}
-              className="absolute left-0 top-full mt-2 w-64 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 p-4 z-50"
+          {item.dropdown ? (
+            <button
+              ref={(el) => { triggerRefs.current[idx] = el as HTMLButtonElement; }}
+              type="button"
+              aria-haspopup="true"
+              aria-expanded={hovered === idx}
+              onFocus={() => openDropdown(idx)}
+              onBlur={(e) => {
+                // Only close if focus moves outside this nav item
+                if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+                  closeDropdown();
+                }
+              }}
+              onKeyDown={(e) => handleTriggerKeyDown(e, idx, true)}
+              className={cn(
+                "relative px-5 py-2 cursor-pointer inline-block rounded-full transition-colors",
+                "text-foreground",
+                "hover:text-primary",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+                hovered === idx && "text-primary",
+              )}
             >
-              {item.dropdown.map((section, sectionIdx) => (
-                <div key={`section-${sectionIdx}`} className={sectionIdx > 0 ? "mt-4" : ""}>
-                  <div className="text-xs font-bold text-slate-400 dark:text-gray-500 uppercase tracking-wider mb-2">
-                    {section.section}
-                  </div>
-                  <div className="space-y-2">
-                    {section.items.map((dropdownItem, itemIdx) => (
-                      <a
-                        key={`dropdown-item-${itemIdx}`}
-                        href={dropdownItem.link}
-                        onClick={onItemClick}
-                        className="block px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg transition-colors"
-                      >
-                        {dropdownItem.name}
-                      </a>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </motion.div>
+              <AnimatePresence>
+                {hovered === idx && (
+                  <motion.div
+                    layoutId="hovered"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute inset-0 h-full w-full rounded-full bg-accent"
+                  />
+                )}
+              </AnimatePresence>
+              <span className="relative z-20 flex items-center gap-1">
+                {item.name}
+                <svg
+                  className={cn(
+                    "relative z-20 h-3 w-3 transition-transform",
+                    hovered === idx && "rotate-180",
+                  )}
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+              </span>
+            </button>
+          ) : (
+            <a
+              ref={(el) => { triggerRefs.current[idx] = el as HTMLAnchorElement; }}
+              onClick={onItemClick}
+              onFocus={() => setFocusedIdx(idx)}
+              onBlur={(e) => {
+                if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+                  setFocusedIdx(null);
+                }
+              }}
+              onKeyDown={(e) => handleTriggerKeyDown(e, idx, false)}
+              className={cn(
+                "relative px-5 py-2 cursor-pointer inline-block rounded-full transition-colors",
+                "text-foreground",
+                "hover:text-primary",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+              )}
+              href={item.link}
+            >
+              <AnimatePresence>
+                {(hovered === idx || focusedIdx === idx) && (
+                  <motion.div
+                    layoutId="hovered"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute inset-0 h-full w-full rounded-full bg-accent"
+                  />
+                )}
+              </AnimatePresence>
+              <span className="relative z-20">{item.name}</span>
+            </a>
           )}
+
+          {/* Dropdown Menu */}
+          <AnimatePresence>
+            {item.dropdown && hovered === idx && (
+              <motion.div
+                key={`dropdown-${idx}`}
+                initial={{ opacity: 0, y: 8, scale: 0.96 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 4, scale: 0.98 }}
+                transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
+                role="menu"
+                className="absolute left-0 top-full mt-2 w-64 bg-card dark:bg-popover rounded-xl shadow-xl border border-border p-4 z-50"
+              >
+                {item.dropdown.map((section, sectionIdx) => (
+                  <div key={`section-${sectionIdx}`} className={sectionIdx > 0 ? "mt-4" : ""}>
+                    <div
+                      id={`nav-dropdown-section-${idx}-${sectionIdx}`}
+                      className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2"
+                    >
+                      {section.section}
+                    </div>
+                    <div
+                      data-dropdown-container
+                      className="space-y-2"
+                      role="group"
+                      aria-labelledby={`nav-dropdown-section-${idx}-${sectionIdx}`}
+                    >
+                      {section.items.map((dropdownItem, itemIdx) => (
+                        <a
+                          key={`dropdown-item-${itemIdx}`}
+                          data-dropdown-link
+                          href={dropdownItem.link}
+                          onClick={onItemClick}
+                          onKeyDown={(e) =>
+                            handleDropdownKeyDown(e, idx, section.items.length, itemIdx)
+                          }
+                          role="menuitem"
+                          className="block px-3 py-2 text-sm text-muted-foreground hover:text-primary hover:bg-accent rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
+                        >
+                          {dropdownItem.name}
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       ))}
     </motion.div>
@@ -209,7 +381,7 @@ export const MobileNav = ({ children, className, visible }: MobileNavProps) => {
       }}
       className={cn(
         "relative z-50 mx-auto flex w-full max-w-[calc(100vw-2rem)] flex-col items-center justify-between bg-transparent px-0 py-2 lg:hidden",
-        visible && "bg-white dark:bg-background",
+        visible && "bg-card dark:bg-background",
         className,
       )}
     >
@@ -239,16 +411,99 @@ export const MobileNavMenu = ({
   className,
   isOpen,
   onClose,
+  id,
 }: MobileNavMenuProps) => {
+  const menuRef = useRef<HTMLDivElement>(null);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
+
+  // Store the element that had focus before menu opened
+  useEffect(() => {
+    if (isOpen) {
+      previousFocusRef.current = document.activeElement as HTMLElement;
+    }
+  }, [isOpen]);
+
+  // Focus trap + Escape key
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const menu = menuRef.current;
+    if (!menu) return;
+
+    // Focus the first focusable element inside the menu
+    const focusFirst = () => {
+      const focusable = menu.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      );
+      if (focusable.length > 0) {
+        focusable[0].focus();
+      }
+    };
+
+    // Small delay to let animation start
+    const timer = setTimeout(focusFirst, 100);
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        onClose();
+        return;
+      }
+
+      if (e.key !== "Tab") return;
+
+      const focusable = menu.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      );
+      if (focusable.length === 0) return;
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+
+      if (e.shiftKey) {
+        // Shift+Tab: if on first element, wrap to last
+        if (document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        }
+      } else {
+        // Tab: if on last element, wrap to first
+        if (document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isOpen, onClose]);
+
+  // Return focus when menu closes
+  useEffect(() => {
+    if (!isOpen && previousFocusRef.current) {
+      previousFocusRef.current.focus();
+      previousFocusRef.current = null;
+    }
+  }, [isOpen]);
+
   return (
     <AnimatePresence>
       {isOpen && (
         <motion.div
+          ref={menuRef}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
+          role="menu"
+          aria-label="Mobile navigation"
+          id={id}
           className={cn(
-            "absolute inset-x-0 top-16 z-50 flex w-full flex-col items-start justify-start gap-4 rounded-lg bg-white px-4 py-8 shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset] dark:bg-background",
+            "absolute inset-x-0 top-16 z-50 flex w-full flex-col items-start justify-start gap-4 rounded-lg bg-card px-4 py-8 shadow-lg dark:bg-background border border-border",
             className,
           )}
         >
@@ -266,20 +521,47 @@ export const MobileNavToggle = ({
   isOpen: boolean;
   onClick: () => void;
 }) => {
-  return isOpen ? (
-    <IconX className="text-black dark:text-white" onClick={onClick} />
-  ) : (
-    <IconMenu2 className="text-black dark:text-white" onClick={onClick} />
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={isOpen ? "Close navigation menu" : "Open navigation menu"}
+      aria-expanded={isOpen}
+      aria-controls="mobile-nav-menu"
+      className={cn(
+        "inline-flex items-center justify-center",
+        "h-11 w-11 rounded-md",
+        "text-foreground",
+        "hover:bg-accent",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+        "transition-colors",
+      )}
+    >
+      {isOpen ? (
+        <IconX className="h-5 w-5" aria-hidden="true" />
+      ) : (
+        <IconMenu2 className="h-5 w-5" aria-hidden="true" />
+      )}
+    </button>
   );
 };
 
-export const NavbarLogo = () => {
+export const NavbarLogo = ({
+  href = "/",
+  children,
+}: {
+  href?: string;
+  children?: React.ReactNode;
+}) => {
   return (
     <a
-      href="/"
-      className="relative z-20 mr-4 flex items-center space-x-2 px-2 py-1 text-sm font-normal"
+      href={href}
+      className={cn(
+        "relative z-20 mr-4 flex items-center space-x-2 px-2 py-1 text-sm font-normal",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:rounded-md",
+      )}
     >
-      <Logo width={32} height={32} className="text-blue-600" />
+      {children ?? <Logo width={32} height={32} className="text-primary" />}
     </a>
   );
 };
@@ -296,21 +578,18 @@ export const NavbarButton = ({
   as?: React.ElementType;
   children: React.ReactNode;
   className?: string;
-  variant?: "primary" | "secondary" | "dark" | "gradient";
+  variant?: "primary" | "secondary";
 } & (
   | React.ComponentPropsWithoutRef<"a">
   | React.ComponentPropsWithoutRef<"button">
 )) => {
   const baseStyles =
-    "px-4 py-2 rounded-md text-sm font-bold relative cursor-pointer hover:-translate-y-0.5 transition duration-200 inline-block text-center";
+    "px-4 py-2 rounded-md text-sm font-bold relative cursor-pointer hover:-translate-y-0.5 transition duration-200 inline-block text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background";
 
   const variantStyles = {
     primary:
-      "bg-blue-600 hover:bg-blue-700 text-white shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]",
-    secondary: "bg-transparent shadow-none text-slate-900 dark:text-white",
-    dark: "bg-black text-white shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset]",
-    gradient:
-      "bg-gradient-to-b from-blue-500 to-blue-700 text-white shadow-[0px_2px_0px_0px_rgba(255,255,255,0.3)_inset]",
+      "bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm hover:shadow-md transition-shadow",
+    secondary: "bg-transparent shadow-none text-foreground",
   };
 
   return (

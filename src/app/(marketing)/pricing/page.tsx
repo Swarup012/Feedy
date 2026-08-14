@@ -16,20 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import {
-  Navbar,
-  NavBody,
-  NavItems,
-  MobileNav,
-  NavbarLogo,
-  NavbarButton,
-  MobileNavHeader,
-  MobileNavToggle,
-  MobileNavMenu,
-} from "@/components/ui/resizable-navbar";
 import { LandingFooter } from "@/components/ui/landing-footer";
-import { ThemeToggleDebug } from "@/components/theme-toggle-debug";
-import { Logo } from "@/components/logo";
 import {
   Check,
   X,
@@ -55,61 +42,7 @@ export default function PricingPage() {
     "monthly",
   );
   const [loading, setLoading] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [overageOpen, setOverageOpen] = useState(false);
-
-  // Navbar Actions Component
-  const NavbarActions = ({ visible }: { visible?: boolean }) => (
-    <div className="flex items-center gap-3">
-      <ThemeToggleDebug />
-      {!visible && (
-        <NavbarButton variant="secondary" onClick={() => router.push("/login")}>
-          Login
-        </NavbarButton>
-      )}
-      <NavbarButton variant="primary" onClick={() => router.push("/signup")}>
-        Sign Up
-      </NavbarButton>
-    </div>
-  );
-
-  const navItems = [
-    {
-      name: "Product",
-      link: "/feedback",
-      dropdown: [
-        {
-          section: "Features",
-          items: [
-            { name: "Collect Feedback", link: "/collect-feedback" },
-            { name: "Analyze Feedback", link: "/analyze-feedback" },
-            { name: "Autopilot", link: "/autopilot" },
-            { name: "Share Updates", link: "/share-updates" },
-          ],
-        },
-        {
-          section: "Use Cases",
-          items: [
-            { name: "Feature Request Management", link: "/collect-feedback" },
-            { name: "Role-Based Access Control", link: "/role-based-access" },
-            { name: "Public Roadmap", link: "/public-roadmap" },
-          ],
-        },
-      ],
-    },
-    {
-      name: "Documentation",
-      link: "/docs",
-    },
-    {
-      name: "Pricing",
-      link: "/pricing",
-    },
-    {
-      name: "Contact",
-      link: "/contact",
-    },
-  ];
 
   const handleUpgrade = async (
     plan: "starter" | "pro",
@@ -157,8 +90,6 @@ export default function PricingPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
-      {/* Navbar */}
-
       <div className="container mx-auto px-4 py-16 pt-24">
         {/* Header */}
         <div className="text-center mb-12">

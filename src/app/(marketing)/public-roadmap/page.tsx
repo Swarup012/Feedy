@@ -25,90 +25,12 @@ import {
   PlayCircle,
   CheckSquare,
 } from "lucide-react";
-import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import {
-  Navbar,
-  NavBody,
-  NavItems,
-  MobileNav,
-  NavbarLogo,
-  NavbarButton,
-  MobileNavHeader,
-  MobileNavToggle,
-  MobileNavMenu,
-} from "@/components/ui/resizable-navbar";
-import { ThemeToggleDebug } from "@/components/theme-toggle-debug";
 import { LandingFooter } from "@/components/ui/landing-footer";
-import { Logo } from "@/components/logo";
 
 export default function PublicRoadmapPage() {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const router = useRouter();
-
-  // Navbar Actions Component
-  const NavbarActions = ({ visible }: { visible?: boolean }) => (
-    <div className="flex items-center gap-3">
-      <ThemeToggleDebug />
-      {!visible && (
-        <NavbarButton variant="secondary" onClick={() => router.push("/login")}>
-          Login
-        </NavbarButton>
-      )}
-      <NavbarButton variant="primary" onClick={() => router.push("/signup")}>
-        Sign Up
-      </NavbarButton>
-    </div>
-  );
-
-  const navItems = [
-    {
-      name: "Product",
-      link: "/feedback",
-      dropdown: [
-        {
-          section: "Features",
-          items: [
-            { name: "Collect Feedback", link: "/collect-feedback" },
-            { name: "Analyze Feedback", link: "/analyze-feedback" },
-            { name: "Autopilot", link: "/autopilot" },
-            { name: "Share Updates", link: "/share-updates" },
-          ],
-        },
-        {
-          section: "Use Cases",
-          items: [
-            { name: "Feature Request Management", link: "/collect-feedback" },
-            { name: "Role-Based Access Control", link: "/role-based-access" },
-            { name: "Public Roadmap", link: "/public-roadmap" },
-          ],
-        },
-        {
-          section: "Resources",
-          items: [
-            { name: "Blog", link: "/blog" },
-          ],
-        },
-      ],
-    },
-    {
-      name: "Documentation",
-      link: "/docs",
-    },
-    {
-      name: "Pricing",
-      link: "/pricing",
-    },
-    {
-      name: "Contact",
-      link: "/contact",
-    },
-  ];
-
   return (
     <>
-      {/* Navbar */}
 
       <div className="min-h-screen bg-[#f9f9f9] dark:bg-background">
         {/* Hero Section */}
