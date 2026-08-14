@@ -43,6 +43,14 @@
   --brand-accent: #4f7cff;              /* Primary action / CTA */
   --brand-danger: #ff4d4f;
 
+  /* Integration brand colors */
+  --brand-discord: #5865F2;
+  --brand-intercom: #1F8DED;
+  --brand-slack: #E01E5A;
+  --brand-slack-dark: #4A154B;
+  --brand-github: #24292F;
+  --brand-github-light: #f0f6fc;
+
   /* Typography */
   --font-sans: 'IBM Plex Sans', system-ui, sans-serif;
   --font-mono: 'IBM Plex Mono', monospace;

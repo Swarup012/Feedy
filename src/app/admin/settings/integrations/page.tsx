@@ -45,6 +45,7 @@ import {
   IntegrationReconnectBanner,
   formatDate,
 } from '@/components/admin/IntegrationCard';
+import { INTEGRATION_BRAND_COLORS } from '@/components/admin/integration-brands';
 
 const DiscordIcon = ({ className }: { className?: string }) => (
   <img src="/images/icons/discord.svg" alt="Discord" className={className} />
@@ -108,10 +109,22 @@ function IntegrationsPageInner() {
     setLoading(true);
     try {
       const [intercomRes, discordRes, slackRes, githubRes] = await Promise.all([
-        intercomService.getStatus(orgId).catch(() => null),
-        discordService.getStatus(orgId).catch(() => null),
-        slackService.getStatus(orgId).catch(() => null),
-        githubService.getStatus(orgId).catch(() => null),
+        intercomService.getStatus(orgId).catch(err => {
+          console.error('Failed to load Intercom status:', err);
+          return null;
+        }),
+        discordService.getStatus(orgId).catch(err => {
+          console.error('Failed to load Discord status:', err);
+          return null;
+        }),
+        slackService.getStatus(orgId).catch(err => {
+          console.error('Failed to load Slack status:', err);
+          return null;
+        }),
+        githubService.getStatus(orgId).catch(err => {
+          console.error('Failed to load GitHub status:', err);
+          return null;
+        }),
       ]);
 
       if (intercomRes) setIntercomStatus(intercomRes.data);
@@ -151,10 +164,22 @@ function IntegrationsPageInner() {
     (async () => {
       try {
         const [intercomRes, discordRes, slackRes, githubRes] = await Promise.all([
-          autopilotService.getSettings(orgId, 'intercom').catch(() => null),
-          autopilotService.getSettings(orgId, 'discord').catch(() => null),
-          autopilotService.getSettings(orgId, 'slack').catch(() => null),
-          autopilotService.getSettings(orgId, 'github').catch(() => null),
+          autopilotService.getSettings(orgId, 'intercom').catch(err => {
+            console.error('Failed to load Intercom autopilot settings:', err);
+            return null;
+          }),
+          autopilotService.getSettings(orgId, 'discord').catch(err => {
+            console.error('Failed to load Discord autopilot settings:', err);
+            return null;
+          }),
+          autopilotService.getSettings(orgId, 'slack').catch(err => {
+            console.error('Failed to load Slack autopilot settings:', err);
+            return null;
+          }),
+          autopilotService.getSettings(orgId, 'github').catch(err => {
+            console.error('Failed to load GitHub autopilot settings:', err);
+            return null;
+          }),
         ]);
 
         if (intercomRes?.data?.settings) {
@@ -184,8 +209,8 @@ function IntegrationsPageInner() {
             setGithubBoardId(githubRes.data.settings.default_board_id);
           }
         }
-      } catch {
-        // non-fatal.
+      } catch (err) {
+        console.error('Failed to load autopilot settings:', err);
       }
     })();
   }, [orgId]);
@@ -589,7 +614,7 @@ function IntegrationsPageInner() {
                   <IntegrationCardConnected
                     name="Discord"
                     icon={<DiscordIcon className="h-5 w-5" />}
-                    brandColor="#5865F2"
+                    brandColor={INTEGRATION_BRAND_COLORS.discord}
                     status={discordStatus?.status === 'error' ? 'error' : 'active'}
                     subtitle={`#${discordChannels.find(c => c.id === discordStatus?.provider_channel_id)?.name || 'No channel'} → ${boards.find(b => b.id === discordBoardId)?.name || 'No board'} · connected ${discordStatus?.connected_at ? formatDate(discordStatus.connected_at) : '—'}`}
                     settingsContent={
@@ -614,8 +639,8 @@ function IntegrationsPageInner() {
                           <div className="flex items-center justify-between gap-4">
                             <div className="space-y-0.5">
                               <Label className="text-sm font-medium flex items-center gap-1.5"><Zap className="h-3.5 w-3.5 text-amber-500" /> Automatic Mode</Label>
-                              <p className="text-[11px] text-muted-foreground leading-tight">Bypass review & publish instantly.</p>
-                              {!discordBoardId && <p className="text-[10px] text-amber-600 dark:text-amber-500 mt-0.5 font-medium">Select a board below first.</p>}
+                              <p className="text-xs text-muted-foreground leading-tight">Bypass review & publish instantly.</p>
+                              {!discordBoardId && <p className="text-xs text-amber-600 dark:text-amber-500 mt-0.5 font-medium">Select a board below first.</p>}
                             </div>
                              <Switch checked={discordAutopilot?.autopilot_mode === 'automatic'} disabled={savingDiscordAutopilot || !discordBoardId || !canUseAutoMode} onCheckedChange={(checked) => handleAutopilotModeToggle('discord', checked)} />
                           </div>
@@ -655,7 +680,7 @@ function IntegrationsPageInner() {
                   <IntegrationCardConnected
                     name="Intercom"
                     icon={<IntercomIcon className="h-5 w-5" />}
-                    brandColor="#1F8DED"
+                    brandColor={INTEGRATION_BRAND_COLORS.intercom}
                     status={intercomStatus?.status === 'error' ? 'error' : 'active'}
                     subtitle={`${intercomStatus?.provider_workspace_id || 'No workspace'} → ${boards.find(b => b.id === intercomBoardId)?.name || 'No board'} · connected ${intercomStatus?.connected_at ? formatDate(intercomStatus.connected_at) : '—'}`}
                     settingsContent={
@@ -664,8 +689,8 @@ function IntegrationsPageInner() {
                           <div className="flex items-center justify-between gap-4">
                             <div className="space-y-0.5">
                               <Label className="text-sm font-medium flex items-center gap-1.5"><Zap className="h-3.5 w-3.5 text-amber-500" /> Automatic Mode</Label>
-                              <p className="text-[11px] text-muted-foreground leading-tight">Bypass review & publish instantly.</p>
-                              {!intercomBoardId && <p className="text-[10px] text-amber-600 dark:text-amber-500 mt-0.5 font-medium">Select a board below first.</p>}
+                              <p className="text-xs text-muted-foreground leading-tight">Bypass review & publish instantly.</p>
+                              {!intercomBoardId && <p className="text-xs text-amber-600 dark:text-amber-500 mt-0.5 font-medium">Select a board below first.</p>}
                             </div>
                              <Switch checked={intercomAutopilot?.autopilot_mode === 'automatic'} disabled={savingIntercomAutopilot || !intercomBoardId || !canUseAutoMode} onCheckedChange={(checked) => handleAutopilotModeToggle('intercom', checked)} />
                           </div>
@@ -682,8 +707,8 @@ function IntegrationsPageInner() {
                         </div>
 
                         <div className="rounded-lg bg-muted/50 border border-dashed px-3 py-2.5">
-                          <p className="text-[10px] text-muted-foreground leading-relaxed">
-                            Subscribe to <code className="font-mono text-[9px] bg-muted px-1 py-0.5 rounded">conversation.admin.closed</code> in Intercom Webhooks and point to your public webhook endpoint.
+                          <p className="text-xs text-muted-foreground leading-relaxed">
+                            Subscribe to <code className="font-mono text-[10px] bg-muted px-1 py-0.5 rounded">conversation.admin.closed</code> in Intercom Webhooks and point to your public webhook endpoint.
                           </p>
                         </div>
                       </>
@@ -711,7 +736,7 @@ function IntegrationsPageInner() {
                   <IntegrationCardConnected
                     name="Slack"
                     icon={<SlackIcon className="h-5 w-5" />}
-                    brandColor="#E01E5A"
+                    brandColor={INTEGRATION_BRAND_COLORS.slack}
                     status={slackStatus?.status === 'error' ? 'error' : 'active'}
                     subtitle={`#${slackChannels.find(c => c.id === slackStatus?.provider_channel_id)?.name || 'No channel'} → ${boards.find(b => b.id === slackBoardId)?.name || 'No board'} · connected ${slackStatus?.connected_at ? formatDate(slackStatus.connected_at) : '—'}`}
                     settingsContent={
@@ -729,7 +754,7 @@ function IntegrationsPageInner() {
                                 ))}
                               </SelectContent>
                             </Select>
-                            <p className="text-[10px] text-muted-foreground leading-relaxed">
+                            <p className="text-xs text-muted-foreground leading-relaxed">
                               Invite the Feedy bot to this channel so Events API can deliver messages.
                             </p>
                           </div>
@@ -739,15 +764,15 @@ function IntegrationsPageInner() {
                           <div className="flex items-center justify-between gap-4">
                             <div className="space-y-0.5">
                               <Label className="text-sm font-medium flex items-center gap-1.5"><Zap className="h-3.5 w-3.5 text-amber-500" /> Automatic Mode</Label>
-                              <p className="text-[11px] text-muted-foreground leading-tight">Bypass review & publish instantly.</p>
-                              {!slackBoardId && <p className="text-[10px] text-amber-600 dark:text-amber-500 mt-0.5 font-medium">Select a board below first.</p>}
+                              <p className="text-xs text-muted-foreground leading-tight">Bypass review & publish instantly.</p>
+                              {!slackBoardId && <p className="text-xs text-amber-600 dark:text-amber-500 mt-0.5 font-medium">Select a board below first.</p>}
                             </div>
                              <Switch checked={slackAutopilot?.autopilot_mode === 'automatic'} disabled={savingSlackAutopilot || !slackBoardId || !canUseAutoMode} onCheckedChange={(checked) => handleAutopilotModeToggle('slack', checked)} />
                           </div>
 
                           {slackAutopilot?.autopilot_mode === 'automatic' && (
                             <div className="rounded-lg border border-amber-200 bg-amber-50/80 dark:border-amber-900/50 dark:bg-amber-950/30 px-3 py-2.5 flex gap-2">
-                              <p className="text-[11px] text-amber-800 dark:text-amber-300 leading-relaxed">
+                              <p className="text-xs text-amber-800 dark:text-amber-300 leading-relaxed">
                                 Feedback from this channel will publish directly to the board without manual review.
                               </p>
                             </div>
@@ -788,7 +813,7 @@ function IntegrationsPageInner() {
                   <IntegrationCardConnected
                     name="GitHub"
                     icon={<GitHubIcon className="h-5 w-5" />}
-                    brandColor="#24292F"
+                    brandColor={INTEGRATION_BRAND_COLORS.github}
                     status={githubStatus?.status === 'error' ? 'error' : 'active'}
                     subtitle={`Installation #${githubStatus?.provider_workspace_id || '—'} → ${boards.find(b => b.id === githubBoardId)?.name || 'No board'} · connected ${githubStatus?.connected_at ? formatDate(githubStatus.connected_at) : '—'}`}
                     settingsContent={
@@ -797,15 +822,15 @@ function IntegrationsPageInner() {
                           <div className="flex items-center justify-between gap-4">
                             <div className="space-y-0.5">
                               <Label className="text-sm font-medium flex items-center gap-1.5"><Zap className="h-3.5 w-3.5 text-amber-500" /> Automatic Mode</Label>
-                              <p className="text-[11px] text-muted-foreground leading-tight">Bypass review & publish instantly.</p>
-                              {!githubBoardId && <p className="text-[10px] text-amber-600 dark:text-amber-500 mt-0.5 font-medium">Select a board below first.</p>}
+                              <p className="text-xs text-muted-foreground leading-tight">Bypass review & publish instantly.</p>
+                              {!githubBoardId && <p className="text-xs text-amber-600 dark:text-amber-500 mt-0.5 font-medium">Select a board below first.</p>}
                             </div>
                              <Switch checked={githubAutopilot?.autopilot_mode === 'automatic'} disabled={savingGithubAutopilot || !githubBoardId || !canUseAutoMode} onCheckedChange={(checked) => handleAutopilotModeToggle('github', checked)} />
                           </div>
 
                           {githubAutopilot?.autopilot_mode === 'automatic' && (
                             <div className="rounded-lg border border-amber-200 bg-amber-50/80 dark:border-amber-900/50 dark:bg-amber-950/30 px-3 py-2.5 flex gap-2">
-                              <p className="text-[11px] text-amber-800 dark:text-amber-300 leading-relaxed">
+                              <p className="text-xs text-amber-800 dark:text-amber-300 leading-relaxed">
                                 Issues and pull requests will publish directly to the board without manual review.
                               </p>
                             </div>
@@ -823,8 +848,8 @@ function IntegrationsPageInner() {
                         </div>
 
                         <div className="rounded-lg bg-muted/50 border border-dashed px-3 py-2.5">
-                          <p className="text-[10px] text-muted-foreground leading-relaxed">
-                            Subscribe to <code className="font-mono text-[9px] bg-muted px-1 py-0.5 rounded">issues</code> and <code className="font-mono text-[9px] bg-muted px-1 py-0.5 rounded">pull_request</code> events in your GitHub App settings and point to your public webhook endpoint.
+                          <p className="text-xs text-muted-foreground leading-relaxed">
+                            Subscribe to <code className="font-mono text-[10px] bg-muted px-1 py-0.5 rounded">issues</code> and <code className="font-mono text-[10px] bg-muted px-1 py-0.5 rounded">pull_request</code> events in your GitHub App settings and point to your public webhook endpoint.
                           </p>
                         </div>
                       </>
@@ -862,8 +887,8 @@ function IntegrationsPageInner() {
               {!isDiscordActive && (
                 <IntegrationCardAdd
                   name="Discord"
-                  icon={<DiscordIcon className="h-5 w-5 text-[#5865F2]" />}
-                  brandColor="#5865F2"
+                  icon={<DiscordIcon className="h-5 w-5 text-brand-discord" />}
+                  brandColor={INTEGRATION_BRAND_COLORS.discord}
                   description="Monitor Discord channels and convert conversations into actionable feedback."
                   onConnect={handleConnectDiscord}
                 />
@@ -871,8 +896,8 @@ function IntegrationsPageInner() {
               {!isIntercomActive && (
                 <IntegrationCardAdd
                   name="Intercom"
-                  icon={<IntercomIcon className="h-5 w-5 text-[#1F8DED]" />}
-                  brandColor="#1F8DED"
+                  icon={<IntercomIcon className="h-5 w-5 text-brand-intercom" />}
+                  brandColor={INTEGRATION_BRAND_COLORS.intercom}
                   description="Receive closed conversation transcripts and generate feedback suggestions."
                   onConnect={handleConnectIntercom}
                 />
@@ -880,8 +905,8 @@ function IntegrationsPageInner() {
               {!isSlackActive && (
                 <IntegrationCardAdd
                   name="Slack"
-                  icon={<SlackIcon className="h-5 w-5" />}
-                  brandColor="#E01E5A"
+                  icon={<SlackIcon className="h-5 w-5 text-brand-slack" />}
+                  brandColor={INTEGRATION_BRAND_COLORS.slack}
                   description="Monitor a Slack channel and convert messages into actionable feedback."
                   onConnect={handleConnectSlack}
                 />
@@ -889,8 +914,8 @@ function IntegrationsPageInner() {
               {!isGithubActive && (
                 <IntegrationCardAdd
                   name="GitHub"
-                  icon={<GitHubIcon className="h-5 w-5 text-[#24292F] dark:text-[#f0f6fc]" />}
-                  brandColor="#24292F"
+                  icon={<GitHubIcon className="h-5 w-5 text-brand-github dark:text-brand-github-light" />}
+                  brandColor={INTEGRATION_BRAND_COLORS.github}
                   description="Track issues and pull requests as feedback via GitHub App webhooks."
                   onConnect={handleConnectGithub}
                 />

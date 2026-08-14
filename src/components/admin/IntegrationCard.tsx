@@ -116,7 +116,7 @@ export function IntegrationCardConnected({
               </span>
             )}
           </div>
-          <p className="text-xs text-muted-foreground mt-0.5 truncate">
+          <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
             {subtitle}
           </p>
         </div>
@@ -133,7 +133,7 @@ export function IntegrationCardConnected({
           </PopoverTrigger>
           <PopoverContent
             align="end"
-            className="w-80 p-0 overflow-hidden rounded-xl border bg-card shadow-lg"
+            className="w-[min(80vw,20rem)] p-0 overflow-hidden rounded-xl border bg-card shadow-lg"
           >
             <div className="bg-muted/50 px-4 py-3 border-b">
               <h4 className="font-semibold text-sm flex items-center gap-2">
@@ -224,7 +224,7 @@ export function IntegrationDisconnectButton({
         {label}
       </Button>
       {note && (
-        <p className="text-[10px] text-muted-foreground text-center mt-2">
+        <p className="text-xs text-muted-foreground text-center mt-2">
           {note}
         </p>
       )}

@@ -75,6 +75,14 @@ export default {
   				'3': 'hsl(var(--chart-3))',
   				'4': 'hsl(var(--chart-4))',
   				'5': 'hsl(var(--chart-5))'
+  			},
+  			brand: {
+  				discord: 'var(--brand-discord)',
+  				intercom: 'var(--brand-intercom)',
+  				slack: 'var(--brand-slack)',
+  				'slack-dark': 'var(--brand-slack-dark)',
+  				github: 'var(--brand-github)',
+  				'github-light': 'var(--brand-github-light)',
   			}
   		},
   		borderRadius: {
