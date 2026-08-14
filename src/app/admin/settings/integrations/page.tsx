@@ -2,7 +2,6 @@
 
 import { Suspense, useCallback, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import Link from 'next/link';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { PaidFeatureGate } from '@/components/PaidFeatureGate';
 import { useOrganization } from '@/context/OrganizationContext';
@@ -28,43 +27,24 @@ import {
   type GitHubStatus,
 } from '@/services/githubService';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import {
-  CheckCircle2,
-  AlertTriangle,
   Loader2,
-  Plug,
-  Unplug,
-  ExternalLink,
-  MessageSquare,
   Hash,
-  Settings2,
   Zap,
-  Globe,
   Mail,
-  GitBranch,
 } from 'lucide-react';
 import { autopilotService, type AutopilotSettings } from '@/services/autopilotService';
 import { boardService, type Board } from '@/services/boardService';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-
-function formatDate(iso: string | null) {
-  if (!iso) return null;
-  try {
-    return new Date(iso).toLocaleString(undefined, {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  } catch {
-    return iso;
-  }
-}
+import {
+  IntegrationCardConnected,
+  IntegrationCardAdd,
+  IntegrationDisconnectButton,
+  IntegrationReconnectBanner,
+  formatDate,
+} from '@/components/admin/IntegrationCard';
 
 const DiscordIcon = ({ className }: { className?: string }) => (
   <img src="/images/icons/discord.svg" alt="Discord" className={className} />
@@ -83,38 +63,6 @@ const GitHubIcon = ({ className }: { className?: string }) => (
     <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
   </svg>
 );
-
-function StatusBadge({ status }: { status: string | null }) {
-  if (!status) {
-    return (
-      <Badge variant="outline" className="text-muted-foreground">
-        Not connected
-      </Badge>
-    );
-  }
-
-  if (status === 'active') {
-    return (
-      <Badge className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300 border-0">
-        Connected
-      </Badge>
-    );
-  }
-
-  if (status === 'error') {
-    return (
-      <Badge className="bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300 border-0">
-        Error — reconnect required
-      </Badge>
-    );
-  }
-
-  return (
-    <Badge variant="outline" className="text-muted-foreground">
-      Disconnected
-    </Badge>
-  );
-}
 
 function IntegrationsPageInner() {
   const { organization, loading: orgLoading } = useOrganization();
@@ -171,7 +119,6 @@ function IntegrationsPageInner() {
       if (slackRes) setSlackStatus(slackRes.data);
       if (githubRes) setGithubStatus(githubRes.data);
 
-      // Load Discord channels if connected
       if (discordRes?.data?.status === 'active' && discordRes.data.provider_workspace_id) {
         discordService.listChannels(orgId).then(res => {
           setDiscordChannels(res.data.channels);
@@ -180,7 +127,6 @@ function IntegrationsPageInner() {
         });
       }
 
-      // Load Slack channels if connected
       if (slackRes?.data?.status === 'active' && slackRes.data.provider_workspace_id) {
         slackService.listChannels(orgId).then(res => {
           setSlackChannels(res.data.channels);
@@ -200,7 +146,6 @@ function IntegrationsPageInner() {
     }
   }, [orgId, toast]);
 
-  // Fetch Autopilot Settings
   useEffect(() => {
     if (!orgId) return;
     (async () => {
@@ -245,7 +190,6 @@ function IntegrationsPageInner() {
     })();
   }, [orgId]);
 
-  // Fetch Boards
   useEffect(() => {
     if (!orgId) return;
     (async () => {
@@ -418,7 +362,6 @@ function IntegrationsPageInner() {
     loadStatus();
   }, [loadStatus]);
 
-  // Handle OAuth callback query params
   useEffect(() => {
     const intercomResult = searchParams.get('intercom');
     const discordResult = searchParams.get('discord');
@@ -444,7 +387,7 @@ function IntegrationsPageInner() {
         title: 'Discord connected',
         description: 'Select a channel to monitor for feedback.',
       });
-      loadStatus(); // Reload to get channels
+      loadStatus();
     } else if (discordResult === 'error') {
       toast({
         title: 'Discord connection failed',
@@ -482,7 +425,6 @@ function IntegrationsPageInner() {
     }
 
     if (intercomResult || discordResult || slackResult || githubResult) {
-      // Clean query string without full reload
       const url = new URL(window.location.href);
       url.searchParams.delete('intercom');
       url.searchParams.delete('discord');
@@ -619,6 +561,8 @@ function IntegrationsPageInner() {
   const isGithubActive = githubStatus?.status === 'active';
   const needsGithubReconnect = githubStatus?.status === 'error';
 
+  const activeCount = [isDiscordActive, isIntercomActive, isSlackActive, isGithubActive].filter(Boolean).length;
+
   return (
     <PaidFeatureGate featureName="Integrations">
     <div className="space-y-6">
@@ -634,438 +578,322 @@ function IntegrationsPageInner() {
       ) : (
         <>
           {/* ── Connected Integrations ── */}
-          {(isDiscordActive || isIntercomActive || isSlackActive || isGithubActive) && (
+          {activeCount > 0 && (
             <section className="space-y-3">
-              <h2 className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
-                Connected · {[isDiscordActive, isIntercomActive, isSlackActive, isGithubActive].filter(Boolean).length}
+              <h2 className="text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">
+                Connected · {activeCount}
               </h2>
 
               <div className="space-y-2">
                 {isDiscordActive && (
-                  <div className="rounded-xl border bg-card px-4 py-3 flex items-center gap-3 hover:shadow-sm transition-shadow">
-                    <div className="h-9 w-9 shrink-0 rounded-lg bg-[#5865F2]/10 flex items-center justify-center">
-                      <DiscordIcon className="h-5 w-5" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium text-sm">Discord</span>
-                        <span className="relative flex h-2 w-2">
-                          <span className="animate-ping absolute h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                          <span className="relative rounded-full h-2 w-2 bg-emerald-500" />
-                        </span>
-                        <span className="text-emerald-600 dark:text-emerald-400 text-xs font-medium">Active</span>
-                      </div>
-                      <p className="text-xs text-muted-foreground mt-0.5 truncate">
-                        #{discordChannels.find(c => c.id === discordStatus?.provider_channel_id)?.name || 'No channel'} → {boards.find(b => b.id === discordBoardId)?.name || 'No board'} · connected {discordStatus?.connected_at ? formatDate(discordStatus.connected_at) : '—'}
-                      </p>
-                    </div>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button variant="outline" size="sm" className="shrink-0 gap-1.5 h-8">
-                          <Settings2 className="h-3.5 w-3.5" /> Manage
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent align="end" className="w-80 p-0 overflow-hidden rounded-xl border bg-card shadow-lg">
-                        <div className="bg-muted/50 px-4 py-3 border-b">
-                          <h4 className="font-semibold text-sm flex items-center gap-2">
-                            <DiscordIcon className="h-4 w-4 text-[#5865F2]" /> Discord Settings
-                          </h4>
-                        </div>
-                        <div className="p-4 space-y-5">
-                          {discordChannels.length > 0 && (
-                            <div className="space-y-2">
-                              <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-                                <Hash className="h-3.5 w-3.5" /> Monitored Channel
-                              </Label>
-                              <Select value={discordStatus?.provider_channel_id || undefined} onValueChange={handleDiscordChannelChange} disabled={savingDiscordChannel}>
-                                <SelectTrigger className="h-9"><SelectValue placeholder="Select channel…" /></SelectTrigger>
-                                <SelectContent>
-                                  {discordChannels.map(ch => (
-                                    <SelectItem key={ch.id} value={ch.id}># {ch.name}</SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </div>
-                          )}
+                  <IntegrationCardConnected
+                    name="Discord"
+                    icon={<DiscordIcon className="h-5 w-5" />}
+                    brandColor="#5865F2"
+                    status={discordStatus?.status === 'error' ? 'error' : 'active'}
+                    subtitle={`#${discordChannels.find(c => c.id === discordStatus?.provider_channel_id)?.name || 'No channel'} → ${boards.find(b => b.id === discordBoardId)?.name || 'No board'} · connected ${discordStatus?.connected_at ? formatDate(discordStatus.connected_at) : '—'}`}
+                    settingsContent={
+                      <>
+                        {discordChannels.length > 0 && (
+                          <div className="space-y-2">
+                            <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                              <Hash className="h-3.5 w-3.5" /> Monitored Channel
+                            </Label>
+                            <Select value={discordStatus?.provider_channel_id || undefined} onValueChange={handleDiscordChannelChange} disabled={savingDiscordChannel}>
+                              <SelectTrigger className="h-9"><SelectValue placeholder="Select channel…" /></SelectTrigger>
+                              <SelectContent>
+                                {discordChannels.map(ch => (
+                                  <SelectItem key={ch.id} value={ch.id}># {ch.name}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        )}
 
-                          <div className="space-y-3">
-                            <div className="flex items-center justify-between gap-4">
-                              <div className="space-y-0.5">
-                                <Label className="text-sm font-medium flex items-center gap-1.5"><Zap className="h-3.5 w-3.5 text-amber-500" /> Automatic Mode</Label>
-                                <p className="text-[11px] text-muted-foreground leading-tight">Bypass review & publish instantly.</p>
-                                {!discordBoardId && <p className="text-[10px] text-amber-600 dark:text-amber-500 mt-0.5 font-medium">Select a board below first.</p>}
-                              </div>
-                               <Switch checked={discordAutopilot?.autopilot_mode === 'automatic'} disabled={savingDiscordAutopilot || !discordBoardId || !canUseAutoMode} onCheckedChange={(checked) => handleAutopilotModeToggle('discord', checked)} />
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between gap-4">
+                            <div className="space-y-0.5">
+                              <Label className="text-sm font-medium flex items-center gap-1.5"><Zap className="h-3.5 w-3.5 text-amber-500" /> Automatic Mode</Label>
+                              <p className="text-[11px] text-muted-foreground leading-tight">Bypass review & publish instantly.</p>
+                              {!discordBoardId && <p className="text-[10px] text-amber-600 dark:text-amber-500 mt-0.5 font-medium">Select a board below first.</p>}
                             </div>
+                             <Switch checked={discordAutopilot?.autopilot_mode === 'automatic'} disabled={savingDiscordAutopilot || !discordBoardId || !canUseAutoMode} onCheckedChange={(checked) => handleAutopilotModeToggle('discord', checked)} />
+                          </div>
 
-                            <div className="space-y-2 pt-1 border-t">
-                              <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mt-2 block">Default Board</Label>
-                              <Select value={discordBoardId || undefined} onValueChange={(val) => handleBoardChange('discord', val)} disabled={savingDiscordAutopilot}>
-                                <SelectTrigger className="h-9"><SelectValue placeholder="Select a board…" /></SelectTrigger>
-                                <SelectContent>
-                                  {boards.map(b => (<SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>))}
-                                </SelectContent>
-                              </Select>
-                            </div>
+                          <div className="space-y-2 pt-1 border-t">
+                            <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mt-2 block">Default Board</Label>
+                            <Select value={discordBoardId || undefined} onValueChange={(val) => handleBoardChange('discord', val)} disabled={savingDiscordAutopilot}>
+                              <SelectTrigger className="h-9"><SelectValue placeholder="Select a board…" /></SelectTrigger>
+                              <SelectContent>
+                                {boards.map(b => (<SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>))}
+                              </SelectContent>
+                            </Select>
                           </div>
                         </div>
-
-                        <div className="border-t bg-red-50/50 dark:bg-red-950/20 p-4">
-                          <Button variant="destructive" size="sm" className="w-full gap-2" onClick={handleDisconnectDiscord} disabled={disconnectingDiscord}>
-                            {disconnectingDiscord ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Unplug className="h-3.5 w-3.5" />}
-                            Disconnect Discord
-                          </Button>
-                        </div>
-                      </PopoverContent>
-                    </Popover>
-                  </div>
+                      </>
+                    }
+                    footerContent={
+                      <IntegrationDisconnectButton
+                        onClick={handleDisconnectDiscord}
+                        loading={disconnectingDiscord}
+                        label="Disconnect Discord"
+                      />
+                    }
+                    reconnectButton={
+                      needsDiscordReconnect ? (
+                        <IntegrationReconnectBanner
+                          name="Discord"
+                          message="Bot token was rejected. Reconnect to restore."
+                          onReconnect={handleConnectDiscord}
+                        />
+                      ) : undefined
+                    }
+                  />
                 )}
 
                 {isIntercomActive && (
-                  <div className="rounded-xl border bg-card px-4 py-3 flex items-center gap-3 hover:shadow-sm transition-shadow">
-                    <div className="h-9 w-9 shrink-0 rounded-lg bg-[#1F8DED]/10 flex items-center justify-center">
-                      <IntercomIcon className="h-5 w-5" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium text-sm">Intercom</span>
-                        <span className="relative flex h-2 w-2">
-                          <span className="animate-ping absolute h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                          <span className="relative rounded-full h-2 w-2 bg-emerald-500" />
-                        </span>
-                        <span className="text-emerald-600 dark:text-emerald-400 text-xs font-medium">Active</span>
-                      </div>
-                      <p className="text-xs text-muted-foreground mt-0.5 truncate">
-                        {intercomStatus?.provider_workspace_id || 'No workspace'} → {boards.find(b => b.id === intercomBoardId)?.name || 'No board'} · connected {intercomStatus?.connected_at ? formatDate(intercomStatus.connected_at) : '—'}
-                      </p>
-                    </div>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button variant="outline" size="sm" className="shrink-0 gap-1.5 h-8">
-                          <Settings2 className="h-3.5 w-3.5" /> Manage
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent align="end" className="w-80 p-0 overflow-hidden rounded-xl border bg-card shadow-lg">
-                        <div className="bg-muted/50 px-4 py-3 border-b">
-                          <h4 className="font-semibold text-sm flex items-center gap-2">
-                            <IntercomIcon className="h-4 w-4 text-[#1F8DED]" /> Intercom Settings
-                          </h4>
-                        </div>
-                        <div className="p-4 space-y-5">
-                          <div className="space-y-3">
-                            <div className="flex items-center justify-between gap-4">
-                              <div className="space-y-0.5">
-                                <Label className="text-sm font-medium flex items-center gap-1.5"><Zap className="h-3.5 w-3.5 text-amber-500" /> Automatic Mode</Label>
-                                <p className="text-[11px] text-muted-foreground leading-tight">Bypass review & publish instantly.</p>
-                                {!intercomBoardId && <p className="text-[10px] text-amber-600 dark:text-amber-500 mt-0.5 font-medium">Select a board below first.</p>}
-                              </div>
-                               <Switch checked={intercomAutopilot?.autopilot_mode === 'automatic'} disabled={savingIntercomAutopilot || !intercomBoardId || !canUseAutoMode} onCheckedChange={(checked) => handleAutopilotModeToggle('intercom', checked)} />
+                  <IntegrationCardConnected
+                    name="Intercom"
+                    icon={<IntercomIcon className="h-5 w-5" />}
+                    brandColor="#1F8DED"
+                    status={intercomStatus?.status === 'error' ? 'error' : 'active'}
+                    subtitle={`${intercomStatus?.provider_workspace_id || 'No workspace'} → ${boards.find(b => b.id === intercomBoardId)?.name || 'No board'} · connected ${intercomStatus?.connected_at ? formatDate(intercomStatus.connected_at) : '—'}`}
+                    settingsContent={
+                      <>
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between gap-4">
+                            <div className="space-y-0.5">
+                              <Label className="text-sm font-medium flex items-center gap-1.5"><Zap className="h-3.5 w-3.5 text-amber-500" /> Automatic Mode</Label>
+                              <p className="text-[11px] text-muted-foreground leading-tight">Bypass review & publish instantly.</p>
+                              {!intercomBoardId && <p className="text-[10px] text-amber-600 dark:text-amber-500 mt-0.5 font-medium">Select a board below first.</p>}
                             </div>
-
-                            <div className="space-y-2 pt-1 border-t">
-                              <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mt-2 block">Default Board</Label>
-                              <Select value={intercomBoardId || undefined} onValueChange={(val) => handleBoardChange('intercom', val)} disabled={savingIntercomAutopilot}>
-                                <SelectTrigger className="h-9"><SelectValue placeholder="Select a board…" /></SelectTrigger>
-                                <SelectContent>
-                                  {boards.map(b => (<SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>))}
-                                </SelectContent>
-                              </Select>
-                            </div>
+                             <Switch checked={intercomAutopilot?.autopilot_mode === 'automatic'} disabled={savingIntercomAutopilot || !intercomBoardId || !canUseAutoMode} onCheckedChange={(checked) => handleAutopilotModeToggle('intercom', checked)} />
                           </div>
 
-                          <div className="rounded-lg bg-muted/50 border border-dashed px-3 py-2.5">
-                            <p className="text-[10px] text-muted-foreground leading-relaxed">
-                              Subscribe to <code className="font-mono text-[9px] bg-muted px-1 py-0.5 rounded">conversation.admin.closed</code> in Intercom Webhooks and point to your public webhook endpoint.
-                            </p>
+                          <div className="space-y-2 pt-1 border-t">
+                            <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mt-2 block">Default Board</Label>
+                            <Select value={intercomBoardId || undefined} onValueChange={(val) => handleBoardChange('intercom', val)} disabled={savingIntercomAutopilot}>
+                              <SelectTrigger className="h-9"><SelectValue placeholder="Select a board…" /></SelectTrigger>
+                              <SelectContent>
+                                {boards.map(b => (<SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>))}
+                              </SelectContent>
+                            </Select>
                           </div>
                         </div>
 
-                        <div className="border-t bg-red-50/50 dark:bg-red-950/20 p-4">
-                          <Button variant="destructive" size="sm" className="w-full gap-2" onClick={handleDisconnectIntercom} disabled={disconnectingIntercom}>
-                            {disconnectingIntercom ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Unplug className="h-3.5 w-3.5" />}
-                            Disconnect Intercom
-                          </Button>
+                        <div className="rounded-lg bg-muted/50 border border-dashed px-3 py-2.5">
+                          <p className="text-[10px] text-muted-foreground leading-relaxed">
+                            Subscribe to <code className="font-mono text-[9px] bg-muted px-1 py-0.5 rounded">conversation.admin.closed</code> in Intercom Webhooks and point to your public webhook endpoint.
+                          </p>
                         </div>
-                      </PopoverContent>
-                    </Popover>
-                  </div>
+                      </>
+                    }
+                    footerContent={
+                      <IntegrationDisconnectButton
+                        onClick={handleDisconnectIntercom}
+                        loading={disconnectingIntercom}
+                        label="Disconnect Intercom"
+                      />
+                    }
+                    reconnectButton={
+                      needsIntercomReconnect ? (
+                        <IntegrationReconnectBanner
+                          name="Intercom"
+                          message="Auth error — reconnect to restore."
+                          onReconnect={handleConnectIntercom}
+                        />
+                      ) : undefined
+                    }
+                  />
                 )}
 
                 {isSlackActive && (
-                  <div className="rounded-xl border bg-card px-4 py-3 flex items-center gap-3 hover:shadow-sm transition-shadow">
-                    <div className="h-9 w-9 shrink-0 rounded-lg bg-[#E01E5A]/10 flex items-center justify-center">
-                      <SlackIcon className="h-5 w-5" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium text-sm">Slack</span>
-                        <span className="relative flex h-2 w-2">
-                          <span className="animate-ping absolute h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                          <span className="relative rounded-full h-2 w-2 bg-emerald-500" />
-                        </span>
-                        <span className="text-emerald-600 dark:text-emerald-400 text-xs font-medium">Active</span>
-                      </div>
-                      <p className="text-xs text-muted-foreground mt-0.5 truncate">
-                        #{slackChannels.find(c => c.id === slackStatus?.provider_channel_id)?.name || 'No channel'} → {boards.find(b => b.id === slackBoardId)?.name || 'No board'} · connected {slackStatus?.connected_at ? formatDate(slackStatus.connected_at) : '—'}
-                      </p>
-                    </div>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button variant="outline" size="sm" className="shrink-0 gap-1.5 h-8">
-                          <Settings2 className="h-3.5 w-3.5" /> Manage
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent align="end" className="w-80 p-0 overflow-hidden rounded-xl border bg-card shadow-lg">
-                        <div className="bg-muted/50 px-4 py-3 border-b">
-                          <h4 className="font-semibold text-sm flex items-center gap-2">
-                            <SlackIcon className="h-4 w-4" /> Slack Settings
-                          </h4>
-                        </div>
-                        <div className="p-4 space-y-5">
-                          {slackChannels.length > 0 && (
-                            <div className="space-y-2">
-                              <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-                                <Hash className="h-3.5 w-3.5" /> Monitored Channel
-                              </Label>
-                              <Select value={slackStatus?.provider_channel_id || undefined} onValueChange={handleSlackChannelChange} disabled={savingSlackChannel}>
-                                <SelectTrigger className="h-9"><SelectValue placeholder="Select channel…" /></SelectTrigger>
-                                <SelectContent>
-                                  {slackChannels.map(ch => (
-                                    <SelectItem key={ch.id} value={ch.id}># {ch.name}</SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                              <p className="text-[10px] text-muted-foreground leading-relaxed">
-                                Invite the Feedy bot to this channel so Events API can deliver messages.
+                  <IntegrationCardConnected
+                    name="Slack"
+                    icon={<SlackIcon className="h-5 w-5" />}
+                    brandColor="#E01E5A"
+                    status={slackStatus?.status === 'error' ? 'error' : 'active'}
+                    subtitle={`#${slackChannels.find(c => c.id === slackStatus?.provider_channel_id)?.name || 'No channel'} → ${boards.find(b => b.id === slackBoardId)?.name || 'No board'} · connected ${slackStatus?.connected_at ? formatDate(slackStatus.connected_at) : '—'}`}
+                    settingsContent={
+                      <>
+                        {slackChannels.length > 0 && (
+                          <div className="space-y-2">
+                            <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                              <Hash className="h-3.5 w-3.5" /> Monitored Channel
+                            </Label>
+                            <Select value={slackStatus?.provider_channel_id || undefined} onValueChange={handleSlackChannelChange} disabled={savingSlackChannel}>
+                              <SelectTrigger className="h-9"><SelectValue placeholder="Select channel…" /></SelectTrigger>
+                              <SelectContent>
+                                {slackChannels.map(ch => (
+                                  <SelectItem key={ch.id} value={ch.id}># {ch.name}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <p className="text-[10px] text-muted-foreground leading-relaxed">
+                              Invite the Feedy bot to this channel so Events API can deliver messages.
+                            </p>
+                          </div>
+                        )}
+
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between gap-4">
+                            <div className="space-y-0.5">
+                              <Label className="text-sm font-medium flex items-center gap-1.5"><Zap className="h-3.5 w-3.5 text-amber-500" /> Automatic Mode</Label>
+                              <p className="text-[11px] text-muted-foreground leading-tight">Bypass review & publish instantly.</p>
+                              {!slackBoardId && <p className="text-[10px] text-amber-600 dark:text-amber-500 mt-0.5 font-medium">Select a board below first.</p>}
+                            </div>
+                             <Switch checked={slackAutopilot?.autopilot_mode === 'automatic'} disabled={savingSlackAutopilot || !slackBoardId || !canUseAutoMode} onCheckedChange={(checked) => handleAutopilotModeToggle('slack', checked)} />
+                          </div>
+
+                          {slackAutopilot?.autopilot_mode === 'automatic' && (
+                            <div className="rounded-lg border border-amber-200 bg-amber-50/80 dark:border-amber-900/50 dark:bg-amber-950/30 px-3 py-2.5 flex gap-2">
+                              <p className="text-[11px] text-amber-800 dark:text-amber-300 leading-relaxed">
+                                Feedback from this channel will publish directly to the board without manual review.
                               </p>
                             </div>
                           )}
 
-                          <div className="space-y-3">
-                            <div className="flex items-center justify-between gap-4">
-                              <div className="space-y-0.5">
-                                <Label className="text-sm font-medium flex items-center gap-1.5"><Zap className="h-3.5 w-3.5 text-amber-500" /> Automatic Mode</Label>
-                                <p className="text-[11px] text-muted-foreground leading-tight">Bypass review & publish instantly.</p>
-                                {!slackBoardId && <p className="text-[10px] text-amber-600 dark:text-amber-500 mt-0.5 font-medium">Select a board below first.</p>}
-                              </div>
-                               <Switch checked={slackAutopilot?.autopilot_mode === 'automatic'} disabled={savingSlackAutopilot || !slackBoardId || !canUseAutoMode} onCheckedChange={(checked) => handleAutopilotModeToggle('slack', checked)} />
-                            </div>
-
-                            {slackAutopilot?.autopilot_mode === 'automatic' && (
-                              <div className="rounded-lg border border-amber-200 bg-amber-50/80 dark:border-amber-900/50 dark:bg-amber-950/30 px-3 py-2.5 flex gap-2">
-                                <AlertTriangle className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
-                                <p className="text-[11px] text-amber-800 dark:text-amber-300 leading-relaxed">
-                                  Feedback from this channel will publish directly to the board without manual review.
-                                </p>
-                              </div>
-                            )}
-
-                            <div className="space-y-2 pt-1 border-t">
-                              <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mt-2 block">Default Board</Label>
-                              <Select value={slackBoardId || undefined} onValueChange={(val) => handleBoardChange('slack', val)} disabled={savingSlackAutopilot}>
-                                <SelectTrigger className="h-9"><SelectValue placeholder="Select a board…" /></SelectTrigger>
-                                <SelectContent>
-                                  {boards.map(b => (<SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>))}
-                                </SelectContent>
-                              </Select>
-                            </div>
+                          <div className="space-y-2 pt-1 border-t">
+                            <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mt-2 block">Default Board</Label>
+                            <Select value={slackBoardId || undefined} onValueChange={(val) => handleBoardChange('slack', val)} disabled={savingSlackAutopilot}>
+                              <SelectTrigger className="h-9"><SelectValue placeholder="Select a board…" /></SelectTrigger>
+                              <SelectContent>
+                                {boards.map(b => (<SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>))}
+                              </SelectContent>
+                            </Select>
                           </div>
                         </div>
-
-                        <div className="border-t bg-red-50/50 dark:bg-red-950/20 p-4">
-                          <Button variant="destructive" size="sm" className="w-full gap-2" onClick={handleDisconnectSlack} disabled={disconnectingSlack}>
-                            {disconnectingSlack ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Unplug className="h-3.5 w-3.5" />}
-                            Disconnect Slack
-                          </Button>
-                        </div>
-                      </PopoverContent>
-                    </Popover>
-                  </div>
+                      </>
+                    }
+                    footerContent={
+                      <IntegrationDisconnectButton
+                        onClick={handleDisconnectSlack}
+                        loading={disconnectingSlack}
+                        label="Disconnect Slack"
+                      />
+                    }
+                    reconnectButton={
+                      needsSlackReconnect ? (
+                        <IntegrationReconnectBanner
+                          name="Slack"
+                          message="Auth error — reconnect to restore."
+                          onReconnect={handleConnectSlack}
+                        />
+                      ) : undefined
+                    }
+                  />
                 )}
 
                 {isGithubActive && (
-                  <div className="rounded-xl border bg-card px-4 py-3 flex items-center gap-3 hover:shadow-sm transition-shadow">
-                    <div className="h-9 w-9 shrink-0 rounded-lg bg-[#24292F]/10 dark:bg-[#f0f6fc]/10 flex items-center justify-center">
-                      <GitHubIcon className="h-5 w-5 text-[#24292F] dark:text-[#f0f6fc]" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium text-sm">GitHub</span>
-                        <span className="relative flex h-2 w-2">
-                          <span className="animate-ping absolute h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                          <span className="relative rounded-full h-2 w-2 bg-emerald-500" />
-                        </span>
-                        <span className="text-emerald-600 dark:text-emerald-400 text-xs font-medium">Active</span>
-                      </div>
-                      <p className="text-xs text-muted-foreground mt-0.5 truncate">
-                        Installation #{githubStatus?.provider_workspace_id || '—'} → {boards.find(b => b.id === githubBoardId)?.name || 'No board'} · connected {githubStatus?.connected_at ? formatDate(githubStatus.connected_at) : '—'}
-                      </p>
-                    </div>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button variant="outline" size="sm" className="shrink-0 gap-1.5 h-8">
-                          <Settings2 className="h-3.5 w-3.5" /> Manage
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent align="end" className="w-80 p-0 overflow-hidden rounded-xl border bg-card shadow-lg">
-                        <div className="bg-muted/50 px-4 py-3 border-b">
-                          <h4 className="font-semibold text-sm flex items-center gap-2">
-                            <GitHubIcon className="h-4 w-4" /> GitHub Settings
-                          </h4>
-                        </div>
-                        <div className="p-4 space-y-5">
-                          <div className="space-y-3">
-                            <div className="flex items-center justify-between gap-4">
-                              <div className="space-y-0.5">
-                                <Label className="text-sm font-medium flex items-center gap-1.5"><Zap className="h-3.5 w-3.5 text-amber-500" /> Automatic Mode</Label>
-                                <p className="text-[11px] text-muted-foreground leading-tight">Bypass review & publish instantly.</p>
-                                {!githubBoardId && <p className="text-[10px] text-amber-600 dark:text-amber-500 mt-0.5 font-medium">Select a board below first.</p>}
-                              </div>
-                               <Switch checked={githubAutopilot?.autopilot_mode === 'automatic'} disabled={savingGithubAutopilot || !githubBoardId || !canUseAutoMode} onCheckedChange={(checked) => handleAutopilotModeToggle('github', checked)} />
+                  <IntegrationCardConnected
+                    name="GitHub"
+                    icon={<GitHubIcon className="h-5 w-5" />}
+                    brandColor="#24292F"
+                    status={githubStatus?.status === 'error' ? 'error' : 'active'}
+                    subtitle={`Installation #${githubStatus?.provider_workspace_id || '—'} → ${boards.find(b => b.id === githubBoardId)?.name || 'No board'} · connected ${githubStatus?.connected_at ? formatDate(githubStatus.connected_at) : '—'}`}
+                    settingsContent={
+                      <>
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between gap-4">
+                            <div className="space-y-0.5">
+                              <Label className="text-sm font-medium flex items-center gap-1.5"><Zap className="h-3.5 w-3.5 text-amber-500" /> Automatic Mode</Label>
+                              <p className="text-[11px] text-muted-foreground leading-tight">Bypass review & publish instantly.</p>
+                              {!githubBoardId && <p className="text-[10px] text-amber-600 dark:text-amber-500 mt-0.5 font-medium">Select a board below first.</p>}
                             </div>
-
-                            {githubAutopilot?.autopilot_mode === 'automatic' && (
-                              <div className="rounded-lg border border-amber-200 bg-amber-50/80 dark:border-amber-900/50 dark:bg-amber-950/30 px-3 py-2.5 flex gap-2">
-                                <AlertTriangle className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
-                                <p className="text-[11px] text-amber-800 dark:text-amber-300 leading-relaxed">
-                                  Issues and pull requests will publish directly to the board without manual review.
-                                </p>
-                              </div>
-                            )}
-
-                            <div className="space-y-2 pt-1 border-t">
-                              <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mt-2 block">Default Board</Label>
-                              <Select value={githubBoardId || undefined} onValueChange={(val) => handleBoardChange('github', val)} disabled={savingGithubAutopilot}>
-                                <SelectTrigger className="h-9"><SelectValue placeholder="Select a board…" /></SelectTrigger>
-                                <SelectContent>
-                                  {boards.map(b => (<SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>))}
-                                </SelectContent>
-                              </Select>
-                            </div>
+                             <Switch checked={githubAutopilot?.autopilot_mode === 'automatic'} disabled={savingGithubAutopilot || !githubBoardId || !canUseAutoMode} onCheckedChange={(checked) => handleAutopilotModeToggle('github', checked)} />
                           </div>
 
-                          <div className="rounded-lg bg-muted/50 border border-dashed px-3 py-2.5">
-                            <p className="text-[10px] text-muted-foreground leading-relaxed">
-                              Subscribe to <code className="font-mono text-[9px] bg-muted px-1 py-0.5 rounded">issues</code> and <code className="font-mono text-[9px] bg-muted px-1 py-0.5 rounded">pull_request</code> events in your GitHub App settings and point to your public webhook endpoint.
-                            </p>
+                          {githubAutopilot?.autopilot_mode === 'automatic' && (
+                            <div className="rounded-lg border border-amber-200 bg-amber-50/80 dark:border-amber-900/50 dark:bg-amber-950/30 px-3 py-2.5 flex gap-2">
+                              <p className="text-[11px] text-amber-800 dark:text-amber-300 leading-relaxed">
+                                Issues and pull requests will publish directly to the board without manual review.
+                              </p>
+                            </div>
+                          )}
+
+                          <div className="space-y-2 pt-1 border-t">
+                            <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mt-2 block">Default Board</Label>
+                            <Select value={githubBoardId || undefined} onValueChange={(val) => handleBoardChange('github', val)} disabled={savingGithubAutopilot}>
+                              <SelectTrigger className="h-9"><SelectValue placeholder="Select a board…" /></SelectTrigger>
+                              <SelectContent>
+                                {boards.map(b => (<SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>))}
+                              </SelectContent>
+                            </Select>
                           </div>
                         </div>
 
-                        <div className="border-t bg-red-50/50 dark:bg-red-950/20 p-4">
-                          <Button variant="destructive" size="sm" className="w-full gap-2" onClick={handleDisconnectGithub} disabled={disconnectingGithub}>
-                            {disconnectingGithub ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Unplug className="h-3.5 w-3.5" />}
-                            Disconnect GitHub
-                          </Button>
-                          <p className="text-[10px] text-muted-foreground text-center mt-2">
-                            This only disconnects Faddy. You must uninstall the App from GitHub separately.
+                        <div className="rounded-lg bg-muted/50 border border-dashed px-3 py-2.5">
+                          <p className="text-[10px] text-muted-foreground leading-relaxed">
+                            Subscribe to <code className="font-mono text-[9px] bg-muted px-1 py-0.5 rounded">issues</code> and <code className="font-mono text-[9px] bg-muted px-1 py-0.5 rounded">pull_request</code> events in your GitHub App settings and point to your public webhook endpoint.
                           </p>
                         </div>
-                      </PopoverContent>
-                    </Popover>
-                  </div>
+                      </>
+                    }
+                    footerContent={
+                      <IntegrationDisconnectButton
+                        onClick={handleDisconnectGithub}
+                        loading={disconnectingGithub}
+                        label="Disconnect GitHub"
+                        note="This only disconnects Faddy. You must uninstall the App from GitHub separately."
+                      />
+                    }
+                    reconnectButton={
+                      needsGithubReconnect ? (
+                        <IntegrationReconnectBanner
+                          name="GitHub"
+                          message="Connection error — reconnect to restore."
+                          onReconnect={handleConnectGithub}
+                        />
+                      ) : undefined
+                    }
+                  />
                 )}
               </div>
-
-              {needsDiscordReconnect && (
-                <div className="rounded-xl border border-red-200 dark:border-red-900/50 bg-red-50/50 dark:bg-red-950/20 p-4 flex items-start gap-3">
-                  <AlertTriangle className="h-5 w-5 text-red-500 shrink-0 mt-0.5" />
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-red-800 dark:text-red-300">Discord connection lost</p>
-                    <p className="text-sm text-red-600/80 dark:text-red-400/80 mt-0.5">Bot token was rejected. Reconnect to restore.</p>
-                  </div>
-                  <Button size="sm" variant="outline" className="border-red-300 text-red-700 hover:bg-red-100 dark:border-red-800 dark:text-red-300" onClick={handleConnectDiscord}>
-                    <Plug className="h-3.5 w-3.5 mr-1.5" /> Reconnect
-                  </Button>
-                </div>
-              )}
-
-              {needsIntercomReconnect && (
-                <div className="rounded-xl border border-red-200 dark:border-red-900/50 bg-red-50/50 dark:bg-red-950/20 p-4 flex items-start gap-3">
-                  <AlertTriangle className="h-5 w-5 text-red-500 shrink-0 mt-0.5" />
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-red-800 dark:text-red-300">Intercom connection lost</p>
-                    <p className="text-sm text-red-600/80 dark:text-red-400/80 mt-0.5">Auth error — reconnect to restore.</p>
-                  </div>
-                  <Button size="sm" variant="outline" className="border-red-300 text-red-700 hover:bg-red-100 dark:border-red-800 dark:text-red-300" onClick={handleConnectIntercom}>
-                    <Plug className="h-3.5 w-3.5 mr-1.5" /> Reconnect
-                  </Button>
-                </div>
-              )}
-
-              {needsSlackReconnect && (
-                <div className="rounded-xl border border-red-200 dark:border-red-900/50 bg-red-50/50 dark:bg-red-950/20 p-4 flex items-start gap-3">
-                  <AlertTriangle className="h-5 w-5 text-red-500 shrink-0 mt-0.5" />
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-red-800 dark:text-red-300">Slack connection lost</p>
-                    <p className="text-sm text-red-600/80 dark:text-red-400/80 mt-0.5">Auth error — reconnect to restore.</p>
-                  </div>
-                  <Button size="sm" variant="outline" className="border-red-300 text-red-700 hover:bg-red-100 dark:border-red-800 dark:text-red-300" onClick={handleConnectSlack}>
-                    <Plug className="h-3.5 w-3.5 mr-1.5" /> Reconnect
-                  </Button>
-                </div>
-              )}
-
-              {needsGithubReconnect && (
-                <div className="rounded-xl border border-red-200 dark:border-red-900/50 bg-red-50/50 dark:bg-red-950/20 p-4 flex items-start gap-3">
-                  <AlertTriangle className="h-5 w-5 text-red-500 shrink-0 mt-0.5" />
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-red-800 dark:text-red-300">GitHub connection lost</p>
-                    <p className="text-sm text-red-600/80 dark:text-red-400/80 mt-0.5">Connection error — reconnect to restore.</p>
-                  </div>
-                  <Button size="sm" variant="outline" className="border-red-300 text-red-700 hover:bg-red-100 dark:border-red-800 dark:text-red-300" onClick={handleConnectGithub}>
-                    <Plug className="h-3.5 w-3.5 mr-1.5" /> Reconnect
-                  </Button>
-                </div>
-              )}
             </section>
           )}
 
           {/* ── Add Integrations ── */}
           <section className="space-y-4">
             <div>
-              <h2 className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">Add Integrations</h2>
+              <h2 className="text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">Add Integrations</h2>
               <p className="text-sm text-muted-foreground mt-1">Supercharge your workflow by connecting with the tools you already use.</p>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {!isDiscordActive && (
-                <div className="rounded-xl border bg-card p-5 flex flex-col hover:shadow-md hover:border-[#5865F2]/30 transition-all group">
-                  <div className="h-10 w-10 rounded-lg bg-[#5865F2]/10 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
-                    <DiscordIcon className="h-5 w-5 text-[#5865F2]" />
-                  </div>
-                  <h3 className="font-semibold text-sm">Discord</h3>
-                  <p className="text-xs text-muted-foreground mt-1.5 flex-1 leading-relaxed">Monitor Discord channels and convert conversations into actionable feedback.</p>
-                  <Button size="sm" className="mt-4 w-full bg-[#5865F2] hover:bg-[#4752C4]" onClick={handleConnectDiscord}>Connect</Button>
-                </div>
+                <IntegrationCardAdd
+                  name="Discord"
+                  icon={<DiscordIcon className="h-5 w-5 text-[#5865F2]" />}
+                  brandColor="#5865F2"
+                  description="Monitor Discord channels and convert conversations into actionable feedback."
+                  onConnect={handleConnectDiscord}
+                />
               )}
               {!isIntercomActive && (
-                <div className="rounded-xl border bg-card p-5 flex flex-col hover:shadow-md hover:border-[#1F8DED]/30 transition-all group">
-                  <div className="h-10 w-10 rounded-lg bg-[#1F8DED]/10 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
-                    <IntercomIcon className="h-5 w-5 text-[#1F8DED]" />
-                  </div>
-                  <h3 className="font-semibold text-sm">Intercom</h3>
-                  <p className="text-xs text-muted-foreground mt-1.5 flex-1 leading-relaxed">Receive closed conversation transcripts and generate feedback suggestions.</p>
-                  <Button size="sm" className="mt-4 w-full bg-[#1F8DED] hover:bg-[#1a7ad4]" onClick={handleConnectIntercom}>Connect</Button>
-                </div>
+                <IntegrationCardAdd
+                  name="Intercom"
+                  icon={<IntercomIcon className="h-5 w-5 text-[#1F8DED]" />}
+                  brandColor="#1F8DED"
+                  description="Receive closed conversation transcripts and generate feedback suggestions."
+                  onConnect={handleConnectIntercom}
+                />
               )}
               {!isSlackActive && (
-                <div className="rounded-xl border bg-card p-5 flex flex-col hover:shadow-md hover:border-[#E01E5A]/30 transition-all group">
-                  <div className="h-10 w-10 rounded-lg bg-[#E01E5A]/10 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
-                    <SlackIcon className="h-5 w-5" />
-                  </div>
-                  <h3 className="font-semibold text-sm">Slack</h3>
-                  <p className="text-xs text-muted-foreground mt-1.5 flex-1 leading-relaxed">Monitor a Slack channel and convert messages into actionable feedback.</p>
-                  <Button size="sm" className="mt-4 w-full bg-[#4A154B] hover:bg-[#3b113c]" onClick={handleConnectSlack}>Connect</Button>
-                </div>
+                <IntegrationCardAdd
+                  name="Slack"
+                  icon={<SlackIcon className="h-5 w-5" />}
+                  brandColor="#E01E5A"
+                  description="Monitor a Slack channel and convert messages into actionable feedback."
+                  onConnect={handleConnectSlack}
+                />
               )}
               {!isGithubActive && (
-                <div className="rounded-xl border bg-card p-5 flex flex-col hover:shadow-md hover:border-[#24292F]/30 dark:hover:border-[#f0f6fc]/30 transition-all group">
-                  <div className="h-10 w-10 rounded-lg bg-[#24292F]/10 dark:bg-[#f0f6fc]/10 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
-                    <GitHubIcon className="h-5 w-5 text-[#24292F] dark:text-[#f0f6fc]" />
-                  </div>
-                  <h3 className="font-semibold text-sm">GitHub</h3>
-                  <p className="text-xs text-muted-foreground mt-1.5 flex-1 leading-relaxed">Track issues and pull requests as feedback via GitHub App webhooks.</p>
-                  <Button size="sm" className="mt-4 w-full bg-[#24292F] hover:bg-[#1a1e22] dark:bg-[#f0f6fc] dark:text-[#24292F] dark:hover:bg-[#e0e6ea]" onClick={handleConnectGithub}>Connect</Button>
-                </div>
+                <IntegrationCardAdd
+                  name="GitHub"
+                  icon={<GitHubIcon className="h-5 w-5 text-[#24292F] dark:text-[#f0f6fc]" />}
+                  brandColor="#24292F"
+                  description="Track issues and pull requests as feedback via GitHub App webhooks."
+                  onConnect={handleConnectGithub}
+                />
               )}
               <div className="rounded-xl border bg-card p-5 flex flex-col opacity-60 cursor-not-allowed">
                 <div className="h-10 w-10 rounded-lg bg-amber-500/10 flex items-center justify-center mb-3">
@@ -1077,8 +905,6 @@ function IntegrationsPageInner() {
               </div>
             </div>
           </section>
-
-
         </>
       )}
     </div>
