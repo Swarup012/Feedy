@@ -22,13 +22,13 @@ interface WebhookDeliveryLogsProps {
 function statusBadge(status: WebhookDelivery['status']) {
   switch (status) {
     case 'success':
-      return <Badge className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 border-green-200 gap-1"><CheckCircle2 className="h-3 w-3" />Success</Badge>;
+      return <Badge variant="success" className="gap-1"><CheckCircle2 className="h-3 w-3" />Success</Badge>;
     case 'failed':
-      return <Badge className="bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 border-red-200 gap-1"><XCircle className="h-3 w-3" />Failed</Badge>;
+      return <Badge variant="destructive" className="gap-1"><XCircle className="h-3 w-3" />Failed</Badge>;
     case 'retrying':
-      return <Badge className="bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border-amber-200 gap-1"><RefreshCw className="h-3 w-3" />Retrying</Badge>;
+      return <Badge variant="warning" className="gap-1"><RefreshCw className="h-3 w-3" />Retrying</Badge>;
     default:
-      return <Badge className="bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400 gap-1"><Clock className="h-3 w-3" />Pending</Badge>;
+      return <Badge variant="pending" className="gap-1"><Clock className="h-3 w-3" />Pending</Badge>;
   }
 }
 
@@ -94,10 +94,12 @@ export function WebhookDeliveryLogs({ webhookId }: WebhookDeliveryLogsProps) {
     <div className="space-y-3">
       {/* Filter + Refresh */}
       <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2" role="group" aria-label="Filter by status">
           {(['', 'success', 'failed', 'retrying'] as const).map(s => (
             <button
               key={s}
+              role="radio"
+              aria-checked={statusFilter === s}
               onClick={() => { setStatusFilter(s); setPage(1); }}
               className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
                 statusFilter === s
@@ -134,8 +136,12 @@ export function WebhookDeliveryLogs({ webhookId }: WebhookDeliveryLogsProps) {
             <div key={d.id} className="rounded-lg border border-border overflow-hidden">
               {/* Row summary */}
               <div
+                role="button"
+                tabIndex={0}
+                aria-expanded={expandedId === d.id}
                 className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted/50 transition-colors"
                 onClick={() => setExpandedId(expandedId === d.id ? null : d.id)}
+                onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setExpandedId(expandedId === d.id ? null : d.id); } }}
               >
                 <div className="shrink-0">{statusBadge(d.status)}</div>
                 <div className="flex-1 min-w-0">
@@ -150,13 +156,12 @@ export function WebhookDeliveryLogs({ webhookId }: WebhookDeliveryLogsProps) {
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   {d.response_status && (
-                    <span className={`text-xs font-mono px-2 py-0.5 rounded ${
-                      d.response_status >= 200 && d.response_status < 300
-                        ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                        : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-                    }`}>
+                    <Badge
+                      variant={d.response_status >= 200 && d.response_status < 300 ? 'success' : 'destructive'}
+                      className="text-xs font-mono px-2 py-0.5"
+                    >
                       HTTP {d.response_status}
-                    </span>
+                    </Badge>
                   )}
                   {(d.status === 'failed') && d.attempt_number < d.max_attempts && (
                     <Button

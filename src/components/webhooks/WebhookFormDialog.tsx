@@ -223,10 +223,12 @@ export function WebhookFormDialog({ open, onClose, onSaved, existing }: WebhookF
             {/* Type */}
             <div className="space-y-1.5">
               <Label>Type <span className="text-red-500">*</span></Label>
-              <div className="grid grid-cols-3 gap-2">
+              <div role="radiogroup" aria-label="Webhook type" className="grid grid-cols-3 gap-2">
                 {WEBHOOK_TYPES.map(t => (
                   <button
                     key={t.value}
+                    role="radio"
+                    aria-checked={type === t.value}
                     onClick={() => setType(t.value)}
                     className={`rounded-lg border p-3 text-left transition-all ${
                       type === t.value
@@ -282,6 +284,9 @@ export function WebhookFormDialog({ open, onClose, onSaved, existing }: WebhookF
                     <div key={category}>
                       {/* Category header */}
                       <button
+                        role="checkbox"
+                        aria-checked={allSelected}
+                        aria-label={`Select all ${category} events`}
                         onClick={() => toggleCategory(category)}
                         className="flex items-center gap-2 mb-1.5 group"
                       >
@@ -303,6 +308,8 @@ export function WebhookFormDialog({ open, onClose, onSaved, existing }: WebhookF
                         {catEvents.map(event => (
                           <button
                             key={event.value}
+                            role="checkbox"
+                            aria-checked={events.includes(event.value)}
                             onClick={() => toggleEvent(event.value)}
                             className={`flex items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors text-left ${
                               events.includes(event.value)

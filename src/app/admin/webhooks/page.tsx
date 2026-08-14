@@ -6,7 +6,7 @@ import { webhookService, Webhook } from '@/services/webhookService';
 import { WebhookFormDialog } from '@/components/webhooks/WebhookFormDialog';
 import { WebhookDeliveryLogs } from '@/components/webhooks/WebhookDeliveryLogs';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { Badge, type BadgeProps } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { isPlanUpgradeRequired } from '@/lib/api';
@@ -53,12 +53,8 @@ function typeLabel(type: string) {
   return { custom: 'Custom', discord: 'Discord', slack: 'Slack' }[type] ?? type;
 }
 
-function typeBadgeColor(type: string) {
-  return {
-    custom:  'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-    discord: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400',
-    slack:   'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
-  }[type] ?? 'bg-muted text-muted-foreground';
+function typeBadgeVariant(type: string): BadgeProps['variant'] {
+  return { custom: 'info', discord: 'info', slack: 'info' }[type] ?? 'secondary';
 }
 
 function successRate(webhook: Webhook) {
@@ -97,26 +93,26 @@ function WebhookCard({ webhook, onEdit, onDelete, onTest, onToggle, onRegenerate
 
   return (
     <div className={`rounded-xl border bg-card transition-all ${
-      webhook.is_active ? 'border-border' : 'border-border/50 opacity-60'
+      webhook.is_active ? 'border-border' : 'border-border/50'
     }`}>
       {/* Card Header */}
       <div className="flex items-start gap-4 p-5">
         {/* Status dot */}
         <div className={`mt-1 w-2.5 h-2.5 rounded-full shrink-0 ${
-          webhook.is_active ? 'bg-green-500 shadow-sm shadow-green-400' : 'bg-gray-400'
+          webhook.is_active ? 'bg-green-500 shadow-sm shadow-green-400' : 'bg-muted-foreground/40'
         }`} />
 
         {/* Info */}
         <div className="flex-1 min-w-0 space-y-2">
           <div className="flex items-start gap-2 flex-wrap">
             <h3 className="font-semibold text-foreground text-base leading-tight">{webhook.name}</h3>
-            <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${typeBadgeColor(webhook.type)}`}>
+            <Badge variant={typeBadgeVariant(webhook.type)} className="text-xs px-2 py-0.5">
               {typeLabel(webhook.type)}
-            </span>
+            </Badge>
             {webhook.is_verified && (
-              <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 flex items-center gap-1">
+              <Badge variant="success" className="text-xs px-2 py-0.5 gap-1">
                 <CheckCircle2 className="h-3 w-3" /> Verified
-              </span>
+              </Badge>
             )}
           </div>
 
@@ -201,6 +197,7 @@ function WebhookCard({ webhook, onEdit, onDelete, onTest, onToggle, onRegenerate
       <div className="border-t border-border">
         <button
           onClick={() => setShowLogs(v => !v)}
+          aria-expanded={showLogs}
           className="w-full flex items-center justify-between px-5 py-2.5 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
         >
           <span>Delivery Logs</span>
@@ -459,7 +456,7 @@ export default function WebhooksPage() {
               <AlertDialogAction
                 onClick={handleDelete}
                 disabled={deleting}
-                className="bg-red-600 hover:bg-red-700 text-white"
+                variant="destructive"
               >
                 {deleting ? 'Deleting…' : 'Delete Webhook'}
               </AlertDialogAction>
