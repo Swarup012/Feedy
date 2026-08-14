@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, memo, useMemo } from 'react';
 import { webhookService, WebhookDelivery } from '@/services/webhookService';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -37,6 +37,122 @@ function formatEventType(event: string) {
   return event.replace('.', ' › ').replace(/_/g, ' ');
 }
 
+interface DeliveryRowProps {
+  delivery: WebhookDelivery;
+  webhookId: string;
+  isExpanded: boolean;
+  isRetrying: boolean;
+  onToggle: (id: string) => void;
+  onRetry: (webhookId: string, deliveryId: string) => void;
+}
+
+const DeliveryRow = memo(function DeliveryRow({ delivery, webhookId, isExpanded, isRetrying, onToggle, onRetry }: DeliveryRowProps) {
+  const requestBody = useMemo(
+    () => delivery.request_body ? JSON.stringify(delivery.request_body, null, 2) : null,
+    [delivery.request_body]
+  );
+
+  const handleToggle = useCallback(() => onToggle(delivery.id), [onToggle, delivery.id]);
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      onToggle(delivery.id);
+    }
+  }, [onToggle, delivery.id]);
+
+  const handleRetry = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    onRetry(webhookId, delivery.id);
+  }, [onRetry, webhookId, delivery.id]);
+
+  return (
+    <div className="rounded-lg border border-border overflow-hidden">
+      {/* Row summary */}
+      <div
+        role="button"
+        tabIndex={0}
+        aria-expanded={isExpanded}
+        className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted/50 transition-colors"
+        onClick={handleToggle}
+        onKeyDown={handleKeyDown}
+      >
+        <div className="shrink-0">{statusBadge(delivery.status)}</div>
+        <div className="flex-1 min-w-0">
+          <div className="text-sm font-medium text-foreground capitalize">
+            {formatEventType(delivery.event_type)}
+          </div>
+          <div className="text-xs text-muted-foreground mt-0.5">
+            {timeAgo(delivery.created_at)}
+            {delivery.response_time_ms != null && ` · ${delivery.response_time_ms}ms`}
+            {delivery.attempt_number > 1 && ` · Attempt ${delivery.attempt_number}/${delivery.max_attempts}`}
+          </div>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          {delivery.response_status && (
+            <Badge
+              variant={delivery.response_status >= 200 && delivery.response_status < 300 ? 'success' : 'destructive'}
+              className="text-xs font-mono px-2 py-0.5"
+            >
+              HTTP {delivery.response_status}
+            </Badge>
+          )}
+          {(delivery.status === 'failed') && delivery.attempt_number < delivery.max_attempts && (
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-7 px-2 text-xs gap-1"
+              onClick={handleRetry}
+              disabled={isRetrying}
+            >
+              <RotateCcw className="h-3 w-3" />
+              {isRetrying ? 'Retrying…' : 'Retry'}
+            </Button>
+          )}
+          {isExpanded
+            ? <ChevronUp className="h-4 w-4 text-muted-foreground" />
+            : <ChevronDown className="h-4 w-4 text-muted-foreground" />
+          }
+        </div>
+      </div>
+
+      {/* Expanded details */}
+      {isExpanded && (
+        <div className="border-t border-border bg-muted/30 px-4 py-3 space-y-3 text-xs font-mono">
+          {delivery.error_message && (
+            <div>
+              <div className="text-muted-foreground mb-1 font-sans font-medium text-xs">Error</div>
+              <div className="text-red-600 dark:text-red-400">{delivery.error_message}</div>
+            </div>
+          )}
+          {delivery.next_retry_at && (
+            <div>
+              <div className="text-muted-foreground mb-1 font-sans font-medium text-xs">Next Retry</div>
+              <div className="text-foreground">{new Date(delivery.next_retry_at).toLocaleString()}</div>
+            </div>
+          )}
+          {requestBody && (
+            <div>
+              <div className="text-muted-foreground mb-1 font-sans font-medium text-xs">Request Body</div>
+              <pre className="text-foreground bg-background rounded p-2 overflow-x-auto text-xs max-h-48">
+                {requestBody}
+              </pre>
+            </div>
+          )}
+          {delivery.response_body && (
+            <div>
+              <div className="text-muted-foreground mb-1 font-sans font-medium text-xs">Response Body</div>
+              <pre className="text-foreground bg-background rounded p-2 overflow-x-auto text-xs max-h-48">
+                {delivery.response_body}
+              </pre>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+});
+
 export function WebhookDeliveryLogs({ webhookId }: WebhookDeliveryLogsProps) {
   const { toast } = useToast();
   const [deliveries, setDeliveries] = useState<WebhookDelivery[]>([]);
@@ -66,7 +182,7 @@ export function WebhookDeliveryLogs({ webhookId }: WebhookDeliveryLogsProps) {
 
   useEffect(() => { load(); }, [load]);
 
-  const handleRetry = async (webhookId: string, deliveryId: string) => {
+  const handleRetry = useCallback(async (webhookId: string, deliveryId: string) => {
     setRetryingId(deliveryId);
     try {
       const result = await webhookService.retryDelivery(webhookId, deliveryId);
@@ -77,7 +193,11 @@ export function WebhookDeliveryLogs({ webhookId }: WebhookDeliveryLogsProps) {
     } finally {
       setRetryingId(null);
     }
-  };
+  }, [load, toast]);
+
+  const handleToggleRow = useCallback((id: string) => {
+    setExpandedId(prev => prev === id ? null : id);
+  }, []);
 
   const totalPages = Math.ceil(total / 15);
 
@@ -124,89 +244,15 @@ export function WebhookDeliveryLogs({ webhookId }: WebhookDeliveryLogsProps) {
       ) : (
         <div className="space-y-1.5">
           {deliveries.map(d => (
-            <div key={d.id} className="rounded-lg border border-border overflow-hidden">
-              {/* Row summary */}
-              <div
-                role="button"
-                tabIndex={0}
-                aria-expanded={expandedId === d.id}
-                className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted/50 transition-colors"
-                onClick={() => setExpandedId(expandedId === d.id ? null : d.id)}
-                onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setExpandedId(expandedId === d.id ? null : d.id); } }}
-              >
-                <div className="shrink-0">{statusBadge(d.status)}</div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm font-medium text-foreground capitalize">
-                    {formatEventType(d.event_type)}
-                  </div>
-                  <div className="text-xs text-muted-foreground mt-0.5">
-                    {timeAgo(d.created_at)}
-                    {d.response_time_ms != null && ` · ${d.response_time_ms}ms`}
-                    {d.attempt_number > 1 && ` · Attempt ${d.attempt_number}/${d.max_attempts}`}
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  {d.response_status && (
-                    <Badge
-                      variant={d.response_status >= 200 && d.response_status < 300 ? 'success' : 'destructive'}
-                      className="text-xs font-mono px-2 py-0.5"
-                    >
-                      HTTP {d.response_status}
-                    </Badge>
-                  )}
-                  {(d.status === 'failed') && d.attempt_number < d.max_attempts && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="h-7 px-2 text-xs gap-1"
-                      onClick={e => { e.stopPropagation(); handleRetry(webhookId, d.id); }}
-                      disabled={retryingId === d.id}
-                    >
-                      <RotateCcw className="h-3 w-3" />
-                      {retryingId === d.id ? 'Retrying…' : 'Retry'}
-                    </Button>
-                  )}
-                  {expandedId === d.id
-                    ? <ChevronUp className="h-4 w-4 text-muted-foreground" />
-                    : <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                  }
-                </div>
-              </div>
-
-              {/* Expanded details */}
-              {expandedId === d.id && (
-                <div className="border-t border-border bg-muted/30 px-4 py-3 space-y-3 text-xs font-mono">
-                  {d.error_message && (
-                    <div>
-                      <div className="text-muted-foreground mb-1 font-sans font-medium text-xs">Error</div>
-                      <div className="text-red-600 dark:text-red-400">{d.error_message}</div>
-                    </div>
-                  )}
-                  {d.next_retry_at && (
-                    <div>
-                      <div className="text-muted-foreground mb-1 font-sans font-medium text-xs">Next Retry</div>
-                      <div className="text-foreground">{new Date(d.next_retry_at).toLocaleString()}</div>
-                    </div>
-                  )}
-                  {d.request_body && (
-                    <div>
-                      <div className="text-muted-foreground mb-1 font-sans font-medium text-xs">Request Body</div>
-                      <pre className="text-foreground bg-background rounded p-2 overflow-x-auto text-xs max-h-48">
-                        {JSON.stringify(d.request_body, null, 2)}
-                      </pre>
-                    </div>
-                  )}
-                  {d.response_body && (
-                    <div>
-                      <div className="text-muted-foreground mb-1 font-sans font-medium text-xs">Response Body</div>
-                      <pre className="text-foreground bg-background rounded p-2 overflow-x-auto text-xs max-h-48">
-                        {d.response_body}
-                      </pre>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
+            <DeliveryRow
+              key={d.id}
+              delivery={d}
+              webhookId={webhookId}
+              isExpanded={expandedId === d.id}
+              isRetrying={retryingId === d.id}
+              onToggle={handleToggleRow}
+              onRetry={handleRetry}
+            />
           ))}
         </div>
       )}

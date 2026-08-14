@@ -1,23 +1,23 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useCallback } from 'react';
-import { ProtectedRoute } from '@/components/ProtectedRoute';
-import { webhookService, Webhook } from '@/services/webhookService';
-import { WebhookFormDialog } from '@/components/webhooks/WebhookFormDialog';
-import { WebhookDeliveryLogs } from '@/components/webhooks/WebhookDeliveryLogs';
-import { Button } from '@/components/ui/button';
-import { Badge, type BadgeProps } from '@/components/ui/badge';
-import { Switch } from '@/components/ui/switch';
-import { useToast } from '@/hooks/use-toast';
-import { isPlanUpgradeRequired } from '@/lib/api';
-import { timeAgo } from '@/lib/utils';
+import { useState, useEffect, useCallback, memo } from "react";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { webhookService, Webhook } from "@/services/webhookService";
+import { WebhookFormDialog } from "@/components/webhooks/WebhookFormDialog";
+import { WebhookDeliveryLogs } from "@/components/webhooks/WebhookDeliveryLogs";
+import { Button } from "@/components/ui/button";
+import { Badge, type BadgeProps } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
+import { useToast } from "@/hooks/use-toast";
+import { isPlanUpgradeRequired } from "@/lib/api";
+import { timeAgo } from "@/lib/utils";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from "@/components/ui/dropdown-menu";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,7 +27,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+} from "@/components/ui/alert-dialog";
 import {
   Webhook as WebhookIcon,
   Plus,
@@ -44,18 +44,20 @@ import {
   Copy,
   Check,
   Zap,
-} from 'lucide-react';
+} from "lucide-react";
 
 // ─────────────────────────────────────────────────────────────
 // Helpers
 // ─────────────────────────────────────────────────────────────
 
 function typeLabel(type: string) {
-  return { custom: 'Custom', discord: 'Discord', slack: 'Slack' }[type] ?? type;
+  return { custom: "Custom", discord: "Discord", slack: "Slack" }[type] ?? type;
 }
 
-function typeBadgeVariant(type: string): BadgeProps['variant'] {
-  return { custom: 'info', discord: 'info', slack: 'info' }[type] ?? 'secondary';
+function typeBadgeVariant(type: string): BadgeProps["variant"] {
+  return (
+    { custom: "info", discord: "info", slack: "info" }[type] ?? "secondary"
+  );
 }
 
 function successRate(webhook: Webhook) {
@@ -77,26 +79,46 @@ interface WebhookCardProps {
   onRegenerateKey: (w: Webhook) => void;
 }
 
-function WebhookCard({ webhook, onEdit, onDelete, onTest, onToggle, onRegenerateKey }: WebhookCardProps) {
+const WebhookCard = memo(function WebhookCard({
+  webhook,
+  onEdit,
+  onDelete,
+  onTest,
+  onToggle,
+  onRegenerateKey,
+}: WebhookCardProps) {
   const [showLogs, setShowLogs] = useState(false);
   const rate = successRate(webhook);
 
+  const handleToggleLogs = useCallback(() => setShowLogs((v) => !v), []);
+
   return (
-    <div className={`rounded-xl border bg-card transition-all ${
-      webhook.is_active ? 'border-border' : 'border-border/50'
-    }`}>
+    <div
+      className={`rounded-xl border bg-card transition-all ${
+        webhook.is_active ? "border-border" : "border-border/50"
+      }`}
+    >
       {/* Card Header */}
       <div className="flex items-start gap-4 p-5">
         {/* Status dot */}
-        <div className={`mt-1 w-2.5 h-2.5 rounded-full shrink-0 ${
-          webhook.is_active ? 'bg-green-500 shadow-sm shadow-green-400' : 'bg-muted-foreground/40'
-        }`} />
+        <div
+          className={`mt-1 w-2.5 h-2.5 rounded-full shrink-0 ${
+            webhook.is_active
+              ? "bg-green-500 shadow-sm shadow-green-400"
+              : "bg-muted-foreground/40"
+          }`}
+        />
 
         {/* Info */}
         <div className="flex-1 min-w-0 space-y-2">
           <div className="flex items-start gap-2 flex-wrap">
-            <h3 className="font-semibold text-foreground text-base leading-tight">{webhook.name}</h3>
-            <Badge variant={typeBadgeVariant(webhook.type)} className="text-xs px-2 py-0.5">
+            <h3 className="font-semibold text-foreground text-base leading-tight">
+              {webhook.name}
+            </h3>
+            <Badge
+              variant={typeBadgeVariant(webhook.type)}
+              className="text-xs px-2 py-0.5"
+            >
               {typeLabel(webhook.type)}
             </Badge>
             {webhook.is_verified && (
@@ -106,16 +128,23 @@ function WebhookCard({ webhook, onEdit, onDelete, onTest, onToggle, onRegenerate
             )}
           </div>
 
-          <p className="text-xs text-muted-foreground font-mono truncate">{webhook.url}</p>
+          <p className="text-xs text-muted-foreground font-mono truncate">
+            {webhook.url}
+          </p>
 
           {webhook.description && (
-            <p className="text-xs text-muted-foreground">{webhook.description}</p>
+            <p className="text-xs text-muted-foreground">
+              {webhook.description}
+            </p>
           )}
 
           {/* Event pills */}
           <div className="flex flex-wrap gap-1.5">
-            {webhook.events.map(e => (
-              <span key={e} className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded-full">
+            {webhook.events.map((e) => (
+              <span
+                key={e}
+                className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded-full"
+              >
                 {e}
               </span>
             ))}
@@ -134,7 +163,15 @@ function WebhookCard({ webhook, onEdit, onDelete, onTest, onToggle, onRegenerate
               </span>
             )}
             {rate !== null && (
-              <span className={rate >= 90 ? 'text-green-600' : rate >= 70 ? 'text-amber-600' : 'text-red-500'}>
+              <span
+                className={
+                  rate >= 90
+                    ? "text-green-600"
+                    : rate >= 70
+                      ? "text-amber-600"
+                      : "text-red-500"
+                }
+              >
                 {rate}% success rate
               </span>
             )}
@@ -151,7 +188,9 @@ function WebhookCard({ webhook, onEdit, onDelete, onTest, onToggle, onRegenerate
           <Switch
             checked={webhook.is_active}
             onCheckedChange={() => onToggle(webhook)}
-            aria-label={webhook.is_active ? 'Disable webhook' : 'Enable webhook'}
+            aria-label={
+              webhook.is_active ? "Disable webhook" : "Enable webhook"
+            }
           />
 
           {/* More menu */}
@@ -162,13 +201,22 @@ function WebhookCard({ webhook, onEdit, onDelete, onTest, onToggle, onRegenerate
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-44">
-              <DropdownMenuItem onClick={() => onTest(webhook)} className="gap-2">
+              <DropdownMenuItem
+                onClick={() => onTest(webhook)}
+                className="gap-2"
+              >
                 <Send className="h-4 w-4" /> Test Delivery
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => onEdit(webhook)} className="gap-2">
+              <DropdownMenuItem
+                onClick={() => onEdit(webhook)}
+                className="gap-2"
+              >
                 <Edit className="h-4 w-4" /> Edit
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => onRegenerateKey(webhook)} className="gap-2">
+              <DropdownMenuItem
+                onClick={() => onRegenerateKey(webhook)}
+                className="gap-2"
+              >
                 <Key className="h-4 w-4" /> Regenerate Secret
               </DropdownMenuItem>
               <DropdownMenuSeparator />
@@ -186,12 +234,16 @@ function WebhookCard({ webhook, onEdit, onDelete, onTest, onToggle, onRegenerate
       {/* Delivery Logs Toggle */}
       <div className="border-t border-border">
         <button
-          onClick={() => setShowLogs(v => !v)}
+          onClick={handleToggleLogs}
           aria-expanded={showLogs}
           className="w-full flex items-center justify-between px-5 py-2.5 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
         >
           <span>Delivery Logs</span>
-          {showLogs ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+          {showLogs ? (
+            <ChevronUp className="h-3.5 w-3.5" />
+          ) : (
+            <ChevronDown className="h-3.5 w-3.5" />
+          )}
         </button>
         {showLogs && (
           <div className="px-5 pb-5 pt-2">
@@ -201,7 +253,7 @@ function WebhookCard({ webhook, onEdit, onDelete, onTest, onToggle, onRegenerate
       </div>
     </div>
   );
-}
+});
 
 // ─────────────────────────────────────────────────────────────
 // Regenerate Secret Dialog
@@ -214,7 +266,12 @@ interface RegenerateSecretDialogProps {
   onClose: () => void;
 }
 
-function RegenerateSecretDialog({ open, webhookName, newSecret, onClose }: RegenerateSecretDialogProps) {
+function RegenerateSecretDialog({
+  open,
+  webhookName,
+  newSecret,
+  onClose,
+}: RegenerateSecretDialogProps) {
   const [copied, setCopied] = useState(false);
 
   const copy = async () => {
@@ -225,31 +282,53 @@ function RegenerateSecretDialog({ open, webhookName, newSecret, onClose }: Regen
   };
 
   return (
-    <AlertDialog open={open} onOpenChange={v => { if (!v) onClose(); }}>
+    <AlertDialog
+      open={open}
+      onOpenChange={(v) => {
+        if (!v) onClose();
+      }}
+    >
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>New Signing Secret — {webhookName}</AlertDialogTitle>
+          <AlertDialogTitle>
+            New Signing Secret — {webhookName}
+          </AlertDialogTitle>
           <AlertDialogDescription>
-            Your new signing secret is shown below. <strong>Save it now</strong> — it will not be shown again.
+            Your new signing secret is shown below. <strong>Save it now</strong>{" "}
+            — it will not be shown again.
           </AlertDialogDescription>
         </AlertDialogHeader>
 
         {newSecret && (
           <div className="rounded-lg border border-amber-300 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-700 p-3 space-y-2">
             <div className="flex items-center gap-2 bg-white dark:bg-zinc-900 rounded-md border px-3 py-2">
-              <code className="text-xs font-mono flex-1 break-all select-all">{newSecret}</code>
-              <Button size="sm" variant="ghost" onClick={copy} className="shrink-0">
-                {copied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
+              <code className="text-xs font-mono flex-1 break-all select-all">
+                {newSecret}
+              </code>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={copy}
+                className="shrink-0"
+              >
+                {copied ? (
+                  <Check className="h-4 w-4 text-green-500" />
+                ) : (
+                  <Copy className="h-4 w-4" />
+                )}
               </Button>
             </div>
             <p className="text-xs text-amber-600 dark:text-amber-400">
-              Update your server to use this new secret for signature verification.
+              Update your server to use this new secret for signature
+              verification.
             </p>
           </div>
         )}
 
         <AlertDialogFooter>
-          <AlertDialogAction onClick={onClose}>I&apos;ve saved my secret — Done</AlertDialogAction>
+          <AlertDialogAction onClick={onClose}>
+            I&apos;ve saved my secret — Done
+          </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
@@ -275,7 +354,7 @@ export default function WebhooksPage() {
 
   // Regenerate secret
   const [regenSecret, setRegenSecret] = useState<string | null>(null);
-  const [regenWebhookName, setRegenWebhookName] = useState('');
+  const [regenWebhookName, setRegenWebhookName] = useState("");
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -284,18 +363,20 @@ export default function WebhooksPage() {
       setWebhooks(data);
     } catch (err: any) {
       if (!isPlanUpgradeRequired(err)) {
-        toast({ title: 'Failed to load webhooks', variant: 'destructive' });
+        toast({ title: "Failed to load webhooks", variant: "destructive" });
       }
     } finally {
       setLoading(false);
     }
   }, []);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    load();
+  }, [load]);
 
-  const handleSaved = (webhook: Webhook) => {
-    setWebhooks(prev => {
-      const idx = prev.findIndex(w => w.id === webhook.id);
+  const handleSaved = useCallback((webhook: Webhook) => {
+    setWebhooks((prev) => {
+      const idx = prev.findIndex((w) => w.id === webhook.id);
       if (idx >= 0) {
         const next = [...prev];
         next[idx] = webhook;
@@ -303,65 +384,88 @@ export default function WebhooksPage() {
       }
       return [webhook, ...prev];
     });
-  };
+  }, []);
 
-  const handleToggle = async (webhook: Webhook) => {
-    try {
-      const updated = await webhookService.updateWebhook(webhook.id, { is_active: !webhook.is_active });
-      handleSaved(updated);
-      toast({ title: updated.is_active ? '✅ Webhook enabled' : '⏸️ Webhook disabled' });
-    } catch {
-      toast({ title: 'Failed to update webhook', variant: 'destructive' });
-    }
-  };
+  const handleToggle = useCallback(
+    async (webhook: Webhook) => {
+      try {
+        const updated = await webhookService.updateWebhook(webhook.id, {
+          is_active: !webhook.is_active,
+        });
+        handleSaved(updated);
+        toast({
+          title: updated.is_active
+            ? "✅ Webhook enabled"
+            : "⏸️ Webhook disabled",
+        });
+      } catch {
+        toast({ title: "Failed to update webhook", variant: "destructive" });
+      }
+    },
+    [handleSaved, toast],
+  );
 
-  const handleTest = async (webhook: Webhook) => {
-    setTestingId(webhook.id);
-    try {
-      const result = await webhookService.testWebhook(webhook.id);
-      toast({
-        title: result.success
-          ? `✅ Test delivery successful (HTTP ${result.response_status})`
-          : `❌ Test delivery failed — HTTP ${result.response_status ?? 'N/A'}`,
-        description: result.error_message ?? undefined,
-        variant: result.success ? 'default' : 'destructive',
-      });
-    } catch (err: any) {
-      toast({ title: 'Test failed', description: err?.response?.data?.message, variant: 'destructive' });
-    } finally {
-      setTestingId(null);
-    }
-  };
+  const handleTest = useCallback(
+    async (webhook: Webhook) => {
+      setTestingId(webhook.id);
+      try {
+        const result = await webhookService.testWebhook(webhook.id);
+        toast({
+          title: result.success
+            ? `✅ Test delivery successful (HTTP ${result.response_status})`
+            : `❌ Test delivery failed — HTTP ${result.response_status ?? "N/A"}`,
+          description: result.error_message ?? undefined,
+          variant: result.success ? "default" : "destructive",
+        });
+      } catch (err: any) {
+        toast({
+          title: "Test failed",
+          description: err?.response?.data?.message,
+          variant: "destructive",
+        });
+      } finally {
+        setTestingId(null);
+      }
+    },
+    [toast],
+  );
 
-  const handleDelete = async () => {
+  const handleDelete = useCallback(async () => {
     if (!deleteTarget) return;
     setDeleting(true);
     try {
       await webhookService.deleteWebhook(deleteTarget.id);
-      setWebhooks(prev => prev.filter(w => w.id !== deleteTarget.id));
-      toast({ title: '🗑️ Webhook deleted' });
+      setWebhooks((prev) => prev.filter((w) => w.id !== deleteTarget.id));
+      toast({ title: "🗑️ Webhook deleted" });
       setDeleteTarget(null);
     } catch {
-      toast({ title: 'Failed to delete webhook', variant: 'destructive' });
+      toast({ title: "Failed to delete webhook", variant: "destructive" });
     } finally {
       setDeleting(false);
     }
-  };
+  }, [deleteTarget, toast]);
 
-  const handleRegenerateKey = async (webhook: Webhook) => {
-    try {
-      const result = await webhookService.regenerateSecret(webhook.id);
-      setRegenWebhookName(webhook.name);
-      setRegenSecret(result.new_secret);
-    } catch {
-      toast({ title: 'Failed to regenerate secret', variant: 'destructive' });
-    }
-  };
+  const handleRegenerateKey = useCallback(
+    async (webhook: Webhook) => {
+      try {
+        const result = await webhookService.regenerateSecret(webhook.id);
+        setRegenWebhookName(webhook.name);
+        setRegenSecret(result.new_secret);
+      } catch {
+        toast({ title: "Failed to regenerate secret", variant: "destructive" });
+      }
+    },
+    [toast],
+  );
+
+  const handleEdit = useCallback((webhook: Webhook) => {
+    setEditingWebhook(webhook);
+    setFormOpen(true);
+  }, []);
 
   return (
-    <ProtectedRoute allowedRoles={['owner', 'admin']}>
+    <ProtectedRoute allowedRoles={["owner", "admin"]}>
       <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-5 py-5 space-y-5">
-
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
@@ -370,10 +474,17 @@ export default function WebhooksPage() {
               <h1 className="text-lg font-semibold tracking-tight">Webhooks</h1>
             </div>
             <p className="text-sm text-muted-foreground">
-              Send real-time HTTP notifications to external services when events happen in your organization.
+              Send real-time HTTP notifications to external services when events
+              happen in your organization.
             </p>
           </div>
-          <Button onClick={() => { setEditingWebhook(null); setFormOpen(true); }} className="gap-2 shrink-0">
+          <Button
+            onClick={() => {
+              setEditingWebhook(null);
+              setFormOpen(true);
+            }}
+            className="gap-2 shrink-0"
+          >
             <Plus className="h-4 w-4" />
             Add Webhook
           </Button>
@@ -383,8 +494,14 @@ export default function WebhooksPage() {
         <div className="rounded-lg border border-blue-200 bg-blue-50 dark:bg-blue-950/20 dark:border-blue-800 px-4 py-3 text-sm text-blue-700 dark:text-blue-400 flex items-start gap-2">
           <WebhookIcon className="h-4 w-4 mt-0.5 shrink-0" />
           <div>
-            <strong>Supported events:</strong> post.created, post.updated, post.status_changed, post.deleted, comment.created, vote.created, board.created, changelog.published.
-            {' '}Webhooks are signed with HMAC-SHA256 — verify the <code className="font-mono text-xs bg-blue-100 dark:bg-blue-900/40 px-1 rounded">X-Faddy-Signature</code> header.
+            <strong>Supported events:</strong> post.created, post.updated,
+            post.status_changed, post.deleted, comment.created, vote.created,
+            board.created, changelog.published. Webhooks are signed with
+            HMAC-SHA256 — verify the{" "}
+            <code className="font-mono text-xs bg-blue-100 dark:bg-blue-900/40 px-1 rounded">
+              X-Faddy-Signature
+            </code>{" "}
+            header.
           </div>
         </div>
 
@@ -392,7 +509,10 @@ export default function WebhooksPage() {
         {loading ? (
           <div className="space-y-3">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="h-20 rounded-xl border bg-card animate-pulse" />
+              <div
+                key={i}
+                className="h-20 rounded-xl border bg-card animate-pulse"
+              />
             ))}
           </div>
         ) : webhooks.length === 0 ? (
@@ -400,20 +520,29 @@ export default function WebhooksPage() {
             <WebhookIcon className="h-8 w-8 text-muted-foreground/30" />
             <div className="text-center">
               <p className="font-medium text-foreground">No webhooks yet</p>
-              <p className="text-sm text-muted-foreground mt-1">Create your first webhook to start receiving real-time event notifications.</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                Create your first webhook to start receiving real-time event
+                notifications.
+              </p>
             </div>
-            <Button onClick={() => { setEditingWebhook(null); setFormOpen(true); }} className="gap-2">
+            <Button
+              onClick={() => {
+                setEditingWebhook(null);
+                setFormOpen(true);
+              }}
+              className="gap-2"
+            >
               <Plus className="h-4 w-4" />
               Create your first webhook
             </Button>
           </div>
         ) : (
           <div className="space-y-3">
-            {webhooks.map(webhook => (
+            {webhooks.map((webhook) => (
               <WebhookCard
                 key={webhook.id}
                 webhook={webhook}
-                onEdit={w => { setEditingWebhook(w); setFormOpen(true); }}
+                onEdit={handleEdit}
                 onDelete={setDeleteTarget}
                 onTest={handleTest}
                 onToggle={handleToggle}
@@ -426,19 +555,28 @@ export default function WebhooksPage() {
         {/* Create / Edit Dialog */}
         <WebhookFormDialog
           open={formOpen}
-          onClose={() => { setFormOpen(false); setEditingWebhook(null); }}
+          onClose={() => {
+            setFormOpen(false);
+            setEditingWebhook(null);
+          }}
           onSaved={handleSaved}
           existing={editingWebhook}
         />
 
         {/* Delete Confirmation */}
-        <AlertDialog open={!!deleteTarget} onOpenChange={v => { if (!v) setDeleteTarget(null); }}>
+        <AlertDialog
+          open={!!deleteTarget}
+          onOpenChange={(v) => {
+            if (!v) setDeleteTarget(null);
+          }}
+        >
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>Delete Webhook</AlertDialogTitle>
               <AlertDialogDescription>
-                Are you sure you want to delete <strong>{deleteTarget?.name}</strong>?
-                All delivery logs will be permanently removed. This action cannot be undone.
+                Are you sure you want to delete{" "}
+                <strong>{deleteTarget?.name}</strong>? All delivery logs will be
+                permanently removed. This action cannot be undone.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
@@ -448,7 +586,7 @@ export default function WebhooksPage() {
                 disabled={deleting}
                 variant="destructive"
               >
-                {deleting ? 'Deleting…' : 'Delete Webhook'}
+                {deleting ? "Deleting…" : "Delete Webhook"}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
