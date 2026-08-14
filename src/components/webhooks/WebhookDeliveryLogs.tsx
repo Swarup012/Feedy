@@ -5,6 +5,7 @@ import { webhookService, WebhookDelivery } from '@/services/webhookService';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { timeAgo } from '@/lib/utils';
 import {
   CheckCircle2,
   XCircle,
@@ -34,16 +35,6 @@ function statusBadge(status: WebhookDelivery['status']) {
 
 function formatEventType(event: string) {
   return event.replace('.', ' › ').replace(/_/g, ' ');
-}
-
-function timeAgo(dateStr: string) {
-  const diff = Date.now() - new Date(dateStr).getTime();
-  const mins = Math.floor(diff / 60000);
-  if (mins < 1) return 'just now';
-  if (mins < 60) return `${mins}m ago`;
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h ago`;
-  return `${Math.floor(hrs / 24)}d ago`;
 }
 
 export function WebhookDeliveryLogs({ webhookId }: WebhookDeliveryLogsProps) {

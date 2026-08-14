@@ -10,6 +10,7 @@ import { Badge, type BadgeProps } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { isPlanUpgradeRequired } from '@/lib/api';
+import { timeAgo } from '@/lib/utils';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -61,17 +62,6 @@ function successRate(webhook: Webhook) {
   if (!webhook.total_deliveries) return null;
   const success = webhook.total_deliveries - webhook.failed_deliveries;
   return Math.round((success / webhook.total_deliveries) * 100);
-}
-
-function timeAgo(dateStr: string | null) {
-  if (!dateStr) return 'Never';
-  const diff = Date.now() - new Date(dateStr).getTime();
-  const mins = Math.floor(diff / 60000);
-  if (mins < 1) return 'Just now';
-  if (mins < 60) return `${mins}m ago`;
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h ago`;
-  return `${Math.floor(hrs / 24)}d ago`;
 }
 
 // ─────────────────────────────────────────────────────────────
