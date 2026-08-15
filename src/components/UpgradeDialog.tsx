@@ -114,7 +114,7 @@ export function UpgradeDialog({
           Upgrade to unlock {featureName}
         </DialogTitle>
         <DialogDescription>
-          14-day free trial on both plans. No credit card required.
+          7-day free trial on both plans. No credit card required.
         </DialogDescription>
       </DialogHeader>
 

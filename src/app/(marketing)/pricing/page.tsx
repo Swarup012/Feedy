@@ -236,7 +236,7 @@ export default function PricingPage() {
                     }
                     disabled={loading}
                   >
-                    {loading ? "Loading..." : "Start 14-Day Free Trial"}
+                    {loading ? "Loading..." : "Start 7-Day Free Trial"}
                   </Button>
 
                 </div>
@@ -331,7 +331,7 @@ export default function PricingPage() {
                     onClick={() => handleUpgrade("pro", billingCycle, false)}
                     disabled={loading}
                   >
-                    {loading ? "Loading..." : "Start 14-Day Free Trial"}
+                    {loading ? "Loading..." : "Start 7-Day Free Trial"}
                   </Button>
 
                 </div>
@@ -743,10 +743,10 @@ export default function PricingPage() {
                         -
                       </td>
                       <td className="py-4 px-6 text-center text-sm font-semibold text-blue-600 dark:text-blue-400">
-                        14 days
+                        7 days
                       </td>
                       <td className="py-4 px-6 text-center text-sm font-semibold text-blue-600 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-900/10">
-                        14 days
+                        7 days
                       </td>
                     </tr>
                   </tbody>
@@ -967,7 +967,7 @@ export default function PricingPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-gray-600 dark:text-gray-400">
-                  Yes! You can cancel your 14-day trial at any time with no
+                  Yes! You can cancel your 7-day trial at any time with no
                   charges. If you don't cancel, you'll automatically be charged
                   after the trial ends.
                 </p>
@@ -977,12 +977,12 @@ export default function PricingPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">
-                  How does the 14-day trial work?
+                  How does the 7-day trial work?
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-gray-600 dark:text-gray-400">
-                  You get full access to all Starter plan features for 14 days,
+                  You get full access to all Starter plan features for 7 days,
                   completely free. No credit card required until you decide to
                   continue. We'll remind you 7, 3, and 1 day before your trial
                   ends.

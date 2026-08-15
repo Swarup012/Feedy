@@ -32,7 +32,7 @@ export default function RefundPolicyPage() {
                   All subscription fees are billed in advance on a recurring basis and are non-refundable, except where required by applicable law.
                 </li>
                 <li>
-                  New users may access a 14-day free trial. No charges apply during the trial period. If you do not cancel before the trial ends, your chosen subscription plan will be billed automatically.
+                  New users may access a 7-day free trial. No charges apply during the trial period. If you do not cancel before the trial ends, your chosen subscription plan will be billed automatically.
                 </li>
                 <li>
                   Canceling your subscription stops future billing but does not entitle you to a refund for the current billing period already paid.

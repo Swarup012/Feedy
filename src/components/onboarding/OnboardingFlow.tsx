@@ -7,8 +7,7 @@ import { useAuth } from '@/hooks/useAuth';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { ChevronLeft, ChevronRight, X } from 'lucide-react';
-import { Logo } from '@/components/logo';
+import { ChevronLeft, ChevronRight, AlertCircle } from 'lucide-react';
 
 // Import step components
 import { CompanyInfoStep } from './steps/CompanyInfoStep';
@@ -45,6 +44,8 @@ export default function OnboardingFlow() {
   const [currentStep, setCurrentStep] = useState(1);
   const [data, setData] = useState<OnboardingData>({});
   const [loading, setLoading] = useState(false);
+  const [companyNameError, setCompanyNameError] = useState<string | null>(null);
+  const [onboardingError, setOnboardingError] = useState<string | null>(null);
 
   // Check if user already completed onboarding
   useEffect(() => {
@@ -62,16 +63,16 @@ export default function OnboardingFlow() {
   const handleNext = async () => {
     // Validate step 1 - Company name is required
     if (currentStep === 1 && !data.companyName?.trim()) {
-      alert('Please enter your company name to continue');
+      setCompanyNameError('Company name is required to continue');
       return;
     }
+    setCompanyNameError(null);
+    setOnboardingError(null);
     
     if (currentStep < TOTAL_STEPS) {
       setCurrentStep(currentStep + 1);
-      // Save progress to backend
       await saveProgress(currentStep + 1);
     } else {
-      // Final step - complete onboarding
       await completeOnboarding();
     }
   };
@@ -98,8 +99,8 @@ export default function OnboardingFlow() {
   const completeOnboarding = async () => {
     try {
       setLoading(true);
+      setOnboardingError(null);
 
-      // Generate subdomain from company name if not provided
       const subdomain = data.companyName
         ? data.companyName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
         : undefined;
@@ -109,26 +110,21 @@ export default function OnboardingFlow() {
         subdomain,
       };
 
-      // api client sends the HttpOnly cookie automatically — no manual token needed
       await api.post('/api/users/onboarding/complete', onboardingPayload);
 
-      console.log('📡 Onboarding complete');
-
-      // Refresh user data to get updated organization_role = 'owner'
-      console.log('🔄 Refreshing user data after onboarding...');
       try {
         await refreshUser();
-        console.log('✅ User data refreshed with organization role');
-      } catch (error) {
-        console.error('⚠️ Failed to refresh user data:', error);
+      } catch {
+        // Non-critical — user data will sync on next page load
       }
 
-      // Small delay to ensure state is updated
       await new Promise(resolve => setTimeout(resolve, 200));
-
       router.push('/admin');
     } catch (error) {
-      console.error('Failed to complete onboarding:', error);
+      const message = error instanceof Error
+        ? error.message
+        : 'Something went wrong. Please try again.';
+      setOnboardingError(message);
     } finally {
       setLoading(false);
     }
@@ -137,7 +133,7 @@ export default function OnboardingFlow() {
   const renderStep = () => {
     switch (currentStep) {
       case 1:
-        return <CompanyInfoStep data={data} onUpdate={updateData} />;
+        return <CompanyInfoStep data={data} onUpdate={(d) => { setCompanyNameError(null); updateData(d); }} companyNameError={companyNameError} />;
       case 2:
         return <GoalsStep data={data} onUpdate={updateData} />;
       case 3:
@@ -177,9 +173,29 @@ export default function OnboardingFlow() {
 
           {/* Navigation Footer */}
           <div className="border-t px-6 py-4 bg-muted/30">
+            {/* Onboarding Error */}
+            {onboardingError && (
+              <div className="mb-4 p-3 rounded-lg bg-destructive/10 border border-destructive/20 flex items-start gap-3">
+                <AlertCircle className="h-4 w-4 text-destructive mt-0.5 shrink-0" />
+                <div className="flex-1">
+                  <p className="text-sm text-destructive font-medium">Failed to complete onboarding</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{onboardingError}</p>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={completeOnboarding}
+                  disabled={loading}
+                  className="text-destructive hover:text-destructive hover:bg-destructive/10 h-8 px-3"
+                >
+                  Retry
+                </Button>
+              </div>
+            )}
+
             {/* Policy Acceptance - Show on last step */}
             {currentStep === TOTAL_STEPS && (
-              <div className="mb-4 pb-4 border-b border-gray-200">
+              <div className="mb-4 pb-4 border-b border-border">
                 <div className="flex items-start space-x-3">
                   <Checkbox
                     id="policy-acceptance"
@@ -191,13 +207,13 @@ export default function OnboardingFlow() {
                   />
                   <label 
                     htmlFor="policy-acceptance" 
-                    className="text-sm text-gray-600 leading-relaxed cursor-pointer"
+                    className="text-sm text-muted-foreground leading-relaxed cursor-pointer"
                   >
                     I agree to the{' '}
                     <Link 
                       href="/policy/terms" 
                       target="_blank"
-                      className="text-blue-600 hover:underline font-medium"
+                      className="text-primary hover:underline font-medium"
                     >
                       Terms of Service
                     </Link>{' '}
@@ -205,7 +221,7 @@ export default function OnboardingFlow() {
                     <Link 
                       href="/policy/privacy" 
                       target="_blank"
-                      className="text-blue-600 hover:underline font-medium"
+                      className="text-primary hover:underline font-medium"
                     >
                       Privacy Policy
                     </Link>

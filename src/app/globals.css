@@ -93,6 +93,12 @@
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
+    /* Semantic: Success & Warning */
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
+    --warning: 25 95% 53%;
+    --warning-foreground: 0 0% 100%;
+
     --radius: 0.5rem;                 /* Canny uses a slightly more professional 8px radius */
   }
   /* -------------------------------------------------------------------------
@@ -130,6 +136,12 @@
     /* Destructive - Error states */
     --destructive: 0 84% 60%;            /* #ef4444 - Modern red */
     --destructive-foreground: 0 0% 100%; /* Pure white */
+    
+    /* Semantic: Success & Warning */
+    --success: 142 76% 40%;
+    --success-foreground: 0 0% 100%;
+    --warning: 25 95% 58%;
+    --warning-foreground: 0 0% 100%;
     
     /* Borders & Inputs */
     --border: 215 20% 35%;               /* #3f4a5c - Subtle separation */
@@ -214,6 +226,19 @@
 
   .bg-brand {
     background: var(--brand-bg);
+  }
+
+  /* Touch-aware remove button: hidden on hover-capable devices until group hover,
+     always visible on touch devices (hover: none) */
+  .remove-btn-touch {
+    @media (hover: hover) and (pointer: fine) {
+      opacity: 0;
+    }
+  }
+  .group:hover .remove-btn-touch {
+    @media (hover: hover) and (pointer: fine) {
+      opacity: 1;
+    }
   }
 }
 

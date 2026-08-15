@@ -3,18 +3,18 @@
 import { useEffect, useRef } from "react";
 
 const NAV_ITEMS = [
-  { href: "collect",       label: "1. What We Collect" },
-  { href: "process",       label: "2. How We Process It" },
-  { href: "legal-bases",   label: "3. Legal Bases" },
-  { href: "share",         label: "4. When We Share It" },
-  { href: "cookies",       label: "5. Cookies" },
+  { href: "collect", label: "1. What We Collect" },
+  { href: "process", label: "2. How We Process It" },
+  { href: "legal-bases", label: "3. Legal Bases" },
+  { href: "share", label: "4. When We Share It" },
+  { href: "cookies", label: "5. Cookies" },
   { href: "international", label: "6. International Transfers" },
-  { href: "retention",     label: "7. How Long We Keep It" },
-  { href: "security",      label: "8. How We Keep It Safe" },
-  { href: "minors",        label: "9. Minors" },
-  { href: "rights",        label: "10. Your Rights" },
-  { href: "updates",       label: "11. Policy Updates" },
-  { href: "contact",       label: "12. Contact Us" },
+  { href: "retention", label: "7. How Long We Keep It" },
+  { href: "security", label: "8. How We Keep It Safe" },
+  { href: "minors", label: "9. Minors" },
+  { href: "rights", label: "10. Your Rights" },
+  { href: "updates", label: "11. Policy Updates" },
+  { href: "contact", label: "12. Contact Us" },
 ];
 
 const LEGAL_BASES = [
@@ -37,12 +37,30 @@ const LEGAL_BASES = [
 ];
 
 const RIGHTS = [
-  { title: "Access",      desc: "Request a copy of the personal data we hold about you." },
-  { title: "Correct",     desc: "Request correction of inaccurate or incomplete data." },
-  { title: "Delete",      desc: "Request deletion of your personal data from our systems." },
-  { title: "Portability", desc: "Receive your data in a structured, machine-readable format." },
-  { title: "Restrict",    desc: "Request that we limit how we use your personal data." },
-  { title: "Object",      desc: "Object to processing based on legitimate interests." },
+  {
+    title: "Access",
+    desc: "Request a copy of the personal data we hold about you.",
+  },
+  {
+    title: "Correct",
+    desc: "Request correction of inaccurate or incomplete data.",
+  },
+  {
+    title: "Delete",
+    desc: "Request deletion of your personal data from our systems.",
+  },
+  {
+    title: "Portability",
+    desc: "Receive your data in a structured, machine-readable format.",
+  },
+  {
+    title: "Restrict",
+    desc: "Request that we limit how we use your personal data.",
+  },
+  {
+    title: "Object",
+    desc: "Object to processing based on legitimate interests.",
+  },
 ];
 
 function SectionHeader({ num, title }: { num: string; title: string }) {
@@ -61,7 +79,9 @@ function InfoCard({ children }: { children: React.ReactNode }) {
 function DataList({ items }: { items: React.ReactNode[] }) {
   return (
     <ul className="pp-data-list">
-      {items.map((item, i) => <li key={i}>{item}</li>)}
+      {items.map((item, i) => (
+        <li key={i}>{item}</li>
+      ))}
     </ul>
   );
 }
@@ -79,13 +99,16 @@ export default function PrivacyPolicy() {
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            Object.values(navRefs.current).forEach((el) => el?.classList.remove("pp-active"));
+            Object.values(navRefs.current).forEach((el) =>
+              el?.classList.remove("pp-active"),
+            );
             const id = entry.target.getAttribute("id");
-            if (id && navRefs.current[id]) navRefs.current[id]?.classList.add("pp-active");
+            if (id && navRefs.current[id])
+              navRefs.current[id]?.classList.add("pp-active");
           }
         });
       },
-      { rootMargin: "-30% 0px -60% 0px" }
+      { rootMargin: "-30% 0px -60% 0px" },
     );
     sections.forEach((s) => observer.observe(s));
     return () => observer.disconnect();
@@ -320,7 +343,12 @@ export default function PrivacyPolicy() {
           <ul className="pp-nav-list">
             {NAV_ITEMS.map(({ href, label }) => (
               <li key={href}>
-                <a href={`#${href}`} ref={(el) => { navRefs.current[href] = el; }}>
+                <a
+                  href={`#${href}`}
+                  ref={(el) => {
+                    navRefs.current[href] = el;
+                  }}
+                >
                   {label}
                 </a>
               </li>
@@ -334,14 +362,26 @@ export default function PrivacyPolicy() {
             <div className="pp-badge">Legal</div>
             <h1 className="pp-page-title">Privacy Policy</h1>
             <div className="pp-page-meta">
-              <div className="pp-meta-item">Last updated <span>August 5, 2026</span></div>
-              <div className="pp-meta-item">Applies to <span>faddy.site</span></div>
+              <div className="pp-meta-item">
+                Last updated <span>August 5, 2026</span>
+              </div>
+              <div className="pp-meta-item">
+                Applies to <span>faddy.site</span>
+              </div>
             </div>
             <InfoCard>
-              This policy describes how Faddy collects, uses, and protects your personal information.
-              All payments are processed by{" "}
-              <a href="https://www.paddle.com/legal/privacy" target="_blank" rel="noopener noreferrer" className="pp-link">Paddle.com</a>,
-              who acts as the merchant of record for all transactions on this platform.
+              This policy describes how Faddy collects, uses, and protects your
+              personal information. All payments are processed by{" "}
+              <a
+                href="https://www.paddle.com/legal/privacy"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="pp-link"
+              >
+                Paddle.com
+              </a>
+              , who acts as the merchant of record for all transactions on this
+              platform.
             </InfoCard>
           </header>
 
@@ -349,23 +389,42 @@ export default function PrivacyPolicy() {
           <section className="pp-section" id="collect">
             <SectionHeader num="01" title="What Information Do We Collect?" />
             <div className="pp-body">
-              <p>We collect personal information that you voluntarily provide when you register, use our Services, or contact us.</p>
-              <DataList items={[
-                "Names and email addresses",
-                "Passwords and authentication data",
-                "Billing addresses and job titles",
-                "Any other information you choose to provide",
-              ]} />
               <p>
-                <strong style={{ color: "#0f172a" }}>Payment data:</strong> All payment data is handled and stored securely by{" "}
-                <a href="https://www.paddle.com/legal/privacy" target="_blank" rel="noopener noreferrer" className="pp-link">Paddle.com</a>.
-                We do not store your card details on our servers.
+                We collect personal information that you voluntarily provide
+                when you register, use our Services, or contact us.
+              </p>
+              <DataList
+                items={[
+                  "Names and email addresses",
+                  "Passwords and authentication data",
+                  "Billing addresses and job titles",
+                  "Any other information you choose to provide",
+                ]}
+              />
+              <p>
+                <strong style={{ color: "#0f172a" }}>Payment data:</strong> All
+                payment data is handled and stored securely by{" "}
+                <a
+                  href="https://www.paddle.com/legal/privacy"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="pp-link"
+                >
+                  Paddle.com
+                </a>
+                . We do not store your card details on our servers.
               </p>
               <p>
-                <strong style={{ color: "#0f172a" }}>Information collected automatically:</strong> IP address, browser type, device
-                characteristics, operating system, language preferences, and referring URLs.
+                <strong style={{ color: "#0f172a" }}>
+                  Information collected automatically:
+                </strong>{" "}
+                IP address, browser type, device characteristics, operating
+                system, language preferences, and referring URLs.
               </p>
-              <InfoCard>We do not process sensitive personal information such as health data, biometric data, or racial/ethnic origin.</InfoCard>
+              <InfoCard>
+                We do not process sensitive personal information such as health
+                data, biometric data, or racial/ethnic origin.
+              </InfoCard>
             </div>
           </section>
 
@@ -373,18 +432,26 @@ export default function PrivacyPolicy() {
 
           {/* 2 */}
           <section className="pp-section" id="process">
-            <SectionHeader num="02" title="How Do We Process Your Information?" />
+            <SectionHeader
+              num="02"
+              title="How Do We Process Your Information?"
+            />
             <div className="pp-body">
-              <p>We process your personal information only for specific, legitimate purposes:</p>
-              <DataList items={[
-                "To create and manage your account and authenticate your identity",
-                "To deliver and maintain our Services",
-                "To respond to your inquiries and provide customer support",
-                "To send administrative information such as service updates or policy changes",
-                "To fulfil and manage subscription orders and payments",
-                "To detect, prevent, and address security incidents or fraud",
-                "To comply with applicable legal obligations",
-              ]} />
+              <p>
+                We process your personal information only for specific,
+                legitimate purposes:
+              </p>
+              <DataList
+                items={[
+                  "To create and manage your account and authenticate your identity",
+                  "To deliver and maintain our Services",
+                  "To respond to your inquiries and provide customer support",
+                  "To send administrative information such as service updates or policy changes",
+                  "To fulfil and manage subscription orders and payments",
+                  "To detect, prevent, and address security incidents or fraud",
+                  "To comply with applicable legal obligations",
+                ]}
+              />
             </div>
           </section>
 
@@ -394,7 +461,10 @@ export default function PrivacyPolicy() {
           <section className="pp-section" id="legal-bases">
             <SectionHeader num="03" title="What Legal Bases Do We Rely On?" />
             <div className="pp-body">
-              <p>We only process your personal information when we have a valid legal reason to do so, including:</p>
+              <p>
+                We only process your personal information when we have a valid
+                legal reason to do so, including:
+              </p>
               <div className="pp-basis-list">
                 {LEGAL_BASES.map(({ tag, desc }) => (
                   <div className="pp-basis-item" key={tag}>
@@ -404,7 +474,8 @@ export default function PrivacyPolicy() {
                 ))}
               </div>
               <p style={{ marginTop: 16 }}>
-                If you are located in the EU or UK, these bases correspond to the lawful grounds under the GDPR and UK GDPR.
+                If you are located in the EU or UK, these bases correspond to
+                the lawful grounds under the GDPR and UK GDPR.
               </p>
             </div>
           </section>
@@ -413,15 +484,47 @@ export default function PrivacyPolicy() {
 
           {/* 4 */}
           <section className="pp-section" id="share">
-            <SectionHeader num="04" title="When and With Whom Do We Share Your Information?" />
+            <SectionHeader
+              num="04"
+              title="When and With Whom Do We Share Your Information?"
+            />
             <div className="pp-body">
-              <p>We do not sell your personal information. We may share it only in the following limited circumstances:</p>
-              <DataList items={[
-                <><strong style={{ color: "#0f172a" }}>Payment processing:</strong> Your payment information is shared with Paddle.com, our merchant of record.</>,
-                <><strong style={{ color: "#0f172a" }}>Service providers:</strong> Trusted vendors who assist in operating our platform (hosting, analytics, email delivery) under strict data processing agreements.</>,
-                <><strong style={{ color: "#0f172a" }}>Business transfers:</strong> In the event of a merger, acquisition, or sale of assets.</>,
-                <><strong style={{ color: "#0f172a" }}>Legal requirements:</strong> Where required by law, court order, or to protect the rights and safety of Faddy or its users.</>,
-              ]} />
+              <p>
+                We do not sell your personal information. We may share it only
+                in the following limited circumstances:
+              </p>
+              <DataList
+                items={[
+                  <>
+                    <strong style={{ color: "#0f172a" }}>
+                      Payment processing:
+                    </strong>{" "}
+                    Your payment information is shared with Paddle.com, our
+                    merchant of record.
+                  </>,
+                  <>
+                    <strong style={{ color: "#0f172a" }}>
+                      Service providers:
+                    </strong>{" "}
+                    Trusted vendors who assist in operating our platform
+                    (hosting, analytics, email delivery) under strict data
+                    processing agreements.
+                  </>,
+                  <>
+                    <strong style={{ color: "#0f172a" }}>
+                      Business transfers:
+                    </strong>{" "}
+                    In the event of a merger, acquisition, or sale of assets.
+                  </>,
+                  <>
+                    <strong style={{ color: "#0f172a" }}>
+                      Legal requirements:
+                    </strong>{" "}
+                    Where required by law, court order, or to protect the rights
+                    and safety of Faddy or its users.
+                  </>,
+                ]}
+              />
             </div>
           </section>
 
@@ -431,8 +534,19 @@ export default function PrivacyPolicy() {
           <section className="pp-section" id="cookies">
             <SectionHeader num="05" title="Cookies and Tracking Technologies" />
             <div className="pp-body">
-              <p>We use cookies and similar technologies to maintain session security and understand how our platform is used. You can set your browser to refuse cookies, though this may affect certain features.</p>
-              <p>For detailed information, please see our <a href="/policy/cookie" className="pp-link">Cookie Policy</a>.</p>
+              <p>
+                We use cookies and similar technologies to maintain session
+                security and understand how our platform is used. You can set
+                your browser to refuse cookies, though this may affect certain
+                features.
+              </p>
+              <p>
+                For detailed information, please see our{" "}
+                <a href="/policy/cookie" className="pp-link">
+                  Cookie Policy
+                </a>
+                .
+              </p>
             </div>
           </section>
 
@@ -440,10 +554,22 @@ export default function PrivacyPolicy() {
 
           {/* 6 */}
           <section className="pp-section" id="international">
-            <SectionHeader num="06" title="Is Your Information Transferred Internationally?" />
+            <SectionHeader
+              num="06"
+              title="Is Your Information Transferred Internationally?"
+            />
             <div className="pp-body">
-              <p>Our primary servers are located in <strong style={{ color: "#0f172a" }}>India</strong>. Some third-party service providers (including Paddle.com) may process your information in the United States or other countries.</p>
-              <p>We take all reasonable measures to ensure your information is protected in accordance with this Privacy Policy and applicable law.</p>
+              <p>
+                Our primary servers are located in{" "}
+                <strong style={{ color: "#0f172a" }}>India</strong>. Some
+                third-party service providers (including Paddle.com) may process
+                your information in the United States or other countries.
+              </p>
+              <p>
+                We take all reasonable measures to ensure your information is
+                protected in accordance with this Privacy Policy and applicable
+                law.
+              </p>
             </div>
           </section>
 
@@ -451,10 +577,22 @@ export default function PrivacyPolicy() {
 
           {/* 7 */}
           <section className="pp-section" id="retention">
-            <SectionHeader num="07" title="How Long Do We Keep Your Information?" />
+            <SectionHeader
+              num="07"
+              title="How Long Do We Keep Your Information?"
+            />
             <div className="pp-body">
-              <p>We retain your personal information only for as long as necessary to fulfil the purposes outlined in this Privacy Policy, unless a longer retention period is required by law.</p>
-              <p>When your account is closed, we will delete or anonymise your data. Where immediate deletion is not possible (e.g., backup archives), we will securely isolate it until deletion is feasible.</p>
+              <p>
+                We retain your personal information only for as long as
+                necessary to fulfil the purposes outlined in this Privacy
+                Policy, unless a longer retention period is required by law.
+              </p>
+              <p>
+                When your account is closed, we will delete or anonymise your
+                data. Where immediate deletion is not possible (e.g., backup
+                archives), we will securely isolate it until deletion is
+                feasible.
+              </p>
             </div>
           </section>
 
@@ -462,10 +600,21 @@ export default function PrivacyPolicy() {
 
           {/* 8 */}
           <section className="pp-section" id="security">
-            <SectionHeader num="08" title="How Do We Keep Your Information Safe?" />
+            <SectionHeader
+              num="08"
+              title="How Do We Keep Your Information Safe?"
+            />
             <div className="pp-body">
-              <p>We implement appropriate technical and organisational security measures including encrypted data transmission, access controls, and regular security reviews.</p>
-              <InfoCard>No method of electronic transmission or storage is 100% secure. You are responsible for keeping your account credentials confidential.</InfoCard>
+              <p>
+                We implement appropriate technical and organisational security
+                measures including encrypted data transmission, access controls,
+                and regular security reviews.
+              </p>
+              <InfoCard>
+                No method of electronic transmission or storage is 100% secure.
+                You are responsible for keeping your account credentials
+                confidential.
+              </InfoCard>
             </div>
           </section>
 
@@ -473,10 +622,24 @@ export default function PrivacyPolicy() {
 
           {/* 9 */}
           <section className="pp-section" id="minors">
-            <SectionHeader num="09" title="Do We Collect Information From Minors?" />
+            <SectionHeader
+              num="09"
+              title="Do We Collect Information From Minors?"
+            />
             <div className="pp-body">
-              <p>We do not knowingly collect data from children under 18 years of age. By using our Services, you represent that you are at least 18 years old.</p>
-              <p>If we learn we hold data about a minor, we will promptly delete it. Please contact us at <a href="mailto:support@faddy.site" className="pp-link">support@faddy.site</a> if you believe this has occurred.</p>
+              <p>
+                We do not knowingly collect data from children under 18 years of
+                age. By using our Services, you represent that you are at least
+                18 years old.
+              </p>
+              <p>
+                If we learn we hold data about a minor, we will promptly delete
+                it. Please contact us at{" "}
+                <a href="mailto:support@faddy.site" className="pp-link">
+                  support@faddy.site
+                </a>{" "}
+                if you believe this has occurred.
+              </p>
             </div>
           </section>
 
@@ -486,7 +649,10 @@ export default function PrivacyPolicy() {
           <section className="pp-section" id="rights">
             <SectionHeader num="10" title="What Are Your Privacy Rights?" />
             <div className="pp-body">
-              <p>Depending on your location, you may have the following rights over your personal information:</p>
+              <p>
+                Depending on your location, you may have the following rights
+                over your personal information:
+              </p>
               <div className="pp-rights-grid">
                 {RIGHTS.map(({ title, desc }) => (
                   <div className="pp-right-card" key={title}>
@@ -497,9 +663,15 @@ export default function PrivacyPolicy() {
               </div>
               <p style={{ marginTop: 16 }}>
                 To exercise any of these rights, visit your{" "}
-                <a href="https://faddy.site/admin/profile" className="pp-link">account settings</a>{" "}
-                or email <a href="mailto:support@faddy.site" className="pp-link">support@faddy.site</a>.
-                We will respond within <strong style={{ color: "#0f172a" }}>30 days</strong>.
+                <a href="https://faddy.site/admin/profile" className="pp-link">
+                  account settings
+                </a>{" "}
+                or email{" "}
+                <a href="mailto:support@faddy.site" className="pp-link">
+                  support@faddy.site
+                </a>
+                . We will respond within{" "}
+                <strong style={{ color: "#0f172a" }}>30 days</strong>.
               </p>
             </div>
           </section>
@@ -510,7 +682,11 @@ export default function PrivacyPolicy() {
           <section className="pp-section" id="updates">
             <SectionHeader num="11" title="Do We Update This Policy?" />
             <div className="pp-body">
-              <p>We may update this Privacy Policy from time to time. When we make material changes, we will update the &quot;Last updated&quot; date and, where required, notify you via email.</p>
+              <p>
+                We may update this Privacy Policy from time to time. When we
+                make material changes, we will update the &quot;Last
+                updated&quot; date and, where required, notify you via email.
+              </p>
             </div>
           </section>
 
@@ -520,11 +696,16 @@ export default function PrivacyPolicy() {
           <section className="pp-section" id="contact">
             <SectionHeader num="12" title="Contact Us" />
             <div className="pp-body">
-              <p>If you have questions or requests regarding this Privacy Policy, please reach out:</p>
+              <p>
+                If you have questions or requests regarding this Privacy Policy,
+                please reach out:
+              </p>
               <div className="pp-contact-card">
                 <div className="pp-contact-text">
-                  <strong>Faddy — Operated by Swarup Basu (Sole Proprietor)</strong>
-                  <span>Kolkata, West Bengal 743248, India</span>
+                  <strong>
+                    Faddy — Operated by Swarup Basu (Sole Proprietor)
+                  </strong>
+                  <span>Barasat, West Bengal 743248, India</span>
                 </div>
                 <a href="mailto:support@faddy.site" className="pp-contact-btn">
                   ✉ support@faddy.site
@@ -533,7 +714,9 @@ export default function PrivacyPolicy() {
             </div>
           </section>
 
-          <div className="pp-powered">Powered by <span>Faddy</span></div>
+          <div className="pp-powered">
+            Powered by <span>Faddy</span>
+          </div>
         </main>
       </div>
     </>

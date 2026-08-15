@@ -59,7 +59,7 @@ import { ProfileTab } from '@/components/organization/ProfileTab';
 // Billing components moved from old BillingSection
 import paddleService, { SubscriptionInfo, Invoice } from '@/services/paddleService';
 import { PlanCard } from '@/components/billing/PlanCard';
-import { UpgradeDialog } from '@/components/billing/UpgradeDialog';
+import { UpgradeDialog } from '@/components/UpgradeDialog';
 import { CancelFlow } from '@/components/billing/CancelFlow';
 import { InvoiceHistory } from '@/components/billing/InvoiceHistory';
 import { CustomDomainSettings } from '@/components/organization/CustomDomainSettings';
@@ -808,8 +808,7 @@ export default function OrganizationSettingsPage() {
                   <UpgradeDialog
                     open={showUpgradeDialog}
                     onOpenChange={setShowUpgradeDialog}
-                    currentPlan={billingSubscription?.plan}
-                    onSuccess={loadBillingData}
+                    featureName="billing"
                   />
 
                   {billingSubscription && (

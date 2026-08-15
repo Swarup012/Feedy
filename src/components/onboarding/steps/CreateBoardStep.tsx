@@ -64,25 +64,25 @@ export function CreateBoardStep({ data, onUpdate }: CreateBoardStepProps) {
   return (
     <div className="space-y-4">
       <div className="text-center mb-5">
-        <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <Folder className="h-8 w-8 text-orange-600" />
+        <div className="w-16 h-16 bg-warning/10 rounded-full flex items-center justify-center mx-auto mb-4">
+          <Folder className="h-8 w-8 text-warning" />
         </div>
-        <h2 className="text-xl font-bold text-gray-900 mb-2">
+        <h2 className="text-xl font-bold text-foreground mb-2">
           Create your first board
         </h2>
-        <p className="text-gray-600">
+        <p className="text-muted-foreground">
           Boards help you organize feedback by product, feature, or category
         </p>
       </div>
 
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+      <div className="bg-primary/5 border border-primary/20 rounded-lg p-4 mb-4">
         <div className="flex items-start space-x-3">
-          <Info className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+          <Info className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
           <div>
-            <p className="text-sm text-blue-900 font-medium">
+            <p className="text-sm text-foreground font-medium">
               Quick tip
             </p>
-            <p className="text-sm text-blue-700 mt-1">
+            <p className="text-sm text-muted-foreground mt-1">
               Most teams start with a general "Feature Requests" board. You can create more boards later for specific products or categories.
             </p>
           </div>
@@ -93,7 +93,7 @@ export function CreateBoardStep({ data, onUpdate }: CreateBoardStepProps) {
         {/* Board Name */}
         <div>
           <Label htmlFor="board-name" className="text-base font-medium">
-            Board Name <span className="text-red-500">*</span>
+            Board Name <span className="text-destructive">*</span>
           </Label>
           <Input
             id="board-name"
@@ -103,11 +103,11 @@ export function CreateBoardStep({ data, onUpdate }: CreateBoardStepProps) {
             className="mt-2"
           />
           {nameError && (
-            <p className="text-sm text-red-600 mt-1">{nameError}</p>
+            <p className="text-sm text-destructive mt-1">{nameError}</p>
           )}
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-muted-foreground mt-1">
             This will create a URL:{' '}
-            <span className="font-mono text-blue-600">
+            <span className="font-mono text-primary">
               {data.firstBoard?.name
                 ? `/board/${data.firstBoard.name.toLowerCase().replace(/\s+/g, '-')}`
                 : '/board/your-board'}
@@ -119,7 +119,7 @@ export function CreateBoardStep({ data, onUpdate }: CreateBoardStepProps) {
         <div>
           <Label htmlFor="board-description" className="text-base font-medium">
             Description{' '}
-            <span className="text-gray-400 font-normal">(optional)</span>
+            <span className="text-muted-foreground font-normal">(optional)</span>
           </Label>
           <Textarea
             id="board-description"
@@ -128,7 +128,7 @@ export function CreateBoardStep({ data, onUpdate }: CreateBoardStepProps) {
             onChange={(e) => handleDescriptionChange(e.target.value)}
             className="mt-2 min-h-[100px]"
           />
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-muted-foreground mt-1">
             Helps users understand what kind of feedback to submit
           </p>
         </div>
@@ -150,10 +150,10 @@ export function CreateBoardStep({ data, onUpdate }: CreateBoardStepProps) {
               return (
                 <div
                   key={option.value}
-                  className={`border-2 rounded-lg p-4 hover:bg-orange-50 transition-all ${
+                  className={`border-2 rounded-lg p-4 hover:bg-warning/5 transition-all ${
                     data.firstBoard?.visibility === option.value
-                      ? 'border-orange-500 bg-orange-50'
-                      : 'border-gray-200'
+                      ? 'border-warning bg-warning/5'
+                      : 'border-border'
                   }`}
                 >
                   <div className="flex items-start space-x-3">
@@ -164,20 +164,20 @@ export function CreateBoardStep({ data, onUpdate }: CreateBoardStepProps) {
                     />
                     <div className="flex-1">
                       <div className="flex items-center space-x-2 mb-1">
-                        <Icon className="h-5 w-5 text-orange-600" />
+                        <Icon className="h-5 w-5 text-warning" />
                         <Label
                           htmlFor={`visibility-${option.value}`}
                           className="font-semibold cursor-pointer"
                         >
                           {option.label}
                           {option.recommended && (
-                            <span className="ml-2 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded">
+                            <span className="ml-2 text-xs bg-success/10 text-success px-2 py-0.5 rounded">
                               Recommended
                             </span>
                           )}
                         </Label>
                       </div>
-                      <p className="text-sm text-gray-600">
+                      <p className="text-sm text-muted-foreground">
                         {option.description}
                       </p>
                     </div>

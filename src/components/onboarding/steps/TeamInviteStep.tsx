@@ -131,7 +131,7 @@ export function TeamInviteStep({ data, onUpdate }: TeamInviteStepProps) {
                     variant="ghost"
                     size="sm"
                     onClick={() => handleRemoveEmail(invitedEmail)}
-                    className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100"
+                    className="h-8 w-8 p-0 touch-manipulation remove-btn-touch"
                   >
                     <X className="h-4 w-4" />
                   </Button>

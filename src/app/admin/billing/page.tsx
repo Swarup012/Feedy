@@ -4,7 +4,7 @@ import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import paddleService, { SubscriptionInfo, Invoice } from '@/services/paddleService';
 import { PlanCard } from '@/components/billing/PlanCard';
-import { UpgradeDialog } from '@/components/billing/UpgradeDialog';
+import { UpgradeDialog } from '@/components/UpgradeDialog';
 import { CancelFlow } from '@/components/billing/CancelFlow';
 import { InvoiceHistory } from '@/components/billing/InvoiceHistory';
 import { useToast } from '@/hooks/use-toast';
@@ -109,10 +109,6 @@ function BillingContent() {
     }
   };
 
-  const handleUpgradeSuccess = async () => {
-    await loadData();
-  };
-
   const handleCancelSuccess = async () => {
     await loadData();
   };
@@ -161,8 +157,7 @@ function BillingContent() {
       <UpgradeDialog
         open={showUpgradeDialog}
         onOpenChange={setShowUpgradeDialog}
-        currentPlan={subscription?.plan}
-        onSuccess={handleUpgradeSuccess}
+        featureName="billing"
       />
 
       {/* Cancel Flow */}

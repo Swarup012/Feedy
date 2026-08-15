@@ -12,13 +12,13 @@ import {
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { OnboardingData } from '../OnboardingFlow';
 import { useState, useEffect, useCallback } from 'react';
-import { Check, X, Loader2 } from 'lucide-react';
+import { Check, X, Loader2, AlertCircle } from 'lucide-react';
 import api from '@/lib/api';
-import { Building2 } from 'lucide-react';
 
 interface CompanyInfoStepProps {
   data: OnboardingData;
   onUpdate: (data: Partial<OnboardingData>) => void;
+  companyNameError?: string | null;
 }
 
 const companySizes = [
@@ -43,7 +43,7 @@ const industries = [
   'Other',
 ];
 
-export function CompanyInfoStep({ data, onUpdate }: CompanyInfoStepProps) {
+export function CompanyInfoStep({ data, onUpdate, companyNameError }: CompanyInfoStepProps) {
   const [subdomainStatus, setSubdomainStatus] = useState<{
     checking: boolean;
     available: boolean | null;
@@ -124,8 +124,16 @@ export function CompanyInfoStep({ data, onUpdate }: CompanyInfoStepProps) {
             placeholder="Acme Inc."
             value={data.companyName || ''}
             onChange={(e) => onUpdate({ companyName: e.target.value })}
-            className="h-11"
+            className={`h-11 ${companyNameError ? 'border-destructive focus-visible:ring-destructive' : ''}`}
+            aria-describedby={companyNameError ? 'company-name-error' : undefined}
+            aria-invalid={!!companyNameError}
           />
+          {companyNameError && (
+            <p id="company-name-error" className="mt-1.5 text-xs text-destructive flex items-center gap-1.5">
+              <AlertCircle className="h-3 w-3" />
+              {companyNameError}
+            </p>
+          )}
           
           {/* Subdomain Status */}
           {data.companyName && (
@@ -136,7 +144,7 @@ export function CompanyInfoStep({ data, onUpdate }: CompanyInfoStepProps) {
                   Checking availability...
                 </p>
               ) : subdomainStatus.available === true ? (
-                <p className="text-xs text-green-600 flex items-center gap-1.5">
+                <p className="text-xs text-success flex items-center gap-1.5">
                   <Check className="h-3 w-3" />
                   Available: {' '}
                   <span className="font-mono font-medium">
@@ -144,7 +152,7 @@ export function CompanyInfoStep({ data, onUpdate }: CompanyInfoStepProps) {
                   </span>
                 </p>
               ) : subdomainStatus.available === false && subdomainStatus.suggestedSubdomain ? (
-                <p className="text-xs text-orange-600 flex items-center gap-1.5">
+                <p className="text-xs text-warning flex items-center gap-1.5">
                   <X className="h-3 w-3" />
                   Taken. You'll get: {' '}
                   <span className="font-mono font-medium">
