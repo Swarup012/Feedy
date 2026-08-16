@@ -282,6 +282,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Backend set auth cookies; update UI state from the user object
         setUser(response.data.user);
         TokenManager.setUser(response.data.user);
+
+        // Priority 0: pending invite — always wins over onboarding
+        const pendingInviteToken = localStorage.getItem('pendingInviteToken');
+        if (pendingInviteToken) {
+          router.push(`/invite/${pendingInviteToken}`);
+        }
       }
 
       return { emailConfirmationRequired };

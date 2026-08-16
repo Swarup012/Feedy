@@ -86,6 +86,14 @@ export default function AuthCallback() {
           window.dispatchEvent(new CustomEvent('auth-tokens-stored', { detail: { user: backendUser } }));
           console.log('🔔 Dispatched auth-tokens-stored event');
 
+          // Priority 1: pending invite — always wins over onboarding
+          const pendingInviteToken = localStorage.getItem('pendingInviteToken');
+          if (pendingInviteToken) {
+            console.log('🔙 Redirecting to pending invite:', pendingInviteToken);
+            router.push(`/invite/${pendingInviteToken}`);
+            return;
+          }
+
           // Check for saved return URL (from public pages like upvoting/commenting)
           const returnUrl = getPublicReturnUrl();
           console.log('🔍 Checking for return URL:', { returnUrl, hasReturnUrl: !!returnUrl });

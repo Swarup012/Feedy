@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import { Check, Sparkles, Crown, Zap } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import paddleService, { type SubscriptionInfo } from '@/services/paddleService';
 import { PLANS, type PlanTier } from '@/config/plans';
@@ -51,6 +51,23 @@ export function UpgradeDialog({
   const [loading, setLoading] = useState(false);
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
   const [confirmPlan, setConfirmPlan] = useState<PlanTier | null>(null);
+  const [fetchedSubscription, setFetchedSubscription] = useState<SubscriptionInfo | null>(null);
+
+  // Fetch subscription internally when not provided as prop
+  useEffect(() => {
+    if (subscription !== undefined) return; // prop explicitly provided (including null)
+    if (!open) return;
+    let cancelled = false;
+    paddleService.getSubscription().then((res) => {
+      if (!cancelled && res.success) {
+        setFetchedSubscription(res.data);
+      }
+    }).catch(() => {});
+    return () => { cancelled = true; };
+  }, [subscription, open]);
+
+  // Use prop if provided, otherwise use internally fetched value
+  const resolvedSubscription = subscription !== undefined ? subscription : fetchedSubscription;
 
   const starterPrice = billingCycle === 'monthly' ? PLANS.starter.monthlyPrice : PLANS.starter.yearlyPrice;
   const proPrice = billingCycle === 'monthly' ? PLANS.pro.monthlyPrice : PLANS.pro.yearlyPrice;
@@ -58,8 +75,8 @@ export function UpgradeDialog({
 
   const handleUpgrade = async (plan: PlanTier) => {
     // Existing subscriber with active/trialing subscription → show confirmation first
-    const hasActiveSub = subscription?.hasActiveSubscription &&
-      ['active', 'trialing'].includes(subscription.status);
+    const hasActiveSub = resolvedSubscription?.hasActiveSubscription &&
+      ['active', 'trialing'].includes(resolvedSubscription.status);
 
     if (hasActiveSub) {
       setConfirmPlan(plan);
@@ -143,7 +160,7 @@ export function UpgradeDialog({
   };
 
   const confirmPrice = confirmPlan === 'starter' ? starterPrice : proPrice;
-  const isTrialing = subscription?.status === 'trialing';
+  const isTrialing = resolvedSubscription?.status === 'trialing';
 
   const dialogContent = (
     <DialogContent
