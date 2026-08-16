@@ -26,6 +26,7 @@ export function BillingSection() {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -129,6 +130,7 @@ export function BillingSection() {
   const handleUpgradeToPro = async (selectedBillingCycle: 'monthly' | 'yearly') => {
     try {
       setActionLoading(true);
+      setActionError(null);
       
       // Call the update-plan endpoint using the api client (has auth built-in)
       const response = await api.post('/api/paddle/subscription/update-plan', {
@@ -149,11 +151,9 @@ export function BillingSection() {
       }
     } catch (error: any) {
       console.error('Error upgrading subscription:', error);
-      toast({
-        title: 'Error',
-        description: error.response?.data?.message || 'Failed to upgrade subscription. Please try again.',
-        variant: 'destructive',
-      });
+      setActionError(
+        error.response?.data?.message || 'Failed to upgrade subscription. Please try again.'
+      );
     } finally {
       setActionLoading(false);
     }
@@ -167,6 +167,7 @@ export function BillingSection() {
 
     try {
       setActionLoading(true);
+      setActionError(null);
       
       // Call the update-plan endpoint
       const response = await api.post('/api/paddle/subscription/update-plan', {
@@ -186,11 +187,9 @@ export function BillingSection() {
       }
     } catch (error: any) {
       console.error('Error downgrading subscription:', error);
-      toast({
-        title: 'Error',
-        description: error.response?.data?.message || 'Failed to downgrade subscription. Please try again.',
-        variant: 'destructive',
-      });
+      setActionError(
+        error.response?.data?.message || 'Failed to downgrade subscription. Please try again.'
+      );
     } finally {
       setActionLoading(false);
     }
@@ -204,6 +203,7 @@ export function BillingSection() {
 
     try {
       setActionLoading(true);
+      setActionError(null);
       
       const response = await paddleService.cancelSubscription();
 
@@ -219,11 +219,7 @@ export function BillingSection() {
       }
     } catch (error) {
       console.error('Error cancelling subscription:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to cancel subscription. Please try again.',
-        variant: 'destructive',
-      });
+      setActionError('Failed to cancel subscription. Please try again.');
     } finally {
       setActionLoading(false);
     }
@@ -361,6 +357,21 @@ export function BillingSection() {
                     <p className="text-xs text-red-700 dark:text-red-300 mt-0.5">
                       Ends {formatDate(subscription.currentPeriodEnd)}. You'll lose access after this date.
                     </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Action Error Banner */}
+              {actionError && (
+                <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                  <div className="flex items-start justify-between">
+                    <p className="text-sm text-red-800 dark:text-red-200 font-medium">{actionError}</p>
+                    <button
+                      onClick={() => setActionError(null)}
+                      className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-200 ml-2"
+                    >
+                      ×
+                    </button>
                   </div>
                 </div>
               )}

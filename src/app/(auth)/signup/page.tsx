@@ -30,6 +30,7 @@ export default function SignupPage() {
     password: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [formError, setFormError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -61,6 +62,7 @@ export default function SignupPage() {
     const { id, value } = e.target;
     setFormData(p => ({ ...p, [id]: value }));
     if (errors[id]) setErrors(p => ({ ...p, [id]: "" }));
+    if (formError) setFormError("");
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -78,6 +80,7 @@ export default function SignupPage() {
     }
 
     setLoading(true);
+    setFormError("");
     try {
       const { emailConfirmationRequired } = await signup(
         formData.name,
@@ -101,11 +104,7 @@ export default function SignupPage() {
         }
       }
     } catch (error: any) {
-      toast({
-        title: "Signup failed",
-        description: error.message || "Something went wrong.",
-        variant: "destructive",
-      });
+      setFormError(error.message || "Something went wrong.");
     } finally {
       setLoading(false);
     }
@@ -267,6 +266,13 @@ export default function SignupPage() {
                 </p>
               )}
             </div>
+
+            {/* Submit Error Banner */}
+            {formError && (
+              <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                <p className="text-sm text-red-800 dark:text-red-200 font-medium">{formError}</p>
+              </div>
+            )}
 
             {/* Submit Button */}
             <Button

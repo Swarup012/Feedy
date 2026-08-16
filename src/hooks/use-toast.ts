@@ -9,7 +9,7 @@ import type {
 } from "@/components/ui/toast"
 
 const TOAST_LIMIT = 3  // Show up to 3 toasts
-const TOAST_REMOVE_DELAY = 2000  // 5 seconds (was 16+ minutes!)
+const TOAST_REMOVE_DELAY = 500  // Delay before removing toast from DOM after dismiss (exit animation time)
 
 type ToasterToast = ToastProps & {
   id: string

@@ -64,6 +64,7 @@ export default function PostDetailPage() {
   const [post, setPost] = useState<Post | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const [isUpvoted, setIsUpvoted] = useState(false);
   const [isUpvoting, setIsUpvoting] = useState(false);
   const [newComment, setNewComment] = useState("");
@@ -95,11 +96,7 @@ export default function PostDetailPage() {
       setComments(threadedComments);
     } catch (error: any) {
       console.error("Error fetching post:", error);
-      toast({
-        title: "Error",
-        description: "Failed to load post details",
-        variant: "destructive",
-      });
+      setFetchError("Failed to load post details. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -555,6 +552,11 @@ export default function PostDetailPage() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center space-y-4">
+          {fetchError && (
+            <div className="p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 max-w-md mx-auto">
+              <p className="text-sm text-red-800 dark:text-red-200 font-medium">{fetchError}</p>
+            </div>
+          )}
           <h2 className="text-2xl font-switzer font-medium">Post Not Found</h2>
           <p className="text-muted-foreground">
             The post you're looking for doesn't exist or has been removed.

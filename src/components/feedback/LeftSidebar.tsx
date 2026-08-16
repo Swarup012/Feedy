@@ -47,7 +47,7 @@ import { Board, boardService } from "@/services/boardService";
 import { cn } from "@/lib/utils";
 import { CreateBoardDialog } from "./CreateBoardDialog";
 import { UpgradeDialog } from "@/components/UpgradeDialog";
-import { toast, useToast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { IconPicker, IconDisplay } from "@/components/ui/icon-picker";
 import { useEffect } from "react"; // Add useEffect
 
@@ -87,6 +87,7 @@ export function LeftSidebar({
   const [showAllBoards, setShowAllBoards] = useState(false); // View All toggle
   const [showIconPicker, setShowIconPicker] = useState(false); // Icon picker state
   const [canCreateBoard, setCanCreateBoard] = useState(true); // Pre-load this
+  const [editNameError, setEditNameError] = useState("");
   const [editFormData, setEditFormData] = useState({
     name: '',
     description: '',
@@ -148,6 +149,7 @@ export function LeftSidebar({
 
   const openEditDialog = (board: Board) => {
     setSelectedBoard(board);
+    setEditNameError("");
     setEditFormData({
       name: board.name,
       description: board.description || '',
@@ -177,13 +179,10 @@ export function LeftSidebar({
     if (!selectedBoard) return;
 
     if (!editFormData.name.trim()) {
-      toast({
-        title: 'Error',
-        description: 'Board name is required',
-        variant: 'destructive',
-      });
+      setEditNameError('Board name is required');
       return;
     }
+    setEditNameError("");
 
     try {
       await boardService.updateBoard(selectedBoard.id, editFormData);
@@ -509,10 +508,16 @@ export function LeftSidebar({
               <Input
                 id="edit-name"
                 value={editFormData.name}
-                onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })}
+                onChange={(e) => {
+                  setEditFormData({ ...editFormData, name: e.target.value });
+                  if (editNameError) setEditNameError("");
+                }}
                 placeholder="Board name"
-                className="mt-1 dark:bg-card dark:border-border dark:text-white"
+                className={`mt-1 dark:bg-card dark:border-border dark:text-white ${editNameError ? "border-red-500 dark:border-red-500" : ""}`}
               />
+              {editNameError && (
+                <p className="text-sm text-red-500 mt-1">{editNameError}</p>
+              )}
             </div>
             <div>
               <Label htmlFor="edit-description" className="text-foreground">Description</Label>

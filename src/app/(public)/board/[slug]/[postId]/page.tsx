@@ -52,6 +52,7 @@ export default function PublicPostPage() {
   const [newComment, setNewComment] = useState('');
   const [loading, setLoading] = useState(true);
   const [submittingComment, setSubmittingComment] = useState(false);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const [upvoted, setUpvoted] = useState(false);
   const [upvoting, setUpvoting] = useState(false);
   const [confirmDeleteComment, setConfirmDeleteComment] = useState<string | null>(null);
@@ -136,11 +137,7 @@ export default function PublicPostPage() {
       }
     } catch (error: any) {
       console.error('Error fetching post:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to load post. It may have been deleted.',
-        variant: 'destructive',
-      });
+      setFetchError('Failed to load post. It may have been deleted.');
     } finally {
       setLoading(false);
     }
@@ -267,6 +264,11 @@ export default function PublicPostPage() {
       <div className="container mx-auto py-10">
         <div className="flex items-center justify-center h-[60vh]">
           <div className="text-center">
+            {fetchError && (
+              <div className="p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 max-w-md mx-auto mb-4">
+                <p className="text-sm text-red-800 dark:text-red-200 font-medium">{fetchError}</p>
+              </div>
+            )}
             <div className="text-4xl mb-4">🔍</div>
             <h2 className="text-lg font-switzer font-medium mb-2">Post Not Found</h2>
             <p className="text-gray-500 mb-4">

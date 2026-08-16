@@ -18,18 +18,16 @@ export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
+  const [emailError, setEmailError] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!email) {
-      toast({
-        title: "Error",
-        description: "Please enter your email address",
-        variant: "destructive",
-      });
+      setEmailError("Please enter your email address");
       return;
     }
+    setEmailError("");
 
     setLoading(true);
 
@@ -141,11 +139,18 @@ export default function ForgotPasswordPage() {
                 type="email"
                 placeholder="you@example.com"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  if (emailError) setEmailError("");
+                }}
                 disabled={loading}
                 autoFocus
                 required
+                className={emailError ? "border-red-500 dark:border-red-500" : ""}
               />
+              {emailError && (
+                <p className="text-sm text-red-600 dark:text-red-400">{emailError}</p>
+              )}
             </div>
 
             <Button

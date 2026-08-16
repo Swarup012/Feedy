@@ -51,6 +51,7 @@ export function CreatePostDialog({
   });
   const [customCategory, setCustomCategory] = useState("");
   const [showCustomCategory, setShowCustomCategory] = useState(false);
+  const [fileError, setFileError] = useState<string | null>(null);
 
   const predefinedCategories = [
     { id: "1", name: "Feature Request" },
@@ -141,13 +142,10 @@ export function CreatePostDialog({
   // Handle file upload
   const handleFileUpload = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
+    setFileError(null);
 
     if (formData.images.length + files.length > 5) {
-      toast({
-        title: "Too many images",
-        description: "You can attach up to 5 images per post.",
-        variant: "destructive",
-      });
+      setFileError("You can attach up to 5 images per post.");
       return;
     }
 
@@ -160,12 +158,12 @@ export function CreatePostDialog({
         const file = files[i];
 
         if (!file.type.startsWith("image/")) {
-          toast({ title: "Unsupported file type", description: `${file.name} is not an image. Attach JPG, PNG, GIF, or WebP.`, variant: "destructive" });
+          setFileError(`${file.name} is not an image. Attach JPG, PNG, GIF, or WebP.`);
           continue;
         }
 
         if (file.size > 5 * 1024 * 1024) {
-          toast({ title: "File too large", description: `${file.name} exceeds the 5 MB limit. Try a smaller image.`, variant: "destructive" });
+          setFileError(`${file.name} exceeds the 5 MB limit. Try a smaller image.`);
           continue;
         }
 
@@ -191,7 +189,7 @@ export function CreatePostDialog({
       setFormData({ ...formData, images: [...formData.images, ...newImageUrls] });
       toast({ title: "Image uploaded", description: `${newImageUrls.length} file${newImageUrls.length > 1 ? 's' : ''} attached.` });
     } catch (error: any) {
-      toast({ title: "Upload failed", description: error.message || "Could not upload the image. Try again.", variant: "destructive" });
+      setFileError(error.message || "Could not upload the image. Try again.");
     } finally {
       setUploading(false);
     }
@@ -352,6 +350,11 @@ export function CreatePostDialog({
                   ))}
                 </div>
               </div>
+            )}
+
+            {/* File upload error */}
+            {fileError && (
+              <p className="text-sm text-red-500">{fileError}</p>
             )}
 
             {/* Tips */}

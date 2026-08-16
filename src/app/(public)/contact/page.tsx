@@ -20,7 +20,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useToast } from "@/hooks/use-toast";
 import {
   CheckCircle2,
   Loader2,
@@ -32,9 +31,10 @@ type SubjectType = "Feature Request" | "Bug Report" | "Billing" | "Other";
 
 export default function ContactPage() {
   const { user } = useAuth();
-  const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -60,61 +60,41 @@ export default function ContactPage() {
   // Handle form field changes
   const handleChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+    if (formErrors[field]) {
+      setFormErrors((prev) => ({ ...prev, [field]: "" }));
+    }
   };
 
   // Client-side validation
   const validateForm = (): boolean => {
+    const errors: Record<string, string> = {};
+
     // Honeypot check
     if (formData.honeypot) {
-      toast({
-        title: "Error",
-        description: "Invalid submission detected.",
-        variant: "destructive",
-      });
+      errors.honeypot = "Invalid submission detected.";
       return false;
     }
 
     // Email validation
     const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
     if (!emailRegex.test(formData.email)) {
-      toast({
-        title: "Invalid Email",
-        description: "Please enter a valid email address.",
-        variant: "destructive",
-      });
-      return false;
+      errors.email = "Please enter a valid email address.";
     }
 
     // Subject validation
     if (!formData.subject) {
-      toast({
-        title: "Subject Required",
-        description: "Please select a subject for your message.",
-        variant: "destructive",
-      });
-      return false;
+      errors.subject = "Please select a subject for your message.";
     }
 
     // Message validation
     if (formData.message.trim().length < 10) {
-      toast({
-        title: "Message Too Short",
-        description: "Please provide more details (at least 10 characters).",
-        variant: "destructive",
-      });
-      return false;
+      errors.message = "Please provide more details (at least 10 characters).";
+    } else if (formData.message.trim().length > 5000) {
+      errors.message = "Please keep your message under 5000 characters.";
     }
 
-    if (formData.message.trim().length > 5000) {
-      toast({
-        title: "Message Too Long",
-        description: "Please keep your message under 5000 characters.",
-        variant: "destructive",
-      });
-      return false;
-    }
-
-    return true;
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
   // Handle form submission
@@ -126,6 +106,7 @@ export default function ContactPage() {
     }
 
     setIsSubmitting(true);
+    setSubmitError(null);
 
     try {
       const response = await api.post("/api/contact", {
@@ -138,20 +119,13 @@ export default function ContactPage() {
 
       if (response.data.success) {
         setIsSubmitted(true);
-        toast({
-          title: "Message Sent!",
-          description: response.data.message || "We'll get back to you soon.",
-        });
       }
     } catch (error: any) {
       console.error("Contact form error:", error);
-      toast({
-        title: "Submission Failed",
-        description:
-          error.response?.data?.message ||
-          "Something went wrong. Please try again.",
-        variant: "destructive",
-      });
+      setSubmitError(
+        error.response?.data?.message ||
+          "Something went wrong. Please try again."
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -322,9 +296,12 @@ export default function ContactPage() {
                     onChange={(e) => handleChange("email", e.target.value)}
                     disabled={!!user}
                     required
-                    className="text-base h-12 border-2 focus:border-blue-500 dark:focus:border-blue-400"
+                    className={`text-base h-12 border-2 focus:border-blue-500 dark:focus:border-blue-400 ${formErrors.email ? "border-red-500 dark:border-red-500" : ""}`}
                   />
-                  {user && (
+                  {formErrors.email && (
+                    <p className="text-sm text-red-600 dark:text-red-400">{formErrors.email}</p>
+                  )}
+                  {user && !formErrors.email && (
                     <p className="text-sm text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
                       <CheckCircle2 className="h-3.5 w-3.5 text-green-600" />
                       Email auto-filled from your account
@@ -345,7 +322,7 @@ export default function ContactPage() {
                     onValueChange={(value) => handleChange("subject", value)}
                     required
                   >
-                    <SelectTrigger className="text-base h-12 border-2 focus:border-blue-500 dark:focus:border-blue-400">
+                    <SelectTrigger className={`text-base h-12 border-2 focus:border-blue-500 dark:focus:border-blue-400 ${formErrors.subject ? "border-red-500 dark:border-red-500" : ""}`}>
                       <SelectValue placeholder="Select a subject..." />
                     </SelectTrigger>
                     <SelectContent>
@@ -363,6 +340,9 @@ export default function ContactPage() {
                       </SelectItem>
                     </SelectContent>
                   </Select>
+                  {formErrors.subject && (
+                    <p className="text-sm text-red-600 dark:text-red-400">{formErrors.subject}</p>
+                  )}
                 </div>
 
                 {/* Message Textarea */}
@@ -380,9 +360,12 @@ export default function ContactPage() {
                     onChange={(e) => handleChange("message", e.target.value)}
                     required
                     rows={8}
-                    className="text-base resize-none border-2 focus:border-blue-500 dark:focus:border-blue-400"
+                    className={`text-base resize-none border-2 focus:border-blue-500 dark:focus:border-blue-400 ${formErrors.message ? "border-red-500 dark:border-red-500" : ""}`}
                     maxLength={5000}
                   />
+                  {formErrors.message && (
+                    <p className="text-sm text-red-600 dark:text-red-400">{formErrors.message}</p>
+                  )}
                   <div className="flex justify-between text-sm">
                     <span className="text-slate-500 dark:text-slate-400">
                       Minimum 10 characters
@@ -394,6 +377,13 @@ export default function ContactPage() {
                     </span>
                   </div>
                 </div>
+
+                {/* Submit Error Banner */}
+                {submitError && (
+                  <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                    <p className="text-sm text-red-800 dark:text-red-200 font-medium">{submitError}</p>
+                  </div>
+                )}
 
                 {/* Submit Button */}
                 <div className="pt-6">

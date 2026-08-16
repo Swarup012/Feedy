@@ -35,11 +35,7 @@ function ResetPasswordForm() {
       verifyToken(tokenParam);
     } else {
       setVerifyingToken(false);
-      toast({
-        title: "Invalid Link",
-        description: "No reset token found in URL",
-        variant: "destructive",
-      });
+      // tokenValid stays false → page shows "Invalid Reset Link" UI
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
@@ -61,11 +57,6 @@ function ResetPasswordForm() {
       } else {
         console.log('❌ Token is INVALID:', response.data.message);
         setTokenValid(false);
-        toast({
-          title: "Invalid Token",
-          description: response.data.message || "This reset link is invalid or has expired",
-          variant: "destructive",
-        });
       }
     } catch (error: any) {
       console.error('❌ Token verification FAILED:', error);
@@ -74,11 +65,6 @@ function ResetPasswordForm() {
       console.error('Error message:', error.message);
       
       setTokenValid(false);
-      toast({
-        title: "Invalid Token",
-        description: error.response?.data?.message || "This reset link is invalid or has expired",
-        variant: "destructive",
-      });
     } finally {
       console.log('✅ Token verification complete. tokenValid will be set.');
       setVerifyingToken(false);

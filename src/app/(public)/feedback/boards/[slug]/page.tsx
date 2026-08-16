@@ -65,6 +65,7 @@ export default function PublicBoardPage() {
   const [selectedBoards, setSelectedBoards] = useState<string[]>([]);
   const [canCreatePost, setCanCreatePost] = useState(true);
   const [postLimitReason, setPostLimitReason] = useState<string>("");
+  const [multiBoardError, setMultiBoardError] = useState<string | null>(null);
 
   // ── Filters ──
   const [filters, setFilters] = useState({
@@ -134,12 +135,7 @@ export default function PublicBoardPage() {
         setAllPosts(combined);
         setPosts(applyFilters(combined));
       } catch {
-        if (!cancelled)
-          toast({
-            title: "Error",
-            description: "Failed to load posts",
-            variant: "destructive",
-          });
+        if (!cancelled) setMultiBoardError("Failed to load posts");
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -282,6 +278,15 @@ export default function PublicBoardPage() {
         }}
         onDeleteBoard={() => {}}
       />
+
+      {/* Multi-board fetch error banner */}
+      {multiBoardError && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 max-w-md">
+          <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 shadow-lg">
+            <p className="text-sm text-red-800 dark:text-red-200 font-medium">{multiBoardError}</p>
+          </div>
+        </div>
+      )}
 
       {/* Middle - Posts List */}
       <PostsList

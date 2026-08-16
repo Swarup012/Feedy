@@ -94,11 +94,7 @@ export default function InvitePage({ params }: { params: Promise<{ token: string
 
     // Check if email matches (should already be validated by UI)
     if (user.email?.toLowerCase() !== invitation.email.toLowerCase()) {
-      toast({
-        title: 'Email mismatch',
-        description: `This invitation was sent to ${invitation.email}. Please log in with that email address.`,
-        variant: 'destructive',
-      });
+      // Email mismatch — page already shows inline error banner
       return;
     }
 
