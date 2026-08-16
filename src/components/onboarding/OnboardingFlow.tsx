@@ -119,7 +119,8 @@ export default function OnboardingFlow() {
       }
 
       await new Promise(resolve => setTimeout(resolve, 200));
-      router.push('/admin');
+      const pendingCheckout = sessionStorage.getItem("pendingCheckout");
+      router.push(pendingCheckout ? '/pricing' : '/admin');
     } catch (error) {
       const message = error instanceof Error
         ? error.message

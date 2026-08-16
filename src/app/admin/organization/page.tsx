@@ -809,6 +809,7 @@ export default function OrganizationSettingsPage() {
                     open={showUpgradeDialog}
                     onOpenChange={setShowUpgradeDialog}
                     featureName="billing"
+                    subscription={billingSubscription}
                   />
 
                   {billingSubscription && (

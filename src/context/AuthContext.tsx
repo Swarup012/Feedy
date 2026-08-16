@@ -251,6 +251,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
+      // If user came from pricing page checkout flow, go back there
+      const pendingCheckout = sessionStorage.getItem("pendingCheckout");
+      if (pendingCheckout) {
+        router.push("/pricing");
+        return;
+      }
+
       const orgRole = loggedInUser.organization_role;
       router.push(orgRole === "owner" || orgRole === "admin" ? "/admin" : "/dashboard");
     } catch (error) {

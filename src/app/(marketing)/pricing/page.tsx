@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import * as Collapsible from "@radix-ui/react-collapsible";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
@@ -33,6 +33,9 @@ import { useToast } from "@/hooks/use-toast";
 import paddleService from "@/services/paddleService";
 import { TrackedUsersExplainer } from "@/components/pricing/TrackedUsersExplainer";
 
+const PADDLE_CLIENT_TOKEN = process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN || 'test_67753ae11c6f27e94e5909861a5';
+const IS_SANDBOX = !PADDLE_CLIENT_TOKEN.startsWith('live_');
+
 export default function PricingPage() {
   const router = useRouter();
   const { user } = useAuth();
@@ -44,12 +47,27 @@ export default function PricingPage() {
   const [loading, setLoading] = useState(false);
   const [overageOpen, setOverageOpen] = useState(false);
 
+  // Auto-resume pending checkout after login/signup/onboarding
+  useEffect(() => {
+    if (!user || !organization) return;
+    const raw = sessionStorage.getItem("pendingCheckout");
+    if (!raw) return;
+    sessionStorage.removeItem("pendingCheckout");
+    try {
+      const intent = JSON.parse(raw) as { plan: "starter" | "pro"; billingCycle: "monthly" | "yearly"; skipTrial: boolean };
+      handleUpgrade(intent.plan, intent.billingCycle, intent.skipTrial);
+    } catch {
+      // corrupted data — ignore
+    }
+  }, [user, organization]);
+
   const handleUpgrade = async (
     plan: "starter" | "pro",
     planType: "monthly" | "yearly",
     skipTrial: boolean = false,
   ) => {
     if (!user || !organization) {
+      sessionStorage.setItem("pendingCheckout", JSON.stringify({ plan, billingCycle: planType, skipTrial }));
       router.push("/login?redirect=/pricing");
       return;
     }
@@ -65,7 +83,36 @@ export default function PricingPage() {
       });
 
       if (response.success && response.data.url) {
-        // Redirect to Paddle Checkout
+        if (response.data.transactionId) {
+          try {
+            if (!(window as any).Paddle) {
+              const script = document.createElement('script');
+              script.src = 'https://cdn.paddle.com/paddle/v2/paddle.js';
+              script.async = true;
+              document.body.appendChild(script);
+              await new Promise((resolve, reject) => {
+                script.onload = () => resolve(true);
+                script.onerror = () => reject(new Error('Failed to load Paddle'));
+                setTimeout(() => reject(new Error('Timeout')), 10000);
+              });
+            }
+            const Paddle = (window as any).Paddle;
+            if (IS_SANDBOX) Paddle.Environment.set('sandbox');
+            Paddle.Setup({ token: PADDLE_CLIENT_TOKEN });
+            Paddle.Checkout.open({
+              transactionId: response.data.transactionId,
+              settings: {
+                displayMode: 'overlay',
+                theme: 'light',
+                successUrl: window.location.origin + '/admin?checkout=success',
+              },
+            });
+            setLoading(false);
+            return;
+          } catch {
+            // fall through to redirect
+          }
+        }
         window.location.href = response.data.url;
       } else {
         throw new Error("Failed to create checkout session");
@@ -1047,7 +1094,7 @@ export default function PricingPage() {
                 Ready to Grow Your Feedback Community?
               </h3>
               <p className="text-blue-100 mb-6">
-                Start your 14-day free trial today. No credit card required.
+                Start your 7-day free trial today. No credit card required.
               </p>
               <Button
                 size="lg"

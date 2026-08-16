@@ -430,6 +430,7 @@ export function BillingSection() {
                 open={showUpgradeDialog}
                 onOpenChange={setShowUpgradeDialog}
                 featureName="billing"
+                subscription={subscription}
               />
 
               {/* Already cancelled notice */}

@@ -4,8 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Check, Sparkles, Crown, Zap } from 'lucide-react';
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import paddleService from '@/services/paddleService';
+import paddleService, { type SubscriptionInfo } from '@/services/paddleService';
 import { PLANS, type PlanTier } from '@/config/plans';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import {
   Dialog,
   DialogContent,
@@ -20,6 +21,7 @@ export interface UpgradeDialogProps {
   onOpenChange?: (open: boolean) => void;
   featureName?: string;
   feature?: 'boards' | 'posts' | 'team_members' | 'roadmap_items';
+  subscription?: SubscriptionInfo | null;
 }
 
 const PADDLE_CLIENT_TOKEN = process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN || 'test_67753ae11c6f27e94e5909861a5';
@@ -43,16 +45,32 @@ export function UpgradeDialog({
   open,
   onOpenChange,
   featureName = 'this feature',
+  subscription,
 }: UpgradeDialogProps) {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
+  const [confirmPlan, setConfirmPlan] = useState<PlanTier | null>(null);
 
   const starterPrice = billingCycle === 'monthly' ? PLANS.starter.monthlyPrice : PLANS.starter.yearlyPrice;
   const proPrice = billingCycle === 'monthly' ? PLANS.pro.monthlyPrice : PLANS.pro.yearlyPrice;
   const starterSavings = Math.round((1 - PLANS.starter.yearlyPrice / PLANS.starter.monthlyPrice) * 100);
 
   const handleUpgrade = async (plan: PlanTier) => {
+    // Existing subscriber with active/trialing subscription → show confirmation first
+    const hasActiveSub = subscription?.hasActiveSubscription &&
+      ['active', 'trialing'].includes(subscription.status);
+
+    if (hasActiveSub) {
+      setConfirmPlan(plan);
+      return;
+    }
+
+    // New/free subscriber → create checkout session directly
+    await executeCheckout(plan);
+  };
+
+  const executeCheckout = async (plan: PlanTier) => {
     try {
       setLoading(true);
       const response = await paddleService.createCheckoutSession({
@@ -102,6 +120,30 @@ export function UpgradeDialog({
       setLoading(false);
     }
   };
+
+  const confirmUpdate = async () => {
+    if (!confirmPlan) return;
+    try {
+      setLoading(true);
+      const response = await paddleService.updateSubscriptionPlan(confirmPlan, billingCycle);
+      if (response.success) {
+        toast({
+          title: 'Plan updated',
+          description: response.data.message || `Successfully switched to ${confirmPlan} plan.`,
+        });
+        onOpenChange?.(false);
+      }
+    } catch (err: any) {
+      const msg = err.response?.data?.message || err.message || 'Failed to update plan';
+      toast({ title: 'Error', description: msg, variant: 'destructive' });
+    } finally {
+      setLoading(false);
+      setConfirmPlan(null);
+    }
+  };
+
+  const confirmPrice = confirmPlan === 'starter' ? starterPrice : proPrice;
+  const isTrialing = subscription?.status === 'trialing';
 
   const dialogContent = (
     <DialogContent
@@ -217,25 +259,46 @@ export function UpgradeDialog({
     </DialogContent>
   );
 
+  const confirmDialog = (
+    <ConfirmDialog
+      open={!!confirmPlan}
+      onOpenChange={(v) => { if (!v) setConfirmPlan(null); }}
+      title={`Switch to ${confirmPlan ? PLANS[confirmPlan].name : ''}?`}
+      description={
+        isTrialing
+          ? `Since you're still in your trial, you won't be charged today. Your plan will change to ${confirmPlan ? PLANS[confirmPlan].name : ''} at $${confirmPrice}/mo.`
+          : `You'll be charged a prorated amount today based on your billing cycle. Your new plan will be ${confirmPlan ? PLANS[confirmPlan].name : ''} at $${confirmPrice}/mo.`
+      }
+      confirmLabel={isTrialing ? 'Switch Plan' : `Pay $${confirmPrice}/mo`}
+      onConfirm={confirmUpdate}
+    />
+  );
+
   // Controlled mode: when open/onOpenChange are provided
   if (open !== undefined || onOpenChange !== undefined) {
     return (
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        {dialogContent}
-      </Dialog>
+      <>
+        <Dialog open={open} onOpenChange={onOpenChange}>
+          {dialogContent}
+        </Dialog>
+        {confirmDialog}
+      </>
     );
   }
 
   // Standalone mode: wraps children with a trigger
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button size="sm" className="gap-1.5">
-          <Sparkles className="w-3.5 h-3.5" />
-          Upgrade
-        </Button>
-      </DialogTrigger>
-      {dialogContent}
-    </Dialog>
+    <>
+      <Dialog>
+        <DialogTrigger asChild>
+          <Button size="sm" className="gap-1.5">
+            <Sparkles className="w-3.5 h-3.5" />
+            Upgrade
+          </Button>
+        </DialogTrigger>
+        {dialogContent}
+      </Dialog>
+      {confirmDialog}
+    </>
   );
 }

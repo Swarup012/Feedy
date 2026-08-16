@@ -66,6 +66,20 @@ const paddleService = {
   },
 
   /**
+   * Update existing subscription plan (upgrade/downgrade)
+   */
+  async updateSubscriptionPlan(
+    newPlan: 'starter' | 'pro',
+    billingCycle: 'monthly' | 'yearly'
+  ): Promise<{ success: boolean; data: { newPlan: string; billingCycle: string; message: string } }> {
+    const response = await api.post('/api/paddle/subscription/update-plan', {
+      newPlan,
+      billingCycle,
+    });
+    return response.data;
+  },
+
+  /**
    * Cancel Paddle subscription
    */
   async cancelSubscription(): Promise<{ success: boolean; message: string }> {

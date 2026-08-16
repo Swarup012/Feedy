@@ -158,6 +158,7 @@ function BillingContent() {
         open={showUpgradeDialog}
         onOpenChange={setShowUpgradeDialog}
         featureName="billing"
+        subscription={subscription}
       />
 
       {/* Cancel Flow */}
