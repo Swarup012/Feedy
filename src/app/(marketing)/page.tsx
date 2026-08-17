@@ -1,15 +1,15 @@
-"use client"
-import React, { useEffect, useRef } from 'react';
-import { ArrowRight, CheckCircle, Users, Sparkles } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/hooks/useAuth';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
-import { PointerHighlight } from '@/components/ui/pointer-highlight.tsx'
-import { LandingFooter } from '@/components/ui/landing-footer';
-import { FeatureTabSection } from '@/components/FeatureTabSection';
+"use client";
+import React, { useEffect, useRef } from "react";
+import { ArrowRight, CheckCircle, Users, Sparkles } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/hooks/useAuth";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
+import { PointerHighlight } from "@/components/ui/pointer-highlight.tsx";
+import { LandingFooter } from "@/components/ui/landing-footer";
+import { FeatureTabSection } from "@/components/FeatureTabSection";
 
-if (typeof window !== 'undefined') {
+if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
 }
 
@@ -19,7 +19,7 @@ export default function LandingPage() {
 
   const handleClick = () => {
     router.push("/signup");
-  }
+  };
 
   // Refs for GSAP
   const heroRef = useRef(null);
@@ -32,20 +32,24 @@ export default function LandingPage() {
   useEffect(() => {
     // --- ORIGINAL BUSINESS LOGIC (PRESERVED) ---
     const hostname = window.location.hostname;
-    const parts = hostname.split('.');
+    const parts = hostname.split(".");
 
     let subdomain = null;
 
     // Production: company.domain.com
-    if (parts.length >= 3 && !hostname.includes('localhost')) {
+    if (parts.length >= 3 && !hostname.includes("localhost")) {
       subdomain = parts[0];
-      if (subdomain === 'www' || subdomain === 'api' || subdomain === 'admin') {
+      if (subdomain === "www" || subdomain === "api" || subdomain === "admin") {
         subdomain = null;
       }
     }
 
     // Development: company.localhost:5173
-    if (hostname.includes('localhost') && parts.length > 1 && parts[0] !== 'localhost') {
+    if (
+      hostname.includes("localhost") &&
+      parts.length > 1 &&
+      parts[0] !== "localhost"
+    ) {
       subdomain = parts[0];
     }
 
@@ -54,22 +58,22 @@ export default function LandingPage() {
       // This allows users to view ANY organization's public pages
       if (!loading && subdomain) {
         try {
-          const { boardService } = await import('@/services/boardService');
+          const { boardService } = await import("@/services/boardService");
           const response = await boardService.getPublicBoards();
           const publicBoards = response.data.boards;
 
           if (publicBoards.length > 0) {
-            router.push('/feedback');
+            router.push("/feedback");
             return;
           }
         } catch (error) {
-          console.error('Error loading public boards:', error);
+          console.error("Error loading public boards:", error);
         }
       }
 
       // If NO subdomain and user is authenticated, go to their admin dashboard
       if (!loading && user && !subdomain) {
-        router.push('/admin');
+        router.push("/admin");
         return;
       }
     };
@@ -88,28 +92,31 @@ export default function LandingPage() {
           opacity: 0,
           duration: 1,
           stagger: 0.2,
-          ease: "expo.out"
-        })
-          .from(".hero-stats", {
+          ease: "expo.out",
+        }).from(
+          ".hero-stats",
+          {
             opacity: 0,
             y: 20,
             duration: 0.8,
-            ease: "power2.out"
-          }, "-=0.5");
+            ease: "power2.out",
+          },
+          "-=0.5",
+        );
 
         // Scroll Trigger: Features
         gsap.from(".feature-card", {
           scrollTrigger: {
             trigger: featuresRef.current,
             start: "top 80%",
-            once: true
+            once: true,
           },
           y: 40,
           opacity: 0,
           duration: 0.8,
           stagger: 0.15,
           ease: "power3.out",
-          immediateRender: false
+          immediateRender: false,
         });
 
         // Scroll Trigger: Benefits Left
@@ -121,7 +128,7 @@ export default function LandingPage() {
           x: -50,
           opacity: 0,
           duration: 1,
-          ease: "power2.out"
+          ease: "power2.out",
         });
 
         // Scroll Trigger: Benefits Cards Right
@@ -134,7 +141,7 @@ export default function LandingPage() {
           opacity: 0,
           duration: 1,
           stagger: 0.2,
-          ease: "power2.out"
+          ease: "power2.out",
         });
       });
       return () => ctx.revert();
@@ -149,12 +156,14 @@ export default function LandingPage() {
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          video.play().catch(() => {/* autoplay may be blocked */ });
+          video.play().catch(() => {
+            /* autoplay may be blocked */
+          });
         } else {
           video.pause();
         }
       },
-      { threshold: 0.3 }
+      { threshold: 0.3 },
     );
 
     observer.observe(video);
@@ -163,22 +172,29 @@ export default function LandingPage() {
     };
   }, []);
 
-
   return (
     <div className="min-h-screen bg-white dark:bg-slate-950 font-sans text-slate-900 dark:text-slate-100 antialiased selection:bg-blue-100 dark:selection:bg-blue-900 selection:text-blue-900 dark:selection:text-blue-100">
       {/* Visual background texture */}
       <div className="fixed inset-0 z-0 opacity-[0.03] pointer-events-none">
-        <div className="absolute inset-0" style={{ backgroundImage: `radial-gradient(currentColor 1px, transparent 1px)`, backgroundSize: '40px 40px' }}></div>
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `radial-gradient(currentColor 1px, transparent 1px)`,
+            backgroundSize: "40px 40px",
+          }}
+        ></div>
       </div>
 
       {/* Resizable Navbar */}
 
       <main className="relative z-10">
         {/* Hero Section */}
-        <section ref={heroRef} className="relative overflow-hidden pt-20 sm:pt-12 pb-12 sm:pb-10 px-5 sm:px-6">
+        <section
+          ref={heroRef}
+          className="relative overflow-hidden pt-20 sm:pt-12 pb-12 sm:pb-10 px-5 sm:px-6"
+        >
           <div className="max-w-7xl mx-auto">
             <div className="flex flex-col lg:flex-row items-start gap-10 lg:gap-8">
-
               {/* Left — Hero Copy */}
               <div className="w-full lg:w-[46%] flex flex-col items-center lg:items-start text-center lg:text-left space-y-5 sm:space-y-7">
                 {/* Eyebrow badge */}
@@ -188,12 +204,16 @@ export default function LandingPage() {
                 </div>
 
                 <h1 className="hero-reveal text-[32px] sm:text-2xl md:text-[34px] font-black tracking-tight leading-[1.15] text-slate-900 dark:text-white">
-                  Your users are telling you what to build.<br />
-                  <span className="inline-block mt-3"><PointerHighlight>Are you listening?</PointerHighlight></span>
+                  Your users are telling you what to build.
+                  <br />
+                  <span className="inline-block mt-3">
+                    <PointerHighlight>Are you listening?</PointerHighlight>
+                  </span>
                 </h1>
 
                 <p className="hero-reveal text-base sm:text-lg md:text-xl text-slate-500 dark:text-slate-400 leading-relaxed max-w-lg">
-                  Faddy's AI reads every request across your tools and tells you exactly what to build next to keep users happy and paying.
+                  Faddy's AI reads every request across your tools and tells you
+                  exactly what to build next to keep users happy and paying.
                 </p>
 
                 <div className="hero-reveal flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
@@ -203,22 +223,32 @@ export default function LandingPage() {
                   >
                     Try for Free
                   </button>
-                  <a href="/feedback" className="w-full sm:w-auto px-8 py-3.5 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-switzer font-bold rounded-2xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all flex items-center justify-center gap-2 text-base">
+                  <a
+                    href="/feedback"
+                    className="w-full sm:w-auto px-8 py-3.5 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-switzer font-bold rounded-2xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all flex items-center justify-center gap-2 text-base"
+                  >
                     Explore Demo Board
                   </a>
                 </div>
-                <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">No credit card required</p>
+                <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">
+                  No credit card required
+                </p>
 
                 {/* Social Proof / Stats */}
                 <div className="hero-stats w-full pt-5 border-t border-slate-100 dark:border-slate-800 grid grid-cols-1 sm:grid-cols-3 gap-3">
                   {[
                     "Free plan available",
                     "From $19/mo flat",
-                    "Built for small teams"
+                    "Built for small teams",
                   ].map((stat, i) => (
-                    <div key={i} className="flex items-center justify-center lg:justify-start gap-2">
+                    <div
+                      key={i}
+                      className="flex items-center justify-center lg:justify-start gap-2"
+                    >
                       <CheckCircle className="w-4 h-4 text-blue-500 shrink-0" />
-                      <span className="text-sm font-switzer font-medium text-slate-600 dark:text-slate-300">{stat}</span>
+                      <span className="text-sm font-switzer font-medium text-slate-600 dark:text-slate-300">
+                        {stat}
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -248,24 +278,24 @@ export default function LandingPage() {
                   />
                 </div>
               </div>
-
             </div>
           </div>
-
         </section>
 
-
         {/* Features Section — Tabbed Showcase */}
-        <section ref={featuresRef} className="py-12 px-6 bg-slate-50/50 dark:bg-slate-900/50 border-y border-slate-100 dark:border-slate-800">
+        <section
+          ref={featuresRef}
+          className="py-12 px-6 bg-slate-50/50 dark:bg-slate-900/50 border-y border-slate-100 dark:border-slate-800"
+        >
           <div className="max-w-6xl mx-auto">
-
             {/* Section header */}
             <div className="text-center mb-14">
               <h2 className="text-xl md:text-2xl font-switzer font-medium tracking-tight text-slate-900 dark:text-white mb-4">
                 Everything you need to manage product feedback
               </h2>
               <p className="text-lg text-slate-500 dark:text-slate-400 max-w-xl mx-auto">
-                From collecting ideas to shipping features — Faddy handles the full loop.
+                From collecting ideas to shipping features — Faddy handles the
+                full loop.
               </p>
             </div>
 
@@ -275,25 +305,31 @@ export default function LandingPage() {
         </section>
 
         {/* Benefits Section */}
-        <section ref={benefitsRef} className="py-16 px-6 bg-blue-600 overflow-hidden relative">
+        <section
+          ref={benefitsRef}
+          className="py-16 px-6 bg-blue-600 overflow-hidden relative"
+        >
           <div className="max-w-7xl mx-auto relative z-10">
             <div className="grid md:grid-cols-2 gap-10 items-center">
               <div className="benefit-content text-white">
                 <h2 className="text-xl md:text-3xl font-switzer font-bold tracking-tight mb-8">
-                  Stop building <br />in the dark.
+                  Stop building <br />
+                  in the dark.
                 </h2>
                 <div className="space-y-5">
                   {[
                     "Know exactly what your users want before you write a single line of code",
                     "Public roadmap builds trust and reduces repetitive support questions",
                     "Changelog keeps users excited about every update you ship",
-                    "Flat pricing that scales with your product, not your user count"
+                    "Flat pricing that scales with your product, not your user count",
                   ].map((text, i) => (
                     <div key={i} className="flex items-start gap-4">
                       <div className="mt-1 w-6 h-6 rounded-full bg-white/20 flex items-center justify-center shrink-0">
                         <CheckCircle className="w-4 h-4 text-white" />
                       </div>
-                      <span className="text-lg font-medium text-blue-50 leading-tight">{text}</span>
+                      <span className="text-lg font-medium text-blue-50 leading-tight">
+                        {text}
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -301,16 +337,37 @@ export default function LandingPage() {
 
               <div className="grid gap-6">
                 {[
-                  { label: "Built for", value: "Startups & Indie Hackers", subtext: "Not enterprise. No complexity. No per-user pricing traps.", icon: <Users /> },
-                  { label: "Pricing starts at", value: "Free", subtext: "Upgrade to $19/mo when you're ready. No credit card to start.", icon: <Sparkles /> }
+                  {
+                    label: "Built for",
+                    value: "Startups & Indie Hackers",
+                    subtext:
+                      "Not enterprise. No complexity. No per-user pricing traps.",
+                    icon: <Users />,
+                  },
+                  {
+                    label: "Pricing starts at",
+                    value: "Free",
+                    subtext:
+                      "Upgrade to $19/mo when you're ready. No credit card to start.",
+                    icon: <Sparkles />,
+                  },
                 ].map((stat, i) => (
-                  <div key={i} className="benefit-stat-card p-6 bg-white/10 rounded-2xl border border-white/20">
+                  <div
+                    key={i}
+                    className="benefit-stat-card p-6 bg-white/10 rounded-2xl border border-white/20"
+                  >
                     <div className="flex items-center gap-4 mb-6 text-white/80">
                       {stat.icon}
-                      <span className="font-bold uppercase tracking-widest text-sm">{stat.label}</span>
+                      <span className="font-bold uppercase tracking-widest text-sm">
+                        {stat.label}
+                      </span>
                     </div>
-                    <div className="text-2xl font-switzer font-black text-white leading-tight">{stat.value}</div>
-                    <p className="text-blue-100 mt-4 font-medium leading-relaxed text-sm">{stat.subtext}</p>
+                    <div className="text-2xl font-switzer font-black text-white leading-tight">
+                      {stat.value}
+                    </div>
+                    <p className="text-blue-100 mt-4 font-medium leading-relaxed text-sm">
+                      {stat.subtext}
+                    </p>
                   </div>
                 ))}
               </div>
@@ -326,9 +383,13 @@ export default function LandingPage() {
                 Your users are waiting to tell you what to build.
               </h2>
               <p className="text-lg text-slate-400 mb-12 max-w-2xl mx-auto leading-relaxed">
-                Start collecting feedback in minutes. Free plan available — no credit card required.
+                Start collecting feedback in minutes. Free plan available — no
+                credit card required.
               </p>
-              <a href="/signup" className="inline-flex items-center gap-3 px-6 py-4 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-switzer font-black rounded-2xl hover:scale-105 transition-all text-base">
+              <a
+                href="/signup"
+                className="inline-flex items-center gap-3 px-6 py-4 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-switzer font-black rounded-2xl hover:scale-105 transition-all text-base"
+              >
                 Start Free Today
                 <ArrowRight className="w-5 h-5" />
               </a>

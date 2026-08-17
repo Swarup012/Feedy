@@ -28,7 +28,7 @@ export default function MarketingLayout({
     <div className="flex items-center gap-3">
       <ThemeToggleDebug />
       {!visible && (
-        <NavbarButton variant="secondary" onClick={() => router.push("/login")}>
+        <NavbarButton variant="secondary" onClick={() => router.push("/login")} className="border-2">
           Login
         </NavbarButton>
       )}
@@ -168,7 +168,7 @@ export default function MarketingLayout({
                   router.push("/login");
                 }}
                 variant="secondary"
-                className="w-full"
+                className="w-full border-2"
               >
                 Login
               </NavbarButton>
