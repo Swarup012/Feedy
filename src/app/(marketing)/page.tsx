@@ -203,7 +203,7 @@ export default function LandingPage() {
                   AI-powered customer feedback platform
                 </div>
 
-                <h1 className="hero-reveal text-[32px] sm:text-2xl md:text-[34px] font-black tracking-tight leading-[1.15] text-slate-900 dark:text-white">
+                <h1 className="hero-reveal text-3xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-switzer font-medium tracking-tight leading-tight text-slate-900 dark:text-white">
                   Your users are telling you what to build.
                   <br />
                   <span className="inline-block mt-3">
@@ -219,15 +219,15 @@ export default function LandingPage() {
                 <div className="hero-reveal flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
                   <button
                     onClick={handleClick}
-                    className="w-full sm:w-auto px-8 py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-switzer font-bold rounded-2xl transition-all flex items-center justify-center gap-2 text-base"
+                    className="w-full sm:w-auto px-8 py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-switzer font-bold rounded-2xl transition-all flex items-center justify-center gap-2 text-base border border-black"
                   >
                     Try for Free
                   </button>
                   <a
-                    href="/feedback"
-                    className="w-full sm:w-auto px-8 py-3.5 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-switzer font-bold rounded-2xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all flex items-center justify-center gap-2 text-base"
+                    href="/pricing"
+                    className="w-full sm:w-auto px-8 py-3.5 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-switzer font-bold rounded-2xl border-2 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all flex items-center justify-center gap-2 text-base"
                   >
-                    Explore Demo Board
+                    Pricing
                   </a>
                 </div>
                 <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">

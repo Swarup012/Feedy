@@ -193,7 +193,7 @@ export default function PricingPage() {
                   </span>
                 </div>
               </div>
-              <CardDescription>For solo builders just getting started with structured feedback.</CardDescription>
+              <CardDescription>For solo builders getting started.</CardDescription>
             </CardHeader>
             <CardContent>
               <Button
@@ -271,7 +271,7 @@ export default function PricingPage() {
                   </div>
                 )}
               </div>
-              <CardDescription>For indie founders and small teams ready to put their brand front and center.</CardDescription>
+              <CardDescription>For indie founders ready to grow.</CardDescription>
             </CardHeader>
             <CardContent>
               {currentPlan === "free" ? (
@@ -368,7 +368,7 @@ export default function PricingPage() {
                   </div>
                 )}
               </div>
-              <CardDescription>Turn scattered feedback into clear priorities with AI-powered clustering and automation.</CardDescription>
+              <CardDescription>For teams who want it running on autopilot.</CardDescription>
             </CardHeader>
             <CardContent>
               {currentPlan === "free" ? (
@@ -648,6 +648,90 @@ export default function PricingPage() {
                     </tr>
                     <tr>
                       <td className="py-4 px-6 text-sm text-gray-900 dark:text-white">
+                        Feedback Widget
+                      </td>
+                      <td className="py-4 px-6 text-center bg-blue-50/50 dark:bg-blue-900/10">
+                        <Check className="w-5 h-5 text-green-500 mx-auto" />
+                      </td>
+                      <td className="py-4 px-6 text-center bg-blue-50/50 dark:bg-blue-900/10">
+                        <Check className="w-5 h-5 text-green-500 mx-auto" />
+                      </td>
+                      <td className="py-4 px-6 text-center bg-blue-50/50 dark:bg-blue-900/10">
+                        <Check className="w-5 h-5 text-green-500 mx-auto" />
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="py-4 px-6 text-sm text-gray-900 dark:text-white">
+                        Integrations (Slack, Discord, Intercom)
+                      </td>
+                      <td className="py-4 px-6 text-center">
+                        <X className="w-5 h-5 text-gray-300 mx-auto" />
+                      </td>
+                      <td className="py-4 px-6 text-center bg-blue-50/50 dark:bg-blue-900/10">
+                        <Check className="w-5 h-5 text-green-500 mx-auto" />
+                      </td>
+                      <td className="py-4 px-6 text-center bg-blue-50/50 dark:bg-blue-900/10">
+                        <Check className="w-5 h-5 text-green-500 mx-auto" />
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="py-4 px-6 text-sm text-gray-900 dark:text-white">
+                        AI Chat
+                      </td>
+                      <td className="py-4 px-6 text-center">
+                        <X className="w-5 h-5 text-gray-300 mx-auto" />
+                      </td>
+                      <td className="py-4 px-6 text-center bg-blue-50/50 dark:bg-blue-900/10">
+                        <Check className="w-5 h-5 text-green-500 mx-auto" />
+                      </td>
+                      <td className="py-4 px-6 text-center bg-blue-50/50 dark:bg-blue-900/10">
+                        <Check className="w-5 h-5 text-green-500 mx-auto" />
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="py-4 px-6 text-sm text-gray-900 dark:text-white">
+                        Autopilot
+                      </td>
+                      <td className="py-4 px-6 text-center">
+                        <X className="w-5 h-5 text-gray-300 mx-auto" />
+                      </td>
+                      <td className="py-4 px-6 text-center bg-blue-50/50 dark:bg-blue-900/10">
+                        <span className="text-sm font-semibold text-blue-600 dark:text-blue-400">Manual only</span>
+                      </td>
+                      <td className="py-4 px-6 text-center bg-blue-50/50 dark:bg-blue-900/10">
+                        <span className="text-sm font-semibold text-blue-600 dark:text-blue-400">Full access</span>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="py-4 px-6 text-sm text-gray-900 dark:text-white">
+                        Webhooks & API
+                      </td>
+                      <td className="py-4 px-6 text-center">
+                        <X className="w-5 h-5 text-gray-300 mx-auto" />
+                      </td>
+                      <td className="py-4 px-6 text-center bg-blue-50/50 dark:bg-blue-900/10">
+                        <Check className="w-5 h-5 text-green-500 mx-auto" />
+                      </td>
+                      <td className="py-4 px-6 text-center bg-blue-50/50 dark:bg-blue-900/10">
+                        <Check className="w-5 h-5 text-green-500 mx-auto" />
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="py-4 px-6 text-sm text-gray-900 dark:text-white">
+                        Instant Notifications (urgent alerts)
+                      </td>
+                      <td className="py-4 px-6 text-center">
+                        <X className="w-5 h-5 text-gray-300 mx-auto" />
+                      </td>
+                      <td className="py-4 px-6 text-center">
+                        <X className="w-5 h-5 text-gray-300 mx-auto" />
+                      </td>
+                      <td className="py-4 px-6 text-center bg-blue-50/50 dark:bg-blue-900/10">
+                        <Check className="w-5 h-5 text-green-500 mx-auto" />
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="py-4 px-6 text-sm text-gray-900 dark:text-white">
                         Custom Branding
                       </td>
                       <td className="py-4 px-6 text-center">
@@ -656,7 +740,7 @@ export default function PricingPage() {
                       <td className="py-4 px-6 text-center bg-blue-50/50 dark:bg-blue-900/10">
                         <Check className="w-5 h-5 text-green-500 mx-auto" />
                       </td>
-                      <td className="py-4 px-6 text-center">
+                      <td className="py-4 px-6 text-center bg-blue-50/50 dark:bg-blue-900/10">
                         <Check className="w-5 h-5 text-green-500 mx-auto" />
                       </td>
                     </tr>
@@ -691,20 +775,6 @@ export default function PricingPage() {
                     <tr>
                       <td className="py-4 px-6 text-sm text-gray-900 dark:text-white">
                         Priority Support
-                      </td>
-                      <td className="py-4 px-6 text-center">
-                        <X className="w-5 h-5 text-gray-300 mx-auto" />
-                      </td>
-                      <td className="py-4 px-6 text-center">
-                        <X className="w-5 h-5 text-gray-300 mx-auto" />
-                      </td>
-                      <td className="py-4 px-6 text-center bg-blue-50/50 dark:bg-blue-900/10">
-                        <Check className="w-5 h-5 text-green-500 mx-auto" />
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="py-4 px-6 text-sm text-gray-900 dark:text-white">
-                        Custom Integrations
                       </td>
                       <td className="py-4 px-6 text-center">
                         <X className="w-5 h-5 text-gray-300 mx-auto" />

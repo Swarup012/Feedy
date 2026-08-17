@@ -250,45 +250,33 @@ export function getPlanFeatureDisplay(tier: PlanTier): {
 
   if (tier === 'free') {
     features.push(
-      { text: f.boards === -1 ? 'Unlimited boards' : `${f.boards} boards`, included: true },
-      { text: f.posts_per_board === -1 ? 'Unlimited posts per board' : `${f.posts_per_board} posts per board`, included: true },
-      { text: `${f.tracked_users} tracked users`, included: true },
-      { text: `${f.team_members} members`, included: true },
-      { text: 'Basic priority flagging', included: true },
+      { text: '3 feedback boards', included: true },
+      { text: 'Track up to 20 users', included: true },
       { text: 'Public roadmap & changelog', included: true },
-      { text: 'Feedback widget', included: true },
-      { text: 'Integrations (Slack, Discord, Intercom)', included: false },
-      { text: 'AI Chat', included: false },
-      { text: 'Autopilot', included: false },
-      { text: 'Webhooks & API', included: false },
+      { text: 'Feedback widget for your site', included: true },
+      { text: 'Up to 3 team members', included: true },
     );
   } else if (tier === 'starter') {
     features.push(
       { text: 'Everything in Free, plus:', bold: true, included: true },
       { text: 'Unlimited boards & posts', included: true, highlight: true },
-      { text: `Unlimited members, up to ${f.admin_members} admins`, included: true, highlight: true },
-      { text: `${f.tracked_users}+ tracked users with overage billing`, included: true },
-      { text: 'Slack, Discord & Intercom integrations', included: true },
-      { text: 'Autopilot manual mode', included: true },
-      { text: 'AI Chat', included: true },
-      { text: 'Webhooks & API access', included: true },
-      { text: 'Advanced analytics', included: true },
-      { text: 'Custom branding', included: true },
-      { text: 'Autopilot Automatic Mode', included: false },
-      { text: 'AI-powered severity classification', included: false },
-      { text: 'Configurable Slack/Discord alerts', included: false },
+      { text: 'Up to 5 team members', included: true },
+      { text: 'Grow past 125 users (simple pay-as-you-grow pricing)', included: true, highlight: true },
+      { text: 'Connect Slack, Discord & Intercom', included: true },
+      { text: 'AI chat to explore your feedback', included: true },
+      { text: 'Auto-collect feedback from support conversations', included: true },
+      { text: 'Custom branding & deeper analytics', included: true },
+      { text: 'Developer access (API & webhooks)', included: true },
     );
   } else {
     features.push(
       { text: 'Everything in Starter, plus:', bold: true, included: true },
-      { text: 'Autopilot Automatic Mode', included: true, highlight: true },
-      { text: 'AI-powered severity classification', included: true, highlight: true },
-      { text: 'Needs Attention Slack/Discord alerts', included: true, highlight: true },
-      { text: `Unlimited members, up to ${f.admin_members} admins`, included: true },
-      { text: `${f.tracked_users}+ tracked users with overage billing`, included: true },
-      { text: f.custom_domain > 0 ? `${f.custom_domain} custom domain${f.custom_domain > 1 ? 's' : ''}` : 'Custom domains', included: true, highlight: true },
-      { text: 'Advanced analytics', included: true },
-      { text: 'Custom branding', included: true },
+      { text: 'Fully automatic feedback triage — no manual review needed', included: true, highlight: true },
+      { text: 'AI flags what\'s urgent, so nothing slips through', included: true, highlight: true },
+      { text: 'Instant alerts when something needs attention', included: true, highlight: true },
+      { text: 'Up to 10 team members', included: true },
+      { text: 'Your own custom domain', included: true, highlight: true },
+      { text: 'Advanced analytics & reporting', included: true },
     );
   }
 
