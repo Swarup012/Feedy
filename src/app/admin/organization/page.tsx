@@ -46,6 +46,7 @@ import {
   User,
   Bell,
   Loader2,
+  Key,
 } from 'lucide-react';
 import { OrganizationSkeleton, MembersTableSkeleton } from '@/components/admin/OrganizationSkeleton';
 import { InviteMemberModal } from '@/components/organization/InviteMemberModal';
@@ -55,6 +56,7 @@ import dynamic from 'next/dynamic';
 const WebhooksPage = dynamic(() => import('@/app/admin/webhooks/page'), { ssr: false });
 const WidgetsPage = dynamic(() => import('@/app/admin/widgets/page'), { ssr: false });
 const IntegrationsPage = dynamic(() => import('@/app/admin/settings/integrations/page'), { ssr: false });
+const ApiKeysPage = dynamic(() => import('@/app/admin/api-keys/page'), { ssr: false });
 import { ProfileTab } from '@/components/organization/ProfileTab';
 // Billing components moved from old BillingSection
 import paddleService, { SubscriptionInfo, Invoice } from '@/services/paddleService';
@@ -488,6 +490,7 @@ export default function OrganizationSettingsPage() {
             { tab: 'roles', icon: Briefcase, label: 'Job Roles' },
             { tab: 'subdomain', icon: ExternalLink, label: 'Subdomain' },
             { tab: 'webhooks', icon: Webhook, label: 'Webhooks' },
+            { tab: 'api-keys', icon: Key, label: 'API Keys' },
             { tab: 'widgets', icon: Code, label: 'Widgets' },
             { tab: 'integrations', icon: Plug, label: 'Integrations' },
             { tab: 'notifications', icon: Bell, label: 'Notifications' },
@@ -518,6 +521,7 @@ export default function OrganizationSettingsPage() {
                 <TabsTrigger value="roles" id="tab-roles">Job Roles</TabsTrigger>
                 <TabsTrigger value="subdomain" id="tab-subdomain">Subdomain</TabsTrigger>
                 <TabsTrigger value="webhooks" id="tab-webhooks">Webhooks</TabsTrigger>
+                <TabsTrigger value="api-keys" id="tab-api-keys">API Keys</TabsTrigger>
                 <TabsTrigger value="widgets" id="tab-widgets">Widgets</TabsTrigger>
                 <TabsTrigger value="integrations" id="tab-integrations">Integrations</TabsTrigger>
                 <TabsTrigger value="notifications" id="tab-notifications">Notifications</TabsTrigger>
@@ -757,6 +761,13 @@ export default function OrganizationSettingsPage() {
               <PaidFeatureGate featureName="Webhooks">
                 <WebhooksPage />
               </PaidFeatureGate>
+            </TabsContent>
+
+            {/* API Keys Tab */}
+            <TabsContent value="api-keys">
+              <ProFeatureGate featureName="API Access">
+                <ApiKeysPage />
+              </ProFeatureGate>
             </TabsContent>
 
             {/* Widgets Tab */}

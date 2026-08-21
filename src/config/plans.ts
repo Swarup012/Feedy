@@ -30,6 +30,7 @@ export interface PlanFeatures {
   severity_rules: boolean;
   severity_ai: boolean;
   notifications: boolean;
+  api_access: boolean;
 }
 
 export interface PlanOverage {
@@ -78,6 +79,7 @@ export const PLANS: Record<PlanTier, PlanConfig> = {
       severity_rules: true,
       severity_ai: false,
       notifications: false,
+      api_access: false,
     },
   },
   starter: {
@@ -108,6 +110,7 @@ export const PLANS: Record<PlanTier, PlanConfig> = {
       severity_rules: true,
       severity_ai: false,
       notifications: false,
+      api_access: false,
     },
     overage: {
       grace_buffer: 25,
@@ -144,6 +147,7 @@ export const PLANS: Record<PlanTier, PlanConfig> = {
       severity_rules: true,
       severity_ai: true,
       notifications: true,
+      api_access: true,
     },
     overage: {
       grace_buffer: 25,
