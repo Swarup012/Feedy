@@ -25,6 +25,8 @@ import { boardService, BoardCategory } from "@/services/boardService";
 import { postService, Post } from "@/services/postService";
 import { useToast } from "@/hooks/use-toast";
 import { TokenManager } from "@/lib/tokenManager";
+import { useOrganization } from "@/context/OrganizationContext";
+import api from "@/lib/api";
 
 interface CreatePostDialogProps {
   open: boolean;
@@ -40,6 +42,7 @@ export function CreatePostDialog({
   onPostCreated,
 }: CreatePostDialogProps) {
   const { toast } = useToast();
+  const { organization } = useOrganization();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [creating, setCreating] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -52,17 +55,44 @@ export function CreatePostDialog({
   const [customCategory, setCustomCategory] = useState("");
   const [showCustomCategory, setShowCustomCategory] = useState(false);
   const [fileError, setFileError] = useState<string | null>(null);
+  const [labels, setLabels] = useState<{ id: string; name: string }[]>([]);
 
-  const predefinedCategories = [
+  const defaultCategories = [
     { id: "1", name: "Feature Request" },
     { id: "2", name: "Bug Report" },
-    { id: "3", name: "General Feedback" }
+    { id: "3", name: "General Feedback" },
   ];
+
+  // Fetch labels from API when dialog opens, fall back to defaults
+  useEffect(() => {
+    if (!open || !organization?.id) return;
+
+    let cancelled = false;
+    api
+      .get(`/api/organizations/${organization.id}/labels`)
+      .then((res) => {
+        if (!cancelled && res.data?.data?.labels?.length) {
+          setLabels(res.data.data.labels);
+        }
+      })
+      .catch(() => {
+        // Fall back to defaults on error (auth failure, network, etc.)
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [open, organization?.id]);
+
+  const predefinedCategories = labels.length > 0 ? labels : defaultCategories;
 
   // Handle category selection
   const handleCategoryChange = (value: string) => {
     if (value === "custom") {
       setShowCustomCategory(true);
+      setFormData({ ...formData, category: "" });
+    } else if (value === "") {
+      setShowCustomCategory(false);
       setFormData({ ...formData, category: "" });
     } else {
       setShowCustomCategory(false);
@@ -248,7 +278,7 @@ export function CreatePostDialog({
                   <SelectValue placeholder="Select a category" />
                 </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="null">No Category</SelectItem>
+                      <SelectItem value="">No Category</SelectItem>
                       {predefinedCategories.map((category) => (
                         <SelectItem key={category.id} value={category.name}>
                           <span>{category.name}</span>

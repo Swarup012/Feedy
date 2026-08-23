@@ -48,15 +48,10 @@ import { useOrganization } from "@/context/OrganizationContext";
 import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
 import { usePostRealtime } from "@/hooks/usePostRealtime";
+import api from "@/lib/api";
 
 // 🔥 GLOBAL cache for comments (persists across post switches!)
 const commentsCache: Record<string, Comment[]> = {};
-
-const PREDEFINED_CATEGORIES = [
-  { id: "1", name: "Feature Request" },
-  { id: "2", name: "Bug Report" },
-  { id: "3", name: "General Feedback" },
-];
 
 interface PostDetailsProps {
   post: Post | null;
@@ -342,6 +337,15 @@ export function PostDetails({
   const [composerFocused, setComposerFocused] = useState(false);
   const [editingCategory, setEditingCategory] = useState(false);
   const [categoryValue, setCategoryValue] = useState("");
+  const [labels, setLabels] = useState<{ id: string; name: string }[]>([]);
+
+  const defaultCategories = [
+    { id: "1", name: "Feature Request" },
+    { id: "2", name: "Bug Report" },
+    { id: "3", name: "General Feedback" },
+  ];
+
+  const predefinedCategories = labels.length > 0 ? labels : defaultCategories;
   const [showCustomCategory, setShowCustomCategory] = useState(false);
   const [customCategory, setCustomCategory] = useState("");
   const [confirmDeleteComment, setConfirmDeleteComment] = useState<string | null>(null);
@@ -437,6 +441,27 @@ export function PostDetails({
       }
     }
   }, [post?.id]);
+
+  // Fetch labels from API when organization is available
+  useEffect(() => {
+    if (!organization?.id) return;
+
+    let cancelled = false;
+    api
+      .get(`/api/organizations/${organization.id}/labels`)
+      .then((res) => {
+        if (!cancelled && res.data?.data?.labels?.length) {
+          setLabels(res.data.data.labels);
+        }
+      })
+      .catch(() => {
+        // Fall back to defaults on error
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [organization?.id]);
 
   const fetchComments = async () => {
     if (!post) return;
@@ -1297,7 +1322,7 @@ export function PostDetails({
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="none">No Category</SelectItem>
-                        {PREDEFINED_CATEGORIES.map((cat) => (
+                        {predefinedCategories.map((cat) => (
                           <SelectItem key={cat.id} value={cat.name}>
                             {cat.name}
                           </SelectItem>
