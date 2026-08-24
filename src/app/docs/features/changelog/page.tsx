@@ -36,6 +36,28 @@ export default function ChangelogDocsPage() {
           </Button>
         </Link>
       </div>
+
+      <div className="not-prose mt-12 pt-8 border-t border-slate-200 dark:border-slate-700">
+        <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4">Related articles</h3>
+        <div className="grid sm:grid-cols-2 gap-3">
+          <Link href="/docs/features/roadmap">
+            <Card className="group hover:shadow-lg transition-all border hover:border-blue-300 dark:hover:border-blue-700">
+              <CardContent className="p-4">
+                <p className="font-semibold text-sm text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">Setting up your public roadmap</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Plan and share what you're building next</p>
+              </CardContent>
+            </Card>
+          </Link>
+          <Link href="/docs/features/boards">
+            <Card className="group hover:shadow-lg transition-all border hover:border-blue-300 dark:hover:border-blue-700">
+              <CardContent className="p-4">
+                <p className="font-semibold text-sm text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">Setting up boards</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">The feedback boards that feed your changelog</p>
+              </CardContent>
+            </Card>
+          </Link>
+        </div>
+      </div>
     </div>
   );
 }

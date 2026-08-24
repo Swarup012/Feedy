@@ -15,6 +15,19 @@ import {
 } from "@/components/ui/resizable-navbar";
 import { ThemeToggleDebug } from "@/components/theme-toggle-debug";
 import { Logo } from "@/components/logo";
+import {
+  MessageSquare,
+  BarChart3,
+  Zap,
+  Share2,
+  FolderOpen,
+  Users,
+  Map,
+  Plug,
+  Bot,
+  Eye,
+  Code,
+} from "lucide-react";
 
 export default function MarketingLayout({
   children,
@@ -44,27 +57,87 @@ export default function MarketingLayout({
       link: "/feedback",
       dropdown: [
         {
-          section: "Features",
+          section: "Core",
           items: [
-            { name: "Collect Feedback", link: "/collect-feedback" },
-            { name: "Analyze Feedback", link: "/analyze-feedback" },
-            { name: "Autopilot", link: "/autopilot" },
-            { name: "Share Updates", link: "/share-updates" },
+            {
+              name: "AI Chat",
+              link: "/ai-chat",
+              description: "Ask your product data questions in plain language",
+              icon: <Bot className="w-4 h-4" />,
+            },
+            {
+              name: "Expert View",
+              link: "/expert-view",
+              description: "Bird's-eye view of all feedback and trends",
+              icon: <Eye className="w-4 h-4" />,
+            },
+            {
+              name: "Autopilot",
+              link: "/autopilot",
+              description: "Automated workflows that save you hours",
+              icon: <Zap className="w-4 h-4" />,
+            },
+            {
+              name: "Developer & API",
+              link: "/developer-api",
+              description: "Build custom integrations with full API access",
+              icon: <Code className="w-4 h-4" />,
+            },
+            {
+              name: "Integrations",
+              link: "/integrations",
+              description: "Connect Intercom, Slack, Discord & more",
+              icon: <Plug className="w-4 h-4" />,
+            },
+            {
+              name: "Team Access",
+              link: "/role-based-access",
+              description: "Role-based permissions for your team",
+              icon: <Users className="w-4 h-4" />,
+            },
           ],
         },
         {
-          section: "Use Cases",
+          section: "Manage",
           items: [
-            { name: "Feature Request Management", link: "/collect-feedback" },
-            { name: "Role-Based Access Control", link: "/role-based-access" },
-            { name: "Public Roadmap", link: "/public-roadmap" },
+            {
+              name: "Collect Feedback",
+              link: "/collect-feedback",
+              description: "Gather insights from users across all channels",
+              icon: <MessageSquare className="w-4 h-4" />,
+            },
+            {
+              name: "Analyze Feedback",
+              link: "/analyze-feedback",
+              description: "AI-powered analysis to find what matters",
+              icon: <BarChart3 className="w-4 h-4" />,
+            },
+            {
+              name: "Share Updates",
+              link: "/share-updates",
+              description: "Keep users engaged with changelogs",
+              icon: <Share2 className="w-4 h-4" />,
+            },
+            {
+              name: "Feature Requests",
+              link: "/collect-feedback",
+              description: "Track and prioritize user requests",
+              icon: <FolderOpen className="w-4 h-4" />,
+            },
+            {
+              name: "Public Roadmap",
+              link: "/public-roadmap",
+              description: "Share what you're building next",
+              icon: <Map className="w-4 h-4" />,
+            },
           ],
-        },
-        {
-          section: "Resources",
-          items: [{ name: "Blog", link: "/blog" }],
         },
       ],
+      featured: {
+        title: "From the blog",
+        description: "Learn how teams use Faddy to build better products.",
+        link: "/blog",
+      },
     },
     {
       name: "Documentation",

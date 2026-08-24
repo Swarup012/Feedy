@@ -36,6 +36,10 @@ const PUBLIC_PATHS: Array<string | { prefix: string }> = [
   "/share-updates",
   "/role-based-access",
   "/public-roadmap",
+  "/integrations",
+  "/ai-chat",
+  "/expert-view",
+  "/developer-api",
   // App public pages
   "/changelog",
   "/feedback",

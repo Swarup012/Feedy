@@ -38,6 +38,36 @@ export default function RoadmapDocsPage() {
           </Button>
         </Link>
       </div>
+
+      <div className="not-prose mt-12 pt-8 border-t border-slate-200 dark:border-slate-700">
+        <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4">Related articles</h3>
+        <div className="grid sm:grid-cols-3 gap-3">
+          <Link href="/docs/features/boards">
+            <Card className="group hover:shadow-lg transition-all border hover:border-green-300 dark:hover:border-green-700">
+              <CardContent className="p-4">
+                <p className="font-semibold text-sm text-slate-900 dark:text-white group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">Setting up boards</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Create the boards that feed your roadmap</p>
+              </CardContent>
+            </Card>
+          </Link>
+          <Link href="/docs/features/changelog">
+            <Card className="group hover:shadow-lg transition-all border hover:border-green-300 dark:hover:border-green-700">
+              <CardContent className="p-4">
+                <p className="font-semibold text-sm text-slate-900 dark:text-white group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">Publishing changelog updates</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Announce completed features to your users</p>
+              </CardContent>
+            </Card>
+          </Link>
+          <Link href="/docs/plans/comparison">
+            <Card className="group hover:shadow-lg transition-all border hover:border-green-300 dark:hover:border-green-700">
+              <CardContent className="p-4">
+                <p className="font-semibold text-sm text-slate-900 dark:text-white group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">Understanding your plan</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Roadmap item limits per tier</p>
+              </CardContent>
+            </Card>
+          </Link>
+        </div>
+      </div>
     </div>
   );
 }

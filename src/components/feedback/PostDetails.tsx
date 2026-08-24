@@ -82,7 +82,7 @@ const STATUS_OPTIONS = [
   },
   {
     value: "under-review",
-    label: "In Review",
+    label: "Under Review",
     color: "bg-primary/10 text-primary",
   },
   {

@@ -65,6 +65,36 @@ export default function BoardsDocsPage() {
           </Button>
         </Link>
       </div>
+
+      <div className="not-prose mt-12 pt-8 border-t border-slate-200 dark:border-slate-700">
+        <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4">Related articles</h3>
+        <div className="grid sm:grid-cols-3 gap-3">
+          <Link href="/docs/features/team">
+            <Card className="group hover:shadow-lg transition-all border hover:border-purple-300 dark:hover:border-purple-700">
+              <CardContent className="p-4">
+                <p className="font-semibold text-sm text-slate-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">Team roles &amp; permissions</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Who can create boards, change status, and manage settings</p>
+              </CardContent>
+            </Card>
+          </Link>
+          <Link href="/docs/getting-started/invite-team">
+            <Card className="group hover:shadow-lg transition-all border hover:border-purple-300 dark:hover:border-purple-700">
+              <CardContent className="p-4">
+                <p className="font-semibold text-sm text-slate-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">Invite team members</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Add admins and members to collaborate on feedback</p>
+              </CardContent>
+            </Card>
+          </Link>
+          <Link href="/docs/plans/comparison">
+            <Card className="group hover:shadow-lg transition-all border hover:border-purple-300 dark:hover:border-purple-700">
+              <CardContent className="p-4">
+                <p className="font-semibold text-sm text-slate-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">Understanding your plan</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Board and post limits per tier</p>
+              </CardContent>
+            </Card>
+          </Link>
+        </div>
+      </div>
     </div>
   );
 }
