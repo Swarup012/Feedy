@@ -22,8 +22,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Select,
   SelectContent,
@@ -34,7 +32,6 @@ import {
 import {
   AlertTriangle,
   Bell,
-  CheckCircle2,
   Hash,
   Loader2,
   Plus,
@@ -260,77 +257,103 @@ export function NotificationsTab() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      <div className="flex flex-col items-center justify-center py-16 gap-3">
+        <Loader2 className="h-5 w-5 animate-spin text-primary" />
+        <span className="text-sm text-muted-foreground">Loading notification settings...</span>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5 max-w-2xl">
       {/* Master Switch */}
-      <Card>
-        <CardHeader className="pb-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Bell className="h-5 w-5 text-muted-foreground" />
-              <div>
-                <CardTitle className="text-base">High-Severity Alerts</CardTitle>
-                <CardDescription>
-                  Receive Slack/Discord notifications when posts are classified as high severity
-                  (billing, security, or data loss issues).
-                </CardDescription>
-              </div>
+      <div className="relative overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+        <div className="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-primary/60 to-primary" />
+        <div className="flex items-center justify-between p-5 pl-6">
+          <div className="flex items-center gap-4">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+              <Bell className="h-5 w-5 text-primary" />
             </div>
-            <Switch
-              checked={masterEnabled}
-              onCheckedChange={handleMasterToggle}
-              disabled={savingMaster}
-            />
+            <div className="space-y-0.5">
+              <h3 className="text-sm font-semibold leading-none tracking-tight">
+                High-Severity Alerts
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Get notified when posts are classified as high severity — billing, security, or data
+                loss issues.
+              </p>
+            </div>
           </div>
-        </CardHeader>
-      </Card>
+          <Switch
+            checked={masterEnabled}
+            onCheckedChange={handleMasterToggle}
+            disabled={savingMaster}
+          />
+        </div>
+      </div>
 
       {/* Alert Destinations */}
-      <Card>
-        <CardHeader className="pb-4">
-          <div className="flex items-center gap-3">
-            <Hash className="h-5 w-5 text-muted-foreground" />
-            <div>
-              <CardTitle className="text-base">Alert Destinations</CardTitle>
-              <CardDescription>
-                Choose which channels receive high-severity alerts. These are independent of the
-                channel used for feedback ingestion.
-              </CardDescription>
+      <div className="rounded-xl border border-border bg-card shadow-sm">
+        <div className="flex items-center justify-between p-5 pb-4">
+          <div className="flex items-center gap-4">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted">
+              <Hash className="h-5 w-5 text-muted-foreground" />
+            </div>
+            <div className="space-y-0.5">
+              <h3 className="text-sm font-semibold leading-none tracking-tight">
+                Alert Destinations
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Choose which channels receive high-severity alerts. Separate from your feedback
+                ingestion channel.
+              </p>
             </div>
           </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
+          {channels.length > 0 && (
+            <Badge variant="secondary" className="text-xs font-medium">
+              {channels.length} {channels.length === 1 ? 'channel' : 'channels'}
+            </Badge>
+          )}
+        </div>
+
+        <div className="px-5 pb-5 space-y-4">
           {/* Configured Channels */}
           {channels.length > 0 ? (
             <div className="space-y-2">
               {channels.map((channel, index) => (
                 <div
                   key={channel.id || `${channel.provider}-${channel.channel_id}`}
-                  className="flex items-center justify-between p-3 rounded-lg border bg-card"
+                  className={`group flex items-center justify-between rounded-lg border bg-background/50 px-4 py-3 transition-colors hover:bg-accent/50 ${
+                    !channel.enabled ? 'opacity-60' : ''
+                  }`}
                 >
-                  <div className="flex items-center gap-3">
-                    {getProviderIcon(channel.provider)}
-                    <div>
-                      <span className="font-medium">
-                        {channel.channel_name || channel.channel_id}
-                      </span>
-                      <span className="text-sm text-muted-foreground ml-2">
-                        ({channel.provider})
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div
+                      className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-md ${
+                        channel.provider === 'slack'
+                          ? 'bg-[#E01E5A]/10'
+                          : 'bg-[#5865F2]/10'
+                      }`}
+                    >
+                      {getProviderIcon(channel.provider)}
+                    </div>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium truncate">
+                          {channel.channel_name || channel.channel_id}
+                        </span>
+                        {!channel.enabled && (
+                          <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-5 shrink-0">
+                            Disabled
+                          </Badge>
+                        )}
+                      </div>
+                      <span className="text-xs text-muted-foreground capitalize">
+                        {channel.provider}
                       </span>
                     </div>
-                    {!channel.enabled && (
-                      <Badge variant="outline" className="text-xs">
-                        Disabled
-                      </Badge>
-                    )}
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1 shrink-0">
                     <Switch
                       checked={channel.enabled}
                       onCheckedChange={(checked) => handleToggleChannel(index, checked)}
@@ -341,110 +364,136 @@ export function NotificationsTab() {
                       size="sm"
                       onClick={() => handleRemoveChannel(index)}
                       disabled={saving}
-                      className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive"
+                      className="h-8 w-8 p-0 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity hover:text-destructive hover:bg-destructive/10"
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Trash2 className="h-3.5 w-3.5" />
                     </Button>
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-sm text-muted-foreground text-center py-4">
-              No alert destinations configured. Add a channel below.
-            </p>
+            <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed py-10">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
+                <Bell className="h-5 w-5 text-muted-foreground" />
+              </div>
+              <div className="text-center space-y-1">
+                <p className="text-sm font-medium">No destinations yet</p>
+                <p className="text-xs text-muted-foreground max-w-[280px]">
+                  Add a Slack or Discord channel to start receiving high-severity alerts.
+                </p>
+              </div>
+            </div>
           )}
 
           {/* Add Channel */}
           {addingProvider ? (
-            <div className="flex items-center gap-3 p-3 rounded-lg border border-dashed">
-              <Select
-                value={addingProvider}
-                onValueChange={(value: 'slack' | 'discord') => {
-                  setAddingProvider(value);
-                  setSelectedChannelId('');
-                }}
-              >
-                <SelectTrigger className="w-[120px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {slackStatus?.connected && (
-                    <SelectItem value="slack">
-                      <div className="flex items-center gap-2">
-                        <SlackIcon className="h-4 w-4" />
-                        Slack
-                      </div>
-                    </SelectItem>
-                  )}
-                  {discordStatus?.connected && (
-                    <SelectItem value="discord">
-                      <div className="flex items-center gap-2">
-                        <DiscordIcon className="h-4 w-4" />
-                        Discord
-                      </div>
-                    </SelectItem>
-                  )}
-                </SelectContent>
-              </Select>
+            <div className="rounded-lg border border-dashed border-primary/30 bg-primary/5 p-4 space-y-3">
+              <div className="flex items-center gap-2 text-xs font-medium text-primary">
+                <Plus className="h-3.5 w-3.5" />
+                Add alert destination
+              </div>
+              <div className="flex items-center gap-2">
+                <Select
+                  value={addingProvider}
+                  onValueChange={(value: 'slack' | 'discord') => {
+                    setAddingProvider(value);
+                    setSelectedChannelId('');
+                  }}
+                >
+                  <SelectTrigger className="w-[120px] h-9">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {slackStatus?.connected && (
+                      <SelectItem value="slack">
+                        <div className="flex items-center gap-2">
+                          <SlackIcon className="h-3.5 w-3.5" />
+                          Slack
+                        </div>
+                      </SelectItem>
+                    )}
+                    {discordStatus?.connected && (
+                      <SelectItem value="discord">
+                        <div className="flex items-center gap-2">
+                          <DiscordIcon className="h-3.5 w-3.5" />
+                          Discord
+                        </div>
+                      </SelectItem>
+                    )}
+                  </SelectContent>
+                </Select>
 
-              <Select
-                value={selectedChannelId}
-                onValueChange={setSelectedChannelId}
-              >
-                <SelectTrigger className="flex-1">
-                  <SelectValue placeholder="Select a channel" />
-                </SelectTrigger>
-                <SelectContent>
-                  {(addingProvider === 'slack' ? slackChannels : discordChannels).map((ch) => (
-                    <SelectItem key={ch.id} value={ch.id}>
-                      #{ch.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                <Select
+                  value={selectedChannelId}
+                  onValueChange={setSelectedChannelId}
+                >
+                  <SelectTrigger className="flex-1 h-9">
+                    <SelectValue placeholder="Select a channel" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {(addingProvider === 'slack' ? slackChannels : discordChannels).map((ch) => (
+                      <SelectItem key={ch.id} value={ch.id}>
+                        #{ch.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
 
-              <Button
-                size="sm"
-                onClick={handleAddChannel}
-                disabled={!selectedChannelId || saving}
-              >
-                {saving ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  'Add'
-                )}
-              </Button>
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={() => {
-                  setAddingProvider(null);
-                  setSelectedChannelId('');
-                }}
-              >
-                Cancel
-              </Button>
+                <Button
+                  size="sm"
+                  className="h-9 px-4"
+                  onClick={handleAddChannel}
+                  disabled={!selectedChannelId || saving}
+                >
+                  {saving ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    'Add'
+                  )}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="h-9 px-3"
+                  onClick={() => {
+                    setAddingProvider(null);
+                    setSelectedChannelId('');
+                  }}
+                >
+                  Cancel
+                </Button>
+              </div>
             </div>
           ) : (
             <div className="space-y-3">
               {/* Reconnect banners */}
               {slackStatus?.connected && !writeScopeStatus.slack?.has_write_scope && (
-                <div className="flex items-center gap-3 p-3 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800">
-                  <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0" />
-                  <p className="text-sm text-amber-800 dark:text-amber-200">
-                    Reconnect Slack to enable notification alerts. The current token lacks{' '}
-                    <code className="font-mono text-xs">chat:write</code> permission.
-                  </p>
+                <div className="flex items-start gap-3 rounded-lg border border-amber-200/60 bg-amber-50/80 dark:border-amber-900/40 dark:bg-amber-950/20 p-4">
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/40">
+                    <AlertTriangle className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
+                  </div>
+                  <div className="flex-1 min-w-0 space-y-1">
+                    <p className="text-sm font-medium text-amber-800 dark:text-amber-200">
+                      Reconnect Slack
+                    </p>
+                    <p className="text-xs text-amber-700/80 dark:text-amber-300/70">
+                      The current token lacks{' '}
+                      <code className="font-mono text-[11px] bg-amber-100/60 dark:bg-amber-900/30 px-1 py-0.5 rounded">
+                        chat:write
+                      </code>{' '}
+                      permission. Reconnect to enable notification alerts.
+                    </p>
+                  </div>
                   <Button
                     size="sm"
                     variant="outline"
-                    className="shrink-0"
+                    className="shrink-0 h-8 border-amber-200 dark:border-amber-800 hover:bg-amber-100 dark:hover:bg-amber-900/40"
                     onClick={() => {
                       window.location.href = `/api/organizations/${orgId}/integrations/slack/connect`;
                     }}
                   >
-                    <RefreshCw className="h-4 w-4 mr-1" />
+                    <RefreshCw className="h-3.5 w-3.5 mr-1.5" />
                     Reconnect
                   </Button>
                 </div>
@@ -455,8 +504,8 @@ export function NotificationsTab() {
                 <Button
                   variant="outline"
                   size="sm"
+                  className="h-9 border-dashed"
                   onClick={() => {
-                    // Default to the first connected provider
                     if (slackStatus?.connected) {
                       setAddingProvider('slack');
                     } else if (discordStatus?.connected) {
@@ -464,28 +513,36 @@ export function NotificationsTab() {
                     }
                   }}
                 >
-                  <Plus className="h-4 w-4 mr-1" />
+                  <Plus className="h-4 w-4 mr-1.5" />
                   Add channel
                 </Button>
               )}
 
               {/* Not connected message */}
               {!slackStatus?.connected && !discordStatus?.connected && (
-                <p className="text-sm text-muted-foreground text-center py-4">
-                  Connect Slack or Discord in the Integrations tab to set up alert destinations.
-                </p>
+                <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed py-10">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
+                    <Hash className="h-5 w-5 text-muted-foreground" />
+                  </div>
+                  <div className="text-center space-y-1">
+                    <p className="text-sm font-medium">No integrations connected</p>
+                    <p className="text-xs text-muted-foreground max-w-[280px]">
+                      Connect Slack or Discord in the Integrations tab to set up alert destinations.
+                    </p>
+                  </div>
+                </div>
               )}
             </div>
           )}
 
           {/* Info note */}
           {channels.length > 0 && (
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-muted-foreground/70 pt-1">
               Alerts are sent to the channels above, not the channel used for feedback ingestion.
             </p>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }
