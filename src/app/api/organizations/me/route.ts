@@ -12,9 +12,11 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    const subdomain = request.headers.get('x-subdomain') || '';
+
     const response = await fetch(`${BACKEND_URL}/api/organizations/me`, {
       method: 'GET',
-      headers: buildBackendHeaders(authHeader),
+      headers: buildBackendHeaders(authHeader, { 'x-subdomain': subdomain }),
     });
 
     const data = await response.json();

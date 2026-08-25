@@ -117,8 +117,8 @@ interface Member {
 export default function OrganizationSettingsPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const { organization, organizations, organizationRole, loading, refreshOrganization } = useOrganization();
-  const { isAuthenticated } = useAuth();
+  const { organization, organizations, organizationRole, loading, orgsFetchStatus, refreshOrganization } = useOrganization();
+  const { isAuthenticated, loading: authLoading } = useAuth();
 
   const [saving, setSaving] = useState(false);
   const [members, setMembers] = useState<Member[]>([]);
@@ -164,13 +164,18 @@ export default function OrganizationSettingsPage() {
   }, []);
 
   useEffect(() => {
+    // Wait for AuthContext to finish loading before making any redirect decisions.
+    // On reload, isAuthenticated is false until checkAuth() completes — redirecting
+    // immediately would send the user to /login even though they have a valid session.
+    if (authLoading) return;
+
     if (!isAuthenticated) {
       router.push('/login');
       return;
     }
 
-    // Only redirect if loading is complete and we have no organizations at all
-    if (!loading && !organization && organizations.length === 0) {
+    // Only redirect if fetch genuinely completed and confirmed zero orgs
+    if (orgsFetchStatus === 'success' && !organization && organizations.length === 0) {
       toast({
         title: 'No organization',
         description: 'You need to create an organization first.',
@@ -178,7 +183,7 @@ export default function OrganizationSettingsPage() {
       });
       router.push('/create-organization');
     }
-  }, [isAuthenticated, loading, organization, organizations, router, toast]);
+  }, [isAuthenticated, authLoading, loading, orgsFetchStatus, organization, organizations, router, toast]);
 
   useEffect(() => {
     if (organization) {

@@ -31,6 +31,7 @@ interface OrganizationContextType {
   organizations: Organization[]; // All organizations user belongs to
   organizationRole: string | null;
   loading: boolean;
+  orgsFetchStatus: 'idle' | 'loading' | 'success' | 'error';
   subdomain: string | null;
   refreshOrganization: () => Promise<void>;
   switchOrganization: (organizationId: string) => Promise<void>;
@@ -42,6 +43,7 @@ const OrganizationContext = createContext<OrganizationContextType>({
   organizations: [],
   organizationRole: null,
   loading: true,
+  orgsFetchStatus: 'idle',
   subdomain: null,
   refreshOrganization: async () => {},
   switchOrganization: async () => {},
@@ -54,6 +56,7 @@ export function OrganizationProvider({ children }: { children: React.ReactNode }
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [organizationRole, setOrganizationRole] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [orgsFetchStatus, setOrgsFetchStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [subdomain, setSubdomain] = useState<string | null>(null);
 
   // Get subdomain from hostname or cookie
@@ -89,11 +92,16 @@ export function OrganizationProvider({ children }: { children: React.ReactNode }
       setOrganizations([]);
       setOrganizationRole(null);
       setLoading(false);
+      // Intentionally do NOT set orgsFetchStatus here.
+      // The initial 'idle' state means "no fetch attempted yet" —
+      // setting it to 'success' here would trick the redirect guard
+      // into thinking we confirmed zero orgs, when we didn't even try.
       return;
     }
 
     try {
       setLoading(true);
+      setOrgsFetchStatus('loading');
 
       // Fetch current organization — api client sends cookies + Authorization header automatically
       try {
@@ -112,11 +120,14 @@ export function OrganizationProvider({ children }: { children: React.ReactNode }
       } catch {
         setOrganizations([]);
       }
+
+      setOrgsFetchStatus('success');
     } catch (error) {
       console.error('Failed to fetch organization:', error);
       setOrganization(null);
       setOrganizations([]);
       setOrganizationRole(null);
+      setOrgsFetchStatus('error');
     } finally {
       setLoading(false);
     }
@@ -230,16 +241,17 @@ export function OrganizationProvider({ children }: { children: React.ReactNode }
 
   return (
     <OrganizationContext.Provider
-      value={{
-        organization,
-        organizations,
-        organizationRole,
-        loading,
-        subdomain,
-        refreshOrganization,
-        switchOrganization,
-        createOrganization,
-      }}
+        value={{
+          organization,
+          organizations,
+          organizationRole,
+          loading,
+          orgsFetchStatus,
+          subdomain,
+          refreshOrganization,
+          switchOrganization,
+          createOrganization,
+        }}
     >
       {children}
     </OrganizationContext.Provider>
