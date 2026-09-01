@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { useOrganization } from '@/context/OrganizationContext';
-import { isPaidPlan } from '@/config/plans';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,26 +35,18 @@ export function OrganizationSwitcher() {
     }
   };
 
-  // Check organization limit based on user's plan
-  const getOrganizationLimit = () => {
-    // Check if user has any active paid plan (starter or pro)
-    const hasPaid = organizations.some(org => isPaidPlan(org));
-    return hasPaid ? 2 : 1;
-  };
+  // Every plan allows 1 organization
+  const organizationLimit = 1;
 
   // Count organizations owned by user
   const ownedOrganizations = organizations.filter(org => org.role === 'owner');
-  const organizationLimit = getOrganizationLimit();
   const canCreateOrganization = ownedOrganizations.length < organizationLimit;
 
   const handleCreateOrganization = () => {
     if (!canCreateOrganization) {
-      const hasStarterPlan = organizationLimit === 2;
       toast({
         title: 'Organization Limit Reached',
-        description: hasStarterPlan 
-          ? `You've reached the maximum of ${organizationLimit} organizations for the Starter plan.`
-          : `You've reached the limit of ${organizationLimit} organization on the Free plan. Upgrade to Starter for 2 organizations.`,
+        description: `Each plan allows 1 organization. Delete an existing organization first.`,
         variant: 'destructive',
       });
       return;
