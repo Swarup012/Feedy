@@ -237,13 +237,6 @@ export default function PricingPage() {
             <CardHeader>
               <div className="flex items-center justify-between mb-2">
                 <CardTitle className="text-2xl">{starterPlan.name}</CardTitle>
-                <div className="relative group">
-                  <div className="absolute -inset-0.5 bg-gradient-to-r from-amber-400 to-orange-500 rounded-full blur opacity-30 group-hover:opacity-60 transition duration-200"></div>
-                  <Badge className="relative bg-white dark:bg-gray-900 text-orange-600 dark:text-amber-400 border border-orange-200 dark:border-amber-800/60 shadow-sm font-bold uppercase tracking-wider text-[10px] px-2.5 py-0.5 flex items-center gap-1">
-                    <Zap className="w-3 h-3 fill-orange-500 dark:fill-amber-500 text-orange-500 dark:text-amber-500" />
-                    Early Access
-                  </Badge>
-                </div>
               </div>
               <div className="mb-4">
                 {billingCycle === "monthly" ? (
@@ -334,7 +327,7 @@ export default function PricingPage() {
             <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
               <Badge className="bg-blue-500 text-white px-4 py-1">
                 <Crown className="w-3 h-3 mr-1" />
-                Most Popular
+                Recommended
               </Badge>
             </div>
 

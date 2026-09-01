@@ -264,9 +264,9 @@ export function getPlanFeatureDisplay(tier: PlanTier): {
     features.push(
       { text: 'Everything in Free, plus:', bold: true, included: true },
       { text: 'Unlimited boards & posts', included: true, highlight: true },
-      { text: 'Up to 5 team members', included: true },
+      { text: 'Up to 5 admins', included: true },
       { text: 'Grow past 125 users (simple pay-as-you-grow pricing)', included: true, highlight: true },
-      { text: 'Connect Slack, Discord & Intercom', included: true },
+      { text: 'Connect Slack, Intercom and more', included: true },
       { text: 'AI chat to explore your feedback', included: true },
       { text: 'Auto-collect feedback from support conversations', included: true },
       { text: 'Custom branding & deeper analytics', included: true },
@@ -278,7 +278,7 @@ export function getPlanFeatureDisplay(tier: PlanTier): {
       { text: 'Fully automatic feedback triage — no manual review needed', included: true, highlight: true },
       { text: 'AI flags what\'s urgent, so nothing slips through', included: true, highlight: true },
       { text: 'Instant alerts when something needs attention', included: true, highlight: true },
-      { text: 'Up to 10 team members', included: true },
+      { text: 'Total 10 admins', included: true },
       { text: 'Your own custom domain', included: true, highlight: true },
       { text: 'Advanced analytics & reporting', included: true },
     );
