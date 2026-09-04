@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Copy, Plus, Trash2, Edit, Code, Check } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import api from "@/lib/api";
 
@@ -373,35 +374,33 @@ export default function WidgetManagementPage() {
           </p>
         </div>
         <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              Create Widget
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Create New Widget</DialogTitle>
+              <DialogTitle className="text-lg font-semibold">Create Widget</DialogTitle>
+              <p className="text-sm text-muted-foreground mt-1">
+                Set up a new embeddable feedback widget for your product.
+              </p>
             </DialogHeader>
-            <form onSubmit={handleCreateWidget} className="space-y-4">
-              <div>
-                <Label htmlFor="name">Widget Name</Label>
+            <form onSubmit={handleCreateWidget} className="space-y-5 pt-2">
+              <div className="space-y-2">
+                <Label htmlFor="name" className="text-sm font-medium">Widget Name <span className="text-red-500">*</span></Label>
                 <Input
                   id="name"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   placeholder="e.g., Product Feedback Widget"
+                  className="h-11"
                   required
                 />
               </div>
 
-              <div>
-                <Label htmlFor="default_board_id">Default Board</Label>
+              <div className="space-y-2">
+                <Label htmlFor="default_board_id" className="text-sm font-medium">Default Board <span className="text-red-500">*</span></Label>
                 <select
                   id="default_board_id"
                   value={formData.default_board_id}
                   onChange={(e) => setFormData({ ...formData, default_board_id: e.target.value })}
-                  className="w-full mt-1 px-3 py-2 border rounded-md"
+                  className="w-full h-11 px-3 border border-border rounded-lg bg-background text-sm"
                   required
                 >
                   <option value="">Select a board</option>
@@ -413,76 +412,85 @@ export default function WidgetManagementPage() {
                 </select>
               </div>
 
-              <div>
-                <Label htmlFor="allowed_domains">Allowed Domains (comma-separated)</Label>
+              <div className="space-y-2">
+                <Label htmlFor="allowed_domains" className="text-sm font-medium">Allowed Domains</Label>
                 <Input
                   id="allowed_domains"
                   value={formData.allowed_domains}
                   onChange={(e) => setFormData({ ...formData, allowed_domains: e.target.value })}
                   placeholder="e.g., yourapp.com, app.yourapp.com"
+                  className="h-11"
                 />
-                <p className="text-xs text-gray-500 mt-1">
-                  Leave empty to allow all domains (not recommended for production)
+                <p className="text-xs text-muted-foreground">
+                  Comma-separated. Leave empty to allow all domains.
                 </p>
               </div>
 
-              <div>
-                <Label htmlFor="primaryColor">Primary Color</Label>
-                <div className="flex gap-2 mt-1">
+              <div className="space-y-2">
+                <Label htmlFor="primaryColor" className="text-sm font-medium">Primary Color</Label>
+                <div className="flex gap-2">
                   <Input
                     id="primaryColor"
                     type="color"
                     value={formData.primaryColor}
                     onChange={(e) => setFormData({ ...formData, primaryColor: e.target.value })}
-                    className="w-20 h-10"
+                    className="w-12 h-11 p-1 cursor-pointer"
                   />
                   <Input
                     value={formData.primaryColor}
                     onChange={(e) => setFormData({ ...formData, primaryColor: e.target.value })}
-                    className="flex-1"
+                    className="flex-1 h-11 font-mono"
                   />
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label>Settings</Label>
-                <div className="space-y-2">
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
+              <div className="space-y-3">
+                <Label className="text-sm font-medium">Settings</Label>
+                <div className="space-y-3 rounded-lg border border-border p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium">Show voting</p>
+                      <p className="text-xs text-muted-foreground">Allow users to upvote posts</p>
+                    </div>
+                    <Switch
                       checked={formData.show_voting}
-                      onChange={(e) => setFormData({ ...formData, show_voting: e.target.checked })}
+                      onCheckedChange={(checked) => setFormData({ ...formData, show_voting: checked })}
                     />
-                    <span className="text-sm">Show voting</span>
-                  </label>
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium">Allow anonymous</p>
+                      <p className="text-xs text-muted-foreground">Let users submit without signing in</p>
+                    </div>
+                    <Switch
                       checked={formData.allow_anonymous}
-                      onChange={(e) => setFormData({ ...formData, allow_anonymous: e.target.checked })}
+                      onCheckedChange={(checked) => setFormData({ ...formData, allow_anonymous: checked })}
                     />
-                    <span className="text-sm">Allow anonymous feedback</span>
-                  </label>
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium">Show roadmap</p>
+                      <p className="text-xs text-muted-foreground">Display public roadmap view</p>
+                    </div>
+                    <Switch
                       checked={formData.show_roadmap}
-                      onChange={(e) => setFormData({ ...formData, show_roadmap: e.target.checked })}
+                      onCheckedChange={(checked) => setFormData({ ...formData, show_roadmap: checked })}
                     />
-                    <span className="text-sm">Show roadmap view</span>
-                  </label>
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium">Require Secure Identity</p>
+                      <p className="text-xs text-muted-foreground">HMAC signature verification</p>
+                    </div>
+                    <Switch
                       checked={formData.require_sdk_identity}
-                      onChange={(e) => setFormData({ ...formData, require_sdk_identity: e.target.checked })}
+                      onCheckedChange={(checked) => setFormData({ ...formData, require_sdk_identity: checked })}
                     />
-                    <span className="text-sm">Require Secure Identity (HMAC)</span>
-                  </label>
+                  </div>
                 </div>
               </div>
 
-              <div className="flex gap-2 pt-4">
+              <div className="flex gap-3 pt-2">
                 <Button type="submit" className="flex-1">
                   Create Widget
                 </Button>
@@ -624,28 +632,32 @@ export default function WidgetManagementPage() {
 
       {/* Edit Dialog */}
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Edit Widget</DialogTitle>
+            <DialogTitle className="text-lg font-semibold">Edit Widget</DialogTitle>
+            <p className="text-sm text-muted-foreground mt-1">
+              Update your widget configuration.
+            </p>
           </DialogHeader>
-          <form onSubmit={handleUpdateWidget} className="space-y-4">
-            <div>
-              <Label htmlFor="edit-name">Widget Name</Label>
+          <form onSubmit={handleUpdateWidget} className="space-y-5 pt-2">
+            <div className="space-y-2">
+              <Label htmlFor="edit-name" className="text-sm font-medium">Widget Name <span className="text-red-500">*</span></Label>
               <Input
                 id="edit-name"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                className="h-11"
                 required
               />
             </div>
 
-            <div>
-              <Label htmlFor="edit-default_board_id">Default Board</Label>
+            <div className="space-y-2">
+              <Label htmlFor="edit-default_board_id" className="text-sm font-medium">Default Board <span className="text-red-500">*</span></Label>
               <select
                 id="edit-default_board_id"
                 value={formData.default_board_id}
                 onChange={(e) => setFormData({ ...formData, default_board_id: e.target.value })}
-                className="w-full mt-1 px-3 py-2 border rounded-md"
+                className="w-full h-11 px-3 border border-border rounded-lg bg-background text-sm"
                 required
               >
                 {boards.map((board) => (
@@ -656,74 +668,84 @@ export default function WidgetManagementPage() {
               </select>
             </div>
 
-            <div>
-              <Label htmlFor="edit-allowed_domains">Allowed Domains (comma-separated)</Label>
+            <div className="space-y-2">
+              <Label htmlFor="edit-allowed_domains" className="text-sm font-medium">Allowed Domains</Label>
               <Input
                 id="edit-allowed_domains"
                 value={formData.allowed_domains}
                 onChange={(e) => setFormData({ ...formData, allowed_domains: e.target.value })}
+                placeholder="Comma-separated domains"
+                className="h-11"
               />
             </div>
 
-            <div>
-              <Label htmlFor="edit-primaryColor">Primary Color</Label>
-              <div className="flex gap-2 mt-1">
+            <div className="space-y-2">
+              <Label htmlFor="edit-primaryColor" className="text-sm font-medium">Primary Color</Label>
+              <div className="flex gap-2">
                 <Input
                   id="edit-primaryColor"
                   type="color"
                   value={formData.primaryColor}
                   onChange={(e) => setFormData({ ...formData, primaryColor: e.target.value })}
-                  className="w-20 h-10"
+                  className="w-12 h-11 p-1 cursor-pointer"
                 />
                 <Input
                   value={formData.primaryColor}
                   onChange={(e) => setFormData({ ...formData, primaryColor: e.target.value })}
-                  className="flex-1"
+                  className="flex-1 h-11 font-mono"
                 />
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label>Settings</Label>
-              <div className="space-y-2">
-                <label className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
+            <div className="space-y-3">
+              <Label className="text-sm font-medium">Settings</Label>
+              <div className="space-y-3 rounded-lg border border-border p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium">Show voting</p>
+                    <p className="text-xs text-muted-foreground">Allow users to upvote posts</p>
+                  </div>
+                  <Switch
                     checked={formData.show_voting}
-                    onChange={(e) => setFormData({ ...formData, show_voting: e.target.checked })}
+                    onCheckedChange={(checked) => setFormData({ ...formData, show_voting: checked })}
                   />
-                  <span className="text-sm">Show voting</span>
-                </label>
-                <label className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
+                </div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium">Allow anonymous</p>
+                    <p className="text-xs text-muted-foreground">Let users submit without signing in</p>
+                  </div>
+                  <Switch
                     checked={formData.allow_anonymous}
-                    onChange={(e) => setFormData({ ...formData, allow_anonymous: e.target.checked })}
+                    onCheckedChange={(checked) => setFormData({ ...formData, allow_anonymous: checked })}
                   />
-                  <span className="text-sm">Allow anonymous feedback</span>
-                </label>
-                <label className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
+                </div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium">Show roadmap</p>
+                    <p className="text-xs text-muted-foreground">Display public roadmap view</p>
+                  </div>
+                  <Switch
                     checked={formData.show_roadmap}
-                    onChange={(e) => setFormData({ ...formData, show_roadmap: e.target.checked })}
+                    onCheckedChange={(checked) => setFormData({ ...formData, show_roadmap: checked })}
                   />
-                  <span className="text-sm">Show roadmap view</span>
-                </label>
-                <label className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
+                </div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium">Require Secure Identity</p>
+                    <p className="text-xs text-muted-foreground">HMAC signature verification</p>
+                  </div>
+                  <Switch
                     checked={formData.require_sdk_identity}
-                    onChange={(e) => setFormData({ ...formData, require_sdk_identity: e.target.checked })}
+                    onCheckedChange={(checked) => setFormData({ ...formData, require_sdk_identity: checked })}
                   />
-                  <span className="text-sm">Require Secure Identity (HMAC)</span>
-                </label>
+                </div>
               </div>
             </div>
 
-            <div className="flex gap-2 pt-4">
+            <div className="flex gap-3 pt-2">
               <Button type="submit" className="flex-1">
-                Update Widget
+                Save Changes
               </Button>
               <Button
                 type="button"
@@ -742,24 +764,39 @@ export default function WidgetManagementPage() {
       </Dialog>
 
       <Dialog open={Boolean(apiSecretDialog)} onOpenChange={() => setApiSecretDialog(null)}>
-        <DialogContent>
+        <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>API Secret — copy now</DialogTitle>
+            <DialogTitle className="text-lg font-semibold">API Secret</DialogTitle>
+            <p className="text-sm text-muted-foreground mt-1">
+              Copy this secret now — it will not be shown again.
+            </p>
           </DialogHeader>
-          <p className="text-sm text-gray-600">
-            Use this server-side only to sign SDK identity (HMAC). It will not be shown again.
-          </p>
-          <code className="block bg-gray-100 p-3 rounded text-xs break-all">{apiSecretDialog}</code>
+          <div className="rounded-lg border border-amber-300 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-700 p-4">
+            <p className="text-xs text-amber-700 dark:text-amber-400 mb-2 font-medium">
+              Use this server-side only to sign SDK identity (HMAC).
+            </p>
+            <div className="flex items-center gap-2 bg-white dark:bg-zinc-900 rounded-md border px-3 py-2">
+              <code className="text-xs font-mono flex-1 break-all select-all">{apiSecretDialog}</code>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => {
+                  if (apiSecretDialog) {
+                    navigator.clipboard.writeText(apiSecretDialog);
+                    toast({ title: "Copied", description: "API secret copied to clipboard" });
+                  }
+                }}
+                className="shrink-0"
+              >
+                <Copy className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
           <Button
             className="w-full"
-            onClick={() => {
-              if (apiSecretDialog) {
-                navigator.clipboard.writeText(apiSecretDialog);
-                toast({ title: "Copied", description: "API secret copied to clipboard" });
-              }
-            }}
+            onClick={() => setApiSecretDialog(null)}
           >
-            Copy API Secret
+            I've saved my secret — Done
           </Button>
         </DialogContent>
       </Dialog>

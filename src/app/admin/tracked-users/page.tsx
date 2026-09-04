@@ -1,13 +1,15 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
+import { useOrganization } from '@/context/OrganizationContext';
 import trackedUsersService, {
   TrackedUsersUsage,
   TrackedUser,
   HistoricalData
 } from '@/services/trackedUsersService';
+import api from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
 import { useErrorHandler } from '@/hooks/useErrorHandler';
 import {
@@ -19,7 +21,9 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Progress } from '@/components/ui/progress';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import {
   Table,
   TableBody,
@@ -46,10 +50,14 @@ import {
   Calendar,
   AlertTriangle,
   CheckCircle,
+  Trash2,
 } from 'lucide-react';
 import {
   LineChart,
   Line,
+  BarChart,
+  Bar,
+  Cell,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -58,12 +66,6 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { Skeleton } from '@/components/ui/skeleton';
-
-const BREAKDOWN_COLORS = {
-  posts: 'bg-blue-500',
-  votes: 'bg-emerald-500',
-  comments: 'bg-amber-500',
-};
 
 function getStatusBadge(status: string, percent: number) {
   const config: Record<string, { label: string; className: string; icon: React.ElementType }> = {
@@ -119,8 +121,11 @@ function getAvatarColor(name: string | null | undefined): string {
 export default function TrackedUsersPage() {
   const router = useRouter();
   const { toast } = useToast();
+  const { organization, organizationRole } = useOrganization();
   const handleLoadError = useErrorHandler({ context: 'loadTrackedUsers', showToast: true, logError: true });
   const handleUsersError = useErrorHandler({ context: 'loadUsersList', showToast: false, logError: true });
+
+  const isAdmin = ['owner', 'admin'].includes(organizationRole ?? '');
 
   const [usage, setUsage] = useState<TrackedUsersUsage | null>(null);
   const [users, setUsers] = useState<TrackedUser[]>([]);
@@ -134,6 +139,12 @@ export default function TrackedUsersPage() {
   const [sortBy, setSortBy] = useState<'created_at' | 'last_activity_at' | 'total_actions'>('last_activity_at');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
+  // Selection & delete state (admin only)
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [deleteMode, setDeleteMode] = useState<'single' | 'bulk' | null>(null);
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
   useEffect(() => {
     loadAllData();
   }, []);
@@ -142,23 +153,27 @@ export default function TrackedUsersPage() {
     loadUsers();
   }, [currentPage, sortBy, sortOrder]);
 
-  const loadAllData = async () => {
-    setLoading(true);
+  const loadUsage = useCallback(async () => {
     try {
-      const [usageResponse, historyResponse] = await Promise.all([
-        trackedUsersService.getUsage(),
-        trackedUsersService.getHistory(6),
-      ]);
-
+      const usageResponse = await trackedUsersService.getUsage();
       if (usageResponse.success) {
         setUsage(usageResponse.data);
       }
+    } catch (error) {
+      handleLoadError(error);
+    }
+  }, [handleLoadError]);
+
+  const loadAllData = async () => {
+    setLoading(true);
+    try {
+      const historyResponse = await trackedUsersService.getHistory(6);
 
       if (historyResponse.success) {
         setHistory(historyResponse.data.history);
       }
 
-      await loadUsers();
+      await Promise.all([loadUsage(), loadUsers()]);
     } catch (error) {
       handleLoadError(error);
     } finally {
@@ -230,6 +245,107 @@ export default function TrackedUsersPage() {
     }
   };
 
+  // ── Delete handlers (admin only) ──────────────────────────────────
+
+  const orgId = organization?.id;
+
+  const handleSingleDeleteClick = (id: string) => {
+    setDeleteTargetId(id);
+    setDeleteMode('single');
+  };
+
+  const handleBulkDeleteClick = () => {
+    if (selectedIds.size === 0) return;
+    setDeleteMode('bulk');
+  };
+
+  const executeDelete = async () => {
+    if (!deleteMode || !orgId) return;
+
+    setDeleting(true);
+    try {
+      let serverCount: number | null = null;
+
+      if (deleteMode === 'single' && deleteTargetId) {
+        const response = await api.delete(
+          `/api/organizations/${orgId}/tracked-users/${deleteTargetId}`
+        );
+        serverCount = response.data.data?.count ?? response.data.count ?? null;
+        toast({ title: 'Tracked user removed' });
+      } else if (deleteMode === 'bulk' && selectedIds.size > 0) {
+        const response = await api.delete(`/api/organizations/${orgId}/tracked-users`, {
+          data: { ids: Array.from(selectedIds) },
+        });
+        serverCount = response.data.data?.count ?? response.data.count ?? null;
+        toast({
+          title: 'Tracked users removed',
+          description: `${selectedIds.size} user(s) deleted.`,
+        });
+      }
+
+      setSelectedIds(new Set());
+      // Use the authoritative count from the server response to clamp
+      // currentPage — avoids fetching a page index that no longer exists.
+      const limit = 50;
+      let targetPage = currentPage;
+      if (serverCount !== null) {
+        const newPages = Math.max(1, Math.ceil(serverCount / limit));
+        targetPage = Math.min(currentPage, newPages);
+      }
+      setCurrentPage(targetPage);
+      // Re-fetch using the clamped page and the fresh usage stats in parallel.
+      await Promise.all([
+        (async () => {
+          const listResponse = await trackedUsersService.getList({
+            page: targetPage,
+            limit,
+            sort: sortBy,
+            order: sortOrder,
+          });
+          if (listResponse.success) {
+            setUsers(listResponse.data.users);
+            setTotalPages(listResponse.data.pagination?.pages ?? 1);
+          }
+        })(),
+        loadUsage(),
+      ]);
+    } catch (error: any) {
+      const message =
+        error?.response?.data?.error ||
+        error?.response?.data?.message ||
+        'Failed to delete tracked user(s). Please try again.';
+      toast({ title: 'Error', description: message, variant: 'destructive' });
+    } finally {
+      setDeleting(false);
+      setDeleteMode(null);
+      setDeleteTargetId(null);
+    }
+  };
+
+  const toggleRow = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleAll = () => {
+    setSelectedIds((prev) => {
+      if (prev.size === users.length) return new Set();
+      return new Set(users.map((u) => u.id));
+    });
+  };
+
+  const getDeleteTargetName = () => {
+    if (deleteMode === 'single' && deleteTargetId) {
+      const user = users.find((u) => u.id === deleteTargetId);
+      return user?.display_name || user?.email || 'this user';
+    }
+    return null;
+  };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -242,7 +358,6 @@ export default function TrackedUsersPage() {
   const totalActions = usage?.breakdown
     ? usage.breakdown.posts + usage.breakdown.votes + usage.breakdown.comments
     : 0;
-  const breakdownTotal = totalActions || 1;
 
   if (loading) {
     return (
@@ -313,6 +428,11 @@ export default function TrackedUsersPage() {
                 <span className="font-medium text-foreground">{usage?.current_period || ''}</span>
               </span>
             </div>
+            {usage?.peak != null && (
+              <p className="text-sm text-muted-foreground mt-2">
+                Peak this month: <span className="font-medium text-foreground">{usage.peak}</span> · Billing is based on your peak, not your current count.
+              </p>
+            )}
           </CardContent>
         </Card>
 
@@ -417,58 +537,51 @@ export default function TrackedUsersPage() {
             </Card>
           )}
 
-          {/* Action Breakdown — horizontal progress bars */}
+          {/* Action Breakdown — bar chart */}
           <Card>
             <CardHeader>
               <CardTitle>Action Breakdown</CardTitle>
               <CardDescription>Distribution of user actions this month</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              {/* Posts */}
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="font-medium">Posts</span>
-                  <span className="text-muted-foreground tabular-nums">{(usage?.breakdown?.posts || 0).toLocaleString()}</span>
-                </div>
-                <div className="h-2 rounded-full bg-muted overflow-hidden">
-                  <div
-                    className="h-full rounded-full bg-blue-500 transition-all duration-500"
-                    style={{ width: `${breakdownTotal > 0 ? ((usage?.breakdown?.posts || 0) / breakdownTotal) * 100 : 0}%` }}
-                  />
-                </div>
-              </div>
-              {/* Votes */}
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="font-medium">Votes</span>
-                  <span className="text-muted-foreground tabular-nums">{(usage?.breakdown?.votes || 0).toLocaleString()}</span>
-                </div>
-                <div className="h-2 rounded-full bg-muted overflow-hidden">
-                  <div
-                    className="h-full rounded-full bg-emerald-500 transition-all duration-500"
-                    style={{ width: `${breakdownTotal > 0 ? ((usage?.breakdown?.votes || 0) / breakdownTotal) * 100 : 0}%` }}
-                  />
-                </div>
-              </div>
-              {/* Comments */}
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="font-medium">Comments</span>
-                  <span className="text-muted-foreground tabular-nums">{(usage?.breakdown?.comments || 0).toLocaleString()}</span>
-                </div>
-                <div className="h-2 rounded-full bg-muted overflow-hidden">
-                  <div
-                    className="h-full rounded-full bg-amber-500 transition-all duration-500"
-                    style={{ width: `${breakdownTotal > 0 ? ((usage?.breakdown?.comments || 0) / breakdownTotal) * 100 : 0}%` }}
-                  />
-                </div>
-              </div>
-              {/* Legend */}
-              <div className="flex items-center gap-4 pt-2 text-xs text-muted-foreground">
-                <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-blue-500" />Posts</span>
-                <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-emerald-500" />Votes</span>
-                <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-amber-500" />Comments</span>
-              </div>
+            <CardContent>
+              {(() => {
+                const breakdownData = [
+                  { name: 'Posts', value: usage?.breakdown?.posts || 0, color: '#3b82f6' },
+                  { name: 'Votes', value: usage?.breakdown?.votes || 0, color: '#10b981' },
+                  { name: 'Comments', value: usage?.breakdown?.comments || 0, color: '#f59e0b' },
+                ];
+                const hasData = breakdownData.some((d) => d.value > 0);
+
+                if (!hasData) {
+                  return (
+                    <div className="flex flex-col items-center justify-center py-12 text-center">
+                      <TrendingUp className="h-10 w-10 text-muted-foreground/40 mb-3" />
+                      <p className="text-sm text-muted-foreground max-w-xs">
+                        No actions recorded yet this month.
+                      </p>
+                    </div>
+                  );
+                }
+
+                return (
+                  <ResponsiveContainer width="100%" height={250}>
+                    <BarChart data={breakdownData} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                      <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+                      <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
+                      <Tooltip
+                        formatter={(value: number) => [value.toLocaleString(), 'Count']}
+                        cursor={{ fill: 'hsl(var(--muted))', opacity: 0.5 }}
+                      />
+                      <Bar dataKey="value" radius={[4, 4, 0, 0]} maxBarSize={60}>
+                        {breakdownData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                );
+              })()}
             </CardContent>
           </Card>
         </div>
@@ -482,6 +595,16 @@ export default function TrackedUsersPage() {
                 <CardDescription>Users who have interacted with your feedback board</CardDescription>
               </div>
               <div className="flex gap-2">
+                {isAdmin && selectedIds.size > 0 && (
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={handleBulkDeleteClick}
+                  >
+                    <Trash2 className="h-4 w-4 mr-1.5" />
+                    Delete {selectedIds.size} selected
+                  </Button>
+                )}
                 <Select value={sortBy} onValueChange={(value: any) => setSortBy(value)}>
                   <SelectTrigger className="w-[180px]">
                     <SelectValue placeholder="Sort by" />
@@ -499,6 +622,15 @@ export default function TrackedUsersPage() {
             <Table>
               <TableHeader>
                 <TableRow>
+                  {isAdmin && (
+                    <TableHead className="w-10">
+                      <Checkbox
+                        checked={selectedIds.size === users.length && users.length > 0}
+                        onCheckedChange={toggleAll}
+                        aria-label="Select all"
+                      />
+                    </TableHead>
+                  )}
                   <TableHead>User</TableHead>
                   <TableHead>First Seen</TableHead>
                   <TableHead>Last Seen</TableHead>
@@ -506,18 +638,28 @@ export default function TrackedUsersPage() {
                   <TableHead className="text-center">Votes</TableHead>
                   <TableHead className="text-center">Comments</TableHead>
                   <TableHead className="text-center">Total</TableHead>
+                  {isAdmin && <TableHead className="w-10" />}
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {users.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
+                    <TableCell colSpan={isAdmin ? 9 : 8} className="text-center text-muted-foreground py-8">
                       No tracked users yet
                     </TableCell>
                   </TableRow>
                 ) : (
                   users.map((user) => (
                     <TableRow key={user.id}>
+                      {isAdmin && (
+                        <TableCell>
+                          <Checkbox
+                            checked={selectedIds.has(user.id)}
+                            onCheckedChange={() => toggleRow(user.id)}
+                            aria-label={`Select ${user.display_name || user.email}`}
+                          />
+                        </TableCell>
+                      )}
                       <TableCell>
                         <div className="flex items-center gap-2.5">
                           <div className={`flex-shrink-0 w-7 h-7 rounded-full ${getAvatarColor(user.display_name)} flex items-center justify-center`}>
@@ -539,6 +681,19 @@ export default function TrackedUsersPage() {
                       <TableCell className="text-center">
                         <Badge variant="secondary" className="tabular-nums">{user.total_actions}</Badge>
                       </TableCell>
+                      {isAdmin && (
+                        <TableCell>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => handleSingleDeleteClick(user.id)}
+                            title="Remove tracked user"
+                          >
+                            <Trash2 className="h-3.5 w-3.5 text-muted-foreground hover:text-red-500" />
+                          </Button>
+                        </TableCell>
+                      )}
                     </TableRow>
                   ))
                 )}
@@ -579,6 +734,41 @@ export default function TrackedUsersPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Delete confirmation dialogs (admin only) */}
+      {isAdmin && (
+        <>
+          <ConfirmDialog
+            open={deleteMode === 'single'}
+            onOpenChange={(open) => { if (!open) { setDeleteMode(null); setDeleteTargetId(null); } }}
+            title="Remove tracked user?"
+            description={
+              <>
+                Are you sure you want to remove <strong>{getDeleteTargetName()}</strong> from
+                your tracked users for this billing period? This action cannot be undone.
+              </>
+            }
+            confirmLabel={deleting ? 'Removing…' : 'Remove'}
+            variant="destructive"
+            onConfirm={executeDelete}
+          />
+
+          <ConfirmDialog
+            open={deleteMode === 'bulk'}
+            onOpenChange={(open) => { if (!open) { setDeleteMode(null); setDeleteTargetId(null); } }}
+            title="Remove tracked users?"
+            description={
+              <>
+                Are you sure you want to remove <strong>{selectedIds.size} user(s)</strong> from
+                your tracked users for this billing period? This action cannot be undone.
+              </>
+            }
+            confirmLabel={deleting ? 'Removing…' : `Remove ${selectedIds.size} user(s)`}
+            variant="destructive"
+            onConfirm={executeDelete}
+          />
+        </>
+      )}
     </ProtectedRoute>
   );
 }

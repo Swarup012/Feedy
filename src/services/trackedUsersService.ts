@@ -21,6 +21,7 @@ export interface TrackedUsersUsage {
     votes: number;
     comments: number;
   };
+  peak: number | null;
   status: 'good' | 'warning' | 'critical' | 'exceeded';
 }
 
@@ -96,8 +97,10 @@ const trackedUsersService = {
           limit: 0,
           usage_percent: 0,
           current_period: '',
+          plan_type: 'free',
           days_remaining: 0,
           breakdown: { posts: 0, votes: 0, comments: 0 },
+          peak: null,
           status: 'good',
         },
         error: error.response?.data?.error || 'Failed to fetch usage',

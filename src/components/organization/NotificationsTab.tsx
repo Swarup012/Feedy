@@ -293,256 +293,255 @@ export function NotificationsTab() {
       </div>
 
       {/* Alert Destinations */}
-      <div className="rounded-xl border border-border bg-card shadow-sm">
-        <div className="flex items-center justify-between p-5 pb-4">
-          <div className="flex items-center gap-4">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted">
-              <Hash className="h-5 w-5 text-muted-foreground" />
-            </div>
-            <div className="space-y-0.5">
-              <h3 className="text-sm font-semibold leading-none tracking-tight">
-                Alert Destinations
-              </h3>
-              <p className="text-sm text-muted-foreground">
-                Choose which channels receive high-severity alerts. Separate from your feedback
-                ingestion channel.
-              </p>
-            </div>
-          </div>
-          {channels.length > 0 && (
-            <Badge variant="secondary" className="text-xs font-medium">
-              {channels.length} {channels.length === 1 ? 'channel' : 'channels'}
-            </Badge>
-          )}
-        </div>
-
-        <div className="px-5 pb-5 space-y-4">
-          {/* Configured Channels */}
-          {channels.length > 0 ? (
-            <div className="space-y-2">
-              {channels.map((channel, index) => (
-                <div
-                  key={channel.id || `${channel.provider}-${channel.channel_id}`}
-                  className={`group flex items-center justify-between rounded-lg border bg-background/50 px-4 py-3 transition-colors hover:bg-accent/50 ${
-                    !channel.enabled ? 'opacity-60' : ''
-                  }`}
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div
-                      className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-md ${
-                        channel.provider === 'slack'
-                          ? 'bg-[#E01E5A]/10'
-                          : 'bg-[#5865F2]/10'
-                      }`}
-                    >
-                      {getProviderIcon(channel.provider)}
-                    </div>
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium truncate">
-                          {channel.channel_name || channel.channel_id}
-                        </span>
-                        {!channel.enabled && (
-                          <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-5 shrink-0">
-                            Disabled
-                          </Badge>
-                        )}
-                      </div>
-                      <span className="text-xs text-muted-foreground capitalize">
-                        {channel.provider}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-1 shrink-0">
-                    <Switch
-                      checked={channel.enabled}
-                      onCheckedChange={(checked) => handleToggleChannel(index, checked)}
-                      disabled={saving}
-                    />
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleRemoveChannel(index)}
-                      disabled={saving}
-                      className="h-8 w-8 p-0 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity hover:text-destructive hover:bg-destructive/10"
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed py-10">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
-                <Bell className="h-5 w-5 text-muted-foreground" />
+      {slackStatus?.connected || discordStatus?.connected ? (
+        <div className="rounded-xl border border-border bg-card shadow-sm">
+          <div className="flex items-center justify-between p-5 pb-4">
+            <div className="flex items-center gap-4">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted">
+                <Hash className="h-5 w-5 text-muted-foreground" />
               </div>
-              <div className="text-center space-y-1">
-                <p className="text-sm font-medium">No destinations yet</p>
-                <p className="text-xs text-muted-foreground max-w-[280px]">
-                  Add a Slack or Discord channel to start receiving high-severity alerts.
+              <div className="space-y-0.5">
+                <h3 className="text-sm font-semibold leading-none tracking-tight">
+                  Alert Destinations
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Choose which channels receive high-severity alerts. Separate from your feedback
+                  ingestion channel.
                 </p>
               </div>
             </div>
-          )}
+            {channels.length > 0 && (
+              <Badge variant="secondary" className="text-xs font-medium">
+                {channels.length} {channels.length === 1 ? 'channel' : 'channels'}
+              </Badge>
+            )}
+          </div>
 
-          {/* Add Channel */}
-          {addingProvider ? (
-            <div className="rounded-lg border border-dashed border-primary/30 bg-primary/5 p-4 space-y-3">
-              <div className="flex items-center gap-2 text-xs font-medium text-primary">
-                <Plus className="h-3.5 w-3.5" />
-                Add alert destination
-              </div>
-              <div className="flex items-center gap-2">
-                <Select
-                  value={addingProvider}
-                  onValueChange={(value: 'slack' | 'discord') => {
-                    setAddingProvider(value);
-                    setSelectedChannelId('');
-                  }}
-                >
-                  <SelectTrigger className="w-[120px] h-9">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {slackStatus?.connected && (
-                      <SelectItem value="slack">
+          <div className="px-5 pb-5 space-y-4">
+            {/* Configured Channels */}
+            {channels.length > 0 ? (
+              <div className="space-y-2">
+                {channels.map((channel, index) => (
+                  <div
+                    key={channel.id || `${channel.provider}-${channel.channel_id}`}
+                    className={`group flex items-center justify-between rounded-lg border bg-background/50 px-4 py-3 transition-colors hover:bg-accent/50 ${
+                      !channel.enabled ? 'opacity-60' : ''
+                    }`}
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div
+                        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-md ${
+                          channel.provider === 'slack'
+                            ? 'bg-[#E01E5A]/10'
+                            : 'bg-[#5865F2]/10'
+                        }`}
+                      >
+                        {getProviderIcon(channel.provider)}
+                      </div>
+                      <div className="min-w-0">
                         <div className="flex items-center gap-2">
-                          <SlackIcon className="h-3.5 w-3.5" />
-                          Slack
+                          <span className="text-sm font-medium truncate">
+                            {channel.channel_name || channel.channel_id}
+                          </span>
+                          {!channel.enabled && (
+                            <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-5 shrink-0">
+                              Disabled
+                            </Badge>
+                          )}
                         </div>
-                      </SelectItem>
-                    )}
-                    {discordStatus?.connected && (
-                      <SelectItem value="discord">
-                        <div className="flex items-center gap-2">
-                          <DiscordIcon className="h-3.5 w-3.5" />
-                          Discord
-                        </div>
-                      </SelectItem>
-                    )}
-                  </SelectContent>
-                </Select>
-
-                <Select
-                  value={selectedChannelId}
-                  onValueChange={setSelectedChannelId}
-                >
-                  <SelectTrigger className="flex-1 h-9">
-                    <SelectValue placeholder="Select a channel" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {(addingProvider === 'slack' ? slackChannels : discordChannels).map((ch) => (
-                      <SelectItem key={ch.id} value={ch.id}>
-                        #{ch.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-
-                <Button
-                  size="sm"
-                  className="h-9 px-4"
-                  onClick={handleAddChannel}
-                  disabled={!selectedChannelId || saving}
-                >
-                  {saving ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    'Add'
-                  )}
-                </Button>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className="h-9 px-3"
-                  onClick={() => {
-                    setAddingProvider(null);
-                    setSelectedChannelId('');
-                  }}
-                >
-                  Cancel
-                </Button>
+                        <span className="text-xs text-muted-foreground capitalize">
+                          {channel.provider}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <Switch
+                        checked={channel.enabled}
+                        onCheckedChange={(checked) => handleToggleChannel(index, checked)}
+                        disabled={saving}
+                      />
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleRemoveChannel(index)}
+                        disabled={saving}
+                        className="h-8 w-8 p-0 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity hover:text-destructive hover:bg-destructive/10"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
               </div>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {/* Reconnect banners */}
-              {slackStatus?.connected && !writeScopeStatus.slack?.has_write_scope && (
-                <div className="flex items-start gap-3 rounded-lg border border-amber-200/60 bg-amber-50/80 dark:border-amber-900/40 dark:bg-amber-950/20 p-4">
-                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/40">
-                    <AlertTriangle className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
-                  </div>
-                  <div className="flex-1 min-w-0 space-y-1">
-                    <p className="text-sm font-medium text-amber-800 dark:text-amber-200">
-                      Reconnect Slack
-                    </p>
-                    <p className="text-xs text-amber-700/80 dark:text-amber-300/70">
-                      The current token lacks{' '}
-                      <code className="font-mono text-[11px] bg-amber-100/60 dark:bg-amber-900/30 px-1 py-0.5 rounded">
-                        chat:write
-                      </code>{' '}
-                      permission. Reconnect to enable notification alerts.
-                    </p>
-                  </div>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="shrink-0 h-8 border-amber-200 dark:border-amber-800 hover:bg-amber-100 dark:hover:bg-amber-900/40"
-                    onClick={() => {
-                      window.location.href = `/api/organizations/${orgId}/integrations/slack/connect`;
+            ) : (
+              <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed py-10">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
+                  <Bell className="h-5 w-5 text-muted-foreground" />
+                </div>
+                <div className="text-center space-y-1">
+                  <p className="text-sm font-medium">No destinations yet</p>
+                  <p className="text-xs text-muted-foreground max-w-[280px]">
+                    Add a Slack or Discord channel to start receiving high-severity alerts.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Add Channel */}
+            {addingProvider ? (
+              <div className="rounded-lg border border-dashed border-primary/30 bg-primary/5 p-4 space-y-3">
+                <div className="flex items-center gap-2 text-xs font-medium text-primary">
+                  <Plus className="h-3.5 w-3.5" />
+                  Add alert destination
+                </div>
+                <div className="flex items-center gap-2">
+                  <Select
+                    value={addingProvider}
+                    onValueChange={(value: 'slack' | 'discord') => {
+                      setAddingProvider(value);
+                      setSelectedChannelId('');
                     }}
                   >
-                    <RefreshCw className="h-3.5 w-3.5 mr-1.5" />
-                    Reconnect
+                    <SelectTrigger className="w-[120px] h-9">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {slackStatus?.connected && (
+                        <SelectItem value="slack">
+                          <div className="flex items-center gap-2">
+                            <SlackIcon className="h-3.5 w-3.5" />
+                            Slack
+                          </div>
+                        </SelectItem>
+                      )}
+                      {discordStatus?.connected && (
+                        <SelectItem value="discord">
+                          <div className="flex items-center gap-2">
+                            <DiscordIcon className="h-3.5 w-3.5" />
+                            Discord
+                          </div>
+                        </SelectItem>
+                      )}
+                    </SelectContent>
+                  </Select>
+
+                  <Select
+                    value={selectedChannelId}
+                    onValueChange={setSelectedChannelId}
+                  >
+                    <SelectTrigger className="flex-1 h-9">
+                      <SelectValue placeholder="Select a channel" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {(addingProvider === 'slack' ? slackChannels : discordChannels).map((ch) => (
+                        <SelectItem key={ch.id} value={ch.id}>
+                          #{ch.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+
+                  <Button
+                    size="sm"
+                    className="h-9 px-4"
+                    onClick={handleAddChannel}
+                    disabled={!selectedChannelId || saving}
+                  >
+                    {saving ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      'Add'
+                    )}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-9 px-3"
+                    onClick={() => {
+                      setAddingProvider(null);
+                      setSelectedChannelId('');
+                    }}
+                  >
+                    Cancel
                   </Button>
                 </div>
-              )}
-
-              {/* Add button */}
-              {(slackStatus?.connected || discordStatus?.connected) && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-9 border-dashed"
-                  onClick={() => {
-                    if (slackStatus?.connected) {
-                      setAddingProvider('slack');
-                    } else if (discordStatus?.connected) {
-                      setAddingProvider('discord');
-                    }
-                  }}
-                >
-                  <Plus className="h-4 w-4 mr-1.5" />
-                  Add channel
-                </Button>
-              )}
-
-              {/* Not connected message */}
-              {!slackStatus?.connected && !discordStatus?.connected && (
-                <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed py-10">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
-                    <Hash className="h-5 w-5 text-muted-foreground" />
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {/* Reconnect banners */}
+                {slackStatus?.connected && !writeScopeStatus.slack?.has_write_scope && (
+                  <div className="flex items-start gap-3 rounded-lg border border-amber-200/60 bg-amber-50/80 dark:border-amber-900/40 dark:bg-amber-950/20 p-4">
+                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/40">
+                      <AlertTriangle className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
+                    </div>
+                    <div className="flex-1 min-w-0 space-y-1">
+                      <p className="text-sm font-medium text-amber-800 dark:text-amber-200">
+                        Reconnect Slack
+                      </p>
+                      <p className="text-xs text-amber-700/80 dark:text-amber-300/70">
+                        The current token lacks{' '}
+                        <code className="font-mono text-[11px] bg-amber-100/60 dark:bg-amber-900/30 px-1 py-0.5 rounded">
+                          chat:write
+                        </code>{' '}
+                        permission. Reconnect to enable notification alerts.
+                      </p>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="shrink-0 h-8 border-amber-200 dark:border-amber-800 hover:bg-amber-100 dark:hover:bg-amber-900/40"
+                      onClick={() => {
+                        window.location.href = `/api/organizations/${orgId}/integrations/slack/connect`;
+                      }}
+                    >
+                      <RefreshCw className="h-3.5 w-3.5 mr-1.5" />
+                      Reconnect
+                    </Button>
                   </div>
-                  <div className="text-center space-y-1">
-                    <p className="text-sm font-medium">No integrations connected</p>
-                    <p className="text-xs text-muted-foreground max-w-[280px]">
-                      Connect Slack or Discord in the Integrations tab to set up alert destinations.
-                    </p>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
+                )}
 
-          {/* Info note */}
-          {channels.length > 0 && (
-            <p className="text-xs text-muted-foreground/70 pt-1">
-              Alerts are sent to the channels above, not the channel used for feedback ingestion.
-            </p>
-          )}
+                {/* Add button */}
+                {(slackStatus?.connected || discordStatus?.connected) && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-9 border-dashed"
+                    onClick={() => {
+                      if (slackStatus?.connected) {
+                        setAddingProvider('slack');
+                      } else if (discordStatus?.connected) {
+                        setAddingProvider('discord');
+                      }
+                    }}
+                  >
+                    <Plus className="h-4 w-4 mr-1.5" />
+                    Add channel
+                  </Button>
+                )}
+              </div>
+            )}
+
+            {/* Info note */}
+            {channels.length > 0 && (
+              <p className="text-xs text-muted-foreground/70 pt-1">
+                Alerts are sent to the channels above, not the channel used for feedback ingestion.
+              </p>
+            )}
+          </div>
         </div>
-      </div>
+      ) : (
+        <Button
+          size="sm"
+          variant="outline"
+          className="border-dashed gap-1.5"
+          onClick={() => {
+            window.location.href = '/admin/organization?tab=integrations';
+          }}
+        >
+          <Plus className="h-3.5 w-3.5" />
+          Add Integration
+        </Button>
+      )}
     </div>
   );
 }

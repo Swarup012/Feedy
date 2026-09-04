@@ -15,7 +15,7 @@ export async function GET(
       );
     }
 
-    const { organizationId } = params;
+    const { organizationId } = await params;
 
     const response = await fetch(`${BACKEND_URL}/api/organizations/${organizationId}/members`, {
       method: 'GET',

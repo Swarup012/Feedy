@@ -883,7 +883,7 @@ function IntegrationsPageInner() {
               <h2 className="text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">Add Integrations</h2>
               <p className="text-sm text-muted-foreground mt-1">Supercharge your workflow by connecting with the tools you already use.</p>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-[3.75rem]">
               {!isDiscordActive && (
                 <IntegrationCardAdd
                   name="Discord"
@@ -920,13 +920,12 @@ function IntegrationsPageInner() {
                   onConnect={handleConnectGithub}
                 />
               )}
-              <div className="rounded-xl border bg-card p-5 flex flex-col opacity-60 cursor-not-allowed">
-                <div className="h-10 w-10 rounded-lg bg-amber-500/10 flex items-center justify-center mb-3">
+              <div className="rounded-xl border bg-card px-6 py-5 flex items-center gap-4 opacity-60 cursor-not-allowed">
+                <div className="h-12 w-12 rounded-lg bg-amber-500/10 flex items-center justify-center shrink-0">
                   <Mail className="h-5 w-5 text-amber-600" />
                 </div>
-                <h3 className="font-semibold text-sm">Email</h3>
-                <p className="text-xs text-muted-foreground mt-1.5 flex-1 leading-relaxed">Collect feedback via email and turn it into organized suggestions.</p>
-                <Button size="sm" variant="outline" className="mt-4 w-full" disabled>Coming Soon</Button>
+                <h3 className="font-semibold text-base">Email</h3>
+                <Button size="sm" variant="outline" disabled className="h-9 text-sm px-4 ml-auto">Coming Soon</Button>
               </div>
             </div>
           </section>

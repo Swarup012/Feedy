@@ -437,7 +437,7 @@ export default function OrganizationSettingsPage() {
 
   const copySubdomain = () => {
     if (!organization) return;
-    const url = `https://${organization.subdomain}.fady.com`;
+    const url = `https://${organization.subdomain}.faddy.site`;
     navigator.clipboard.writeText(url);
     setCopiedSubdomain(true);
     setTimeout(() => setCopiedSubdomain(false), 2000);
@@ -541,37 +541,38 @@ export default function OrganizationSettingsPage() {
 
             {/* General Settings */}
             <TabsContent value="general">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Organization Details</CardTitle>
-                  <CardDescription>
-                    Update your organization's basic information
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <Label htmlFor="name">Organization Name</Label>
+              <div className="max-w-2xl mx-auto space-y-8 pb-12">
+                <div>
+                  <h2 className="text-lg font-semibold text-foreground">Organization Details</h2>
+                  <p className="text-sm text-muted-foreground mt-1">Update your organization's basic information</p>
+                </div>
+
+                <div className="space-y-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="name" className="text-sm font-medium text-foreground">Organization Name</Label>
                     <Input
                       id="name"
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       disabled={organizationRole !== 'owner'}
+                      className="h-11"
                     />
                   </div>
 
-                  <div>
-                    <Label htmlFor="description">Description</Label>
+                  <div className="space-y-2">
+                    <Label htmlFor="description" className="text-sm font-medium text-foreground">Description</Label>
                     <Textarea
                       id="description"
                       value={formData.description}
                       onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                       disabled={organizationRole !== 'owner'}
                       rows={3}
+                      className="resize-none h-auto"
                     />
                   </div>
 
-                  <div>
-                    <Label htmlFor="website">Website</Label>
+                  <div className="space-y-2">
+                    <Label htmlFor="website" className="text-sm font-medium text-foreground">Website</Label>
                     <Input
                       id="website"
                       type="url"
@@ -579,17 +580,19 @@ export default function OrganizationSettingsPage() {
                       value={formData.website}
                       onChange={(e) => setFormData({ ...formData, website: e.target.value })}
                       disabled={organizationRole !== 'owner'}
+                      className="h-11"
                     />
                   </div>
 
-                  <div>
-                    <Label htmlFor="industry">Industry</Label>
+                  <div className="space-y-2">
+                    <Label htmlFor="industry" className="text-sm font-medium text-foreground">Industry</Label>
                     <Input
                       id="industry"
                       placeholder="e.g., SaaS, E-commerce"
                       value={formData.industry}
                       onChange={(e) => setFormData({ ...formData, industry: e.target.value })}
                       disabled={organizationRole !== 'owner'}
+                      className="h-11"
                     />
                   </div>
 
@@ -598,108 +601,113 @@ export default function OrganizationSettingsPage() {
                       {saving ? 'Saving...' : 'Save Changes'}
                     </Button>
                   )}
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             </TabsContent>
 
             {/* Members Tab */}
             <TabsContent value="members">
-              <div className="space-y-6">
-                {/* Invite Member - New System */}
-                {organizationRole === 'owner' && (
-                  <>
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>Invite Team Members</CardTitle>
-                        <CardDescription>
-                          Send email invitations to add new members to your organization
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <Button onClick={() => setShowInviteModal(true)}>
-                          <Mail className="h-4 w-4 mr-2" />
-                          Invite Member
-                        </Button>
-                      </CardContent>
-                    </Card>
+              <div className="max-w-4xl mx-auto space-y-8 pb-12">
+                {/* Header with Invite button */}
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-lg font-semibold text-foreground">Team Members</h2>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {members.length} / {organization.max_users} members
+                    </p>
+                  </div>
+                  {organizationRole === 'owner' && (
+                    <Button onClick={() => setShowInviteModal(true)} className="gap-1.5">
+                      <Mail className="h-4 w-4" /> Invite Member
+                    </Button>
+                  )}
+                </div>
 
-                    {/* Pending Invitations */}
-                    <PendingInvitations
-                      organizationId={organization.id}
-                      refreshTrigger={invitationRefreshTrigger}
-                    />
-                  </>
+                {/* Pending Invitations */}
+                {organizationRole === 'owner' && (
+                  <PendingInvitations
+                    organizationId={organization.id}
+                    refreshTrigger={invitationRefreshTrigger}
+                  />
                 )}
 
-                {/* Members List */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Team Members</CardTitle>
-                    <CardDescription>
-                      {members.length} / {organization.max_users} members
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    {loadingMembers ? (
+                {/* Members Table */}
+                <div className="border border-border rounded-lg overflow-hidden">
+                  {loadingMembers ? (
+                    <div className="p-6">
                       <MembersTableSkeleton />
-                    ) : (
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead>Name</TableHead>
-                            <TableHead>Email</TableHead>
-                            <TableHead>Role</TableHead>
-                            <TableHead>Joined</TableHead>
-                            <TableHead className="text-right">Actions</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {members.map((member) => (
-                            <TableRow key={member.id}>
-                              <TableCell className="font-medium">{member.name}</TableCell>
-                              <TableCell>{member.email}</TableCell>
-                              <TableCell>
-                                {organizationRole === 'owner' && member.organization_role !== 'owner' ? (
-                                  <select
-                                    className="px-3 py-1 border rounded-md text-sm"
-                                    value={member.organization_role}
-                                    onChange={(e) => handleUpdateMemberRole(member.id, e.target.value)}
+                    </div>
+                  ) : members.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-16 text-center">
+                      <Users className="h-10 w-10 text-muted-foreground/40 mb-3" />
+                      <p className="text-sm text-muted-foreground">No team members yet</p>
+                      <p className="text-xs text-muted-foreground mt-1">Invite members to get started</p>
+                    </div>
+                  ) : (
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="bg-muted/50">
+                          <TableHead>Member</TableHead>
+                          <TableHead>Role</TableHead>
+                          <TableHead>Joined</TableHead>
+                          <TableHead className="text-right w-16"></TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {members.map((member) => (
+                          <TableRow key={member.id}>
+                            <TableCell>
+                              <div className="flex items-center gap-3">
+                                <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center text-xs font-medium text-muted-foreground">
+                                  {member.name?.[0]?.toUpperCase() || '?'}
+                                </div>
+                                <div className="min-w-0">
+                                  <p className="text-sm font-medium text-foreground truncate">{member.name}</p>
+                                  <p className="text-xs text-muted-foreground truncate">{member.email}</p>
+                                </div>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              {organizationRole === 'owner' && member.organization_role !== 'owner' ? (
+                                <select
+                                  className="px-2.5 py-1 border border-border rounded-md text-sm bg-background"
+                                  value={member.organization_role}
+                                  onChange={(e) => handleUpdateMemberRole(member.id, e.target.value)}
+                                >
+                                  <option value="member">Member</option>
+                                  <option value="admin">Admin</option>
+                                  <option value="owner">Owner</option>
+                                </select>
+                              ) : (
+                                <Badge variant={getRoleBadgeVariant(member.organization_role)} className="capitalize">
+                                  <span className="mr-1">{getRoleIcon(member.organization_role)}</span>
+                                  {member.organization_role}
+                                </Badge>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-sm text-muted-foreground">
+                              {new Date(member.created_at).toLocaleDateString()}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              {(['owner', 'admin'] as string[]).includes(organizationRole ?? '') &&
+                                member.organization_role !== 'owner' && (
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8"
+                                    onClick={() => handleRemoveMember(member.id, member.name)}
+                                    id={`remove-member-${member.id}`}
                                   >
-                                    <option value="member">Member</option>
-                                    <option value="admin">Admin</option>
-                                    <option value="owner">Owner</option>
-                                  </select>
-                                ) : (
-                                  <Badge variant={getRoleBadgeVariant(member.organization_role)}>
-                                    <span className="mr-1">{getRoleIcon(member.organization_role)}</span>
-                                    {member.organization_role}
-                                  </Badge>
+                                    <Trash2 className="h-3.5 w-3.5 text-muted-foreground hover:text-red-500" />
+                                  </Button>
                                 )}
-                              </TableCell>
-                              <TableCell>
-                                {new Date(member.created_at).toLocaleDateString()}
-                              </TableCell>
-                              <TableCell className="text-right">
-                                {/* Show Remove button for owner/admin, but never for the org owner themselves */}
-                                {(['owner', 'admin'] as string[]).includes(organizationRole ?? '') &&
-                                  member.organization_role !== 'owner' && (
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={() => handleRemoveMember(member.id, member.name)}
-                                      id={`remove-member-${member.id}`}
-                                    >
-                                      <Trash2 className="h-4 w-4 text-red-500" />
-                                    </Button>
-                                  )}
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    )}
-                  </CardContent>
-                </Card>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  )}
+                </div>
               </div>
             </TabsContent>
 
@@ -718,7 +726,7 @@ export default function OrganizationSettingsPage() {
                       <Label>Current Subdomain</Label>
                       <div className="flex items-center gap-2 mt-2">
                         <code className="px-4 py-2 bg-muted rounded-md flex-1">
-                          {organization.subdomain}.fady.com
+                          {organization.subdomain}.faddy.site
                         </code>
                         <Button variant="outline" size="icon" onClick={copySubdomain}>
                           {copiedSubdomain ? (
@@ -740,12 +748,12 @@ export default function OrganizationSettingsPage() {
                       <Label>Public Access URL</Label>
                       <div className="flex items-center gap-2 mt-2">
                         <Input
-                          value={`https://${organization.subdomain}.fady.com`}
+                          value={`https://${organization.subdomain}.faddy.site`}
                           readOnly
                           className="flex-1"
                         />
                         <Button variant="outline" asChild>
-                          <a href={`https://${organization.subdomain}.fady.com`} target="_blank" rel="noopener noreferrer">
+                          <a href={`https://${organization.subdomain}.faddy.site`} target="_blank" rel="noopener noreferrer">
                             <ExternalLink className="h-4 w-4" />
                           </a>
                         </Button>
@@ -835,6 +843,29 @@ export default function OrganizationSettingsPage() {
                       subscription={billingSubscription}
                       onSuccess={loadBillingData}
                     />
+                  )}
+
+                  {/* Tracked Users — admin/owner only */}
+                  {['owner', 'admin'].includes(organizationRole ?? '') && organization && (
+                    <Card>
+                      <CardContent className="p-6">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h3 className="text-sm font-semibold">Tracked Users</h3>
+                            <p className="text-sm text-muted-foreground mt-1">
+                              View and manage tracked users, usage stats, and historical data.
+                            </p>
+                          </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => router.push('/admin/tracked-users')}
+                          >
+                            Manage Tracked Users →
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
                   )}
                 </div>
               )}
