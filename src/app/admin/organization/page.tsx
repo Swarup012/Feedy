@@ -66,7 +66,6 @@ import { CancelFlow } from '@/components/billing/CancelFlow';
 import { InvoiceHistory } from '@/components/billing/InvoiceHistory';
 import { CustomDomainSettings } from '@/components/organization/CustomDomainSettings';
 import { NotificationsTab } from '@/components/organization/NotificationsTab';
-import { PaidFeatureGate } from '@/components/PaidFeatureGate';
 import { ProFeatureGate } from '@/components/ProFeatureGate';
 import { motion } from 'motion/react';
 
@@ -769,11 +768,11 @@ export default function OrganizationSettingsPage() {
               </div>
             </TabsContent>
 
-            {/* Webhooks Tab */}
+            {/* Webhooks Tab — Pro only */}
             <TabsContent value="webhooks">
-              <PaidFeatureGate featureName="Webhooks">
+              <ProFeatureGate featureName="Webhooks">
                 <WebhooksPage />
-              </PaidFeatureGate>
+              </ProFeatureGate>
             </TabsContent>
 
             {/* API Keys Tab */}

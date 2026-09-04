@@ -38,14 +38,13 @@ export default function PlansComparisonPage() {
               "Unlimited boards & posts",
               "125 tracked users included",
               "25-user grace buffer (overage starts at 150)",
-              "Overage: $6 per 50 users",
+              "Overage: $12 per 50 users",
               "Unlimited team members, 5 admins",
               "Unlimited roadmap items",
               "Autopilot (manual mode)",
               "AI Chat",
               "Slack, Discord & Intercom integrations",
               "Custom branding",
-              "Webhooks & API access",
             ],
           },
           {
@@ -56,7 +55,7 @@ export default function PlansComparisonPage() {
               "Everything in Starter, plus:",
               "125 tracked users included",
               "25-user grace buffer (overage starts at 150)",
-              "Overage: $6 per 50 users",
+              "Overage: $12 per 50 users",
               "Up to 10 admins",
               "Autopilot (automatic mode)",
               "AI severity classification",
@@ -65,6 +64,7 @@ export default function PlansComparisonPage() {
               "1 custom domain",
               "Priority support",
               "Advanced security",
+              "Webhooks & API access",
             ],
           },
         ].map((plan) => (
@@ -90,7 +90,7 @@ export default function PlansComparisonPage() {
         <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-3">Tracked Users &amp; Overage</h3>
         <p className="text-sm text-slate-600 dark:text-slate-400 mb-3">
           Both Starter and Pro include <strong>125 tracked users</strong> per month with a <strong>25-user grace buffer</strong>.
-          Overage begins at 150 users, billed at <strong>$6 per block of 50 users</strong> via Paddle.
+          Overage begins at 150 users, billed at <strong>$12 per block of 50 users</strong> via Paddle.
         </p>
         <p className="text-sm text-slate-600 dark:text-slate-400">
           Free plan has a hard cap of 20 tracked users — no overage is available. When the limit is reached, new users can still submit feedback but are not tracked.

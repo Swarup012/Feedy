@@ -102,7 +102,7 @@ export const PLANS: Record<PlanTier, PlanConfig> = {
       overage_allowed: true,
       // Feature access (tier gating)
       widget: true,
-      webhooks_api: true,
+      webhooks_api: false,
       integrations: true,
       autopilot_manual: true,
       ai_chat: true,
@@ -115,7 +115,7 @@ export const PLANS: Record<PlanTier, PlanConfig> = {
     overage: {
       grace_buffer: 25,
       effective_limit: 150,
-      price_per_block: 6.0,
+      price_per_block: 12.0,
       block_size: 50,
     },
   },
@@ -152,7 +152,7 @@ export const PLANS: Record<PlanTier, PlanConfig> = {
     overage: {
       grace_buffer: 25,
       effective_limit: 150,
-      price_per_block: 6.0,
+      price_per_block: 12.0,
       block_size: 50,
     },
   },
@@ -270,7 +270,6 @@ export function getPlanFeatureDisplay(tier: PlanTier): {
       { text: 'AI chat to explore your feedback', included: true },
       { text: 'Auto-collect feedback from support conversations', included: true },
       { text: 'Custom branding & deeper analytics', included: true },
-      { text: 'Developer access (API & webhooks)', included: true },
     );
   } else {
     features.push(
@@ -281,6 +280,7 @@ export function getPlanFeatureDisplay(tier: PlanTier): {
       { text: 'Total 10 admins', included: true },
       { text: 'Your own custom domain', included: true, highlight: true },
       { text: 'Advanced analytics & reporting', included: true },
+      { text: 'Developer access (API & webhooks)', included: true, highlight: true },
     );
   }
 

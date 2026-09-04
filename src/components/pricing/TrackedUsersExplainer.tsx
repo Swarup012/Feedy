@@ -12,7 +12,7 @@ const TRACKED_USERS = PLANS.starter.features.tracked_users;   // 125
 const OVERAGE_GRACE = PLANS.starter.overage!.grace_buffer;    // 25
 const OVERAGE_EFFECTIVE = PLANS.starter.overage!.effective_limit; // 150
 const OVERAGE_BLOCK = PLANS.starter.overage!.block_size;      // 50
-const OVERAGE_PRICE = PLANS.starter.overage!.price_per_block; // $6
+const OVERAGE_PRICE = PLANS.starter.overage!.price_per_block; // $12
 
 // Stepped snap points that map to slider index 0-7
 const SNAP_POINTS = [20, 100, 250, 500, 1000, 2000, 5000, 10000] as const;
@@ -25,10 +25,10 @@ function formatUsers(n: number): string {
  * Overage formula (matches backend plans.config.js):
  *   - 125 tracked users included in both Starter & Pro
  *   - 25-user grace buffer → charges begin after 150 total
- *   - $6 per block of 50 additional users, rounded UP
+ *   - $12 per block of 50 additional users, rounded UP
  *
- * Example: 200 users → ceil((200-150)/50)*6 = ceil(1.0)*6 = $6/mo
- * Example: 201 users → ceil((201-150)/50)*6 = ceil(1.02)*6 = 2*6 = $12/mo
+ * Example: 200 users → ceil((200-150)/50)*12 = ceil(1.0)*12 = $12/mo
+ * Example: 201 users → ceil((201-150)/50)*12 = ceil(1.02)*12 = 2*12 = $24/mo
  */
 function calcOverage(users: number): { extraCost: number; extraBlocks: number } {
   const extraBlocks = Math.ceil(Math.max(0, users - OVERAGE_EFFECTIVE) / OVERAGE_BLOCK);

@@ -64,7 +64,7 @@ export default function PlanLimitsPage() {
             A <strong>tracked user</strong> is any unique external person who submits feedback, upvotes, or comments. Internal team members are not counted. Users are identified by email address, deduplicated per billing period.
           </p>
           <p className="text-sm text-slate-600 dark:text-slate-400 mb-3">
-            Both Starter and Pro include 125 users with a 25-user grace buffer. Charges begin at 150 users at <strong>$6 per block of 50</strong>, billed monthly via Paddle.
+            Both Starter and Pro include 125 users with a 25-user grace buffer. Charges begin at 150 users at <strong>$12 per block of 50</strong>, billed monthly via Paddle.
           </p>
           <p className="text-sm text-slate-600 dark:text-slate-400">
             Free plan has a hard cap of 20 — no overage. When reached, new users can still submit feedback but are not tracked.

@@ -359,7 +359,7 @@ export function TrackedUsersWidget({ onUsageClick, variant = 'basic' }: TrackedU
                         Overage This Month: ${overageStatus.overageCost}
                       </div>
                       <div className="text-red-800 dark:text-red-200 mt-0.5">
-                        {overageStatus.overageUsers} users over limit ({overageStatus.overageBlocks} block{overageStatus.overageBlocks > 1 ? 's' : ''} × $6)
+                        {overageStatus.overageUsers} users over limit ({overageStatus.overageBlocks} block{overageStatus.overageBlocks > 1 ? 's' : ''} × ${PLANS.starter.overage!.price_per_block})
                       </div>
                     </div>
                   </div>
