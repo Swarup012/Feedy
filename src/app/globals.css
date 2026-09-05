@@ -62,7 +62,7 @@
 @layer base {
   :root {
     /* 60% - Main Content & Background (Canny uses clean, breathable surfaces) */
-    --background: 0 0% 99%;        /* Clean white (#fdfdfd) */
+    --background: 0 0% 98%;        /* Off-white (#f9f9f9) */
     --foreground: 174 43% 12%;        /* Deepest Teal for text readability */
 
     --card: 0 0% 100%;                /* Pure White for posts/cards */
@@ -86,8 +86,8 @@
     --accent-foreground: 221 83% 45%;
 
     /* Borders & Inputs */
-    --border: 174 20% 88%;            /* Subtle Teal-Gray border */
-    --input: 174 20% 88%;
+    --border: 0 0% 85%;              /* Neutral gray (#dadada) */
+    --input: 0 0% 85%;
     --ring: 221 83% 55%;              /* Your Blue for focus states */
 
     --destructive: 0 84% 60%;

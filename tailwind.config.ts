@@ -84,14 +84,15 @@ export default {
   				'4': 'hsl(var(--chart-4))',
   				'5': 'hsl(var(--chart-5))'
   			},
-  			brand: {
-  				discord: 'var(--brand-discord)',
-  				intercom: 'var(--brand-intercom)',
-  				slack: 'var(--brand-slack)',
-  				'slack-dark': 'var(--brand-slack-dark)',
-  				github: 'var(--brand-github)',
-  				'github-light': 'var(--brand-github-light)',
-  			}
+			brand: {
+				discord: 'var(--brand-discord)',
+				intercom: 'var(--brand-intercom)',
+				slack: 'var(--brand-slack)',
+				'slack-dark': 'var(--brand-slack-dark)',
+				github: 'var(--brand-github)',
+				'github-light': 'var(--brand-github-light)',
+			},
+			white: '#f9f9f9',
   		},
   		borderRadius: {
   			lg: 'var(--radius)',

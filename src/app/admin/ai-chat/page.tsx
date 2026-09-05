@@ -5,6 +5,8 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { PaidFeatureGate } from "@/components/PaidFeatureGate";
 import { useOrganization } from "@/context/OrganizationContext";
 import api, { isPlanUpgradeRequired } from "@/lib/api";
+import { resolvePlan } from "@/config/plans";
+import { MessageLimitCounter } from "@/components/MessageLimitCounter";
 import { Button } from "@/components/ui/button";
 import {
   Send,
@@ -388,6 +390,7 @@ function AiChatContent() {
   const { organization } = useOrganization();
   const orgId = organization?.id;
   const orgName = organization?.name || "your organization";
+  const currentPlan = resolvePlan(organization);
 
   // Conversations
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -402,6 +405,8 @@ function AiChatContent() {
   const [input, setInput] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
   const [rateLimitError, setRateLimitError] = useState<string | null>(null);
+  const [limitReached, setLimitReached] = useState(false);
+  const [usageRefreshKey, setUsageRefreshKey] = useState(0);
 
   // Sidebar mobile toggle
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -580,6 +585,14 @@ function AiChatContent() {
           setMessages((prev) => prev.filter((m) => m.id !== aiMsgId));
           return;
         }
+        if (response.status === 403) {
+          const json = await response.json().catch(() => ({}));
+          if (json.code === "AI_CHAT_LIMIT_REACHED") {
+            setLimitReached(true);
+            setMessages((prev) => prev.filter((m) => m.id !== aiMsgId));
+            return;
+          }
+        }
         if (!response.ok || !response.body)
           throw new Error(`HTTP ${response.status}`);
 
@@ -658,6 +671,8 @@ function AiChatContent() {
               };
               return [updated, ...prev.filter((c) => c.id !== convId)];
             });
+            // Refresh the usage counter
+            setUsageRefreshKey((k) => k + 1);
           } catch (saveErr) {
             console.warn("Message streamed OK but DB save failed:", saveErr);
           }
@@ -706,6 +721,7 @@ function AiChatContent() {
     setActiveConvId(null);
     setMessages([]);
     setRateLimitError(null);
+    setLimitReached(false);
     setSidebarOpen(false);
   };
 
@@ -799,7 +815,27 @@ function AiChatContent() {
 
           {/* Input */}
           <div className="flex-shrink-0 bg-card/50 backdrop-blur-sm px-3 py-3">
-            <div className="max-w-3xl mx-auto">
+            <div className="max-w-3xl mx-auto space-y-2">
+              {/* Message limit counter (starter only) */}
+              {orgId && currentPlan !== "free" && (
+                <MessageLimitCounter
+                  orgId={orgId}
+                  plan={currentPlan}
+                  refreshKey={usageRefreshKey}
+                />
+              )}
+
+              {/* Limit reached banner */}
+              {limitReached && (
+                <div className="rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 px-3 py-2 text-xs text-amber-800 dark:text-amber-200">
+                  You've reached your monthly message limit.{" "}
+                  <a href="/admin/organization?tab=billing" className="font-semibold underline">
+                    Upgrade to Pro
+                  </a>{" "}
+                  for unlimited AI chat.
+                </div>
+              )}
+
               <div
                 className={`flex items-end gap-2 rounded-2xl border transition-all duration-200 ${isStreaming ? "border-primary/40 bg-primary/5" : "border-border bg-background"} shadow-sm px-3 py-2.5`}
               >
@@ -817,11 +853,13 @@ function AiChatContent() {
                       Math.min(e.target.scrollHeight, 160) + "px";
                   }}
                   onKeyDown={handleKeyDown}
-                  disabled={isStreaming}
+                  disabled={isStreaming || limitReached}
                   placeholder={
-                    isStreaming
-                      ? "AI is thinking…"
-                      : "Ask about your feedback, clusters, or priorities…"
+                    limitReached
+                      ? "Message limit reached — upgrade to Pro for unlimited"
+                      : isStreaming
+                        ? "AI is thinking…"
+                        : "Ask about your feedback, clusters, or priorities…"
                   }
                   rows={1}
                   className="flex-1 resize-none bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none focus-visible:ring-0 leading-relaxed min-h-[24px] max-h-[160px] disabled:opacity-50"
@@ -829,7 +867,7 @@ function AiChatContent() {
                 <Button
                   size="sm"
                   onClick={() => sendMessage()}
-                  disabled={!input.trim() || isStreaming}
+                  disabled={!input.trim() || isStreaming || limitReached}
                   className="flex-shrink-0 min-w-[44px] min-h-[44px] p-0 rounded-xl"
                   aria-label="Send message"
                 >
