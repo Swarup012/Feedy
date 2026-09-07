@@ -24,17 +24,34 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import {
-  Bot,
   Check,
   Loader2,
   X,
   ExternalLink,
-  Inbox,
+  Plus,
   Sparkles,
-  Plug,
 } from 'lucide-react';
 
 type StatusFilter = AutopilotSuggestionStatus | 'all';
+
+const TAB_LIST: { key: StatusFilter; label: string }[] = [
+  { key: 'pending', label: 'Pending' },
+  { key: 'approved', label: 'Approved' },
+  { key: 'rejected', label: 'Rejected' },
+];
+
+const SOURCE_DOT: Record<string, string> = {
+  intercom: 'bg-indigo-500',
+  github: 'bg-slate-500',
+  discord: 'bg-violet-500',
+};
+
+const EMPTY_MESSAGES: Record<StatusFilter, { bold: string; muted: string }> = {
+  pending: { bold: 'Nothing pending', muted: 'Submit text on the left to get started.' },
+  approved: { bold: 'Nothing approved yet', muted: 'Approved drafts will show up here.' },
+  rejected: { bold: 'Nothing dismissed yet', muted: 'Dismissed drafts will show up here.' },
+  all: { bold: 'No suggestions yet', muted: 'Submit text on the left to get started.' },
+};
 
 function formatDate(iso: string) {
   try {
@@ -206,226 +223,235 @@ function AutopilotPageInner() {
     );
   }
 
+  const empty = EMPTY_MESSAGES[statusFilter] || EMPTY_MESSAGES.all;
+
   return (
     <PaidFeatureGate featureName="Autopilot">
-    <div className="mx-auto h-full max-w-6xl overflow-y-auto px-4 py-6 sm:px-6">
+    <div className="mx-auto h-full max-w-6xl flex flex-col px-4 py-6 sm:px-6">
       {/* Header */}
-      <header className="mb-6 space-y-2">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
-              <Bot className="h-5 w-5 text-primary" />
-            </div>
-            <div>
-              <h1 className="font-switzer text-lg font-semibold tracking-tight">Autopilot</h1>
-              <p className="text-sm text-muted-foreground">
-                Paste raw text from chats, emails, or reviews. AI detects feedback and queues a draft for your approval.
-              </p>
-            </div>
+      <header className="shrink-0 mb-6">
+        <div className="flex items-start justify-between">
+          <div>
+            <h1 className="font-switzer text-lg font-semibold tracking-tight">Autopilot</h1>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Paste raw text from chats, emails, or reviews. AI detects feedback and queues a draft for your approval.
+            </p>
           </div>
           <Link href="/admin/organization?tab=integrations">
             <Button variant="outline" size="sm" className="gap-2">
-              <Plug className="h-4 w-4" />
-              Connect Apps
+              <Plus className="h-4 w-4" />
+              Connect apps
             </Button>
           </Link>
         </div>
+        <div className="mt-5 h-px w-full bg-border" />
       </header>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[340px_1fr] gap-6 items-start">
-        {/* Left: Submit */}
-        <section className="rounded-xl border bg-card shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden lg:sticky lg:top-6">
-          <div className="px-5 py-4 border-b bg-muted/30">
-            <div className="flex items-center gap-2 text-sm font-semibold">
-              <Sparkles className="h-4 w-4 text-amber-500" />
-              Submit feedback
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">Paste a support chat, email, review, or any raw text.</p>
-          </div>
-          <div className="p-5 space-y-4">
+      <div className="flex-1 min-h-0 grid grid-cols-1 md:grid-cols-[300px_1fr] gap-0 items-start overflow-hidden">
+        {/* Left: Compose (sticky) */}
+        <section className="md:border-r md:border-border md:pr-6 md:sticky md:top-6 md:self-start overflow-y-auto max-h-[calc(100vh-10rem)]">
+          <h2 className="text-sm font-bold">New submission</h2>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Paste a support chat, email, review, or any raw text.
+          </p>
+
+          <div className="mt-4">
             <Textarea
               value={ingestText}
               onChange={(e) => setIngestText(e.target.value)}
               placeholder="e.g. &quot;I wish the dashboard had a dark mode toggle...&quot;"
-              className="min-h-[200px] resize-y text-sm leading-relaxed focus-visible:ring-0"
+              className="min-h-[200px] resize-y text-sm leading-relaxed focus-visible:ring-0 border-0 border-b border-border rounded-none px-0 focus-visible:border-primary"
               disabled={ingesting}
             />
-            <div className="flex items-center justify-between">
-              <p className="text-xs text-muted-foreground">
-                {ingestText.trim() ? `${ingestText.trim().split(/\s+/).length} words` : 'Nothing to analyze yet'}
-              </p>
-              <Button onClick={handleIngest} disabled={ingesting || !ingestText.trim()} className="gap-2">
-                {ingesting ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Analyzing…
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="h-4 w-4" />
-                    Run Autopilot
-                  </>
-                )}
-              </Button>
-            </div>
+          </div>
+
+          <div className="mt-3 flex items-center justify-between">
+            <p className="text-xs text-muted-foreground">
+              {ingestText.trim() ? `${ingestText.trim().split(/\s+/).length} words` : 'Nothing to analyze yet'}
+            </p>
+            <Button onClick={handleIngest} disabled={ingesting || !ingestText.trim()} className="gap-2">
+              {ingesting ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Analyzing…
+                </>
+              ) : (
+                <>
+                  <Sparkles className="h-4 w-4" />
+                  Run Autopilot
+                </>
+              )}
+            </Button>
           </div>
         </section>
 
-        {/* Right: Review queue */}
-        <section className="space-y-4">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-2">
-              <Inbox className="h-4 w-4 text-muted-foreground" />
-              <h2 className="text-sm font-semibold">Review queue</h2>
-              {!loadingList && suggestions.length > 0 && (
-                <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">{suggestions.length}</span>
-              )}
-            </div>
-            <Select
-              value={statusFilter}
-              onValueChange={(v) => setStatusFilter(v as StatusFilter)}
-            >
-              <SelectTrigger className="w-[150px] h-9 text-xs">
-                <SelectValue placeholder="Filter" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="pending">Pending</SelectItem>
-                <SelectItem value="approved">Approved</SelectItem>
-                <SelectItem value="rejected">Rejected</SelectItem>
-                <SelectItem value="all">All</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {loadingList ? (
-            <div className="flex justify-center py-12">
-              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-            </div>
-          ) : suggestions.length === 0 ? (
-            <div className="rounded-xl border border-dashed bg-muted/20 px-6 py-12 text-center">
-              <div className="h-12 w-12 rounded-full bg-muted/50 flex items-center justify-center mx-auto mb-3">
-                <Inbox className="h-6 w-6 text-muted-foreground/60" />
-              </div>
-              <p className="text-sm font-medium text-muted-foreground">
-                No {statusFilter === 'all' ? '' : statusFilter} suggestions yet
-              </p>
-              <p className="text-xs text-muted-foreground/70 mt-1">
-                Submit text on the left to get started
-              </p>
-            </div>
-          ) : (
-            <ul className="space-y-3">
-              {suggestions.map((s) => {
-                const busy = actionId === s.id;
-                const isPending = s.status === 'pending';
+        {/* Right: Queue (scrollable) */}
+        <section className="mt-6 md:mt-0 md:pl-6 overflow-y-auto max-h-[calc(100vh-10rem)]">
+          {/* Tabs */}
+          <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm border-b border-border">
+            <div className="flex items-center gap-0">
+              {TAB_LIST.map((tab) => {
+                const isActive = statusFilter === tab.key;
+                const count = tab.key === 'all'
+                  ? suggestions.length
+                  : suggestions.filter((s) => s.status === tab.key).length;
                 return (
-                  <li
-                    key={s.id}
-                    className="rounded-xl border bg-card shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden hover:shadow-md transition-shadow"
+                  <button
+                    key={tab.key}
+                    role="tab"
+                    aria-selected={isActive}
+                    onClick={() => setStatusFilter(tab.key)}
+                    className={`relative px-4 py-2.5 text-sm font-medium transition-colors ${
+                      isActive
+                        ? 'text-foreground'
+                        : 'text-muted-foreground hover:text-foreground/70'
+                    }`}
                   >
-                    <div className="p-5">
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-2.5">
-                            <h3 className="font-switzer text-base font-semibold leading-snug">
-                              {s.suggested_title || 'Untitled suggestion'}
-                            </h3>
-                            <span className={`shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded-full ${
-                              s.status === 'approved'
-                                ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300'
-                                : s.status === 'rejected'
-                                ? 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300'
-                                : 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'
-                            }`}>
-                              {s.status}
-                            </span>
-                          </div>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            {formatDate(s.created_at)}
-                          </p>
-                        </div>
-                      </div>
-
-                      {s.suggested_body && (
-                        <p className="mt-3 text-sm leading-relaxed text-foreground/80">
-                          {s.suggested_body}
-                        </p>
-                      )}
-
-                      <details className="mt-3 text-xs text-muted-foreground">
-                        <summary className="cursor-pointer select-none hover:text-foreground transition-colors">
-                          View source text
-                        </summary>
-                        <pre className="mt-2 max-h-36 overflow-auto whitespace-pre-wrap rounded-lg bg-muted/50 border p-3 font-mono text-[11px] leading-relaxed">
-                          {s.source_text}
-                        </pre>
-                      </details>
-
-                      {s.possible_duplicate_post_id && (
-                        <Link
-                          href={`/admin/feedback?post=${s.possible_duplicate_post_id}`}
-                          className="inline-flex items-center gap-1 mt-3 text-xs font-medium text-primary hover:underline"
-                        >
-                          Possible duplicate
-                          <ExternalLink className="h-3 w-3" />
-                        </Link>
-                      )}
-                    </div>
-
-                    {isPending && (
-                      <div className="border-t bg-muted/20 px-5 py-3.5 flex flex-wrap items-center gap-2.5">
-                        <Select
-                          value={approveBoardById[s.id] || ''}
-                          onValueChange={(v) =>
-                            setApproveBoardById((prev) => ({ ...prev, [s.id]: v }))
-                          }
-                          disabled={busy || boards.length === 0}
-                        >
-                          <SelectTrigger className="w-[200px] h-9 text-xs">
-                            <SelectValue
-                              placeholder={boards.length ? 'Select board…' : 'No boards'}
-                            />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {boards.map((b) => (
-                              <SelectItem key={b.id} value={b.id}>
-                                {b.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <div className="flex items-center gap-2 ml-auto">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleReject(s)}
-                            disabled={busy}
-                            className="gap-1.5 h-8"
-                          >
-                            <X className="h-3.5 w-3.5" />
-                            Reject
-                          </Button>
-                          <Button
-                            size="sm"
-                            onClick={() => handleApprove(s)}
-                            disabled={busy || !approveBoardById[s.id]}
-                            className="gap-1.5 h-8"
-                          >
-                            {busy ? (
-                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                            ) : (
-                              <Check className="h-3.5 w-3.5" />
-                            )}
-                            Approve
-                          </Button>
-                        </div>
-                      </div>
+                    <span>{tab.label}</span>
+                    <span className="ml-1.5 text-xs text-muted-foreground">{count}</span>
+                    {isActive && (
+                      <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
                     )}
-                  </li>
+                  </button>
                 );
               })}
-            </ul>
-          )}
+            </div>
+          </div>
+
+          {/* List */}
+          <div className="mt-4">
+            {loadingList ? (
+              <div className="flex justify-center py-12">
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              </div>
+            ) : suggestions.length === 0 ? (
+              <div className="py-12">
+                <p className="text-sm font-semibold">{empty.bold}</p>
+                <p className="mt-1 text-xs text-muted-foreground">{empty.muted}</p>
+              </div>
+            ) : (
+              <ul className="divide-y divide-border">
+                {suggestions.map((s) => {
+                  const busy = actionId === s.id;
+                  const isPending = s.status === 'pending';
+                  const dotColor = SOURCE_DOT[s.source || ''] || 'bg-slate-400';
+                  return (
+                    <li key={s.id} className="group py-4">
+                      <div className="flex items-start gap-3">
+                        {/* Dot */}
+                        <span className={`mt-1.5 h-[7px] w-[7px] shrink-0 rounded-full ${dotColor}`} />
+
+                        {/* Content */}
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2">
+                            {s.source && (
+                              <span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                                {s.source}
+                              </span>
+                            )}
+                          </div>
+                          <h3 className="mt-0.5 text-sm font-semibold leading-snug">
+                            {s.suggested_title || 'Untitled suggestion'}
+                          </h3>
+                          {s.suggested_body && (
+                            <p className="mt-1 text-xs leading-relaxed text-muted-foreground line-clamp-1">
+                              {s.suggested_body}
+                            </p>
+                          )}
+                          {s.possible_duplicate_post_id && (
+                            <Link
+                              href={`/admin/feedback?post=${s.possible_duplicate_post_id}`}
+                              className="mt-1.5 inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
+                            >
+                              Possible duplicate
+                              <ExternalLink className="h-3 w-3" />
+                            </Link>
+                          )}
+
+                          {/* Source text expandable */}
+                          <details className="mt-2 text-xs text-muted-foreground">
+                            <summary className="cursor-pointer select-none hover:text-foreground transition-colors">
+                              View source text
+                            </summary>
+                            <pre className="mt-2 max-h-36 overflow-auto whitespace-pre-wrap rounded-lg bg-muted/50 border p-3 font-mono text-[11px] leading-relaxed">
+                              {s.source_text}
+                            </pre>
+                          </details>
+
+                          {/* Board select + actions (pending only) */}
+                          {isPending && (
+                            <div className="mt-3 flex flex-wrap items-center gap-2.5">
+                              <Select
+                                value={approveBoardById[s.id] || ''}
+                                onValueChange={(v) =>
+                                  setApproveBoardById((prev) => ({ ...prev, [s.id]: v }))
+                                }
+                                disabled={busy || boards.length === 0}
+                              >
+                                <SelectTrigger className="w-[200px] h-8 text-xs">
+                                  <SelectValue
+                                    placeholder={boards.length ? 'Select board…' : 'No boards'}
+                                  />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {boards.map((b) => (
+                                    <SelectItem key={b.id} value={b.id}>
+                                      {b.name}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Timestamp + row actions */}
+                        <div className="flex shrink-0 flex-col items-end gap-2">
+                          <span className="whitespace-nowrap text-[11px] text-muted-foreground">
+                            {formatDate(s.created_at)}
+                          </span>
+                          <div className="flex items-center gap-3">
+                            {isPending ? (
+                              <>
+                                <button
+                                  onClick={() => handleReject(s)}
+                                  disabled={busy}
+                                  className="text-xs text-muted-foreground hover:text-red-600 transition-colors disabled:opacity-50"
+                                >
+                                  Dismiss
+                                </button>
+                                <button
+                                  onClick={() => handleApprove(s)}
+                                  disabled={busy || !approveBoardById[s.id]}
+                                  className="text-xs font-medium text-emerald-600 hover:text-emerald-700 transition-colors disabled:opacity-50"
+                                >
+                                  {busy ? (
+                                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                  ) : (
+                                    'Approve'
+                                  )}
+                                </button>
+                              </>
+                            ) : s.status === 'approved' ? (
+                              <span className="flex items-center gap-1 text-[11px] font-medium text-emerald-600">
+                                <Check className="h-3 w-3" />
+                                Approved
+                              </span>
+                            ) : (
+                              <span className="flex items-center gap-1 text-[11px] font-medium text-muted-foreground">
+                                <X className="h-3 w-3" />
+                                Dismissed
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </div>
         </section>
       </div>
     </div>

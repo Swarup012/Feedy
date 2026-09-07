@@ -62,7 +62,7 @@
 @layer base {
   :root {
     /* 60% - Main Content & Background (Canny uses clean, breathable surfaces) */
-    --background: 0 0% 98%;        /* Off-white (#f9f9f9) */
+    --background: 0 0% 97.6%;       /* #f9f9f9 */
     --foreground: 174 43% 12%;        /* Deepest Teal for text readability */
 
     --card: 0 0% 100%;                /* Pure White for posts/cards */
@@ -106,15 +106,15 @@
   ------------------------------------------------------------------------- */
 .dark {
     /* Base Colors - Rich, modern dark theme */
-    --background: 222 47% 11%;           /* #0f1419 - Deep slate background */
+    --background: 0 0% 7.1%;            /* #121212 */
     --foreground: 210 40% 98%;           /* #f8fafc - Soft white, easier on eyes */
     
     /* Card & Surface Colors */
-    --card: 217 33% 17%;                 /* #1a2332 - Elevated surface */
+    --card: 0 0% 11.8%;                  /* #1e1e1e */
     --card-foreground: 210 40% 98%;      /* #f8fafc - Consistent text */
     
     /* Popover */
-    --popover: 217 33% 17%;              /* #1a2332 - Matches card */
+    --popover: 0 0% 11.8%;               /* #1e1e1e */
     --popover-foreground: 210 40% 98%;   /* #f8fafc - Clear text */
     
     /* Primary - Modern blue accent */

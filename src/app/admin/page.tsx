@@ -540,46 +540,43 @@ export default function AdminPage() {
                         Distribution across {stats.totalPosts} posts
                       </p>
                     </div>
-                    <div className="px-5 py-4 space-y-3">
+                    <div className="px-5 py-4">
                       {Object.entries(stats.statusDistribution || {}).length >
                       0 ? (
-                        Object.entries(stats.statusDistribution).map(
-                          ([k, v]: [string, any]) => {
-                            const pct =
-                              stats.totalPosts > 0
-                                ? Math.round((v / stats.totalPosts) * 100)
-                                : 0;
-                            const colors: Record<string, string> = {
-                              open: "bg-blue-500",
-                              "under-review": "bg-amber-500",
-                              planned: "bg-cyan-500",
-                              "in-progress": "bg-violet-500",
-                              completed: "bg-emerald-500",
-                              closed: "bg-gray-400",
-                            };
-                            return (
-                              <div key={k} className="space-y-1">
-                                <div className="flex items-center justify-between text-xs">
-                                  <span className="font-medium text-foreground capitalize">
-                                    {k.replace("-", " ")}
-                                  </span>
-                                  <span className="text-muted-foreground">
-                                    {v}{" "}
-                                    <span className="text-muted-foreground/60">
-                                      ({pct}%)
+                        (() => {
+                          const colors: Record<string, string> = {
+                            open: "bg-blue-500",
+                            "under-review": "bg-amber-500",
+                            planned: "bg-cyan-500",
+                            "in-progress": "bg-violet-500",
+                            completed: "bg-emerald-500",
+                            closed: "bg-gray-400",
+                          };
+                          const entries = Object.entries(stats.statusDistribution);
+                          const maxVal = Math.max(...entries.map(([, v]: [string, any]) => v), 1);
+                          return (
+                            <div className="flex items-end gap-3 h-40">
+                              {entries.map(([k, v]: [string, any]) => {
+                                const pct = stats.totalPosts > 0 ? Math.round((v / stats.totalPosts) * 100) : 0;
+                                const barHeight = maxVal > 0 ? (v / maxVal) * 100 : 0;
+                                return (
+                                  <div key={k} className="flex-1 flex flex-col items-center gap-1.5">
+                                    <span className="text-[11px] font-medium text-foreground">{v}</span>
+                                    <div className="w-full flex items-end justify-center" style={{ height: '80px' }}>
+                                      <div
+                                        className={`w-full max-w-[32px] rounded-t-md ${colors[k] || "bg-primary"} transition-all duration-700`}
+                                        style={{ height: `${Math.max(barHeight, 4)}%` }}
+                                      />
+                                    </div>
+                                    <span className="text-[10px] text-muted-foreground capitalize leading-none text-center">
+                                      {k.replace("-", " ")}
                                     </span>
-                                  </span>
-                                </div>
-                                <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-                                  <div
-                                    className={`h-full ${colors[k] || "bg-primary"} rounded-full transition-all duration-700`}
-                                    style={{ width: `${pct}%` }}
-                                  />
-                                </div>
-                              </div>
-                            );
-                          },
-                        )
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          );
+                        })()
                       ) : (
                         <p className="text-sm text-muted-foreground text-center py-4">
                           No data yet
@@ -592,7 +589,7 @@ export default function AdminPage() {
             </div>
           ) : (
             /* ===== EXPERT VIEW (Part 2 — deeper operational analytics) ===== */
-            <div className="flex-1 min-h-0 overflow-hidden pb-2">
+            <div className="flex-1 min-h-0 overflow-y-auto pb-2">
               <ExpertView organizationId={organization?.id} />
             </div>
           )}

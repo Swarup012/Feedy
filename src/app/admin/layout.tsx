@@ -101,7 +101,7 @@ export default function AdminLayout({
   ];
 
   return (
-    <div className="h-screen flex flex-col bg-gray-50 dark:bg-background overflow-hidden">
+    <div className="h-screen flex flex-col bg-background overflow-hidden">
       {/* 🔹 Navbar */}
 
 
