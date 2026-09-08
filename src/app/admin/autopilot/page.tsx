@@ -15,7 +15,6 @@ import {
   type AutopilotSettings,
 } from '@/services/autopilotService';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
@@ -29,7 +28,6 @@ import {
   X,
   ExternalLink,
   Plus,
-  Sparkles,
 } from 'lucide-react';
 
 type StatusFilter = AutopilotSuggestionStatus | 'all';
@@ -71,9 +69,6 @@ function AutopilotPageInner() {
   const { toast } = useToast();
   const orgId = organization?.id;
 
-  const [ingestText, setIngestText] = useState('');
-  const [ingesting, setIngesting] = useState(false);
-
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('pending');
   const [suggestions, setSuggestions] = useState<AutopilotSuggestion[]>([]);
   const [loadingList, setLoadingList] = useState(false);
@@ -86,7 +81,7 @@ function AutopilotPageInner() {
     if (!orgId) return;
     setLoadingList(true);
     try {
-      const res = await autopilotService.listSuggestions(orgId, statusFilter);
+      const res = await autopilotService.listSuggestions(orgId, 'all');
       setSuggestions(res.data?.suggestions || []);
     } catch (err: any) {
       if (!isPlanUpgradeRequired(err)) {
@@ -99,7 +94,11 @@ function AutopilotPageInner() {
     } finally {
       setLoadingList(false);
     }
-  }, [orgId, statusFilter, toast]);
+  }, [orgId, toast]);
+
+  const filteredSuggestions = statusFilter === 'all'
+    ? suggestions
+    : suggestions.filter((s) => s.status === statusFilter);
 
   useEffect(() => {
     loadSuggestions();
@@ -115,52 +114,6 @@ function AutopilotPageInner() {
       }
     })();
   }, []);
-
-  const handleIngest = async () => {
-    if (!orgId || !ingestText.trim()) return;
-    setIngesting(true);
-    try {
-      const res = await autopilotService.ingest(orgId, ingestText.trim());
-      if (res.data?.discarded) {
-        toast({
-          title: 'No feedback detected',
-          description: 'The text did not contain a feature request, bug, or product feedback.',
-        });
-      } else if (res.data?.automatic) {
-        toast({
-          title: 'Post Published',
-          description: 'Automatic Mode is enabled. The suggestion was instantly published.',
-        });
-        setIngestText('');
-        if (statusFilter === 'approved' || statusFilter === 'all') {
-          await loadSuggestions();
-        } else {
-          setStatusFilter('approved');
-        }
-      } else {
-        toast({
-          title: 'Suggestion queued',
-          description: 'A pending suggestion was created for review.',
-        });
-        setIngestText('');
-        if (statusFilter === 'pending' || statusFilter === 'all') {
-          await loadSuggestions();
-        } else {
-          setStatusFilter('pending');
-        }
-      }
-    } catch (err: any) {
-      if (!isPlanUpgradeRequired(err)) {
-        toast({
-          title: 'Failed to create suggestion',
-          description: err?.response?.data?.message || err.message,
-          variant: 'destructive',
-        });
-      }
-    } finally {
-      setIngesting(false);
-    }
-  };
 
   const handleApprove = async (suggestion: AutopilotSuggestion) => {
     if (!orgId) return;
@@ -227,7 +180,7 @@ function AutopilotPageInner() {
 
   return (
     <PaidFeatureGate featureName="Autopilot">
-    <div className="mx-auto h-full max-w-6xl flex flex-col px-4 py-6 sm:px-6">
+    <div className="mx-auto h-full max-w-6xl flex flex-col px-4 py-6 sm:px-6 bg-background">
       {/* Header */}
       <header className="shrink-0 mb-6">
         <div className="flex items-start justify-between">
@@ -247,46 +200,9 @@ function AutopilotPageInner() {
         <div className="mt-5 h-px w-full bg-border" />
       </header>
 
-      <div className="flex-1 min-h-0 grid grid-cols-1 md:grid-cols-[300px_1fr] gap-0 items-start overflow-hidden">
-        {/* Left: Compose (sticky) */}
-        <section className="md:border-r md:border-border md:pr-6 md:sticky md:top-6 md:self-start overflow-y-auto max-h-[calc(100vh-10rem)]">
-          <h2 className="text-sm font-bold">New submission</h2>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Paste a support chat, email, review, or any raw text.
-          </p>
-
-          <div className="mt-4">
-            <Textarea
-              value={ingestText}
-              onChange={(e) => setIngestText(e.target.value)}
-              placeholder="e.g. &quot;I wish the dashboard had a dark mode toggle...&quot;"
-              className="min-h-[200px] resize-y text-sm leading-relaxed focus-visible:ring-0 border-0 border-b border-border rounded-none px-0 focus-visible:border-primary"
-              disabled={ingesting}
-            />
-          </div>
-
-          <div className="mt-3 flex items-center justify-between">
-            <p className="text-xs text-muted-foreground">
-              {ingestText.trim() ? `${ingestText.trim().split(/\s+/).length} words` : 'Nothing to analyze yet'}
-            </p>
-            <Button onClick={handleIngest} disabled={ingesting || !ingestText.trim()} className="gap-2">
-              {ingesting ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Analyzing…
-                </>
-              ) : (
-                <>
-                  <Sparkles className="h-4 w-4" />
-                  Run Autopilot
-                </>
-              )}
-            </Button>
-          </div>
-        </section>
-
+      <div className="flex-1 min-h-0 grid grid-cols-1 gap-0 items-start overflow-hidden">
         {/* Right: Queue (scrollable) */}
-        <section className="mt-6 md:mt-0 md:pl-6 overflow-y-auto max-h-[calc(100vh-10rem)]">
+        <section className="overflow-y-auto max-h-[calc(100vh-10rem)]">
           {/* Tabs */}
           <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm border-b border-border">
             <div className="flex items-center gap-0">
@@ -324,14 +240,14 @@ function AutopilotPageInner() {
               <div className="flex justify-center py-12">
                 <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
               </div>
-            ) : suggestions.length === 0 ? (
+            ) : filteredSuggestions.length === 0 ? (
               <div className="py-12">
                 <p className="text-sm font-semibold">{empty.bold}</p>
                 <p className="mt-1 text-xs text-muted-foreground">{empty.muted}</p>
               </div>
             ) : (
               <ul className="divide-y divide-border">
-                {suggestions.map((s) => {
+                {filteredSuggestions.map((s) => {
                   const busy = actionId === s.id;
                   const isPending = s.status === 'pending';
                   const dotColor = SOURCE_DOT[s.source || ''] || 'bg-slate-400';

@@ -141,9 +141,9 @@ export default function AdminPage() {
       />
       <div
         ref={pageRef}
-        className="h-screen overflow-hidden bg-background flex flex-col"
+        className="bg-background flex flex-col min-h-full"
       >
-        <div className="max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 flex flex-col h-full overflow-hidden space-y-4">
+        <div className="max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 flex flex-col space-y-4">
           {/* HEADER - Clean Canny-style header */}
           <section className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 shrink-0">
             <div className="space-y-1">
@@ -589,7 +589,7 @@ export default function AdminPage() {
             </div>
           ) : (
             /* ===== EXPERT VIEW (Part 2 — deeper operational analytics) ===== */
-            <div className="flex-1 min-h-0 overflow-y-auto pb-2">
+            <div className="pb-2">
               <ExpertView organizationId={organization?.id} />
             </div>
           )}

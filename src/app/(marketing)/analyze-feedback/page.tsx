@@ -27,7 +27,7 @@ export default function AnalyzeFeedbackPage() {
             <h1 className="text-3xl lg:text-4xl font-switzer font-medium text-slate-900 dark:text-white mb-6 tracking-tight">
               Analyze Feedback, Make Better Decisions
             </h1>
-            <p className="text-xl font-switzer text-slate-600 dark:text-gray-400 mb-8 leading-relaxed">
+            <p className="text-xl font-switzer text-slate-600 dark:text-muted-foreground mb-8 leading-relaxed">
               Turn user feedback into actionable insights. Filter, prioritize,
               and understand what your users really want.
             </p>
@@ -46,7 +46,7 @@ export default function AnalyzeFeedbackPage() {
             </div>
 
             {/* Trust Signals */}
-            <div className="flex flex-col sm:flex-row gap-4 sm:gap-8 justify-center text-sm text-slate-600 dark:text-gray-400">
+            <div className="flex flex-col sm:flex-row gap-4 sm:gap-8 justify-center text-sm text-slate-600 dark:text-muted-foreground">
               <div className="flex items-center justify-center gap-2">
                 <CheckCircle2 className="h-4 w-4 text-green-600" />
                 <span>Instant insights</span>
@@ -64,13 +64,13 @@ export default function AnalyzeFeedbackPage() {
         </section>
 
         {/* Faddy helps you cut through the noise */}
-        <section className="py-16 bg-[#f9f9f9] dark:bg-gray-900/50">
+        <section className="py-16 bg-[#f9f9f9] dark:bg-background/50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
               <h2 className="text-2xl font-switzer font-bold text-slate-900 dark:text-white mb-4">
                 Faddy helps you cut through the noise
               </h2>
-              <p className="text-xl text-slate-600 dark:text-gray-400 max-w-3xl mx-auto">
+              <p className="text-xl text-slate-600 dark:text-muted-foreground max-w-3xl mx-auto">
                 Powerful analysis tools to understand what matters most
               </p>
             </div>
@@ -82,7 +82,7 @@ export default function AnalyzeFeedbackPage() {
                   <h3 className="text-xl font-switzer font-medium text-slate-900 dark:text-white mb-3">
                     Smart Filters
                   </h3>
-                  <p className="text-slate-600 dark:text-gray-400">
+                  <p className="text-slate-600 dark:text-muted-foreground">
                     Filter by category, status, votes, date, and more to find
                     exactly what you need
                   </p>
@@ -95,7 +95,7 @@ export default function AnalyzeFeedbackPage() {
                   <h3 className="text-xl font-switzer font-medium text-slate-900 dark:text-white mb-3">
                     Vote Tracking
                   </h3>
-                  <p className="text-slate-600 dark:text-gray-400">
+                  <p className="text-slate-600 dark:text-muted-foreground">
                     See which features have the most demand and prioritize based
                     on user votes
                   </p>
@@ -108,7 +108,7 @@ export default function AnalyzeFeedbackPage() {
                   <h3 className="text-xl font-switzer font-medium text-slate-900 dark:text-white mb-3">
                     Insights Dashboard
                   </h3>
-                  <p className="text-slate-600 dark:text-gray-400">
+                  <p className="text-slate-600 dark:text-muted-foreground">
                     Get a bird's-eye view of feedback trends and patterns at a
                     glance
                   </p>
@@ -121,7 +121,7 @@ export default function AnalyzeFeedbackPage() {
                   <h3 className="text-xl font-switzer font-medium text-slate-900 dark:text-white mb-3">
                     Prioritization
                   </h3>
-                  <p className="text-slate-600 dark:text-gray-400">
+                  <p className="text-slate-600 dark:text-muted-foreground">
                     Tag and organize feedback to align with your product roadmap
                     and goals
                   </p>
@@ -228,7 +228,7 @@ export default function AnalyzeFeedbackPage() {
               <h2 className="text-2xl font-switzer font-medium text-slate-900 dark:text-white mb-4">
                 Explore the customer feedback cycle
               </h2>
-              <p className="text-xl text-slate-600 dark:text-gray-400 max-w-3xl mx-auto">
+              <p className="text-xl text-slate-600 dark:text-muted-foreground max-w-3xl mx-auto">
                 From collection to action, understand the complete journey
               </p>
             </div>
@@ -247,7 +247,7 @@ export default function AnalyzeFeedbackPage() {
                       <h3 className="text-2xl font-switzer font-medium text-slate-900 dark:text-white mb-4 group-hover:text-blue-600 transition-colors">
                         Collect
                       </h3>
-                      <p className="text-slate-600 dark:text-gray-400 mb-6">
+                      <p className="text-slate-600 dark:text-muted-foreground mb-6">
                         Gather feedback from multiple channels into one
                         centralized hub. Users submit ideas, report bugs, and
                         share suggestions.
@@ -278,7 +278,7 @@ export default function AnalyzeFeedbackPage() {
                     <h3 className="text-2xl font-switzer font-medium text-slate-900 dark:text-white mb-4">
                       Analyze
                     </h3>
-                    <p className="text-slate-600 dark:text-gray-400 mb-6">
+                    <p className="text-slate-600 dark:text-muted-foreground mb-6">
                       Filter, sort, and prioritize feedback based on votes,
                       impact, and alignment with your goals. Identify patterns
                       and trends.
@@ -307,7 +307,7 @@ export default function AnalyzeFeedbackPage() {
                     <h3 className="text-2xl font-switzer font-medium text-slate-900 dark:text-white mb-4">
                       Share
                     </h3>
-                    <p className="text-slate-600 dark:text-gray-400 mb-6">
+                    <p className="text-slate-600 dark:text-muted-foreground mb-6">
                       Keep users informed with updates, changelogs, and status
                       changes. Close the loop and build trust with your
                       community.

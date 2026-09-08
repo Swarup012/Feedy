@@ -85,19 +85,19 @@ export default function ExpertViewPage() {
             <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
               {/* Left — Copy */}
               <div className="flex-1 text-center lg:text-left">
-                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 text-xs sm:text-sm font-semibold mb-6">
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 text-xs sm:text-sm font-semibold mb-6">
                   <Eye className="w-4 h-4" />
                   Expert Dashboard
                 </div>
 
                 <h1 className="text-3xl lg:text-4xl xl:text-5xl font-switzer font-medium text-slate-900 dark:text-white mb-6 tracking-tight leading-tight">
                   See what your users really want.{" "}
-                  <span className="text-emerald-600 dark:text-emerald-400">
+                  <span className="text-blue-600 dark:text-blue-400">
                     Make decisions with confidence.
                   </span>
                 </h1>
 
-                <p className="text-lg lg:text-xl text-slate-600 dark:text-gray-400 mb-8 max-w-xl mx-auto lg:mx-0 leading-relaxed">
+                <p className="text-lg lg:text-xl text-slate-600 dark:text-muted-foreground mb-8 max-w-xl mx-auto lg:mx-0 leading-relaxed">
                   The Expert View gives you a bird&apos;s-eye view of all
                   feedback. Spot trends, prioritize by impact, and understand
                   which features actually drive your product forward.
@@ -107,7 +107,7 @@ export default function ExpertViewPage() {
                   <Link href="/signup">
                     <Button
                       size="lg"
-                      className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg w-full sm:w-auto"
+                      className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg w-full sm:w-auto"
                     >
                       Try for Free
                       <ArrowRight className="ml-2 h-5 w-5" />
@@ -115,7 +115,7 @@ export default function ExpertViewPage() {
                   </Link>
                   <a
                     href="#features"
-                    className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-switzer font-semibold rounded-md border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all text-sm"
+                    className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white dark:bg-card text-slate-900 dark:text-white font-switzer font-semibold rounded-md border border-slate-200 dark:border-border hover:bg-slate-50 dark:hover:bg-slate-700 transition-all text-sm"
                   >
                     Explore Features
                   </a>
@@ -124,13 +124,13 @@ export default function ExpertViewPage() {
 
               {/* Right — Dashboard Preview */}
               <div className="flex-1 w-full max-w-lg lg:max-w-none">
-                <div className="relative rounded-2xl overflow-hidden border border-slate-200/80 dark:border-slate-700/80 bg-slate-50 dark:bg-slate-900">
+                <div className="relative rounded-2xl overflow-hidden border border-slate-200/80 dark:border-border bg-slate-50 dark:bg-background">
                   {/* Browser chrome */}
-                  <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 px-4 py-2.5 border-b border-slate-200 dark:border-slate-700">
+                  <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-card px-4 py-2.5 border-b border-slate-200 dark:border-border">
                     <span className="w-3 h-3 rounded-full bg-red-400" />
                     <span className="w-3 h-3 rounded-full bg-yellow-400" />
                     <span className="w-3 h-3 rounded-full bg-green-400" />
-                    <div className="ml-3 flex-1 bg-white dark:bg-slate-700 rounded-md px-3 py-0.5 text-xs text-slate-400 dark:text-slate-500 font-mono">
+                    <div className="ml-3 flex-1 bg-white dark:bg-card rounded-md px-3 py-0.5 text-xs text-slate-400 dark:text-muted-foreground font-mono">
                       faddy.site/admin/expert-view
                     </div>
                   </div>
@@ -166,7 +166,7 @@ export default function ExpertViewPage() {
                             >
                               {item.icon}
                             </span>
-                            <span className="text-xs font-medium text-slate-600 dark:text-slate-400">
+                            <span className="text-xs font-medium text-slate-600 dark:text-muted-foreground">
                               {item.label}
                             </span>
                           </div>
@@ -178,8 +178,8 @@ export default function ExpertViewPage() {
                     </div>
 
                     {/* Priority List */}
-                    <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4">
-                      <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">
+                    <div className="bg-white dark:bg-card rounded-xl border border-slate-200 dark:border-border p-4">
+                      <div className="text-xs font-semibold text-slate-500 dark:text-muted-foreground uppercase tracking-wider mb-3">
                         Top Priority This Week
                       </div>
                       <div className="space-y-2">
@@ -217,15 +217,15 @@ export default function ExpertViewPage() {
                                     : "bg-purple-500"
                                 }`}
                               />
-                              <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                              <span className="text-sm font-medium text-slate-700 dark:text-muted-foreground">
                                 {item.name}
                               </span>
                             </div>
                             <div className="flex items-center gap-3 text-xs">
-                              <span className="text-slate-500 dark:text-slate-400">
+                              <span className="text-slate-500 dark:text-muted-foreground">
                                 {item.votes} votes
                               </span>
-                              <span className="text-emerald-500 font-medium">
+                              <span className="text-blue-500 font-medium">
                                 {item.trend}
                               </span>
                             </div>
@@ -243,14 +243,14 @@ export default function ExpertViewPage() {
         {/* Features */}
         <section
           id="features"
-          className="py-16 px-6 bg-slate-50/50 dark:bg-slate-900/50 border-y border-slate-100 dark:border-slate-800"
+          className="py-16 px-6 bg-slate-50/50 dark:bg-background/50 border-y border-slate-100 dark:border-border"
         >
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-12">
               <h2 className="text-2xl md:text-3xl font-switzer font-bold tracking-tight text-slate-900 dark:text-white mb-4">
                 Everything you need to see the full picture
               </h2>
-              <p className="text-lg text-slate-500 dark:text-slate-400 max-w-xl mx-auto">
+              <p className="text-lg text-slate-500 dark:text-muted-foreground max-w-xl mx-auto">
                 From raw feedback to actionable insights — all in one view.
               </p>
             </div>
@@ -259,16 +259,16 @@ export default function ExpertViewPage() {
               {features.map((feature) => (
                 <Card
                   key={feature.title}
-                  className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:shadow-lg transition-all"
+                  className="bg-white dark:bg-background border-slate-200 dark:border-border hover:shadow-lg transition-all"
                 >
                   <CardContent className="p-6">
-                    <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 mb-4">
+                    <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 mb-4">
                       {feature.icon}
                     </div>
                     <h3 className="text-lg font-switzer font-bold text-slate-900 dark:text-white mb-2">
                       {feature.title}
                     </h3>
-                    <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
+                    <p className="text-slate-600 dark:text-muted-foreground leading-relaxed">
                       {feature.description}
                     </p>
                   </CardContent>
@@ -285,7 +285,7 @@ export default function ExpertViewPage() {
               <h2 className="text-2xl md:text-3xl font-switzer font-bold tracking-tight text-slate-900 dark:text-white mb-4">
                 Make better product decisions
               </h2>
-              <p className="text-lg text-slate-500 dark:text-slate-400 max-w-xl mx-auto">
+              <p className="text-lg text-slate-500 dark:text-muted-foreground max-w-xl mx-auto">
                 Stop guessing. Start knowing what your users actually need.
               </p>
             </div>
@@ -312,13 +312,13 @@ export default function ExpertViewPage() {
                 },
               ].map((item) => (
                 <div key={item.title} className="text-center">
-                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 mb-4">
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 mb-4">
                     {item.icon}
                   </div>
                   <h3 className="text-lg font-switzer font-bold text-slate-900 dark:text-white mb-2">
                     {item.title}
                   </h3>
-                  <p className="text-slate-600 dark:text-slate-400">
+                  <p className="text-slate-600 dark:text-muted-foreground">
                     {item.description}
                   </p>
                 </div>
@@ -329,7 +329,7 @@ export default function ExpertViewPage() {
 
         {/* CTA Section */}
         <section className="py-16 px-6">
-          <div className="max-w-5xl mx-auto rounded-3xl bg-slate-900 dark:bg-slate-800 p-8 md:p-12 overflow-hidden relative text-center">
+          <div className="max-w-5xl mx-auto rounded-3xl bg-background dark:bg-card p-8 md:p-12 overflow-hidden relative text-center">
             <div className="relative z-10">
               <h2 className="text-xl md:text-3xl font-switzer font-bold text-white mb-8 tracking-tighter leading-tight">
                 Ready to see the full picture?
@@ -340,7 +340,7 @@ export default function ExpertViewPage() {
               </p>
               <a
                 href="/signup"
-                className="inline-flex items-center gap-3 px-6 py-4 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-switzer font-black rounded-2xl hover:scale-105 transition-all text-base"
+                className="inline-flex items-center gap-3 px-6 py-4 bg-white dark:bg-card text-slate-900 dark:text-white font-switzer font-black rounded-2xl hover:scale-105 transition-all text-base"
               >
                 Start Free Today
                 <ArrowRight className="w-5 h-5" />

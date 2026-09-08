@@ -136,26 +136,26 @@ export default function PricingPage() {
   const currentPlan: PlanTier = resolvePlan(organization);
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900">
+    <div className="min-h-screen bg-white dark:bg-background">
       <div className="container mx-auto px-4 py-16 pt-24">
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-3xl md:text-4xl font-switzer font-medium mb-4">
             <span className="text-blue-600">Transparent</span> Pricing
           </h1>
-          <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+          <p className="text-lg text-gray-600 dark:text-muted-foreground max-w-2xl mx-auto">
             Start with our <span className="font-switzer text-blue-600">FREE</span> plan. Upgrade when you need more. <span className="text-blue-600">Cancel anytime</span>
           </p>
         </div>
 
         {/* Billing Cycle Segmented Control */}
         <div className="flex flex-col items-center justify-center gap-3 mb-12">
-          <div className="inline-flex items-center bg-gray-100 dark:bg-gray-800 rounded-full p-1 shadow-inner">
+          <div className="inline-flex items-center bg-gray-100 dark:bg-card rounded-full p-1 shadow-inner">
             <button
               onClick={() => setBillingCycle("monthly")}
               className={`px-6 py-2.5 rounded-full font-medium text-sm transition-all duration-200 ${billingCycle === "monthly"
                 ? "bg-blue-50/50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 ring-1 ring-inset ring-blue-500 shadow-sm"
-                : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                : "text-gray-600 dark:text-muted-foreground hover:text-gray-900 dark:hover:text-white"
                 }`}
             >
               Monthly
@@ -164,7 +164,7 @@ export default function PricingPage() {
               onClick={() => setBillingCycle("yearly")}
               className={`px-6 py-2.5 rounded-full font-medium text-sm transition-all duration-200 flex items-center gap-2 ${billingCycle === "yearly"
                 ? "bg-blue-50/50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 ring-1 ring-inset ring-blue-500 shadow-sm"
-                : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                : "text-gray-600 dark:text-muted-foreground hover:text-gray-900 dark:hover:text-white"
                 }`}
             >
               Yearly
@@ -188,7 +188,7 @@ export default function PricingPage() {
                   <span className="text-4xl font-bold">
                     ${freePlan.monthlyPrice}
                   </span>
-                  <span className="text-gray-600 dark:text-gray-400">
+                  <span className="text-gray-600 dark:text-muted-foreground">
                     /month
                   </span>
                 </div>
@@ -218,7 +218,7 @@ export default function PricingPage() {
                     <span
                       className={
                         feature.included
-                          ? "text-gray-700 dark:text-gray-300"
+                          ? "text-gray-700 dark:text-muted-foreground"
                           : "text-gray-400 line-through"
                       }
                     >
@@ -244,7 +244,7 @@ export default function PricingPage() {
                     <span className="text-4xl font-bold">
                       ${starterPlan.monthlyPrice}
                     </span>
-                    <span className="text-gray-600 dark:text-gray-400">
+                    <span className="text-gray-600 dark:text-muted-foreground">
                       /month
                     </span>
                   </div>
@@ -254,7 +254,7 @@ export default function PricingPage() {
                       <span className="text-4xl font-bold">
                         ${starterPlan.yearlyPrice}
                       </span>
-                      <span className="text-gray-600 dark:text-gray-400">
+                      <span className="text-gray-600 dark:text-muted-foreground">
                         /month
                       </span>
                     </div>
@@ -306,7 +306,7 @@ export default function PricingPage() {
                     )}
                     <div className="flex-1">
                       <span
-                        className={`${feature.highlight ? "font-semibold text-blue-600 dark:text-blue-400" : "text-gray-700 dark:text-gray-300"}`}
+                        className={`${feature.highlight ? "font-semibold text-blue-600 dark:text-blue-400" : "text-gray-700 dark:text-muted-foreground"}`}
                       >
                         {feature.text}
                       </span>
@@ -341,7 +341,7 @@ export default function PricingPage() {
                     <span className="text-4xl font-bold">
                       ${proPlan.monthlyPrice}
                     </span>
-                    <span className="text-gray-600 dark:text-gray-400">
+                    <span className="text-gray-600 dark:text-muted-foreground">
                       /month
                     </span>
                   </div>
@@ -351,7 +351,7 @@ export default function PricingPage() {
                       <span className="text-4xl font-bold">
                         ${proPlan.yearlyPrice}
                       </span>
-                      <span className="text-gray-600 dark:text-gray-400">
+                      <span className="text-gray-600 dark:text-muted-foreground">
                         /month
                       </span>
                     </div>
@@ -405,7 +405,7 @@ export default function PricingPage() {
                           ? "font-bold text-gray-900 dark:text-white"
                           : feature.highlight
                             ? "font-semibold text-blue-600 dark:text-blue-400"
-                            : "text-gray-700 dark:text-gray-300"
+                            : "text-gray-700 dark:text-muted-foreground"
                           }`}
                       >
                         {feature.text}
@@ -433,16 +433,16 @@ export default function PricingPage() {
         <div className="max-w-6xl mx-auto mb-16">
           <div className="text-center mb-8">
             <h2 className="text-xl font-bold mb-2">Compare Plans</h2>
-            <p className="text-gray-600 dark:text-gray-400">
+            <p className="text-gray-600 dark:text-muted-foreground">
               See exactly what's included in each plan
             </p>
           </div>
 
           <div className="overflow-x-auto">
             <div className="inline-block min-w-full align-middle">
-              <div className="overflow-hidden border border-gray-200 dark:border-gray-800 rounded-lg">
-                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
-                  <thead className="bg-gray-50 dark:bg-gray-900">
+              <div className="overflow-hidden border border-gray-200 dark:border-border rounded-lg">
+                <table className="min-w-full divide-y divide-gray-200 dark:divide-border">
+                  <thead className="bg-gray-50 dark:bg-background">
                     <tr>
                       <th
                         scope="col"
@@ -473,9 +473,9 @@ export default function PricingPage() {
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white dark:bg-card divide-y divide-gray-200 dark:divide-gray-800">
+                  <tbody className="bg-white dark:bg-card divide-y divide-gray-200 dark:divide-border">
                     {/* Pricing */}
-                    <tr className="bg-gray-50 dark:bg-gray-900/50">
+                    <tr className="bg-gray-50 dark:bg-background/50">
                       <td
                         colSpan={4}
                         className="py-3 px-6 text-sm font-semibold text-gray-900 dark:text-white"
@@ -513,7 +513,7 @@ export default function PricingPage() {
                     </tr>
 
                     {/* Team Collaboration */}
-                    <tr className="bg-gray-50 dark:bg-gray-900/50">
+                    <tr className="bg-gray-50 dark:bg-background/50">
                       <td
                         colSpan={4}
                         className="py-3 px-6 text-sm font-semibold text-gray-900 dark:text-white"
@@ -525,7 +525,7 @@ export default function PricingPage() {
                       <td className="py-4 px-6 text-sm text-gray-900 dark:text-white">
                         Team Members
                       </td>
-                      <td className="py-4 px-6 text-center text-sm text-gray-700 dark:text-gray-300">
+                      <td className="py-4 px-6 text-center text-sm text-gray-700 dark:text-muted-foreground">
                         3 total members
                       </td>
                       <td className="py-4 px-6 text-center text-sm font-semibold text-blue-600 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-900/10">
@@ -539,7 +539,7 @@ export default function PricingPage() {
                       <td className="py-4 px-6 text-sm text-gray-900 dark:text-white">
                         Admin Roles
                       </td>
-                      <td className="py-4 px-6 text-center text-sm text-gray-700 dark:text-gray-300">
+                      <td className="py-4 px-6 text-center text-sm text-gray-700 dark:text-muted-foreground">
                         Included in 3
                       </td>
                       <td className="py-4 px-6 text-center text-sm font-semibold text-blue-600 dark:text-blue-400">
@@ -565,7 +565,7 @@ export default function PricingPage() {
                     </tr>
 
                     {/* Feedback Management */}
-                    <tr className="bg-gray-50 dark:bg-gray-900/50">
+                    <tr className="bg-gray-50 dark:bg-background/50">
                       <td
                         colSpan={4}
                         className="py-3 px-6 text-sm font-semibold text-gray-900 dark:text-white"
@@ -577,7 +577,7 @@ export default function PricingPage() {
                       <td className="py-4 px-6 text-sm text-gray-900 dark:text-white">
                         Feedback Boards
                       </td>
-                      <td className="py-4 px-6 text-center text-sm text-gray-700 dark:text-gray-300">
+                      <td className="py-4 px-6 text-center text-sm text-gray-700 dark:text-muted-foreground">
                         3 boards
                       </td>
                       <td className="py-4 px-6 text-center text-sm font-semibold text-blue-600 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-900/10">
@@ -591,7 +591,7 @@ export default function PricingPage() {
                       <td className="py-4 px-6 text-sm text-gray-900 dark:text-white">
                         Posts per Board
                       </td>
-                      <td className="py-4 px-6 text-center text-sm text-gray-700 dark:text-gray-300">
+                      <td className="py-4 px-6 text-center text-sm text-gray-700 dark:text-muted-foreground">
                         5 posts
                       </td>
                       <td className="py-4 px-6 text-center text-sm font-semibold text-blue-600 dark:text-blue-400">
@@ -605,7 +605,7 @@ export default function PricingPage() {
                       <td className="py-4 px-6 text-sm text-gray-900 dark:text-white">
                         Tracked Users
                       </td>
-                      <td className="py-4 px-6 text-center text-sm text-gray-700 dark:text-gray-300">
+                      <td className="py-4 px-6 text-center text-sm text-gray-700 dark:text-muted-foreground">
                         20 users
                       </td>
                       <td className="py-4 px-6 text-center text-sm font-semibold text-blue-600 dark:text-blue-400">
@@ -619,7 +619,7 @@ export default function PricingPage() {
                       <td className="py-4 px-6 text-sm text-gray-900 dark:text-white">
                         Roadmap Items
                       </td>
-                      <td className="py-4 px-6 text-center text-sm text-gray-700 dark:text-gray-300">
+                      <td className="py-4 px-6 text-center text-sm text-gray-700 dark:text-muted-foreground">
                         1 roadmap
                       </td>
                       <td className="py-4 px-6 text-center text-sm font-semibold text-blue-600 dark:text-blue-400">
@@ -631,7 +631,7 @@ export default function PricingPage() {
                     </tr>
 
                     {/* Features */}
-                    <tr className="bg-gray-50 dark:bg-gray-900/50">
+                    <tr className="bg-gray-50 dark:bg-background/50">
                       <td
                         colSpan={4}
                         className="py-3 px-6 text-sm font-semibold text-gray-900 dark:text-white"
@@ -755,7 +755,7 @@ export default function PricingPage() {
                       <td className="py-4 px-6 text-sm text-gray-900 dark:text-white">
                         Analytics
                       </td>
-                      <td className="py-4 px-6 text-center text-sm text-gray-700 dark:text-gray-300">
+                      <td className="py-4 px-6 text-center text-sm text-gray-700 dark:text-muted-foreground">
                         Basic
                       </td>
                       <td className="py-4 px-6 text-center text-sm font-semibold text-blue-600 dark:text-blue-400">
@@ -795,7 +795,7 @@ export default function PricingPage() {
                     </tr>
 
                     {/* Overage & Billing */}
-                    <tr className="bg-gray-50 dark:bg-gray-900/50">
+                    <tr className="bg-gray-50 dark:bg-background/50">
                       <td
                         colSpan={4}
                         className="py-3 px-6 text-sm font-semibold text-gray-900 dark:text-white"
@@ -824,7 +824,7 @@ export default function PricingPage() {
                       <td className="py-4 px-6 text-center text-sm text-gray-500">
                         -
                       </td>
-                      <td className="py-4 px-6 text-center text-sm text-gray-700 dark:text-gray-300">
+                      <td className="py-4 px-6 text-center text-sm text-gray-700 dark:text-muted-foreground">
                         20% (25 users)
                       </td>
                       <td className="py-4 px-6 text-center text-sm text-gray-900 dark:text-white bg-blue-50/50 dark:bg-blue-900/10">
@@ -838,7 +838,7 @@ export default function PricingPage() {
                       <td className="py-4 px-6 text-center text-sm text-gray-500">
                         -
                       </td>
-                      <td className="py-4 px-6 text-center text-sm text-gray-700 dark:text-gray-300">
+                      <td className="py-4 px-6 text-center text-sm text-gray-700 dark:text-muted-foreground">
                         $12 per 50 users
                        </td>
                        <td className="py-4 px-6 text-center text-sm text-gray-900 dark:text-white bg-blue-50/50 dark:bg-blue-900/10">
@@ -878,7 +878,7 @@ export default function PricingPage() {
                   />
                 </button>
               </Collapsible.Trigger>
-              <p className="text-gray-600 dark:text-gray-400 text-base">
+              <p className="text-gray-600 dark:text-muted-foreground text-base">
                 Simple, predictable pricing as your community grows
               </p>
             </div>
@@ -886,9 +886,9 @@ export default function PricingPage() {
             <Collapsible.Content className="overflow-hidden data-[state=open]:animate-accordion-down data-[state=closed]:animate-accordion-up">
 
           {/* Three-zone usage bar */}
-          <div className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm overflow-hidden mb-6">
+          <div className="rounded-2xl border border-gray-200 dark:border-border bg-white dark:bg-background shadow-sm overflow-hidden mb-6">
             <div className="px-8 pt-7 pb-6">
-              <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-5">
+              <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 dark:text-muted-foreground mb-5">
                 User Zones at a Glance
               </p>
               {/* Bar */}
@@ -906,21 +906,21 @@ export default function PricingPage() {
               {/* Zone labels */}
               <div className="flex gap-0.5">
                 <div className="flex-[5] text-center">
-                  <span className="inline-flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-400">
+                  <span className="inline-flex items-center gap-1.5 text-xs text-gray-600 dark:text-muted-foreground">
                     <span className="w-2 h-2 rounded-full bg-green-500 inline-block" />
-                    Included &mdash; <strong className="text-gray-800 dark:text-gray-200">$0</strong>
+                    Included &mdash; <strong className="text-gray-800 dark:text-foreground">$0</strong>
                   </span>
                 </div>
                 <div className="flex-[1] text-center">
-                  <span className="inline-flex items-center gap-1 text-xs text-gray-600 dark:text-gray-400">
+                  <span className="inline-flex items-center gap-1 text-xs text-gray-600 dark:text-muted-foreground">
                     <span className="w-2 h-2 rounded-full bg-blue-400 inline-block" />
-                    Grace &mdash; <strong className="text-gray-800 dark:text-gray-200">$0</strong>
+                    Grace &mdash; <strong className="text-gray-800 dark:text-foreground">$0</strong>
                   </span>
                 </div>
                 <div className="flex-[1] text-center">
-                  <span className="inline-flex items-center gap-1 text-xs text-gray-600 dark:text-gray-400">
+                  <span className="inline-flex items-center gap-1 text-xs text-gray-600 dark:text-muted-foreground">
                     <span className="w-2 h-2 rounded-full bg-blue-600 inline-block" />
-                    Overage &mdash; <strong className="text-gray-800 dark:text-gray-200">$12/50 users</strong>
+                    Overage &mdash; <strong className="text-gray-800 dark:text-foreground">$12/50 users</strong>
                   </span>
                 </div>
               </div>
@@ -930,8 +930,8 @@ export default function PricingPage() {
           {/* Steps + Rate table in a two-column grid */}
           <div className="grid md:grid-cols-[1fr_auto] gap-6 mb-6">
             {/* Vertical timeline */}
-            <div className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm overflow-hidden">
-              <div className="flex items-center gap-3 px-7 py-5 border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/60">
+            <div className="rounded-2xl border border-gray-200 dark:border-border bg-white dark:bg-background shadow-sm overflow-hidden">
+              <div className="flex items-center gap-3 px-7 py-5 border-b border-gray-100 dark:border-border bg-gray-50 dark:bg-card/60">
                 <div className="w-7 h-7 rounded-lg bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center">
                   <TrendingUp className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
                 </div>
@@ -946,7 +946,7 @@ export default function PricingPage() {
                   </div>
                   <div className="pb-6 flex-1">
                     <h4 className="font-semibold text-gray-900 dark:text-white text-sm mb-1">Start with 125 Included Users</h4>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">Your Starter plan includes 125 tracked users at no extra cost — unique visitors who engage with your feedback boards.</p>
+                    <p className="text-sm text-gray-500 dark:text-muted-foreground leading-relaxed">Your Starter plan includes 125 tracked users at no extra cost — unique visitors who engage with your feedback boards.</p>
                   </div>
                 </div>
                 {/* Step 2 */}
@@ -957,7 +957,7 @@ export default function PricingPage() {
                   </div>
                   <div className="pb-6 flex-1">
                     <h4 className="font-semibold text-gray-900 dark:text-white text-sm mb-1">Get a Free 20% Grace Buffer</h4>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">We won't charge you until you reach <span className="font-semibold text-gray-700 dark:text-gray-200">150 users</span>. 25 extra users, completely free — giving you room to grow without surprise bills.</p>
+                    <p className="text-sm text-gray-500 dark:text-muted-foreground leading-relaxed">We won't charge you until you reach <span className="font-semibold text-gray-700 dark:text-foreground">150 users</span>. 25 extra users, completely free — giving you room to grow without surprise bills.</p>
                   </div>
                 </div>
                 {/* Step 3 */}
@@ -967,26 +967,26 @@ export default function PricingPage() {
                   </div>
                   <div className="flex-1">
                     <h4 className="font-semibold text-gray-900 dark:text-white text-sm mb-1">Pay Only for What You Use</h4>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">After 150 users, pay <span className="font-semibold text-gray-700 dark:text-gray-200">$12 per 50 additional users</span> each month. No commitments, cancel anytime.</p>
+                    <p className="text-sm text-gray-500 dark:text-muted-foreground leading-relaxed">After 150 users, pay <span className="font-semibold text-gray-700 dark:text-foreground">$12 per 50 additional users</span> each month. No commitments, cancel anytime.</p>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Overage rate card */}
-            <div className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-sm overflow-hidden self-start min-w-[200px]">
-              <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/60">
-                <span className="text-xs font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">Overage Rates</span>
+            <div className="rounded-2xl border border-gray-200 dark:border-border bg-white dark:bg-background shadow-sm overflow-hidden self-start min-w-[200px]">
+              <div className="px-6 py-4 border-b border-gray-100 dark:border-border bg-gray-50 dark:bg-card/60">
+                <span className="text-xs font-semibold uppercase tracking-widest text-gray-400 dark:text-muted-foreground">Overage Rates</span>
               </div>
-              <div className="divide-y divide-gray-100 dark:divide-gray-800">
+              <div className="divide-y divide-gray-100 dark:divide-border">
                 {[
                   { range: "151 – 200", cost: "+$12" },
                   { range: "201 – 250", cost: "+$24" },
                   { range: "251 – 300", cost: "+$36" },
                   { range: "301 – 350", cost: "+$48" },
                 ].map((row, i) => (
-                  <div key={i} className="flex items-center justify-between px-6 py-3 bg-gray-50/40 dark:bg-gray-800/30">
-                    <span className="text-sm text-gray-500 dark:text-gray-400 tabular-nums">{row.range}</span>
+                  <div key={i} className="flex items-center justify-between px-6 py-3 bg-gray-50/40 dark:bg-card/30">
+                    <span className="text-sm text-gray-500 dark:text-muted-foreground tabular-nums">{row.range}</span>
                     <span className="text-sm font-bold text-gray-900 dark:text-white tabular-nums ml-6">{row.cost}</span>
                   </div>
                 ))}
@@ -998,7 +998,7 @@ export default function PricingPage() {
           </div>
 
           {/* Example calculation — invoice style */}
-          <div className="rounded-2xl border border-blue-200 dark:border-blue-800/60 bg-white dark:bg-gray-900 shadow-md overflow-hidden">
+          <div className="rounded-2xl border border-blue-200 dark:border-blue-800/60 bg-white dark:bg-background shadow-md overflow-hidden">
             <div className="flex items-center gap-3 px-8 py-5 bg-blue-600 dark:bg-blue-700">
               <Users className="w-5 h-5 text-white/90" />
               <span className="font-semibold text-white text-sm">Example: 180 Tracked Users This Month</span>
@@ -1007,10 +1007,10 @@ export default function PricingPage() {
               {/* Segmented usage bar */}
               <div>
                 <div className="flex items-center justify-between mb-2 text-sm">
-                  <span className="font-medium text-gray-700 dark:text-gray-300">Your Usage</span>
+                  <span className="font-medium text-gray-700 dark:text-muted-foreground">Your Usage</span>
                   <span className="font-bold text-blue-600 tabular-nums">180 / 125 included</span>
                 </div>
-                <div className="h-5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden flex gap-0.5">
+                <div className="h-5 bg-gray-100 dark:bg-card rounded-full overflow-hidden flex gap-0.5">
                   <div className="bg-green-500 h-full rounded-l-full" style={{ width: "69.4%" }} title="0–125: Included" />
                   <div className="bg-blue-400 h-full" style={{ width: "13.9%" }} title="126–150: Grace" />
                   <div className="bg-blue-600 h-full rounded-r-full" style={{ width: "11.1%" }} title="151–180: Overage" />
@@ -1021,7 +1021,7 @@ export default function PricingPage() {
                   <span className="absolute" style={{ left: "83.3%" }}>150</span>
                   <span className="absolute right-0 font-semibold text-blue-600">180</span>
                 </div>
-                <div className="flex items-center gap-4 mt-3 text-xs text-gray-500 dark:text-gray-400">
+                <div className="flex items-center gap-4 mt-3 text-xs text-gray-500 dark:text-muted-foreground">
                   <span className="flex items-center gap-1.5"><span className="inline-block w-2.5 h-2.5 rounded-sm bg-green-500" />Included</span>
                   <span className="flex items-center gap-1.5"><span className="inline-block w-2.5 h-2.5 rounded-sm bg-blue-400" />Grace (free)</span>
                   <span className="flex items-center gap-1.5"><span className="inline-block w-2.5 h-2.5 rounded-sm bg-blue-600" />Overage</span>
@@ -1029,16 +1029,16 @@ export default function PricingPage() {
               </div>
 
               {/* Invoice breakdown */}
-              <div className="rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden">
+              <div className="rounded-xl border border-gray-100 dark:border-border overflow-hidden">
                 {[
                   { dot: "bg-green-500", label: "Base Plan (125 users included)", value: "$25", valueClass: "" },
                   { dot: "bg-blue-400", label: "Grace Buffer (26–150 users)", value: "$0", valueClass: "text-green-600" },
                   { dot: "bg-blue-600", label: "Overage (30 users = 1 block × $12)", value: "+$12", valueClass: "" },
                 ].map((row, i) => (
-                  <div key={i} className="flex items-center justify-between px-5 py-3.5 border-b border-gray-100 dark:border-gray-700 last:border-0 bg-gray-50/40 dark:bg-gray-800/30">
+                  <div key={i} className="flex items-center justify-between px-5 py-3.5 border-b border-gray-100 dark:border-border last:border-0 bg-gray-50/40 dark:bg-card/30">
                     <div className="flex items-center gap-3">
                       <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${row.dot}`} />
-                      <span className="text-sm text-gray-700 dark:text-gray-300">{row.label}</span>
+                      <span className="text-sm text-gray-700 dark:text-muted-foreground">{row.label}</span>
                     </div>
                     <span className={`text-sm font-semibold tabular-nums ${row.valueClass || "text-gray-900 dark:text-white"}`}>{row.value}</span>
                   </div>
@@ -1076,7 +1076,7 @@ export default function PricingPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-600 dark:text-gray-400">
+                <p className="text-gray-600 dark:text-muted-foreground">
                   Yes! You can cancel your 7-day trial at any time with no
                   charges. If you don't cancel, you'll automatically be charged
                   after the trial ends.
@@ -1091,7 +1091,7 @@ export default function PricingPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-600 dark:text-gray-400">
+                <p className="text-gray-600 dark:text-muted-foreground">
                   You get full access to all Starter plan features for 7 days,
                   completely free. No credit card required until you decide to
                   continue. We'll remind you 7, 3, and 1 day before your trial
@@ -1107,7 +1107,7 @@ export default function PricingPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-600 dark:text-gray-400">
+                <p className="text-gray-600 dark:text-muted-foreground">
                   You have a 20% grace buffer (25 users) before any overage
                   charges apply. After that, you're charged $12 per 50 additional
                   users, billed monthly. You can track your usage in real-time
@@ -1123,7 +1123,7 @@ export default function PricingPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-600 dark:text-gray-400">
+                <p className="text-gray-600 dark:text-muted-foreground">
                   Yes! You can upgrade to yearly billing at any time to save
                   ${starterPlan.savings}/year. The change will take effect at your next billing
                   cycle.
@@ -1138,7 +1138,7 @@ export default function PricingPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-600 dark:text-gray-400">
+                <p className="text-gray-600 dark:text-muted-foreground">
                   Monthly plans can be canceled anytime with access until the
                   end of your paid period. Annual plans are non-refundable but
                   you'll have access for the full year.

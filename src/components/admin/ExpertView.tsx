@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useOrganization } from '@/context/OrganizationContext';
 import {
   Card,
   CardContent,
@@ -27,6 +28,9 @@ import {
   Gauge,
   AlertTriangle,
   RefreshCw,
+  ChevronRight,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 import api from '@/lib/api';
 
@@ -175,24 +179,40 @@ function TrendChip({ value }: { value: number }) {
 
 function ExpertSkeleton() {
   return (
-    <div className="h-full flex flex-col gap-4">
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-5 gap-4 min-h-0">
-        <div className="lg:col-span-3 rounded-xl border border-border bg-card p-4 space-y-3">
+    <div className="flex flex-col gap-4">
+      <div className="flex items-center justify-end gap-2 shrink-0">
+        <Skeleton className="h-8 w-16 rounded-lg" />
+        <Skeleton className="h-8 w-8 rounded-lg" />
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-4">
+        <div className="rounded-xl border border-border bg-card p-4 space-y-3">
           <Skeleton className="h-4 w-40" />
           <Skeleton className="h-32 w-full" />
         </div>
-        <div className="lg:col-span-2 rounded-xl border border-border bg-card p-4 space-y-3">
+        <div className="rounded-xl border border-border bg-card p-4 space-y-3">
           <Skeleton className="h-4 w-32" />
           <Skeleton className="h-32 w-full" />
         </div>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 min-h-0">
-        {[0, 1, 2].map((i) => (
-          <div key={i} className="rounded-xl border border-border bg-card p-4 space-y-3">
-            <Skeleton className="h-4 w-28" />
-            <Skeleton className="h-24 w-full" />
-          </div>
-        ))}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 min-h-0">
+        <div className="rounded-xl bg-[#14181f] p-4 space-y-3">
+          <Skeleton className="h-4 w-36 bg-slate-700" />
+          <Skeleton className="h-24 w-full bg-slate-700" />
+        </div>
+        <div className="rounded-xl border border-border bg-card p-4 space-y-3">
+          <Skeleton className="h-4 w-40" />
+          <Skeleton className="h-24 w-full" />
+        </div>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 min-h-0">
+        <div className="rounded-xl bg-[#fdf6ec] p-4 space-y-3">
+          <Skeleton className="h-4 w-36 bg-amber-200/50" />
+          <Skeleton className="h-24 w-full bg-amber-200/50" />
+        </div>
+        <div className="rounded-xl border border-border bg-card p-4 space-y-3">
+          <Skeleton className="h-4 w-40" />
+          <Skeleton className="h-24 w-full" />
+        </div>
       </div>
     </div>
   );
@@ -202,23 +222,24 @@ function ExpertSkeleton() {
    Panel components
 ====================================================== */
 
-function PanelHeader({ icon: Icon, title, description, right }: {
+function PanelHeader({ icon: Icon, title, description, right, iconColor }: {
   icon: React.ComponentType<{ className?: string }>;
   title: string;
   description: string;
   right?: React.ReactNode;
+  iconColor?: string;
 }) {
   return (
     <div className="flex items-start justify-between gap-2 shrink-0">
-      <div className="flex items-start gap-2.5 min-w-0">
-        <div className="p-1.5 rounded-lg bg-primary/10 text-primary mt-0.5 shrink-0">
+      <div className="flex items-start gap-3 min-w-0">
+        <div className={`w-8 h-8 rounded-full flex items-center justify-center mt-0.5 shrink-0 ${iconColor || 'bg-primary/10 text-primary'}`}>
           <Icon className="h-4 w-4" />
         </div>
         <div className="min-w-0">
-          <CardTitle className="text-sm font-semibold tracking-tight text-foreground">
+          <CardTitle className="text-[15px] font-medium tracking-tight text-foreground">
             {title}
           </CardTitle>
-          <CardDescription className="text-[11px] mt-0.5 text-muted-foreground">
+          <CardDescription className="text-[13px] mt-0.5 text-muted-foreground">
             {description}
           </CardDescription>
         </div>
@@ -309,17 +330,21 @@ function NeedsAttentionPanel({ entries }: { entries: NeedsAttentionEntry[] }) {
   return (
     <div className="space-y-2">
       {entries.map((e) => (
-        <div key={e.cluster_key} className="flex items-center gap-2">
+        <div
+          key={e.cluster_key}
+          className="flex items-center gap-2 rounded-lg bg-red-50/70 dark:bg-red-950/20 px-3 py-2.5"
+        >
           <span className="flex-1 min-w-0 text-xs font-medium text-foreground truncate">
             {e.label}
           </span>
           <div className="flex items-center gap-2 shrink-0">
-            <span className="inline-flex items-center rounded-full bg-red-50 px-1.5 py-0.5 text-[10px] font-semibold text-red-600 dark:bg-red-950/40 dark:text-red-400">
+            <span className="inline-flex items-center rounded-full bg-red-100 px-1.5 py-0.5 text-[10px] font-semibold text-red-600 dark:bg-red-900/50 dark:text-red-400">
               HIGH
             </span>
-            <span className="text-[11px] text-muted-foreground w-8 text-right">
+            <span className="text-[11px] text-muted-foreground w-6 text-right">
               {e.postCount}
             </span>
+            <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/50" />
           </div>
         </div>
       ))}
@@ -327,8 +352,9 @@ function NeedsAttentionPanel({ entries }: { entries: NeedsAttentionEntry[] }) {
   );
 }
 
-/* Panel 2 — Feedback source breakdown (donut + legend) */
+/* Panel 2 — Feedback source breakdown (donut + legend) — dark variant */
 function SourcePanel({ breakdown }: { breakdown: SourceBreakdown }) {
+  const [showPlatform, setShowPlatform] = useState(false);
   const sourceData = Object.entries(breakdown.bySource).map(([key, value]) => ({
     name: SOURCE_META[key]?.label || humanize(key),
     value,
@@ -339,7 +365,6 @@ function SourcePanel({ breakdown }: { breakdown: SourceBreakdown }) {
     value,
     color: PLATFORM_META[key]?.color || '#94a3b8',
   }));
-  const hasAutopilot = breakdown.byPlatform && Object.keys(breakdown.byPlatform).length > 0;
   const total = breakdown.total || 0;
 
   return (
@@ -349,7 +374,7 @@ function SourcePanel({ breakdown }: { breakdown: SourceBreakdown }) {
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
-                data={sourceData}
+                data={sourceData.length > 0 ? sourceData : [{ name: 'empty', value: 1, color: '#2a3441' }]}
                 dataKey="value"
                 nameKey="name"
                 innerRadius={38}
@@ -357,19 +382,22 @@ function SourcePanel({ breakdown }: { breakdown: SourceBreakdown }) {
                 paddingAngle={2}
                 strokeWidth={0}
               >
-                {sourceData.map((s) => (
+                {(sourceData.length > 0 ? sourceData : [{ name: 'empty', value: 1, color: '#2a3441' }]).map((s) => (
                   <Cell key={s.name} fill={s.color} />
                 ))}
               </Pie>
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: 'hsl(var(--background))',
-                  border: '1px solid hsl(var(--border))',
-                  borderRadius: '8px',
-                  fontSize: 12,
-                }}
-                formatter={(value: number) => [`${value} posts`, '']}
-              />
+              {sourceData.length > 0 && (
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: '#14181f',
+                    border: '1px solid #2a3441',
+                    borderRadius: '8px',
+                    fontSize: 12,
+                    color: '#e2e8f0',
+                  }}
+                  formatter={(value: number) => [`${value} posts`, '']}
+                />
+              )}
             </PieChart>
           </ResponsiveContainer>
         </div>
@@ -377,30 +405,39 @@ function SourcePanel({ breakdown }: { breakdown: SourceBreakdown }) {
           {sourceData.map((s) => (
             <div key={s.name} className="flex items-center gap-2">
               <span className="h-2 w-2 rounded-full shrink-0" style={{ background: s.color }} />
-              <span className="flex-1 min-w-0 text-xs text-muted-foreground truncate">{s.name}</span>
-              <span className="text-xs font-medium text-foreground">{s.value}</span>
+              <span className="flex-1 min-w-0 text-xs text-slate-300 truncate">{s.name}</span>
+              <span className="text-xs font-medium text-white">{s.value}</span>
+              <span className="text-[11px] text-slate-400 w-10 text-right">{total > 0 ? Math.round((s.value / total) * 100) : 0}%</span>
             </div>
           ))}
-          <div className="flex items-center gap-2 pt-1 border-t mt-1">
-            <span className="text-xs font-semibold text-foreground">Total</span>
-            <span className="ml-auto text-xs font-semibold text-foreground">{total}</span>
+          <div className="flex items-center gap-2 pt-1 border-t border-slate-700 mt-1">
+            <span className="text-xs font-semibold text-white">Total</span>
+            <span className="ml-auto text-xs font-semibold text-white">{total}</span>
           </div>
         </div>
       </div>
 
-      {hasAutopilot && (
-        <div>
-          <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground mb-1.5">
-            Autopilot by platform
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {platformData.map((p) => (
-              <Badge key={p.name} variant="secondary" className="gap-1.5">
-                <span className="h-2 w-2 rounded-full" style={{ background: p.color }} />
-                {p.name} · {p.value}
-              </Badge>
-            ))}
-          </div>
+      {platformData.length > 0 && (
+        <div className="pt-2 border-t border-slate-700">
+          <button
+            onClick={() => setShowPlatform(!showPlatform)}
+            className="flex items-center justify-between w-full text-[11px] font-semibold uppercase tracking-wide text-slate-400 mb-1.5"
+          >
+            <span>Autopilot by platform</span>
+            <ChevronDown className={`h-3.5 w-3.5 transition-transform ${showPlatform ? 'rotate-180' : ''}`} />
+          </button>
+          {showPlatform && (
+            <div className="space-y-2 mt-2">
+              {platformData.map((p) => (
+                <div key={p.name} className="flex items-center gap-2 rounded-lg bg-slate-800/60 px-3 py-2">
+                  <span className="h-2 w-2 rounded-full shrink-0" style={{ background: p.color }} />
+                  <span className="flex-1 text-xs text-slate-300">{p.name}</span>
+                  <span className="text-xs font-medium text-white">{p.value}</span>
+                  <ChevronRight className="h-3.5 w-3.5 text-slate-500" />
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -411,7 +448,7 @@ function SourcePanel({ breakdown }: { breakdown: SourceBreakdown }) {
 function AutopilotPanel({ autopilot }: { autopilot: AutopilotStats }) {
   const decided = autopilot.approved + autopilot.rejected;
   const rate = autopilot.approvalRate;
-  const gaugeColor = rate === null ? '#94a3b8' : rate >= 60 ? '#10b981' : rate >= 40 ? '#f59e0b' : '#ef4444';
+  const gaugeColor = '#10b981';
   const platformData = Object.entries(autopilot.byPlatform).map(([key, value]) => ({
     name: PLATFORM_META[key]?.label || humanize(key),
     value,
@@ -435,26 +472,30 @@ function AutopilotPanel({ autopilot }: { autopilot: AutopilotStats }) {
             />
           </svg>
           <div className="absolute inset-0 flex items-center justify-center flex-col">
-            <span className="text-lg font-bold text-foreground leading-none">{rate ?? '–'}</span>
-            <span className="text-[9px] text-muted-foreground mt-0.5">% appr.</span>
+            <span className="text-lg font-bold text-foreground leading-none">{rate ?? '–'}%</span>
+            <span className="text-[9px] text-muted-foreground mt-0.5">Approval rate</span>
           </div>
         </div>
         <div className="flex-1 min-w-0 space-y-1.5">
-          <div className="flex justify-between text-xs">
+          <div className="flex items-center gap-2 text-xs">
+            <span className="h-2 w-2 rounded-full bg-emerald-500 shrink-0" />
             <span className="text-muted-foreground">Approved</span>
-            <span className="font-semibold text-emerald-600 dark:text-emerald-400">{autopilot.approved}</span>
+            <span className="ml-auto font-semibold text-emerald-600 dark:text-emerald-400">{autopilot.approved}</span>
           </div>
-          <div className="flex justify-between text-xs">
+          <div className="flex items-center gap-2 text-xs">
+            <span className="h-2 w-2 rounded-full bg-red-500 shrink-0" />
             <span className="text-muted-foreground">Rejected</span>
-            <span className="font-semibold text-red-600 dark:text-red-400">{autopilot.rejected}</span>
+            <span className="ml-auto font-semibold text-red-600 dark:text-red-400">{autopilot.rejected}</span>
           </div>
-          <div className="flex justify-between text-xs">
+          <div className="flex items-center gap-2 text-xs">
+            <span className="h-2 w-2 rounded-full bg-gray-400 shrink-0" />
             <span className="text-muted-foreground">Pending</span>
-            <span className="font-semibold text-muted-foreground">{autopilot.pending}</span>
+            <span className="ml-auto font-semibold text-muted-foreground">{autopilot.pending}</span>
           </div>
-          <div className="flex justify-between text-xs">
+          <div className="flex items-center gap-2 text-xs">
+            <span className="h-2 w-2 shrink-0" />
             <span className="text-muted-foreground">Decided</span>
-            <span className="font-semibold text-foreground">{decided}</span>
+            <span className="ml-auto font-semibold text-foreground">{decided}</span>
           </div>
         </div>
       </div>
@@ -591,11 +632,13 @@ interface ExpertViewProps {
 }
 
 export function ExpertView({ organizationId }: ExpertViewProps) {
+  const { organization } = useOrganization();
   const [range, setRange] = useState<ExpertRange>('30d');
   const [stats, setStats] = useState<ExpertStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [rangeOpen, setRangeOpen] = useState(false);
 
   const load = async (r: ExpertRange, showRefresh = false) => {
     if (showRefresh) setRefreshing(true);
@@ -621,128 +664,184 @@ export function ExpertView({ organizationId }: ExpertViewProps) {
     return <ExpertSkeleton />;
   }
 
+  const hasTrending = (stats?.clusterTrends?.trending?.rising?.length ?? 0) > 0
+    || (stats?.clusterTrends?.trending?.shrinking?.length ?? 0) > 0;
+
+  const rangeLabel = RANGES.find((r) => r.value === range)?.label || range;
+
   return (
-    <div className="h-full flex flex-col gap-4 min-h-0">
-      {/* Range selector */}
-      <div className="flex items-center justify-between shrink-0">
-        <p className="text-xs text-muted-foreground">
-          Deeper operational analytics for your organization
-        </p>
-        <div className="flex items-center gap-2">
-          <div className="inline-flex items-center rounded-lg border border-border bg-background p-1 shadow-sm">
-            {RANGES.map((r) => (
-              <button
-                key={r.value}
-                onClick={() => setRange(r.value)}
-                className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
-                  range === r.value
-                    ? 'bg-primary text-primary-foreground shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                {r.label}
-              </button>
-            ))}
-          </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
-            onClick={() => load(range, true)}
-            disabled={refreshing}
-            title="Refresh"
+    <div className="flex flex-col">
+      {/* Top bar */}
+      <div className="flex items-center justify-end gap-2 mb-4 shrink-0">
+        {/* Range dropdown */}
+        <div className="relative">
+          <button
+            onClick={() => setRangeOpen(!rangeOpen)}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-background px-3 py-1.5 text-xs font-medium shadow-sm hover:bg-accent transition-colors"
           >
-            <RefreshCw className={`h-3.5 w-3.5 ${refreshing ? 'animate-spin' : ''}`} />
-          </Button>
+            {rangeLabel}
+            {rangeOpen ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+          </button>
+          {rangeOpen && (
+            <>
+              <div className="fixed inset-0 z-40" onClick={() => setRangeOpen(false)} />
+              <div className="absolute right-0 mt-1 z-50 w-28 rounded-lg border border-border bg-background shadow-md overflow-hidden">
+                {RANGES.map((r) => (
+                  <button
+                    key={r.value}
+                    onClick={() => { setRange(r.value); setRangeOpen(false); }}
+                    className={`w-full text-left px-3 py-2 text-xs font-medium transition-colors ${
+                      range === r.value
+                        ? 'bg-primary/10 text-primary'
+                        : 'text-foreground hover:bg-accent'
+                    }`}
+                  >
+                    {r.label}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
         </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
+          onClick={() => load(range, true)}
+          disabled={refreshing}
+          title="Refresh"
+        >
+          <RefreshCw className={`h-3.5 w-3.5 ${refreshing ? 'animate-spin' : ''}`} />
+        </Button>
       </div>
 
       {error && (
-        <div className="rounded-lg border border-red-200 bg-red-50 dark:bg-red-950/30 px-3 py-2 text-xs text-red-700 dark:text-red-300 shrink-0">
+        <div className="rounded-lg border border-red-200 bg-red-50 dark:bg-red-950/30 px-3 py-2 text-xs text-red-700 dark:text-red-300 shrink-0 mb-4">
           {error} — showing last known data if available.
         </div>
       )}
 
-      <div className="flex-1 min-h-0 grid grid-rows-[auto_1fr] gap-4">
-        {/* Top: cluster trends (35%) + needs attention (25%) + source (40%) */}
-        <div className="grid grid-cols-1 lg:grid-cols-10 gap-4 min-h-0">
-          <Card className="lg:col-span-3 flex flex-col min-h-0">
-            <CardHeader className="pb-3 shrink-0">
-              <PanelHeader
-                icon={Gauge}
-                title="Trending"
-                description="Week-over-week growth by AI-grouped theme"
-              />
-            </CardHeader>
-            <CardContent className="pt-0 flex-1 min-h-0 overflow-y-auto">
-              <ClusterTrendsPanel trends={stats?.clusterTrends?.trending || { weeks: [], rising: [], shrinking: [] }} />
-            </CardContent>
-          </Card>
-          <Card className="lg:col-span-3 flex flex-col min-h-0">
+      <div className="grid gap-4">
+        {/* Row 1: Trending (wide) + Needs Attention */}
+        <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-4">
+          {/* Trending — wide, gradient background */}
+          <div className="relative flex flex-col rounded-xl overflow-hidden" style={{ background: 'linear-gradient(135deg, #eef4fb 0%, #f4f8fc 50%, #eef2f9 100%)' }}>
+            <div className="relative z-10 flex flex-col">
+              <div className="flex items-center justify-between px-5 pt-5 pb-2 shrink-0">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+                    <Gauge className="h-4 w-4 text-blue-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-[15px] font-medium text-foreground">Trending</h3>
+                    <p className="text-[13px] text-muted-foreground">Week-over-week growth by AI-grouped theme</p>
+                  </div>
+                </div>
+                {hasTrending && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
+                    Keep going! 🚀
+                  </span>
+                )}
+              </div>
+              <div className="px-5 pb-5">
+                <ClusterTrendsPanel trends={stats?.clusterTrends?.trending || { weeks: [], rising: [], shrinking: [] }} />
+              </div>
+            </div>
+          </div>
+
+          {/* Needs Attention — standard card with View all link */}
+          <Card className="flex flex-col">
             <CardHeader className="pb-3 shrink-0">
               <PanelHeader
                 icon={AlertTriangle}
                 title="Needs Attention"
                 description="High-severity clusters by impact score"
+                iconColor="bg-red-100 text-red-600"
+                right={
+                  <span className="text-xs text-primary hover:underline cursor-pointer mt-1">View all →</span>
+                }
               />
             </CardHeader>
-            <CardContent className="pt-0 flex-1 min-h-0 overflow-y-auto">
+            <CardContent className="pt-0">
               <NeedsAttentionPanel entries={stats?.clusterTrends?.needsAttention || []} />
-            </CardContent>
-          </Card>
-          <Card className="lg:col-span-4 flex flex-col min-h-0">
-            <CardHeader className="pb-3 shrink-0">
-              <PanelHeader
-                icon={Globe}
-                title="Feedback Source"
-                description="Volume by where feedback arrives"
-              />
-            </CardHeader>
-            <CardContent className="pt-0 flex-1 min-h-0 overflow-y-auto">
-              <SourcePanel
-                breakdown={stats?.sourceBreakdown || { bySource: {}, byPlatform: {}, total: 0 }}
-              />
             </CardContent>
           </Card>
         </div>
 
-        {/* Bottom: autopilot + velocity + gap */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 min-h-0 overflow-y-auto">
+        {/* Row 2: Feedback Source (dark) + Autopilot Performance */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {/* Feedback Source — dark variant */}
+          <div className="flex flex-col rounded-xl overflow-hidden bg-[#14181f]">
+            <div className="px-5 pt-5 pb-3 shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center">
+                  <Globe className="h-4 w-4 text-emerald-400" />
+                </div>
+                <div>
+                  <h3 className="text-[15px] font-medium text-white">Feedback Source</h3>
+                  <p className="text-[13px] text-slate-400">Volume by where feedback arrives</p>
+                </div>
+              </div>
+            </div>
+            <div className="px-5 pb-5">
+              <SourcePanel
+                breakdown={stats?.sourceBreakdown || { bySource: {}, byPlatform: {}, total: 0 }}
+              />
+            </div>
+          </div>
+
+          {/* Autopilot Performance — standard card */}
           <Card className="flex flex-col">
             <CardHeader className="pb-3 shrink-0">
               <PanelHeader
                 icon={Bot}
                 title="Autopilot Performance"
                 description="Approval rate and platform volume"
+                iconColor="bg-indigo-100 text-indigo-600"
               />
             </CardHeader>
-            <CardContent className="pt-0 overflow-y-auto">
+            <CardContent className="pt-0">
               <AutopilotPanel autopilot={stats?.autopilot || { approved: 0, rejected: 0, pending: 0, approvalRate: null, byPlatform: {}, byStatus: {} }} />
             </CardContent>
           </Card>
-          <Card className="flex flex-col">
-            <CardHeader className="pb-3 shrink-0">
-              <PanelHeader
-                icon={Clock}
-                title="Time to Resolution"
-                description="Created → Done, overall and by board"
-              />
-            </CardHeader>
-            <CardContent className="pt-0 overflow-y-auto">
+        </div>
+
+        {/* Row 3: Time to Resolution (amber tint) + Engagement vs Resolution */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {/* Time to Resolution — amber tinted */}
+          <div className="flex flex-col rounded-xl overflow-hidden" style={{ background: '#fdf6ec' }}>
+            <div className="px-5 pt-5 pb-3 shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center">
+                  <Clock className="h-4 w-4 text-amber-600" />
+                </div>
+                <div>
+                  <h3 className="text-[15px] font-medium text-foreground">Time to Resolution</h3>
+                  <p className="text-[13px] text-muted-foreground">Created → Done, overall and by board</p>
+                </div>
+              </div>
+            </div>
+            <div className="px-5 pb-5">
               <VelocityPanel
                 velocity={stats?.timeToResolution || { count: 0, overallAvgDays: null, byBoard: [], column: null }}
               />
-            </CardContent>
-          </Card>
+            </div>
+          </div>
+
+          {/* Engagement vs Resolution — standard card with View all link */}
           <Card className="flex flex-col">
             <CardHeader className="pb-3 shrink-0">
               <PanelHeader
                 icon={AlertTriangle}
                 title="Engagement vs Resolution"
                 description="Loud themes that aren't shipping"
+                iconColor="bg-blue-100 text-blue-600"
+                right={
+                  <span className="text-xs text-primary hover:underline cursor-pointer mt-1">View all →</span>
+                }
               />
             </CardHeader>
-            <CardContent className="pt-0 overflow-y-auto">
+            <CardContent className="pt-0">
               <GapPanel gap={stats?.engagementGap || []} />
             </CardContent>
           </Card>

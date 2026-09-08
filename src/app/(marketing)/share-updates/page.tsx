@@ -29,7 +29,7 @@ export default function ShareUpdatesPage() {
             <h1 className="text-3xl lg:text-4xl font-switzer font-medium text-slate-900 dark:text-white mb-6 tracking-tight">
               Share Updates, Close the Loop
             </h1>
-            <p className="text-xl font-switzer text-slate-600 dark:text-gray-400 mb-8 leading-relaxed">
+            <p className="text-xl font-switzer text-slate-600 dark:text-muted-foreground mb-8 leading-relaxed">
               Keep users informed with changelogs and status updates. Show them
               you're listening and building what they want.
             </p>
@@ -48,7 +48,7 @@ export default function ShareUpdatesPage() {
             </div>
 
             {/* Trust Signals */}
-            <div className="flex flex-col sm:flex-row gap-4 sm:gap-8 justify-center text-sm text-slate-600 dark:text-gray-400">
+            <div className="flex flex-col sm:flex-row gap-4 sm:gap-8 justify-center text-sm text-slate-600 dark:text-muted-foreground">
               <div className="flex items-center justify-center gap-2">
                 <CheckCircle2 className="h-4 w-4 text-green-600" />
                 <span>Public changelogs</span>
@@ -66,13 +66,13 @@ export default function ShareUpdatesPage() {
         </section>
 
         {/* Keep your users in the loop */}
-        <section className="py-16 bg-[#f9f9f9] dark:bg-gray-900/50">
+        <section className="py-16 bg-[#f9f9f9] dark:bg-background/50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
               <h2 className="text-2xl font-switzer font-bold text-slate-900 dark:text-white mb-4">
                 Keep your users in the loop
               </h2>
-              <p className="text-xl text-slate-600 dark:text-gray-400 max-w-3xl mx-auto">
+              <p className="text-xl text-slate-600 dark:text-muted-foreground max-w-3xl mx-auto">
                 Communication builds trust and keeps users engaged
               </p>
             </div>
@@ -84,7 +84,7 @@ export default function ShareUpdatesPage() {
                   <h3 className="text-xl font-switzer font-medium text-slate-900 dark:text-white mb-3">
                     Changelogs
                   </h3>
-                  <p className="text-slate-600 dark:text-gray-400">
+                  <p className="text-slate-600 dark:text-muted-foreground">
                     Publish beautiful changelogs to showcase new features,
                     improvements, and bug fixes
                   </p>
@@ -97,7 +97,7 @@ export default function ShareUpdatesPage() {
                   <h3 className="text-xl font-switzer font-medium text-slate-900 dark:text-white mb-3">
                     Status Updates
                   </h3>
-                  <p className="text-slate-600 dark:text-gray-400">
+                  <p className="text-slate-600 dark:text-muted-foreground">
                     Update feedback status from planned to in progress to
                     shipped
                   </p>
@@ -110,7 +110,7 @@ export default function ShareUpdatesPage() {
                   <h3 className="text-xl font-switzer font-medium text-slate-900 dark:text-white mb-3">
                     Notifications
                   </h3>
-                  <p className="text-slate-600 dark:text-gray-400">
+                  <p className="text-slate-600 dark:text-muted-foreground">
                     Automatically notify users when their requested features are
                     shipped
                   </p>
@@ -123,7 +123,7 @@ export default function ShareUpdatesPage() {
                   <h3 className="text-xl font-switzer font-medium text-slate-900 dark:text-white mb-3">
                     Public Roadmap
                   </h3>
-                  <p className="text-slate-600 dark:text-gray-400">
+                  <p className="text-slate-600 dark:text-muted-foreground">
                     Share what you're working on and build anticipation for
                     upcoming features
                   </p>
@@ -140,7 +140,7 @@ export default function ShareUpdatesPage() {
               <h2 className="text-2xl font-switzer font-medium text-slate-900 dark:text-white mb-4">
                 Explore the customer feedback cycle
               </h2>
-              <p className="text-xl text-slate-600 dark:text-gray-400 max-w-3xl mx-auto">
+              <p className="text-xl text-slate-600 dark:text-muted-foreground max-w-3xl mx-auto">
                 From collection to action, understand the complete journey
               </p>
             </div>
@@ -159,7 +159,7 @@ export default function ShareUpdatesPage() {
                       <h3 className="text-2xl font-switzer font-bold text-slate-900 dark:text-white mb-4 group-hover:text-blue-600 transition-colors">
                         Collect
                       </h3>
-                      <p className="text-slate-600 dark:text-gray-400 mb-6">
+                      <p className="text-slate-600 dark:text-muted-foreground mb-6">
                         Gather feedback from multiple channels into one
                         centralized hub. Users submit ideas, report bugs, and
                         share suggestions.
@@ -191,7 +191,7 @@ export default function ShareUpdatesPage() {
                       <h3 className="text-2xl font-switzer font-bold text-slate-900 dark:text-white mb-4 group-hover:text-blue-600 transition-colors">
                         Analyze
                       </h3>
-                      <p className="text-slate-600 dark:text-gray-400 mb-6">
+                      <p className="text-slate-600 dark:text-muted-foreground mb-6">
                         Filter, sort, and prioritize feedback based on votes,
                         impact, and alignment with your goals. Identify patterns
                         and trends.
@@ -222,7 +222,7 @@ export default function ShareUpdatesPage() {
                     <h3 className="text-2xl font-switzer font-bold text-slate-900 dark:text-white mb-4">
                       Share
                     </h3>
-                    <p className="text-slate-600 dark:text-gray-400 mb-6">
+                    <p className="text-slate-600 dark:text-muted-foreground mb-6">
                       Keep users informed with updates, changelogs, and status
                       changes. Close the loop and build trust with your
                       community.

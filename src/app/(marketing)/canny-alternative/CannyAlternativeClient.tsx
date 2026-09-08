@@ -98,7 +98,7 @@ export default function CannyAlternativeClient() {
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans antialiased">
+    <div className="min-h-screen bg-white dark:bg-background text-slate-900 dark:text-foreground font-sans antialiased">
 
       {/* ── Navbar ─────────────────────────────────────────────── */}
 
@@ -121,7 +121,7 @@ export default function CannyAlternativeClient() {
               <span className="text-blue-600 dark:text-blue-400">for Startups</span>
             </h1>
 
-            <p className="text-lg md:text-xl text-slate-500 dark:text-slate-400 max-w-2xl mx-auto mb-10 leading-relaxed">
+            <p className="text-lg md:text-xl text-slate-500 dark:text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
               Faddy gives you everything Canny does — feedback boards, feature
               voting, public roadmap, changelog — at a fraction of the price.
               No per-user pricing surprises.
@@ -139,26 +139,26 @@ export default function CannyAlternativeClient() {
               <a
                 href="/pricing"
                 id="hero-cta-see-pricing"
-                className="inline-flex items-center gap-2 px-8 py-4 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-switzer font-bold rounded-2xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all duration-200 text-base"
+                className="inline-flex items-center gap-2 px-8 py-4 bg-white dark:bg-card text-slate-900 dark:text-white font-switzer font-bold rounded-2xl border border-slate-200 dark:border-border hover:bg-slate-50 dark:hover:bg-slate-700 transition-all duration-200 text-base"
               >
                 See pricing
               </a>
             </div>
 
-            <p className="mt-8 text-sm text-slate-400 dark:text-slate-500">
+            <p className="mt-8 text-sm text-slate-400 dark:text-muted-foreground">
               Free plan available · No credit card required · Setup in 2 minutes
             </p>
           </div>
         </section>
 
         {/* ── Pain points ────────────────────────────────────────── */}
-        <section className="py-16 px-6 bg-slate-50 dark:bg-slate-900/50 border-y border-slate-100 dark:border-slate-800">
+        <section className="py-16 px-6 bg-slate-50 dark:bg-background/50 border-y border-slate-100 dark:border-border">
           <div className="max-w-5xl mx-auto">
             <div className="text-center mb-14">
               <h2 className="text-3xl md:text-4xl font-switzer font-bold text-slate-900 dark:text-white mb-4">
                 Why teams leave Canny
               </h2>
-              <p className="text-slate-500 dark:text-slate-400 text-lg max-w-xl mx-auto">
+              <p className="text-slate-500 dark:text-muted-foreground text-lg max-w-xl mx-auto">
                 Canny is a solid product — but it was built for enterprises, not startups.
               </p>
             </div>
@@ -167,7 +167,7 @@ export default function CannyAlternativeClient() {
               {painPoints.map((point, i) => (
                 <div
                   key={i}
-                  className="group p-5 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-red-200 dark:hover:border-red-900 hover:shadow-lg transition-all duration-300"
+                  className="group p-5 bg-white dark:bg-card rounded-2xl border border-slate-200 dark:border-border hover:border-red-200 dark:hover:border-red-900 hover:shadow-lg transition-all duration-300"
                 >
                   <div className="w-12 h-12 flex items-center justify-center bg-red-50 dark:bg-red-900/20 rounded-xl mb-5 group-hover:scale-110 transition-transform duration-300">
                     {point.icon}
@@ -175,7 +175,7 @@ export default function CannyAlternativeClient() {
                   <h3 className="text-lg font-switzer font-semibold text-slate-900 dark:text-white mb-3">
                     {point.title}
                   </h3>
-                  <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
+                  <p className="text-slate-500 dark:text-muted-foreground text-sm leading-relaxed">
                     {point.desc}
                   </p>
                 </div>
@@ -191,27 +191,27 @@ export default function CannyAlternativeClient() {
               <h2 className="text-3xl md:text-4xl font-switzer font-bold text-slate-900 dark:text-white mb-4">
                 Faddy vs Canny
               </h2>
-              <p className="text-slate-500 dark:text-slate-400 text-lg">
+              <p className="text-slate-500 dark:text-muted-foreground text-lg">
                 An honest side-by-side comparison.
               </p>
             </div>
 
-            <div className="overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
+            <div className="overflow-hidden rounded-2xl border border-slate-200 dark:border-border shadow-sm">
               <table className="w-full">
                 <thead>
-                  <tr className="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-700">
-                    <th className="py-4 px-6 text-left text-sm font-semibold text-slate-600 dark:text-slate-300 w-1/3">
+                  <tr className="bg-slate-50 dark:bg-card/60 border-b border-slate-200 dark:border-border">
+                    <th className="py-4 px-6 text-left text-sm font-semibold text-slate-600 dark:text-muted-foreground w-1/3">
                       Feature
                     </th>
                     <th className="py-4 px-6 text-center text-sm font-bold text-blue-600 dark:text-blue-400 w-1/3">
                       Faddy ✦
                     </th>
-                    <th className="py-4 px-6 text-center text-sm font-semibold text-slate-400 dark:text-slate-500 w-1/3">
+                    <th className="py-4 px-6 text-center text-sm font-semibold text-slate-400 dark:text-muted-foreground w-1/3">
                       Canny
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-slate-800 bg-white dark:bg-slate-900">
+                <tbody className="divide-y divide-slate-100 dark:divide-border bg-white dark:bg-background">
                   {comparisonRows.map((row, i) => (
                     <tr
                       key={i}
@@ -219,7 +219,7 @@ export default function CannyAlternativeClient() {
                         row.faddyWins ? "bg-blue-50/40 dark:bg-blue-900/10" : ""
                       }`}
                     >
-                      <td className="py-4 px-6 text-sm text-slate-700 dark:text-slate-300 font-medium">
+                      <td className="py-4 px-6 text-sm text-slate-700 dark:text-muted-foreground font-medium">
                         {row.feature}
                       </td>
                       <td className="py-4 px-6 text-center">
@@ -238,8 +238,8 @@ export default function CannyAlternativeClient() {
                           <span
                             className={`text-sm ${
                               row.faddyWins
-                                ? "text-slate-400 dark:text-slate-500 line-through"
-                                : "text-slate-600 dark:text-slate-400"
+                                ? "text-slate-400 dark:text-muted-foreground line-through"
+                                : "text-slate-600 dark:text-muted-foreground"
                             }`}
                           >
                             {row.canny}
@@ -255,13 +255,13 @@ export default function CannyAlternativeClient() {
         </section>
 
         {/* ── Pricing ────────────────────────────────────────────── */}
-        <section className="py-16 px-6 bg-slate-50 dark:bg-slate-900/50 border-y border-slate-100 dark:border-slate-800">
+        <section className="py-16 px-6 bg-slate-50 dark:bg-background/50 border-y border-slate-100 dark:border-border">
           <div className="max-w-5xl mx-auto">
             <div className="text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-switzer font-bold text-slate-900 dark:text-white mb-4">
                 Simple flat pricing
               </h2>
-              <p className="text-slate-500 dark:text-slate-400 text-lg max-w-xl mx-auto">
+              <p className="text-slate-500 dark:text-muted-foreground text-lg max-w-xl mx-auto">
                 One price. No user-based overages. No surprises on your invoice.
               </p>
             </div>
@@ -273,7 +273,7 @@ export default function CannyAlternativeClient() {
                   className={`relative flex flex-col p-5 rounded-2xl border transition-all duration-300 ${
                     plan.highlight
                       ? "bg-blue-600 border-blue-500 shadow-2xl shadow-blue-500/20 scale-[1.02]"
-                      : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-700 hover:shadow-lg"
+                      : "bg-white dark:bg-card border-slate-200 dark:border-border hover:border-blue-300 dark:hover:border-blue-700 hover:shadow-lg"
                   }`}
                 >
                   {plan.badge && (
@@ -302,7 +302,7 @@ export default function CannyAlternativeClient() {
                       </span>
                       <span
                         className={`text-sm ${
-                          plan.highlight ? "text-blue-100" : "text-slate-500 dark:text-slate-400"
+                          plan.highlight ? "text-blue-100" : "text-slate-500 dark:text-muted-foreground"
                         }`}
                       >
                         {plan.per}
@@ -322,7 +322,7 @@ export default function CannyAlternativeClient() {
                           className={`text-sm ${
                             plan.highlight
                               ? "text-blue-50"
-                              : "text-slate-600 dark:text-slate-300"
+                              : "text-slate-600 dark:text-muted-foreground"
                           }`}
                         >
                           {f}
@@ -346,7 +346,7 @@ export default function CannyAlternativeClient() {
               ))}
             </div>
 
-            <p className="text-center mt-8 text-sm text-slate-400 dark:text-slate-500">
+            <p className="text-center mt-8 text-sm text-slate-400 dark:text-muted-foreground">
               All paid plans include a 14-day free trial. No credit card required to start.
             </p>
           </div>
@@ -354,7 +354,7 @@ export default function CannyAlternativeClient() {
 
         {/* ── Final CTA ──────────────────────────────────────────── */}
         <section className="py-20 px-6">
-          <div className="max-w-4xl mx-auto rounded-2xl bg-slate-900 dark:bg-slate-800 p-8 md:p-16 text-center overflow-hidden relative">
+          <div className="max-w-4xl mx-auto rounded-2xl bg-background dark:bg-card p-8 md:p-16 text-center overflow-hidden relative">
             <div className="absolute -bottom-20 -left-20 w-[400px] h-[400px] bg-blue-600/20 blur-[100px] rounded-full" />
             <div className="absolute -top-20 -right-20 w-[300px] h-[300px] bg-indigo-600/15 blur-[80px] rounded-full" />
 

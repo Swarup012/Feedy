@@ -40,7 +40,7 @@ export default function AutopilotPage() {
                   </span>
                 </h1>
 
-                <p className="text-lg lg:text-xl text-slate-600 dark:text-gray-400 mb-8 max-w-xl mx-auto lg:mx-0 leading-relaxed">
+                <p className="text-lg lg:text-xl text-slate-600 dark:text-muted-foreground mb-8 max-w-xl mx-auto lg:mx-0 leading-relaxed">
                   Autopilot reads every conversation across your connected tools
                   and turns real user requests into feedback posts —
                   automatically.
@@ -58,7 +58,7 @@ export default function AutopilotPage() {
                   </Link>
                   <a
                     href="#how-it-works"
-                    className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-switzer font-semibold rounded-md border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all text-sm"
+                    className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white dark:bg-card text-slate-900 dark:text-white font-switzer font-semibold rounded-md border border-slate-200 dark:border-border hover:bg-slate-50 dark:hover:bg-slate-700 transition-all text-sm"
                   >
                     See how it works
                   </a>
@@ -67,13 +67,13 @@ export default function AutopilotPage() {
 
               {/* Right — Animated Visual */}
               <div className="flex-1 w-full max-w-lg lg:max-w-none">
-                <div className="relative rounded-2xl overflow-hidden border border-slate-200/80 dark:border-slate-700/80 bg-slate-50 dark:bg-slate-900">
+                <div className="relative rounded-2xl overflow-hidden border border-slate-200/80 dark:border-border bg-slate-50 dark:bg-background">
                   {/* Browser chrome */}
-                  <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 px-4 py-2.5 border-b border-slate-200 dark:border-slate-700">
+                  <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-card px-4 py-2.5 border-b border-slate-200 dark:border-border">
                     <span className="w-3 h-3 rounded-full bg-red-400" />
                     <span className="w-3 h-3 rounded-full bg-yellow-400" />
                     <span className="w-3 h-3 rounded-full bg-green-400" />
-                    <div className="ml-3 flex-1 bg-white dark:bg-slate-700 rounded-md px-3 py-0.5 text-xs text-slate-400 dark:text-slate-500 font-mono">
+                    <div className="ml-3 flex-1 bg-white dark:bg-card rounded-md px-3 py-0.5 text-xs text-slate-400 dark:text-muted-foreground font-mono">
                       faddy.site/autopilot
                     </div>
                   </div>
@@ -91,7 +91,7 @@ export default function AutopilotPage() {
         {/* ─── Problem Section ─── */}
         <section className="py-16 px-6 bg-white dark:bg-background">
           <div className="max-w-3xl mx-auto text-center">
-            <p className="text-xl lg:text-2xl text-slate-600 dark:text-gray-400 leading-relaxed font-switzer">
+            <p className="text-xl lg:text-2xl text-slate-600 dark:text-muted-foreground leading-relaxed font-switzer">
               Most product feedback never makes it to a board. It&apos;s buried
               in Slack threads, support tickets, and sales calls — and by the
               time someone remembers to write it down, it&apos;s forgotten.
@@ -102,14 +102,14 @@ export default function AutopilotPage() {
         {/* ─── How It Works ─── */}
         <section
           id="how-it-works"
-          className="py-16 lg:py-20 px-6 bg-white dark:bg-background border-y border-slate-100 dark:border-slate-800"
+          className="py-16 lg:py-20 px-6 bg-white dark:bg-background border-y border-slate-100 dark:border-border"
         >
           <div className="max-w-5xl mx-auto">
             <div className="text-center mb-14">
               <h2 className="text-2xl lg:text-3xl font-switzer font-bold text-slate-900 dark:text-white mb-4">
                 How Autopilot works
               </h2>
-              <p className="text-lg text-slate-600 dark:text-gray-400 max-w-2xl mx-auto">
+              <p className="text-lg text-slate-600 dark:text-muted-foreground max-w-2xl mx-auto">
                 Three steps from conversation to actionable feedback.
               </p>
             </div>
@@ -118,8 +118,8 @@ export default function AutopilotPage() {
               {/* Step 1 — Connect */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
                 <div className="order-2 lg:order-1">
-                  <div className="bg-slate-100 dark:bg-gray-800 rounded-2xl p-6 shadow-xl">
-                    <div className="bg-white dark:bg-gray-900 rounded-xl p-5">
+                  <div className="bg-slate-100 dark:bg-card rounded-2xl p-6 shadow-xl">
+                    <div className="bg-white dark:bg-background rounded-xl p-5">
                       <div className="flex items-center gap-3 mb-4">
                         <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center">
                           <Link2 className="w-5 h-5 text-blue-600" />
@@ -128,7 +128,7 @@ export default function AutopilotPage() {
                           <div className="text-sm font-semibold text-slate-900 dark:text-white">
                             Connected Sources
                           </div>
-                          <div className="text-xs text-slate-500 dark:text-slate-400">
+                          <div className="text-xs text-slate-500 dark:text-muted-foreground">
                             2 active integrations
                           </div>
                         </div>
@@ -140,10 +140,10 @@ export default function AutopilotPage() {
                         ].map((source, i) => (
                           <div
                             key={i}
-                            className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-100 dark:border-slate-700"
+                            className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-card rounded-lg border border-slate-100 dark:border-border"
                           >
                             <CheckCircle2 className="w-4 h-4 text-green-500 shrink-0" />
-                            <span className="text-sm text-slate-700 dark:text-slate-300">
+                            <span className="text-sm text-slate-700 dark:text-muted-foreground">
                               {source}
                             </span>
                           </div>
@@ -161,7 +161,7 @@ export default function AutopilotPage() {
                       Connect
                     </h3>
                   </div>
-                  <p className="text-lg text-slate-600 dark:text-gray-400 mb-4">
+                  <p className="text-lg text-slate-600 dark:text-muted-foreground mb-4">
                     Link Slack, Intercom, or paste conversations directly. No
                     manual copy-pasting.
                   </p>
@@ -172,8 +172,8 @@ export default function AutopilotPage() {
                       "Paste any text directly",
                     ].map((item, i) => (
                       <li key={i} className="flex items-center gap-3">
-                        <CheckCircle2 className="h-4 w-4 text-green-600 shrink-0" />
-                        <span className="text-slate-700 dark:text-gray-300">
+                        <CheckCircle2 className="h-4 w-4 text-blue-600 shrink-0" />
+                        <span className="text-slate-700 dark:text-muted-foreground">
                           {item}
                         </span>
                       </li>
@@ -193,7 +193,7 @@ export default function AutopilotPage() {
                       Autopilot reads
                     </h3>
                   </div>
-                  <p className="text-lg text-slate-600 dark:text-gray-400 mb-4">
+                  <p className="text-lg text-slate-600 dark:text-muted-foreground mb-4">
                     A two-stage AI pipeline filters noise from real feedback,
                     then extracts a clean title and description from the raw
                     conversation.
@@ -205,8 +205,8 @@ export default function AutopilotPage() {
                       "Tagged with source: 'autopilot' for full traceability",
                     ].map((item, i) => (
                       <li key={i} className="flex items-center gap-3">
-                        <CheckCircle2 className="h-4 w-4 text-green-600 shrink-0" />
-                        <span className="text-slate-700 dark:text-gray-300">
+                        <CheckCircle2 className="h-4 w-4 text-blue-600 shrink-0" />
+                        <span className="text-slate-700 dark:text-muted-foreground">
                           {item}
                         </span>
                       </li>
@@ -214,38 +214,38 @@ export default function AutopilotPage() {
                   </ul>
                 </div>
                 <div>
-                  <div className="bg-slate-100 dark:bg-gray-800 rounded-2xl p-6 shadow-xl">
-                    <div className="bg-white dark:bg-gray-900 rounded-xl p-5">
+                  <div className="bg-slate-100 dark:bg-card rounded-2xl p-6 shadow-xl">
+                    <div className="bg-white dark:bg-background rounded-xl p-5">
                       <div className="flex items-center gap-3 mb-4">
-                        <div className="w-10 h-10 rounded-lg bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center">
-                          <Sparkles className="w-5 h-5 text-amber-600" />
+                        <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center">
+                          <Sparkles className="w-5 h-5 text-blue-600" />
                         </div>
                         <div>
                           <div className="text-sm font-semibold text-slate-900 dark:text-white">
                             AI Pipeline
                           </div>
-                          <div className="text-xs text-slate-500 dark:text-slate-400">
+                          <div className="text-xs text-slate-500 dark:text-muted-foreground">
                             Two-stage processing
                           </div>
                         </div>
                       </div>
                       <div className="space-y-3">
-                        <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-100 dark:border-slate-700">
-                          <div className="text-xs font-semibold text-amber-600 mb-1">
+                        <div className="p-3 bg-slate-50 dark:bg-card rounded-lg border border-slate-100 dark:border-border">
+                          <div className="text-xs font-semibold text-blue-600 mb-1">
                             Stage 1 — Filter
                           </div>
-                          <div className="text-xs text-slate-500 dark:text-slate-400">
+                          <div className="text-xs text-slate-500 dark:text-muted-foreground">
                             12 conversations → 4 with real feedback
                           </div>
                         </div>
                         <div className="flex justify-center">
-                          <div className="w-px h-4 bg-slate-200 dark:bg-slate-700" />
+                          <div className="w-px h-4 bg-slate-200 dark:bg-card" />
                         </div>
-                        <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-100 dark:border-slate-700">
+                        <div className="p-3 bg-slate-50 dark:bg-card rounded-lg border border-slate-100 dark:border-border">
                           <div className="text-xs font-semibold text-blue-600 mb-1">
                             Stage 2 — Extract
                           </div>
-                          <div className="text-xs text-slate-500 dark:text-slate-400">
+                          <div className="text-xs text-slate-500 dark:text-muted-foreground">
                             Clean title + description generated
                           </div>
                         </div>
@@ -258,8 +258,8 @@ export default function AutopilotPage() {
               {/* Step 3 — Feedback Appears */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
                 <div className="order-2 lg:order-1">
-                  <div className="bg-slate-100 dark:bg-gray-800 rounded-2xl p-6 shadow-xl">
-                    <div className="bg-white dark:bg-gray-900 rounded-xl p-5">
+                  <div className="bg-slate-100 dark:bg-card rounded-2xl p-6 shadow-xl">
+                    <div className="bg-white dark:bg-background rounded-xl p-5">
                       <div className="space-y-3">
                         {[
                           {
@@ -280,7 +280,7 @@ export default function AutopilotPage() {
                         ].map((item, i) => (
                           <div
                             key={i}
-                            className="p-3 bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-100 dark:border-slate-700"
+                            className="p-3 bg-slate-50 dark:bg-card rounded-lg border border-slate-100 dark:border-border"
                           >
                             <div className="flex items-center justify-between mb-1">
                               <span className="text-sm font-semibold text-slate-900 dark:text-white">
@@ -310,7 +310,7 @@ export default function AutopilotPage() {
                       Feedback appears
                     </h3>
                   </div>
-                  <p className="text-lg text-slate-600 dark:text-gray-400 mb-4">
+                  <p className="text-lg text-slate-600 dark:text-muted-foreground mb-4">
                     Choose manual mode (review before it&apos;s posted) or
                     automatic mode (published straight to your board), tagged so
                     you always know it came from Autopilot.
@@ -322,8 +322,8 @@ export default function AutopilotPage() {
                       "Every post tagged by source for traceability",
                     ].map((item, i) => (
                       <li key={i} className="flex items-center gap-3">
-                        <CheckCircle2 className="h-4 w-4 text-green-600 shrink-0" />
-                        <span className="text-slate-700 dark:text-gray-300">
+                        <CheckCircle2 className="h-4 w-4 text-blue-600 shrink-0" />
+                        <span className="text-slate-700 dark:text-muted-foreground">
                           {item}
                         </span>
                       </li>
@@ -342,7 +342,7 @@ export default function AutopilotPage() {
               <h2 className="text-2xl lg:text-3xl font-switzer font-bold text-slate-900 dark:text-white mb-4">
                 Stay in control, or let it run
               </h2>
-              <p className="text-lg text-slate-600 dark:text-gray-400 max-w-2xl mx-auto">
+              <p className="text-lg text-slate-600 dark:text-muted-foreground max-w-2xl mx-auto">
                 Two modes built for how your team actually works.
               </p>
             </div>
@@ -357,7 +357,7 @@ export default function AutopilotPage() {
                   <h3 className="text-xl font-switzer font-bold text-slate-900 dark:text-white mb-3">
                     Manual mode
                   </h3>
-                  <p className="text-slate-600 dark:text-gray-400 leading-relaxed">
+                  <p className="text-slate-600 dark:text-muted-foreground leading-relaxed">
                     Review every suggestion before it goes live. Autopilot
                     extracts and formats the feedback, but you decide what makes
                     it to the board. Perfect for teams that want a human in the
@@ -369,13 +369,13 @@ export default function AutopilotPage() {
               {/* Automatic Mode */}
               <Card className="border-slate-200 dark:border-border shadow-lg hover:shadow-xl transition-shadow">
                 <CardContent className="p-6">
-                  <div className="w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center mb-5">
-                    <Zap className="w-6 h-6 text-amber-600" />
+                  <div className="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center mb-5">
+                    <Zap className="w-6 h-6 text-blue-600" />
                   </div>
                   <h3 className="text-xl font-switzer font-bold text-slate-900 dark:text-white mb-3">
                     Automatic mode
                   </h3>
-                  <p className="text-slate-600 dark:text-gray-400 leading-relaxed">
+                  <p className="text-slate-600 dark:text-muted-foreground leading-relaxed">
                     Flip the switch and let Autopilot publish directly to your
                     board. Nothing sits in a queue. Every request is tagged by
                     source so you always know where it came from.
@@ -387,41 +387,41 @@ export default function AutopilotPage() {
         </section>
 
         {/* ─── Integrations ─── */}
-        <section className="py-16 px-6 bg-white dark:bg-background border-y border-slate-100 dark:border-slate-800">
+        <section className="py-16 px-6 bg-white dark:bg-background border-y border-slate-100 dark:border-border">
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-2xl lg:text-3xl font-switzer font-bold text-slate-900 dark:text-white mb-4">
               Works where your conversations happen
             </h2>
-            <p className="text-lg text-slate-600 dark:text-gray-400 mb-10 max-w-xl mx-auto">
+            <p className="text-lg text-slate-600 dark:text-muted-foreground mb-10 max-w-xl mx-auto">
               Connect the tools your team already uses. Autopilot reads
               conversations from each one.
             </p>
 
             <div className="flex flex-wrap items-center justify-center gap-6">
               {/* Slack */}
-              <div className="flex items-center gap-3 px-6 py-4 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
-                <Slack className="w-6 h-6 text-purple-600" />
+              <div className="flex items-center gap-3 px-6 py-4 bg-slate-50 dark:bg-card rounded-xl border border-slate-200 dark:border-border">
+                <Slack className="w-6 h-6 text-blue-600" />
                 <span className="font-switzer font-semibold text-slate-900 dark:text-white">
                   Slack
                 </span>
-                <span className="text-xs px-2 py-0.5 rounded-full bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300 font-medium">
+                <span className="text-xs px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 font-medium">
                   Live
                 </span>
               </div>
 
               {/* Intercom */}
-              <div className="flex items-center gap-3 px-6 py-4 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
+              <div className="flex items-center gap-3 px-6 py-4 bg-slate-50 dark:bg-card rounded-xl border border-slate-200 dark:border-border">
                 <MessageSquare className="w-6 h-6 text-blue-500" />
                 <span className="font-switzer font-semibold text-slate-900 dark:text-white">
                   Intercom
                 </span>
-                <span className="text-xs px-2 py-0.5 rounded-full bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300 font-medium">
+                <span className="text-xs px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 font-medium">
                   Live
                 </span>
               </div>
 
               {/* Discord — Coming Soon */}
-              <div className="flex items-center gap-3 px-6 py-4 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 opacity-60">
+              <div className="flex items-center gap-3 px-6 py-4 bg-slate-50 dark:bg-card rounded-xl border border-slate-200 dark:border-border opacity-60">
                 <svg
                   className="w-6 h-6 text-indigo-500"
                   viewBox="0 0 24 24"
@@ -432,7 +432,7 @@ export default function AutopilotPage() {
                 <span className="font-switzer font-semibold text-slate-900 dark:text-white">
                   Discord
                 </span>
-                <span className="text-xs px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-400 font-medium">
+                <span className="text-xs px-2 py-0.5 rounded-full bg-slate-200 dark:bg-card text-slate-600 dark:text-muted-foreground font-medium">
                   Coming soon
                 </span>
               </div>
@@ -491,7 +491,7 @@ export default function AutopilotPage() {
 
         {/* ─── CTA Footer ─── */}
         <section className="py-16 px-6">
-          <div className="max-w-5xl mx-auto rounded-3xl bg-slate-900 dark:bg-slate-800 p-8 md:p-12 overflow-hidden relative text-center">
+          <div className="max-w-5xl mx-auto rounded-3xl bg-background dark:bg-card p-8 md:p-12 overflow-hidden relative text-center">
             <div className="relative z-10">
               <h2 className="text-xl md:text-3xl font-switzer font-bold text-white mb-8 tracking-tighter leading-tight">
                 Turn your conversations into a roadmap.
@@ -502,7 +502,7 @@ export default function AutopilotPage() {
               </p>
               <a
                 href="/signup"
-                className="inline-flex items-center gap-3 px-6 py-4 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-switzer font-black rounded-2xl hover:scale-105 transition-all shadow-xl shadow-white/10 text-base"
+                className="inline-flex items-center gap-3 px-6 py-4 bg-white dark:bg-card text-slate-900 dark:text-white font-switzer font-black rounded-2xl hover:scale-105 transition-all shadow-xl shadow-white/10 text-base"
               >
                 Try for Free
                 <ArrowRight className="w-5 h-5" />
@@ -521,11 +521,11 @@ export default function AutopilotPage() {
 /* ─── Autopilot Animation (Pure CSS) ─── */
 function AutopilotAnimation() {
   return (
-    <div className="relative w-full h-full flex items-center justify-center bg-white dark:bg-slate-950 overflow-hidden">
+    <div className="relative w-full h-full flex items-center justify-center bg-white dark:bg-background overflow-hidden">
       {/* Left side — incoming messages */}
       <div className="absolute left-4 sm:left-8 top-1/2 -translate-y-1/2 flex flex-col gap-3 animate-slide-in">
         {[
-          { color: "bg-purple-500", delay: "0s" },
+          { color: "bg-blue-500", delay: "0s" },
           { color: "bg-blue-500", delay: "0.3s" },
           { color: "bg-indigo-500", delay: "0.6s" },
         ].map((msg, i) => (
@@ -548,14 +548,14 @@ function AutopilotAnimation() {
       {/* Center — AI Filter */}
       <div className="relative z-10 flex flex-col items-center">
         <div className="relative">
-          <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-amber-500 shadow-lg shadow-amber-500/30 flex items-center justify-center animate-pulse-slow">
+          <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-blue-500 shadow-lg shadow-amber-500/30 flex items-center justify-center animate-pulse-slow">
             <Sparkles className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
           </div>
           <div className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center">
             <span className="text-[10px] font-bold text-white">AI</span>
           </div>
         </div>
-        <div className="mt-2 text-xs font-switzer font-semibold text-slate-500 dark:text-slate-400">
+        <div className="mt-2 text-xs font-switzer font-semibold text-slate-500 dark:text-muted-foreground">
           Two-stage filter
         </div>
       </div>
@@ -566,15 +566,15 @@ function AutopilotAnimation() {
           (card, i) => (
             <div
               key={i}
-              className="w-20 sm:w-24 h-12 sm:h-14 bg-white dark:bg-slate-700 rounded-xl border border-slate-200 dark:border-slate-600 shadow-md opacity-0 animate-fade-in-card"
+              className="w-20 sm:w-24 h-12 sm:h-14 bg-white dark:bg-card rounded-xl border border-slate-200 dark:border-border shadow-md opacity-0 animate-fade-in-card"
               style={{ animationDelay: card.delay }}
             >
               <div className="p-2 space-y-1.5">
-                <div className="h-1.5 bg-slate-200 dark:bg-slate-600 rounded w-full" />
-                <div className="h-1.5 bg-slate-200 dark:bg-slate-600 rounded w-3/4" />
+                <div className="h-1.5 bg-slate-200 dark:bg-muted-foreground rounded w-full" />
+                <div className="h-1.5 bg-slate-200 dark:bg-muted-foreground rounded w-3/4" />
                 <div className="flex items-center gap-1 mt-1">
                   <div className="h-1 w-8 bg-blue-200 dark:bg-blue-800 rounded" />
-                  <div className="h-1 w-6 bg-slate-100 dark:bg-slate-600 rounded" />
+                  <div className="h-1 w-6 bg-slate-100 dark:bg-muted-foreground rounded" />
                 </div>
               </div>
             </div>

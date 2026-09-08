@@ -111,7 +111,7 @@ export default function IntegrationsPage() {
                 </span>
               </h1>
 
-              <p className="text-lg lg:text-xl text-slate-600 dark:text-gray-400 mb-8 max-w-2xl mx-auto leading-relaxed">
+              <p className="text-lg lg:text-xl text-slate-600 dark:text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
                 Faddy integrates with the tools your team already uses. Feedback
                 flows in automatically — no manual work required.
               </p>
@@ -128,7 +128,7 @@ export default function IntegrationsPage() {
                 </Link>
                 <a
                   href="#integrations"
-                  className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-switzer font-semibold rounded-md border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all text-sm"
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white dark:bg-card text-slate-900 dark:text-white font-switzer font-semibold rounded-md border border-slate-200 dark:border-border hover:bg-slate-50 dark:hover:bg-slate-700 transition-all text-sm"
                 >
                   View All Integrations
                 </a>
@@ -140,14 +140,14 @@ export default function IntegrationsPage() {
         {/* Integrations Grid */}
         <section
           id="integrations"
-          className="py-16 px-6 bg-slate-50/50 dark:bg-slate-900/50 border-y border-slate-100 dark:border-slate-800"
+          className="py-16 px-6 bg-slate-50/50 dark:bg-background/50 border-y border-slate-100 dark:border-border"
         >
           <div className="max-w-6xl mx-auto">
             <div className="grid md:grid-cols-2 gap-6">
               {integrations.map((integration) => (
                 <Card
                   key={integration.name}
-                  className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:shadow-lg transition-all group overflow-hidden"
+                  className="bg-white dark:bg-background border-slate-200 dark:border-border hover:shadow-lg transition-all group overflow-hidden"
                 >
                   <CardContent className="p-6">
                     <div className="flex items-start gap-4">
@@ -161,14 +161,14 @@ export default function IntegrationsPage() {
                         <h3 className="text-xl font-switzer font-bold text-slate-900 dark:text-white mb-2">
                           {integration.name}
                         </h3>
-                        <p className="text-slate-600 dark:text-slate-400 leading-relaxed mb-4">
+                        <p className="text-slate-600 dark:text-muted-foreground leading-relaxed mb-4">
                           {integration.description}
                         </p>
                         <ul className="space-y-2">
                           {integration.features.map((feature, idx) => (
                             <li
                               key={idx}
-                              className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400"
+                              className="flex items-center gap-2 text-sm text-slate-600 dark:text-muted-foreground"
                             >
                               <CheckCircle2 className="w-4 h-4 text-blue-500 shrink-0" />
                               {feature}
@@ -191,7 +191,7 @@ export default function IntegrationsPage() {
               <h2 className="text-2xl md:text-3xl font-switzer font-bold tracking-tight text-slate-900 dark:text-white mb-4">
                 Three steps to automated feedback
               </h2>
-              <p className="text-lg text-slate-500 dark:text-slate-400 max-w-xl mx-auto">
+              <p className="text-lg text-slate-500 dark:text-muted-foreground max-w-xl mx-auto">
                 Get started in minutes, not days. No complex setup required.
               </p>
             </div>
@@ -230,7 +230,7 @@ export default function IntegrationsPage() {
                   <h3 className="text-lg font-switzer font-bold text-slate-900 dark:text-white mb-2">
                     {item.title}
                   </h3>
-                  <p className="text-slate-600 dark:text-slate-400">
+                  <p className="text-slate-600 dark:text-muted-foreground">
                     {item.description}
                   </p>
                 </div>
@@ -241,7 +241,7 @@ export default function IntegrationsPage() {
 
         {/* CTA Section */}
         <section className="py-16 px-6">
-          <div className="max-w-5xl mx-auto rounded-3xl bg-slate-900 dark:bg-slate-800 p-8 md:p-12 overflow-hidden relative text-center">
+          <div className="max-w-5xl mx-auto rounded-3xl bg-background dark:bg-card p-8 md:p-12 overflow-hidden relative text-center">
             <div className="relative z-10">
               <h2 className="text-xl md:text-3xl font-switzer font-bold text-white mb-8 tracking-tighter leading-tight">
                 Ready to capture every voice?
@@ -252,7 +252,7 @@ export default function IntegrationsPage() {
               </p>
               <a
                 href="/signup"
-                className="inline-flex items-center gap-3 px-6 py-4 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-switzer font-black rounded-2xl hover:scale-105 transition-all text-base"
+                className="inline-flex items-center gap-3 px-6 py-4 bg-white dark:bg-card text-slate-900 dark:text-white font-switzer font-black rounded-2xl hover:scale-105 transition-all text-base"
               >
                 Start Free Today
                 <ArrowRight className="w-5 h-5" />

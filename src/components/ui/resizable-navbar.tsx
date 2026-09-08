@@ -364,7 +364,7 @@ export const NavItems = ({ items, className, onItemClick }: NavItemsProps) => {
                 transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
                 role="menu"
                 style={dropdownStyle}
-                className="absolute top-full mt-2 w-max min-w-[500px] bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 z-50 overflow-hidden"
+                className="absolute top-full mt-2 w-max min-w-[500px] bg-white dark:bg-background rounded-2xl shadow-2xl border border-slate-200 dark:border-border z-50 overflow-hidden"
               >
                 <div className="flex">
                   {/* Columns */}
@@ -372,11 +372,11 @@ export const NavItems = ({ items, className, onItemClick }: NavItemsProps) => {
                     {item.dropdown.map((section, sectionIdx) => (
                       <div
                         key={`section-${sectionIdx}`}
-                        className={`p-6 ${sectionIdx > 0 ? "border-l border-slate-200 dark:border-slate-800" : ""}`}
+                        className={`p-6 ${sectionIdx > 0 ? "border-l border-slate-200 dark:border-border" : ""}`}
                       >
                         <div
                           id={`nav-dropdown-section-${idx}-${sectionIdx}`}
-                          className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-4"
+                          className="text-xs font-semibold text-slate-500 dark:text-muted-foreground uppercase tracking-wider mb-4"
                         >
                           {section.section}
                         </div>
@@ -396,19 +396,19 @@ export const NavItems = ({ items, className, onItemClick }: NavItemsProps) => {
                                 handleDropdownKeyDown(e, idx, section.items.length, itemIdx)
                               }
                               role="menuitem"
-                              className="flex items-start gap-3 px-3 py-2.5 text-sm text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/50 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset group"
+                              className="flex items-start gap-3 px-3 py-2.5 text-sm text-slate-600 dark:text-muted-foreground hover:text-slate-900 dark:hover:text-foreground hover:bg-slate-100 dark:hover:bg-accent rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset group"
                             >
                               {dropdownItem.icon && (
-                                <span className="mt-0.5 flex-shrink-0 text-slate-400 dark:text-slate-500 group-hover:text-blue-500 dark:group-hover:text-blue-400 transition-colors">
+                                <span className="mt-0.5 flex-shrink-0 text-slate-400 dark:text-muted-foreground group-hover:text-blue-500 dark:group-hover:text-blue-400 transition-colors">
                                   {dropdownItem.icon}
                                 </span>
                               )}
                               <div>
-                                <div className="font-medium text-slate-900 dark:text-slate-200 group-hover:text-slate-900 dark:group-hover:text-white">
+                                <div className="font-medium text-slate-900 dark:text-foreground group-hover:text-slate-900 dark:group-hover:text-foreground">
                                   {dropdownItem.name}
                                 </div>
                                 {dropdownItem.description && (
-                                  <div className="text-xs text-slate-500 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-400 mt-0.5 leading-relaxed">
+                                  <div className="text-xs text-slate-500 dark:text-muted-foreground group-hover:text-slate-600 dark:group-hover:text-muted-foreground mt-0.5 leading-relaxed">
                                     {dropdownItem.description}
                                   </div>
                                 )}
@@ -422,12 +422,12 @@ export const NavItems = ({ items, className, onItemClick }: NavItemsProps) => {
 
                   {/* Featured Card */}
                   {item.featured && (
-                    <div className="p-6 border-l border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/30">
-                      <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-4">
+                    <div className="p-6 border-l border-slate-200 dark:border-border bg-slate-50 dark:bg-card">
+                      <div className="text-xs font-semibold text-slate-500 dark:text-muted-foreground uppercase tracking-wider mb-4">
                         {item.featured.title}
                       </div>
                       {item.featured.image && (
-                        <div className="rounded-lg overflow-hidden mb-3 border border-slate-200 dark:border-slate-700">
+                        <div className="rounded-lg overflow-hidden mb-3 border border-slate-200 dark:border-border">
                           <img
                             src={item.featured.image}
                             alt={item.featured.title}
@@ -435,7 +435,7 @@ export const NavItems = ({ items, className, onItemClick }: NavItemsProps) => {
                           />
                         </div>
                       )}
-                      <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                      <p className="text-sm text-slate-600 dark:text-muted-foreground leading-relaxed">
                         {item.featured.description}
                       </p>
                       <a

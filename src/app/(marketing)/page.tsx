@@ -173,7 +173,7 @@ export default function LandingPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-white dark:bg-slate-950 font-sans text-slate-900 dark:text-slate-100 antialiased selection:bg-blue-100 dark:selection:bg-blue-900 selection:text-blue-900 dark:selection:text-blue-100">
+    <div className="min-h-screen bg-white dark:bg-background font-sans text-slate-900 dark:text-foreground antialiased selection:bg-blue-100 dark:selection:bg-primary selection:text-blue-900 dark:selection:text-primary-foreground">
       {/* Visual background texture */}
       <div className="fixed inset-0 z-0 opacity-[0.03] pointer-events-none">
         <div
@@ -211,7 +211,7 @@ export default function LandingPage() {
                   </span>
                 </h1>
 
-                <p className="hero-reveal text-base sm:text-lg md:text-xl text-slate-500 dark:text-slate-400 leading-relaxed max-w-lg">
+                <p className="hero-reveal text-base sm:text-lg md:text-xl text-slate-500 dark:text-muted-foreground leading-relaxed max-w-lg">
                   Faddy's AI reads every request across your tools and tells you
                   exactly what to build next to keep users happy and paying.
                 </p>
@@ -225,17 +225,17 @@ export default function LandingPage() {
                   </button>
                   <a
                     href="/pricing"
-                    className="w-full sm:w-auto px-8 py-3.5 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-switzer font-bold rounded-2xl border-2 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all flex items-center justify-center gap-2 text-base"
+                    className="w-full sm:w-auto px-8 py-3.5 bg-white dark:bg-card text-slate-900 dark:text-white font-switzer font-bold rounded-2xl border-2 border-slate-200 dark:border-border hover:bg-slate-50 dark:hover:bg-slate-700 transition-all flex items-center justify-center gap-2 text-base"
                   >
                     Pricing
                   </a>
                 </div>
-                <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">
+                <p className="text-sm text-slate-500 dark:text-muted-foreground font-medium">
                   No credit card required
                 </p>
 
                 {/* Social Proof / Stats */}
-                <div className="hero-stats w-full pt-5 border-t border-slate-100 dark:border-slate-800 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="hero-stats w-full pt-5 border-t border-slate-100 dark:border-border grid grid-cols-1 sm:grid-cols-3 gap-3">
                   {[
                     "Free plan available",
                     "From $19/mo flat",
@@ -246,7 +246,7 @@ export default function LandingPage() {
                       className="flex items-center justify-center lg:justify-start gap-2"
                     >
                       <CheckCircle className="w-4 h-4 text-blue-500 shrink-0" />
-                      <span className="text-sm font-switzer font-medium text-slate-600 dark:text-slate-300">
+                      <span className="text-sm font-switzer font-medium text-slate-600 dark:text-muted-foreground">
                         {stat}
                       </span>
                     </div>
@@ -256,13 +256,13 @@ export default function LandingPage() {
 
               {/* Right — Video (54%), hidden on small mobile, shown from md up */}
               <div className="hidden md:block w-full lg:w-[54%] relative">
-                <div className="relative rounded-2xl overflow-hidden border border-slate-200/80 dark:border-slate-700/80">
+                <div className="relative rounded-2xl overflow-hidden border border-slate-200/80 dark:border-border">
                   {/* Fake browser chrome */}
-                  <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 px-4 py-2.5 border-b border-slate-200 dark:border-slate-700">
+                  <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-card px-4 py-2.5 border-b border-slate-200 dark:border-border">
                     <span className="w-3 h-3 rounded-full bg-red-400" />
                     <span className="w-3 h-3 rounded-full bg-yellow-400" />
                     <span className="w-3 h-3 rounded-full bg-green-400" />
-                    <div className="ml-3 flex-1 bg-white dark:bg-slate-700 rounded-md px-3 py-0.5 text-xs text-slate-400 dark:text-slate-500 font-mono">
+                    <div className="ml-3 flex-1 bg-white dark:bg-card rounded-md px-3 py-0.5 text-xs text-slate-400 dark:text-muted-foreground font-mono">
                       faddy.site
                     </div>
                   </div>
@@ -285,7 +285,7 @@ export default function LandingPage() {
         {/* Features Section — Tabbed Showcase */}
         <section
           ref={featuresRef}
-          className="py-12 px-6 bg-slate-50/50 dark:bg-slate-900/50 border-y border-slate-100 dark:border-slate-800"
+          className="py-12 px-6 bg-slate-50/50 dark:bg-background/50 border-y border-slate-100 dark:border-border"
         >
           <div className="max-w-6xl mx-auto">
             {/* Section header */}
@@ -293,7 +293,7 @@ export default function LandingPage() {
               <h2 className="text-xl md:text-2xl font-switzer font-medium tracking-tight text-slate-900 dark:text-white mb-4">
                 Everything you need to manage product feedback
               </h2>
-              <p className="text-lg text-slate-500 dark:text-slate-400 max-w-xl mx-auto">
+              <p className="text-lg text-slate-500 dark:text-muted-foreground max-w-xl mx-auto">
                 From collecting ideas to shipping features — Faddy handles the
                 full loop.
               </p>
@@ -381,7 +381,7 @@ export default function LandingPage() {
             <h2 className="text-2xl md:text-3xl font-switzer font-bold tracking-tight text-slate-900 dark:text-white mb-4">
               Automate with your favorite apps
             </h2>
-            <p className="text-lg text-slate-500 dark:text-slate-400 mb-12 max-w-xl mx-auto">
+            <p className="text-lg text-slate-500 dark:text-muted-foreground mb-12 max-w-xl mx-auto">
               Connect Faddy to the tools your team already uses. Feedback flows in automatically.
             </p>
 
@@ -444,7 +444,7 @@ export default function LandingPage() {
               ].map((integration) => (
                 <div
                   key={integration.name}
-                  className="flex flex-col items-center p-6 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 hover:shadow-lg transition-all group"
+                  className="flex flex-col items-center p-6 rounded-2xl bg-slate-50 dark:bg-background border border-slate-100 dark:border-border hover:shadow-lg transition-all group"
                 >
                   <div
                     className="h-12 w-12 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform"
@@ -455,7 +455,7 @@ export default function LandingPage() {
                   <h3 className="font-switzer font-bold text-slate-900 dark:text-white mb-2">
                     {integration.name}
                   </h3>
-                  <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
+                  <p className="text-sm text-slate-500 dark:text-muted-foreground leading-relaxed">
                     {integration.description}
                   </p>
                 </div>
@@ -466,7 +466,7 @@ export default function LandingPage() {
 
         {/* CTA Section */}
         <section className="py-16 px-6">
-          <div className="max-w-5xl mx-auto rounded-3xl bg-slate-900 dark:bg-slate-800 p-8 md:p-12 overflow-hidden relative text-center">
+          <div className="max-w-5xl mx-auto rounded-3xl bg-background dark:bg-card p-8 md:p-12 overflow-hidden relative text-center">
             <div className="relative z-10">
               <h2 className="text-xl md:text-3xl font-switzer font-bold text-white mb-8 tracking-tighter leading-tight">
                 Your users are waiting to tell you what to build.
@@ -477,7 +477,7 @@ export default function LandingPage() {
               </p>
               <a
                 href="/signup"
-                className="inline-flex items-center gap-3 px-6 py-4 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-switzer font-black rounded-2xl hover:scale-105 transition-all text-base"
+                className="inline-flex items-center gap-3 px-6 py-4 bg-white dark:bg-card text-slate-900 dark:text-white font-switzer font-black rounded-2xl hover:scale-105 transition-all text-base"
               >
                 Start Free Today
                 <ArrowRight className="w-5 h-5" />

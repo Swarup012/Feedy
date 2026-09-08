@@ -116,7 +116,7 @@ export default function RoleBasedAccessPage() {
 
   return (
     <>
-      <div className="min-h-screen bg-white dark:bg-gray-900">
+      <div className="min-h-screen bg-white dark:bg-background">
         {/* Hero Section */}
         <div className="pt-20 pb-16 px-4">
           <div className="max-w-6xl mx-auto text-center">
@@ -131,7 +131,7 @@ export default function RoleBasedAccessPage() {
               Role-Based Access Control
             </h1>
 
-            <p className="text-xl text-gray-600 dark:text-gray-400 mb-8 max-w-3xl mx-auto">
+            <p className="text-xl text-gray-600 dark:text-muted-foreground mb-8 max-w-3xl mx-auto">
               Secure your feedback management with flexible role-based
               permissions. Control who can view, edit, and manage feedback
               across your organization.
@@ -146,7 +146,7 @@ export default function RoleBasedAccessPage() {
               </button>
               <button
                 onClick={() => router.push("/pricing")}
-                className="px-8 py-3 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-full font-semibold border border-gray-300 dark:border-gray-700 hover:border-blue-600 dark:hover:border-blue-500 transition-all"
+                className="px-8 py-3 bg-white dark:bg-card text-gray-900 dark:text-white rounded-full font-semibold border border-gray-300 dark:border-border hover:border-blue-600 dark:hover:border-blue-500 transition-all"
               >
                 View Pricing
               </button>
@@ -155,7 +155,7 @@ export default function RoleBasedAccessPage() {
         </div>
 
         {/* Features Grid */}
-        <div className="py-16 px-4 bg-white dark:bg-gray-900/50">
+        <div className="py-16 px-4 bg-white dark:bg-background/50">
           <div className="max-w-6xl mx-auto">
             <h2 className="text-2xl font-bold text-center mb-8">
               Powerful Permission Management
@@ -165,13 +165,13 @@ export default function RoleBasedAccessPage() {
               {features.map((feature, index) => (
                 <div
                   key={index}
-                  className="p-6 rounded-xl border border-gray-200 dark:border-gray-800 hover:border-blue-500 dark:hover:border-blue-500 transition-all hover:shadow-lg bg-white dark:bg-gray-900"
+                  className="p-6 rounded-xl border border-gray-200 dark:border-border hover:border-blue-500 dark:hover:border-blue-500 transition-all hover:shadow-lg bg-white dark:bg-background"
                 >
                   <div className="mb-4">{feature.icon}</div>
                   <h3 className="text-xl font-semibold mb-2">
                     {feature.title}
                   </h3>
-                  <p className="text-gray-600 dark:text-gray-400">
+                  <p className="text-gray-600 dark:text-muted-foreground">
                     {feature.description}
                   </p>
                 </div>
@@ -186,7 +186,7 @@ export default function RoleBasedAccessPage() {
             <h2 className="text-2xl font-bold text-center mb-4">
               Flexible Role Types
             </h2>
-            <p className="text-center text-gray-600 dark:text-gray-400 mb-8 max-w-2xl mx-auto">
+            <p className="text-center text-gray-600 dark:text-muted-foreground mb-8 max-w-2xl mx-auto">
               Choose from predefined roles or customize permissions to fit your
               organization's needs
             </p>
@@ -195,7 +195,7 @@ export default function RoleBasedAccessPage() {
               {roleTypes.map((role, index) => (
                 <div
                   key={index}
-                  className="p-5 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 hover:shadow-xl transition-all"
+                  className="p-5 rounded-xl border border-gray-200 dark:border-border bg-white dark:bg-background hover:shadow-xl transition-all"
                 >
                   <div
                     className={`inline-block px-4 py-2 rounded-full font-semibold mb-6 ${role.color}`}
@@ -207,7 +207,7 @@ export default function RoleBasedAccessPage() {
                     {role.permissions.map((permission, idx) => (
                       <li key={idx} className="flex items-start gap-2">
                         <IconShieldCheck className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
-                        <span className="text-gray-700 dark:text-gray-300">
+                        <span className="text-gray-700 dark:text-muted-foreground">
                           {permission}
                         </span>
                       </li>
@@ -220,7 +220,7 @@ export default function RoleBasedAccessPage() {
         </div>
 
         {/* Use Cases Section */}
-        <div className="py-16 px-4 bg-white dark:bg-gray-900/50">
+        <div className="py-16 px-4 bg-white dark:bg-background/50">
           <div className="max-w-6xl mx-auto">
             <h2 className="text-2xl font-bold text-center mb-8">
               Perfect For Any Team Structure
@@ -230,10 +230,10 @@ export default function RoleBasedAccessPage() {
               {useCases.map((useCase, index) => (
                 <div
                   key={index}
-                  className="p-5 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 hover:shadow-lg transition-all"
+                  className="p-5 rounded-xl border border-gray-200 dark:border-border bg-white dark:bg-background hover:shadow-lg transition-all"
                 >
                   <h3 className="text-2xl font-bold mb-3">{useCase.title}</h3>
-                  <p className="text-gray-600 dark:text-gray-400 mb-6">
+                  <p className="text-gray-600 dark:text-muted-foreground mb-6">
                     {useCase.description}
                   </p>
 

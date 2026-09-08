@@ -112,19 +112,19 @@ export default function DeveloperApiPage() {
             <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
               {/* Left — Copy */}
               <div className="flex-1 text-center lg:text-left">
-                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-orange-50 dark:bg-orange-900/30 border border-orange-200 dark:border-orange-800 text-orange-700 dark:text-orange-300 text-xs sm:text-sm font-semibold mb-6">
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 text-xs sm:text-sm font-semibold mb-6">
                   <Code className="w-4 h-4" />
                   Developer Tools
                 </div>
 
                 <h1 className="text-3xl lg:text-4xl xl:text-5xl font-switzer font-medium text-slate-900 dark:text-white mb-6 tracking-tight leading-tight">
                   Build with Faddy.{" "}
-                  <span className="text-orange-600 dark:text-orange-400">
+                  <span className="text-blue-600 dark:text-blue-400">
                     Your way.
                   </span>
                 </h1>
 
-                <p className="text-lg lg:text-xl text-slate-600 dark:text-gray-400 mb-8 max-w-xl mx-auto lg:mx-0 leading-relaxed">
+                <p className="text-lg lg:text-xl text-slate-600 dark:text-muted-foreground mb-8 max-w-xl mx-auto lg:mx-0 leading-relaxed">
                   Full API access, webhooks, and SDKs. Embed feedback collection
                   into your app, sync customer data, and build custom workflows
                   — all with your brand front and center.
@@ -134,7 +134,7 @@ export default function DeveloperApiPage() {
                   <Link href="/signup">
                     <Button
                       size="lg"
-                      className="bg-orange-600 hover:bg-orange-700 text-white shadow-lg w-full sm:w-auto"
+                      className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg w-full sm:w-auto"
                     >
                       Get API Key
                       <ArrowRight className="ml-2 h-5 w-5" />
@@ -142,7 +142,7 @@ export default function DeveloperApiPage() {
                   </Link>
                   <a
                     href="#features"
-                    className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-switzer font-semibold rounded-md border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all text-sm"
+                    className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white dark:bg-card text-slate-900 dark:text-white font-switzer font-semibold rounded-md border border-slate-200 dark:border-border hover:bg-slate-50 dark:hover:bg-slate-700 transition-all text-sm"
                   >
                     View Documentation
                   </a>
@@ -151,9 +151,9 @@ export default function DeveloperApiPage() {
 
               {/* Right — Code Preview */}
               <div className="flex-1 w-full max-w-lg lg:max-w-none">
-                <div className="relative rounded-2xl overflow-hidden border border-slate-200/80 dark:border-slate-700/80 bg-slate-900">
+                <div className="relative rounded-2xl overflow-hidden border border-slate-200/80 dark:border-border bg-background">
                   {/* Terminal chrome */}
-                  <div className="flex items-center gap-1.5 bg-slate-800 px-4 py-2.5 border-b border-slate-700">
+                  <div className="flex items-center gap-1.5 bg-card px-4 py-2.5 border-b border-slate-700">
                     <span className="w-3 h-3 rounded-full bg-red-400" />
                     <span className="w-3 h-3 rounded-full bg-yellow-400" />
                     <span className="w-3 h-3 rounded-full bg-green-400" />
@@ -214,14 +214,14 @@ export default function DeveloperApiPage() {
         {/* Features */}
         <section
           id="features"
-          className="py-16 px-6 bg-slate-50/50 dark:bg-slate-900/50 border-y border-slate-100 dark:border-slate-800"
+          className="py-16 px-6 bg-slate-50/50 dark:bg-background/50 border-y border-slate-100 dark:border-border"
         >
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-12">
               <h2 className="text-2xl md:text-3xl font-switzer font-bold tracking-tight text-slate-900 dark:text-white mb-4">
                 Everything developers need
               </h2>
-              <p className="text-lg text-slate-500 dark:text-slate-400 max-w-xl mx-auto">
+              <p className="text-lg text-slate-500 dark:text-muted-foreground max-w-xl mx-auto">
                 Powerful API, great docs, and tools that just work.
               </p>
             </div>
@@ -230,16 +230,16 @@ export default function DeveloperApiPage() {
               {features.map((feature) => (
                 <Card
                   key={feature.title}
-                  className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:shadow-lg transition-all"
+                  className="bg-white dark:bg-background border-slate-200 dark:border-border hover:shadow-lg transition-all"
                 >
                   <CardContent className="p-6">
-                    <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 mb-4">
+                    <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 mb-4">
                       {feature.icon}
                     </div>
                     <h3 className="text-lg font-switzer font-bold text-slate-900 dark:text-white mb-2">
                       {feature.title}
                     </h3>
-                    <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
+                    <p className="text-slate-600 dark:text-muted-foreground leading-relaxed">
                       {feature.description}
                     </p>
                   </CardContent>
@@ -256,7 +256,7 @@ export default function DeveloperApiPage() {
               <h2 className="text-2xl md:text-3xl font-switzer font-bold tracking-tight text-slate-900 dark:text-white mb-4">
                 Build anything you imagine
               </h2>
-              <p className="text-lg text-slate-500 dark:text-slate-400 max-w-xl mx-auto">
+              <p className="text-lg text-slate-500 dark:text-muted-foreground max-w-xl mx-auto">
                 From simple widgets to complex workflows — it&apos;s all possible.
               </p>
             </div>
@@ -271,11 +271,11 @@ export default function DeveloperApiPage() {
                     <h3 className="text-xl font-switzer font-bold text-slate-900 dark:text-white mb-3">
                       {useCase.title}
                     </h3>
-                    <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
+                    <p className="text-slate-600 dark:text-muted-foreground leading-relaxed">
                       {useCase.description}
                     </p>
                   </div>
-                  <div className="bg-slate-900 rounded-xl p-4 overflow-x-auto">
+                  <div className="bg-background rounded-xl p-4 overflow-x-auto">
                     <pre className="font-mono text-sm text-slate-300 whitespace-pre">
                       {useCase.code}
                     </pre>
@@ -287,7 +287,7 @@ export default function DeveloperApiPage() {
         </section>
 
         {/* Security */}
-        <section className="py-16 px-6 bg-slate-50/50 dark:bg-slate-900/50 border-y border-slate-100 dark:border-slate-800">
+        <section className="py-16 px-6 bg-slate-50/50 dark:bg-background/50 border-y border-slate-100 dark:border-border">
           <div className="max-w-5xl mx-auto">
             <div className="grid md:grid-cols-3 gap-8">
               {[
@@ -311,13 +311,13 @@ export default function DeveloperApiPage() {
                 },
               ].map((item) => (
                 <div key={item.title} className="text-center">
-                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-orange-50 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 mb-4">
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 mb-4">
                     {item.icon}
                   </div>
                   <h3 className="text-lg font-switzer font-bold text-slate-900 dark:text-white mb-2">
                     {item.title}
                   </h3>
-                  <p className="text-slate-600 dark:text-slate-400">
+                  <p className="text-slate-600 dark:text-muted-foreground">
                     {item.description}
                   </p>
                 </div>
@@ -328,7 +328,7 @@ export default function DeveloperApiPage() {
 
         {/* CTA Section */}
         <section className="py-16 px-6">
-          <div className="max-w-5xl mx-auto rounded-3xl bg-slate-900 dark:bg-slate-800 p-8 md:p-12 overflow-hidden relative text-center">
+          <div className="max-w-5xl mx-auto rounded-3xl bg-background dark:bg-card p-8 md:p-12 overflow-hidden relative text-center">
             <div className="relative z-10">
               <h2 className="text-xl md:text-3xl font-switzer font-bold text-white mb-8 tracking-tighter leading-tight">
                 Start building with Faddy today
@@ -339,7 +339,7 @@ export default function DeveloperApiPage() {
               </p>
               <a
                 href="/signup"
-                className="inline-flex items-center gap-3 px-6 py-4 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-switzer font-black rounded-2xl hover:scale-105 transition-all text-base"
+                className="inline-flex items-center gap-3 px-6 py-4 bg-white dark:bg-card text-slate-900 dark:text-white font-switzer font-black rounded-2xl hover:scale-105 transition-all text-base"
               >
                 Get API Key Free
                 <ArrowRight className="w-5 h-5" />

@@ -39,7 +39,7 @@ export default function PublicRoadmapPage() {
             <h1 className="text-3xl lg:text-4xl font-switzer font-medium text-slate-900 dark:text-white mb-6 tracking-tight">
               Build Trust with a Public Roadmap
             </h1>
-            <p className="text-xl font-switzer text-slate-600 dark:text-gray-400 mb-8 leading-relaxed">
+            <p className="text-xl font-switzer text-slate-600 dark:text-muted-foreground mb-8 leading-relaxed">
               Show your vision, gather feedback, and keep stakeholders aligned with a beautiful public roadmap.
             </p>
 
@@ -57,7 +57,7 @@ export default function PublicRoadmapPage() {
             </div>
 
             {/* Trust Signals */}
-            <div className="flex flex-col sm:flex-row gap-4 sm:gap-8 justify-center text-sm text-slate-600 dark:text-gray-400">
+            <div className="flex flex-col sm:flex-row gap-4 sm:gap-8 justify-center text-sm text-slate-600 dark:text-muted-foreground">
               <div className="flex items-center justify-center gap-2">
                 <CheckCircle2 className="h-4 w-4 text-green-600" />
                 <span>No credit card required</span>
@@ -75,13 +75,13 @@ export default function PublicRoadmapPage() {
         </section>
 
         {/* Benefits Section - 6 Cards */}
-        <section className="py-16 bg-[#f9f9f9] dark:bg-gray-900/50">
+        <section className="py-16 bg-[#f9f9f9] dark:bg-background/50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
               <h2 className="text-2xl font-switzer font-bold text-slate-900 dark:text-white mb-4">
                 Why Public Roadmaps Matter
               </h2>
-              <p className="text-xl text-slate-600 dark:text-gray-400">
+              <p className="text-xl text-slate-600 dark:text-muted-foreground">
                 Transform how you communicate your product vision
               </p>
             </div>
@@ -93,7 +93,7 @@ export default function PublicRoadmapPage() {
                   <h3 className="text-xl font-switzer font-bold text-slate-900 dark:text-white mb-3">
                     Build Trust & Transparency
                   </h3>
-                  <p className="text-slate-600 dark:text-gray-400">
+                  <p className="text-slate-600 dark:text-muted-foreground">
                     Show users what you're working on. Build credibility by being open about your product direction.
                   </p>
                 </CardContent>
@@ -105,7 +105,7 @@ export default function PublicRoadmapPage() {
                   <h3 className="text-xl font-switzer font-bold text-slate-900 dark:text-white mb-3">
                     Drive User Engagement
                   </h3>
-                  <p className="text-slate-600 dark:text-gray-400">
+                  <p className="text-slate-600 dark:text-muted-foreground">
                     Let users vote and comment on upcoming features. Turn passive users into active contributors.
                   </p>
                 </CardContent>
@@ -117,7 +117,7 @@ export default function PublicRoadmapPage() {
                   <h3 className="text-xl font-switzer font-bold text-slate-900 dark:text-white mb-3">
                     Reduce Support Requests
                   </h3>
-                  <p className="text-slate-600 dark:text-gray-400">
+                  <p className="text-slate-600 dark:text-muted-foreground">
                     Answer "When will this be available?" before users ask. Cut down on repetitive support tickets.
                   </p>
                 </CardContent>
@@ -129,7 +129,7 @@ export default function PublicRoadmapPage() {
                   <h3 className="text-xl font-switzer font-bold text-slate-900 dark:text-white mb-3">
                     Align Stakeholders
                   </h3>
-                  <p className="text-slate-600 dark:text-gray-400">
+                  <p className="text-slate-600 dark:text-muted-foreground">
                     Keep investors, team members, and customers on the same page about what's coming next.
                   </p>
                 </CardContent>
@@ -141,7 +141,7 @@ export default function PublicRoadmapPage() {
                   <h3 className="text-xl font-switzer font-bold text-slate-900 dark:text-white mb-3">
                     Gather Early Feedback
                   </h3>
-                  <p className="text-slate-600 dark:text-gray-400">
+                  <p className="text-slate-600 dark:text-muted-foreground">
                     Validate ideas before building. Get user input on planned features to reduce wasted effort.
                   </p>
                 </CardContent>
@@ -153,7 +153,7 @@ export default function PublicRoadmapPage() {
                   <h3 className="text-xl font-switzer font-bold text-slate-900 dark:text-white mb-3">
                     Manage Expectations
                   </h3>
-                  <p className="text-slate-600 dark:text-gray-400">
+                  <p className="text-slate-600 dark:text-muted-foreground">
                     Set realistic timelines publicly. Reduce frustration by showing what's in progress and what's planned.
                   </p>
                 </CardContent>
@@ -169,7 +169,7 @@ export default function PublicRoadmapPage() {
               <h2 className="text-2xl font-switzer font-bold text-slate-900 dark:text-white mb-4">
                 Powerful Roadmap Features
               </h2>
-              <p className="text-xl text-slate-600 dark:text-gray-400">
+              <p className="text-xl text-slate-600 dark:text-muted-foreground">
                 Everything you need to create a stunning public roadmap
               </p>
             </div>
@@ -181,25 +181,25 @@ export default function PublicRoadmapPage() {
                   <h3 className="text-xl font-switzer font-bold text-slate-900 dark:text-white mb-4">
                     Beautiful Timeline View
                   </h3>
-                  <p className="text-slate-600 dark:text-gray-400 mb-6">
+                  <p className="text-slate-600 dark:text-muted-foreground mb-6">
                     Choose between quarterly, monthly, or custom timeline layouts. Visualize your roadmap in the format that works best for your team.
                   </p>
                   <ul className="space-y-3">
                     <li className="flex items-center gap-3">
                       <CheckCircle2 className="h-5 w-5 text-green-600" />
-                      <span className="text-slate-700 dark:text-gray-300">
+                      <span className="text-slate-700 dark:text-muted-foreground">
                         Quarterly & monthly views
                       </span>
                     </li>
                     <li className="flex items-center gap-3">
                       <CheckCircle2 className="h-5 w-5 text-green-600" />
-                      <span className="text-slate-700 dark:text-gray-300">
+                      <span className="text-slate-700 dark:text-muted-foreground">
                         Drag-and-drop timeline management
                       </span>
                     </li>
                     <li className="flex items-center gap-3">
                       <CheckCircle2 className="h-5 w-5 text-green-600" />
-                      <span className="text-slate-700 dark:text-gray-300">
+                      <span className="text-slate-700 dark:text-muted-foreground">
                         Color-coded status indicators
                       </span>
                     </li>
@@ -213,25 +213,25 @@ export default function PublicRoadmapPage() {
                   <h3 className="text-xl font-switzer font-bold text-slate-900 dark:text-white mb-4">
                     Public & Private Options
                   </h3>
-                  <p className="text-slate-600 dark:text-gray-400 mb-6">
+                  <p className="text-slate-600 dark:text-muted-foreground mb-6">
                     Control visibility with flexible privacy settings. Share publicly or restrict access to specific audiences.
                   </p>
                   <ul className="space-y-3">
                     <li className="flex items-center gap-3">
                       <CheckCircle2 className="h-5 w-5 text-green-600" />
-                      <span className="text-slate-700 dark:text-gray-300">
+                      <span className="text-slate-700 dark:text-muted-foreground">
                         Public roadmaps for transparency
                       </span>
                     </li>
                     <li className="flex items-center gap-3">
                       <CheckCircle2 className="h-5 w-5 text-green-600" />
-                      <span className="text-slate-700 dark:text-gray-300">
+                      <span className="text-slate-700 dark:text-muted-foreground">
                         Private roadmaps for internal teams
                       </span>
                     </li>
                     <li className="flex items-center gap-3">
                       <CheckCircle2 className="h-5 w-5 text-green-600" />
-                      <span className="text-slate-700 dark:text-gray-300">
+                      <span className="text-slate-700 dark:text-muted-foreground">
                         Password-protected access
                       </span>
                     </li>
@@ -245,25 +245,25 @@ export default function PublicRoadmapPage() {
                   <h3 className="text-xl font-switzer font-bold text-slate-900 dark:text-white mb-4">
                     Voting & Comments
                   </h3>
-                  <p className="text-slate-600 dark:text-gray-400 mb-6">
+                  <p className="text-slate-600 dark:text-muted-foreground mb-6">
                     Enable community feedback on your roadmap items. Let users vote and comment to prioritize features.
                   </p>
                   <ul className="space-y-3">
                     <li className="flex items-center gap-3">
                       <CheckCircle2 className="h-5 w-5 text-green-600" />
-                      <span className="text-slate-700 dark:text-gray-300">
+                      <span className="text-slate-700 dark:text-muted-foreground">
                         User voting on roadmap items
                       </span>
                     </li>
                     <li className="flex items-center gap-3">
                       <CheckCircle2 className="h-5 w-5 text-green-600" />
-                      <span className="text-slate-700 dark:text-gray-300">
+                      <span className="text-slate-700 dark:text-muted-foreground">
                         Threaded comments & discussions
                       </span>
                     </li>
                     <li className="flex items-center gap-3">
                       <CheckCircle2 className="h-5 w-5 text-green-600" />
-                      <span className="text-slate-700 dark:text-gray-300">
+                      <span className="text-slate-700 dark:text-muted-foreground">
                         Email notifications for updates
                       </span>
                     </li>
@@ -277,25 +277,25 @@ export default function PublicRoadmapPage() {
                   <h3 className="text-xl font-switzer font-bold text-slate-900 dark:text-white mb-4">
                     Custom Branding
                   </h3>
-                  <p className="text-slate-600 dark:text-gray-400 mb-6">
+                  <p className="text-slate-600 dark:text-muted-foreground mb-6">
                     Match your brand with customizable colors, logos, and domains. Make your roadmap feel like home.
                   </p>
                   <ul className="space-y-3">
                     <li className="flex items-center gap-3">
                       <CheckCircle2 className="h-5 w-5 text-green-600" />
-                      <span className="text-slate-700 dark:text-gray-300">
+                      <span className="text-slate-700 dark:text-muted-foreground">
                         Custom colors & themes
                       </span>
                     </li>
                     <li className="flex items-center gap-3">
                       <CheckCircle2 className="h-5 w-5 text-green-600" />
-                      <span className="text-slate-700 dark:text-gray-300">
+                      <span className="text-slate-700 dark:text-muted-foreground">
                         Upload your logo & favicon
                       </span>
                     </li>
                     <li className="flex items-center gap-3">
                       <CheckCircle2 className="h-5 w-5 text-green-600" />
-                      <span className="text-slate-700 dark:text-gray-300">
+                      <span className="text-slate-700 dark:text-muted-foreground">
                         Custom domain support
                       </span>
                     </li>
@@ -307,13 +307,13 @@ export default function PublicRoadmapPage() {
         </section>
 
         {/* How It Works Section - 3 Steps */}
-        <section className="py-16 bg-[#f9f9f9] dark:bg-gray-900/50">
+        <section className="py-16 bg-[#f9f9f9] dark:bg-background/50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
               <h2 className="text-2xl font-switzer font-bold text-slate-900 dark:text-white mb-4">
                 How It Works
               </h2>
-              <p className="text-xl text-slate-600 dark:text-gray-400">
+              <p className="text-xl text-slate-600 dark:text-muted-foreground">
                 Launch your public roadmap in three simple steps
               </p>
             </div>
@@ -321,13 +321,13 @@ export default function PublicRoadmapPage() {
             {/* Step 1 */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center mb-12">
               <div className="order-2 lg:order-1">
-                <div className="bg-slate-100 dark:bg-gray-800 rounded-2xl p-5 shadow-xl">
+                <div className="bg-slate-100 dark:bg-card rounded-2xl p-5 shadow-xl">
                   {/* Mock Roadmap Creation Interface */}
-                  <div className="bg-white dark:bg-gray-900 rounded-lg p-4">
+                  <div className="bg-white dark:bg-background rounded-lg p-4">
                     <div className="space-y-6">
                       {/* Roadmap Item Creation */}
                       <div className="space-y-4">
-                        <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-gray-700">
+                        <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-border">
                           <h4 className="font-semibold text-slate-900 dark:text-white">
                             Create Roadmap Item
                           </h4>
@@ -338,8 +338,8 @@ export default function PublicRoadmapPage() {
                           <label className="text-sm font-medium text-slate-900 dark:text-white">
                             Feature Title
                           </label>
-                          <div className="h-10 bg-white dark:bg-gray-950 rounded-lg border border-slate-200 dark:border-gray-700 px-3 flex items-center">
-                            <span className="text-slate-400 dark:text-gray-500 text-sm">
+                          <div className="h-10 bg-white dark:bg-background rounded-lg border border-slate-200 dark:border-border px-3 flex items-center">
+                            <span className="text-slate-400 dark:text-muted-foreground text-sm">
                               Advanced Analytics Dashboard
                             </span>
                           </div>
@@ -350,8 +350,8 @@ export default function PublicRoadmapPage() {
                           <label className="text-sm font-medium text-slate-900 dark:text-white">
                             Description
                           </label>
-                          <div className="h-20 bg-white dark:bg-gray-950 rounded-lg border border-slate-200 dark:border-gray-700 p-3">
-                            <span className="text-slate-400 dark:text-gray-500 text-sm">
+                          <div className="h-20 bg-white dark:bg-background rounded-lg border border-slate-200 dark:border-border p-3">
+                            <span className="text-slate-400 dark:text-muted-foreground text-sm">
                               Real-time analytics with custom reports...
                             </span>
                           </div>
@@ -380,25 +380,25 @@ export default function PublicRoadmapPage() {
                     Create Roadmap Items
                   </h3>
                 </div>
-                <p className="text-lg font-switzer text-slate-600 dark:text-gray-400 mb-6">
+                <p className="text-lg font-switzer text-slate-600 dark:text-muted-foreground mb-6">
                   Add features, improvements, and updates you're planning to build
                 </p>
                 <ul className="space-y-3">
                   <li className="flex items-center gap-3">
                     <CheckCircle2 className="h-5 w-5 text-green-600" />
-                    <span className="text-slate-700 dark:text-gray-300">
+                    <span className="text-slate-700 dark:text-muted-foreground">
                       Add title, description, and details
                     </span>
                   </li>
                   <li className="flex items-center gap-3">
                     <CheckCircle2 className="h-5 w-5 text-green-600" />
-                    <span className="text-slate-700 dark:text-gray-300">
+                    <span className="text-slate-700 dark:text-muted-foreground">
                       Categorize by feature type
                     </span>
                   </li>
                   <li className="flex items-center gap-3">
                     <CheckCircle2 className="h-5 w-5 text-green-600" />
-                    <span className="text-slate-700 dark:text-gray-300">
+                    <span className="text-slate-700 dark:text-muted-foreground">
                       Link to related feedback
                     </span>
                   </li>
@@ -417,34 +417,34 @@ export default function PublicRoadmapPage() {
                     Set Status & Timeline
                   </h3>
                 </div>
-                <p className="text-lg font-switzer text-slate-600 dark:text-gray-400 mb-6">
+                <p className="text-lg font-switzer text-slate-600 dark:text-muted-foreground mb-6">
                   Organize items by status and assign timelines for delivery
                 </p>
                 <ul className="space-y-3">
                   <li className="flex items-center gap-3">
                     <CheckCircle2 className="h-5 w-5 text-green-600" />
-                    <span className="text-slate-700 dark:text-gray-300">
+                    <span className="text-slate-700 dark:text-muted-foreground">
                       Set status: Planned, In Progress, Done
                     </span>
                   </li>
                   <li className="flex items-center gap-3">
                     <CheckCircle2 className="h-5 w-5 text-green-600" />
-                    <span className="text-slate-700 dark:text-gray-300">
+                    <span className="text-slate-700 dark:text-muted-foreground">
                       Assign quarterly or monthly timelines
                     </span>
                   </li>
                   <li className="flex items-center gap-3">
                     <CheckCircle2 className="h-5 w-5 text-green-600" />
-                    <span className="text-slate-700 dark:text-gray-300">
+                    <span className="text-slate-700 dark:text-muted-foreground">
                       Update progress as you build
                     </span>
                   </li>
                 </ul>
               </div>
               <div>
-                <div className="bg-slate-100 dark:bg-gray-800 rounded-2xl p-5 shadow-xl">
+                <div className="bg-slate-100 dark:bg-card rounded-2xl p-5 shadow-xl">
                   {/* Mock Status Management */}
-                  <div className="bg-white dark:bg-gray-900 rounded-lg p-4 space-y-4">
+                  <div className="bg-white dark:bg-background rounded-lg p-4 space-y-4">
                     <h4 className="font-semibold text-slate-900 dark:text-white mb-4">
                       Roadmap Timeline
                     </h4>
@@ -458,7 +458,7 @@ export default function PublicRoadmapPage() {
                       ].map((item, i) => (
                         <div
                           key={i}
-                          className="flex items-center gap-3 p-3 border border-slate-200 dark:border-gray-700 rounded-lg"
+                          className="flex items-center gap-3 p-3 border border-slate-200 dark:border-border rounded-lg"
                         >
                           <div className={`px-2 py-1 rounded text-xs font-semibold ${
                             item.color === "blue" 
@@ -472,7 +472,7 @@ export default function PublicRoadmapPage() {
                               {item.title}
                             </div>
                           </div>
-                          <span className="text-xs px-2 py-1 bg-slate-100 dark:bg-gray-800 text-slate-700 dark:text-gray-300 rounded">
+                          <span className="text-xs px-2 py-1 bg-slate-100 dark:bg-card text-slate-700 dark:text-muted-foreground rounded">
                             {item.quarter}
                           </span>
                         </div>
@@ -486,9 +486,9 @@ export default function PublicRoadmapPage() {
             {/* Step 3 */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
               <div className="order-2 lg:order-1">
-                <div className="bg-slate-100 dark:bg-gray-800 rounded-2xl p-5 shadow-xl">
+                <div className="bg-slate-100 dark:bg-card rounded-2xl p-5 shadow-xl">
                   {/* Mock Public Roadmap View */}
-                  <div className="bg-white dark:bg-gray-900 rounded-lg p-4">
+                  <div className="bg-white dark:bg-background rounded-lg p-4">
                     <div className="flex items-center justify-between mb-4">
                       <h4 className="font-semibold text-slate-900 dark:text-white">
                         Public Roadmap
@@ -502,12 +502,12 @@ export default function PublicRoadmapPage() {
                     {/* Share Options */}
                     <div className="space-y-3">
                       <div>
-                        <label className="block text-xs font-medium text-slate-700 dark:text-gray-300 mb-1">
+                        <label className="block text-xs font-medium text-slate-700 dark:text-muted-foreground mb-1">
                           Share Link
                         </label>
                         <div className="flex gap-2">
-                          <div className="flex-1 h-8 bg-slate-100 dark:bg-gray-800 rounded border border-slate-200 dark:border-gray-700 flex items-center px-2">
-                            <span className="text-xs text-slate-500 dark:text-gray-400">
+                          <div className="flex-1 h-8 bg-slate-100 dark:bg-card rounded border border-slate-200 dark:border-border flex items-center px-2">
+                            <span className="text-xs text-slate-500 dark:text-muted-foreground">
                               roadmap.yourcompany.com
                             </span>
                           </div>
@@ -518,10 +518,10 @@ export default function PublicRoadmapPage() {
                       </div>
                       
                       {/* Visibility Toggle */}
-                      <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-gray-800 rounded-lg">
+                      <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-card rounded-lg">
                         <div className="flex items-center gap-2">
-                          <Eye className="h-4 w-4 text-slate-600 dark:text-gray-400" />
-                          <span className="text-sm text-slate-700 dark:text-gray-300">Public Access</span>
+                          <Eye className="h-4 w-4 text-slate-600 dark:text-muted-foreground" />
+                          <span className="text-sm text-slate-700 dark:text-muted-foreground">Public Access</span>
                         </div>
                         <div className="w-10 h-5 bg-blue-600 rounded-full flex items-center justify-end px-0.5">
                           <div className="w-4 h-4 bg-white rounded-full"></div>
@@ -540,25 +540,25 @@ export default function PublicRoadmapPage() {
                     Share Publicly
                   </h3>
                 </div>
-                <p className="text-lg font-switzer text-slate-600 dark:text-gray-400 mb-6">
+                <p className="text-lg font-switzer text-slate-600 dark:text-muted-foreground mb-6">
                   Make your roadmap public and start building trust with your users
                 </p>
                 <ul className="space-y-3">
                   <li className="flex items-center gap-3">
                     <CheckCircle2 className="h-5 w-5 text-green-600" />
-                    <span className="text-slate-700 dark:text-gray-300">
+                    <span className="text-slate-700 dark:text-muted-foreground">
                       Get a shareable public link
                     </span>
                   </li>
                   <li className="flex items-center gap-3">
                     <CheckCircle2 className="h-5 w-5 text-green-600" />
-                    <span className="text-slate-700 dark:text-gray-300">
+                    <span className="text-slate-700 dark:text-muted-foreground">
                       Embed on your website
                     </span>
                   </li>
                   <li className="flex items-center gap-3">
                     <CheckCircle2 className="h-5 w-5 text-green-600" />
-                    <span className="text-slate-700 dark:text-gray-300">
+                    <span className="text-slate-700 dark:text-muted-foreground">
                       Collect votes and feedback
                     </span>
                   </li>

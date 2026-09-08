@@ -51,7 +51,7 @@ export default function CollectFeedbackPage() {
             <h1 className="text-3xl lg:text-4xl font-switzer  font-medium text-slate-900 dark:text-white mb-6 tracking-tight">
               Collect Feedback from Your Users, Effortlessly
             </h1>
-            <p className="text-xl font-switzer text-slate-600 dark:text-gray-400 mb-8 leading-relaxed">
+            <p className="text-xl font-switzer text-slate-600 dark:text-muted-foreground mb-8 leading-relaxed">
               Centralize feedback from multiple channels. Organize requests.
               Never miss a valuable insight again.
             </p>
@@ -70,7 +70,7 @@ export default function CollectFeedbackPage() {
             </div>
 
             {/* Trust Signals */}
-            <div className="flex flex-col sm:flex-row gap-4 sm:gap-8 justify-center text-sm text-slate-600 dark:text-gray-400">
+            <div className="flex flex-col sm:flex-row gap-4 sm:gap-8 justify-center text-sm text-slate-600 dark:text-muted-foreground">
               <div className="flex items-center justify-center gap-2">
                 <CheckCircle2 className="h-4 w-4 text-green-600" />
                 <span>No credit card required</span>
@@ -88,13 +88,13 @@ export default function CollectFeedbackPage() {
         </section>
 
         {/* Problem Statement Section */}
-        <section className="py-16 bg-[#f9f9f9] dark:bg-gray-900/50">
+        <section className="py-16 bg-[#f9f9f9] dark:bg-background/50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
               <h2 className="text-2xl font-switzer font-bold text-slate-900 dark:text-white mb-4">
                 Scattered Feedback = Missed Opportunities
               </h2>
-              <p className="text-xl text-slate-600 dark:text-gray-400 max-w-3xl mx-auto">
+              <p className="text-xl text-slate-600 dark:text-muted-foreground max-w-3xl mx-auto">
                 Don't let valuable insights slip through the cracks
               </p>
             </div>
@@ -106,7 +106,7 @@ export default function CollectFeedbackPage() {
                   <h3 className="text-xl font-switzer font-bold text-slate-900 dark:text-white mb-3">
                     Lost in Email Threads
                   </h3>
-                  <p className="text-slate-600 dark:text-gray-400">
+                  <p className="text-slate-600 dark:text-muted-foreground">
                     Customer feedback buried in hundreds of emails, making it
                     impossible to track and prioritize
                   </p>
@@ -119,7 +119,7 @@ export default function CollectFeedbackPage() {
                   <h3 className="text-xl font-switzer font-bold text-slate-900 dark:text-white mb-3">
                     Spread Across Tools
                   </h3>
-                  <p className="text-slate-600 dark:text-gray-400">
+                  <p className="text-slate-600 dark:text-muted-foreground">
                     Slack, support tickets, social media - feedback scattered
                     everywhere with no single source of truth
                   </p>
@@ -132,7 +132,7 @@ export default function CollectFeedbackPage() {
                   <h3 className="text-xl font-switzer font-bold text-slate-900 dark:text-white mb-3">
                     No Clear Picture
                   </h3>
-                  <p className="text-slate-600 dark:text-gray-400">
+                  <p className="text-slate-600 dark:text-muted-foreground">
                     Hard to see patterns, prioritize requests, or understand
                     what features users actually want
                   </p>
@@ -154,9 +154,9 @@ export default function CollectFeedbackPage() {
             {/* Step 1 */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center mb-12">
               <div className="order-2 lg:order-1">
-                <div className="bg-slate-100 dark:bg-gray-800 rounded-2xl p-5 shadow-xl">
+                <div className="bg-slate-100 dark:bg-card rounded-2xl p-5 shadow-xl">
                   {/* Mock Board Creation Interface - Matches actual CreateBoardDialog */}
-                  <div className="bg-white dark:bg-gray-900 rounded-lg p-4">
+                  <div className="bg-white dark:bg-background rounded-lg p-4">
                     <div className="space-y-6">
                       {/* Board Name Input */}
                       <div className="space-y-2">
@@ -164,13 +164,13 @@ export default function CollectFeedbackPage() {
                           Board Name <span className="text-red-500">*</span>
                         </label>
                         <div className="relative">
-                          <div className="h-10 bg-white dark:bg-gray-950 rounded-lg border border-slate-200 dark:border-gray-700 px-3 flex items-center">
-                            <span className="text-slate-400 dark:text-gray-500 text-sm">
+                          <div className="h-10 bg-white dark:bg-background rounded-lg border border-slate-200 dark:border-border px-3 flex items-center">
+                            <span className="text-slate-400 dark:text-muted-foreground text-sm">
                               Feature Requests
                             </span>
                           </div>
                         </div>
-                        <p className="text-xs text-slate-500 dark:text-gray-400">
+                        <p className="text-xs text-slate-500 dark:text-muted-foreground">
                           Choose a clear name for your feedback board
                         </p>
                       </div>
@@ -181,11 +181,11 @@ export default function CollectFeedbackPage() {
                           URL Slug <span className="text-red-500">*</span>
                         </label>
                         <div className="flex items-center gap-2">
-                          <span className="text-sm text-slate-500 dark:text-gray-400 px-3 py-2 bg-slate-50 dark:bg-gray-800 rounded-lg border border-slate-200 dark:border-gray-700">
+                          <span className="text-sm text-slate-500 dark:text-muted-foreground px-3 py-2 bg-slate-50 dark:bg-card rounded-lg border border-slate-200 dark:border-border">
                             yoursite.com/board/
                           </span>
-                          <div className="flex-1 h-10 bg-white dark:bg-gray-950 rounded-lg border border-slate-200 dark:border-gray-700 px-3 flex items-center">
-                            <span className="text-slate-400 dark:text-gray-500 text-sm">
+                          <div className="flex-1 h-10 bg-white dark:bg-background rounded-lg border border-slate-200 dark:border-border px-3 flex items-center">
+                            <span className="text-slate-400 dark:text-muted-foreground text-sm">
                               feature-requests
                             </span>
                           </div>
@@ -215,14 +215,14 @@ export default function CollectFeedbackPage() {
                               className={`p-3 rounded-lg border-2 transition-all ${
                                 item.selected
                                   ? "border-blue-600 bg-blue-50 dark:bg-blue-950/30"
-                                  : "border-slate-200 dark:border-gray-700 hover:border-slate-300 dark:hover:border-gray-600"
+                                  : "border-slate-200 dark:border-border hover:border-slate-300 dark:hover:border-gray-600"
                               }`}
                             >
                               <item.icon
                                 className={`h-5 w-5 ${
                                   item.selected
                                     ? "text-blue-600 dark:text-blue-400"
-                                    : "text-slate-400 dark:text-gray-500"
+                                    : "text-slate-400 dark:text-muted-foreground"
                                 }`}
                               />
                             </button>
@@ -252,7 +252,7 @@ export default function CollectFeedbackPage() {
                               )}
                             </div>
                           ))}
-                          <button className="px-3 py-1.5 border-2 border-dashed border-slate-300 dark:border-gray-600 rounded-lg text-sm text-slate-500 dark:text-gray-400 hover:border-slate-400 dark:hover:border-gray-500 hover:text-slate-700 dark:hover:text-gray-300 transition-colors">
+                          <button className="px-3 py-1.5 border-2 border-dashed border-slate-300 dark:border-border rounded-lg text-sm text-slate-500 dark:text-muted-foreground hover:border-slate-400 dark:hover:border-gray-500 hover:text-slate-700 dark:hover:text-gray-300 transition-colors">
                             + Add Category
                           </button>
                         </div>
@@ -270,25 +270,25 @@ export default function CollectFeedbackPage() {
                     Create Your Feedback Board
                   </h3>
                 </div>
-                <p className="text-lg font-switzer text-slate-600 dark:text-gray-400 mb-6">
+                <p className="text-lg font-switzer text-slate-600 dark:text-muted-foreground mb-6">
                   Set up a branded feedback portal in minutes
                 </p>
                 <ul className="space-y-3">
                   <li className="flex items-center gap-3">
                     <CheckCircle2 className="h-5 w-5 text-green-600" />
-                    <span className="text-slate-700 dark:text-gray-300">
+                    <span className="text-slate-700 dark:text-muted-foreground">
                       Customize categories, colors, and branding
                     </span>
                   </li>
                   <li className="flex items-center gap-3">
                     <CheckCircle2 className="h-5 w-5 text-green-600" />
-                    <span className="text-slate-700 dark:text-gray-300">
+                    <span className="text-slate-700 dark:text-muted-foreground">
                       Set visibility options (public or private)
                     </span>
                   </li>
                   <li className="flex items-center gap-3">
                     <CheckCircle2 className="h-5 w-5 text-green-600" />
-                    <span className="text-slate-700 dark:text-gray-300">
+                    <span className="text-slate-700 dark:text-muted-foreground">
                       Configure voting and submission rules
                     </span>
                   </li>
@@ -307,44 +307,44 @@ export default function CollectFeedbackPage() {
                     Share with Your Users
                   </h3>
                 </div>
-                <p className="text-lg font-switzer text-slate-600 dark:text-gray-400 mb-6">
+                <p className="text-lg font-switzer text-slate-600 dark:text-muted-foreground mb-6">
                   Get a shareable link or embed on your site
                 </p>
                 <ul className="space-y-3">
                   <li className="flex items-center gap-3">
                     <CheckCircle2 className="h-5 w-5 text-green-600" />
-                    <span className="text-slate-700 dark:text-gray-300">
+                    <span className="text-slate-700 dark:text-muted-foreground">
                       Copy shareable link to distribute
                     </span>
                   </li>
                   <li className="flex items-center gap-3">
                     <CheckCircle2 className="h-5 w-5 text-green-600" />
-                    <span className="text-slate-700 dark:text-gray-300">
+                    <span className="text-slate-700 dark:text-muted-foreground">
                       Embed widget code on your website
                     </span>
                   </li>
                   <li className="flex items-center gap-3">
                     <CheckCircle2 className="h-5 w-5 text-green-600" />
-                    <span className="text-slate-700 dark:text-gray-300">
+                    <span className="text-slate-700 dark:text-muted-foreground">
                       No user account needed for submissions
                     </span>
                   </li>
                 </ul>
               </div>
               <div>
-                <div className="bg-slate-100 dark:bg-gray-800 rounded-2xl p-5 shadow-xl">
+                <div className="bg-slate-100 dark:bg-card rounded-2xl p-5 shadow-xl">
                   {/* Mock Share Interface */}
-                  <div className="bg-white dark:bg-gray-900 rounded-lg p-4 space-y-4">
+                  <div className="bg-white dark:bg-background rounded-lg p-4 space-y-4">
                     <h4 className="font-semibold text-slate-900 dark:text-white mb-4">
                       Share Your Board
                     </h4>
                     <div>
-                      <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">
+                      <label className="block text-sm font-medium text-slate-700 dark:text-muted-foreground mb-2">
                         Public Link
                       </label>
                       <div className="flex gap-2">
-                        <div className="flex-1 h-10 bg-slate-100 dark:bg-gray-800 rounded border border-slate-200 dark:border-gray-700 flex items-center px-3">
-                          <span className="text-sm text-slate-500 dark:text-gray-400">
+                        <div className="flex-1 h-10 bg-slate-100 dark:bg-card rounded border border-slate-200 dark:border-border flex items-center px-3">
+                          <span className="text-sm text-slate-500 dark:text-muted-foreground">
                             faddy.site/feedback/your-board
                           </span>
                         </div>
@@ -357,10 +357,10 @@ export default function CollectFeedbackPage() {
                       </div>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">
+                      <label className="block text-sm font-medium text-slate-700 dark:text-muted-foreground mb-2">
                         Embed Code
                       </label>
-                      <div className="h-20 bg-slate-100 dark:bg-gray-800 rounded border border-slate-200 dark:border-gray-700 p-3 font-mono text-xs text-slate-600 dark:text-gray-400">
+                      <div className="h-20 bg-slate-100 dark:bg-card rounded border border-slate-200 dark:border-border p-3 font-mono text-xs text-slate-600 dark:text-muted-foreground">
                         {'<script src="..."></script>'}
                       </div>
                     </div>
@@ -372,9 +372,9 @@ export default function CollectFeedbackPage() {
             {/* Step 3 */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
               <div className="order-2 lg:order-1">
-                <div className="bg-slate-100 dark:bg-gray-800 rounded-2xl p-5 shadow-xl">
+                <div className="bg-slate-100 dark:bg-card rounded-2xl p-5 shadow-xl">
                   {/* Mock Feedback Dashboard */}
-                  <div className="bg-white dark:bg-gray-900 rounded-lg p-4">
+                  <div className="bg-white dark:bg-background rounded-lg p-4">
                     <div className="flex items-center justify-between mb-4">
                       <h4 className="font-semibold text-slate-900 dark:text-white">
                         All Feedback
@@ -383,7 +383,7 @@ export default function CollectFeedbackPage() {
                         {["All", "Feature", "Bug"].map((filter, i) => (
                           <span
                             key={i}
-                            className={`px-3 py-1 rounded-full text-sm ${i === 0 ? "bg-blue-600 text-white" : "bg-slate-100 dark:bg-gray-800 text-slate-700 dark:text-gray-300"}`}
+                            className={`px-3 py-1 rounded-full text-sm ${i === 0 ? "bg-blue-600 text-white" : "bg-slate-100 dark:bg-card text-slate-700 dark:text-muted-foreground"}`}
                           >
                             {filter}
                           </span>
@@ -410,11 +410,11 @@ export default function CollectFeedbackPage() {
                       ].map((item, i) => (
                         <div
                           key={i}
-                          className="flex items-center gap-3 p-3 border border-slate-200 dark:border-gray-700 rounded-lg"
+                          className="flex items-center gap-3 p-3 border border-slate-200 dark:border-border rounded-lg"
                         >
                           <div className="text-center">
                             <TrendingUp className="h-4 w-4 text-blue-600 mx-auto" />
-                            <span className="text-sm font-semibold text-slate-700 dark:text-gray-300">
+                            <span className="text-sm font-semibold text-slate-700 dark:text-muted-foreground">
                               {item.votes}
                             </span>
                           </div>
@@ -441,25 +441,25 @@ export default function CollectFeedbackPage() {
                     Watch Ideas Flow In
                   </h3>
                 </div>
-                <p className="text-lg font-switzer text-slate-600 dark:text-gray-400 mb-6">
+                <p className="text-lg font-switzer text-slate-600 dark:text-muted-foreground mb-6">
                   All feedback organized in one place
                 </p>
                 <ul className="space-y-3">
                   <li className="flex items-center gap-3">
                     <CheckCircle2 className="h-5 w-5 text-green-600" />
-                    <span className="text-slate-700 dark:text-gray-300">
+                    <span className="text-slate-700 dark:text-muted-foreground">
                       Auto-categorize and tag suggestions
                     </span>
                   </li>
                   <li className="flex items-center gap-3">
                     <CheckCircle2 className="h-5 w-5 text-green-600" />
-                    <span className="text-slate-700 dark:text-gray-300">
+                    <span className="text-slate-700 dark:text-muted-foreground">
                       See votes and popularity at a glance
                     </span>
                   </li>
                   <li className="flex items-center gap-3">
                     <CheckCircle2 className="h-5 w-5 text-green-600" />
-                    <span className="text-slate-700 dark:text-gray-300">
+                    <span className="text-slate-700 dark:text-muted-foreground">
                       Filter, search, and prioritize easily
                     </span>
                   </li>
@@ -470,13 +470,13 @@ export default function CollectFeedbackPage() {
         </section>
 
         {/* Key Features Grid */}
-        <section className="py-16 bg-[#f9f9f9] dark:bg-gray-900/50">
+        <section className="py-16 bg-[#f9f9f9] dark:bg-background/50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
               <h2 className="text-2xl font-switzer font-bold text-slate-900 dark:text-white mb-4">
                 Everything You Need to Collect Feedback
               </h2>
-              <p className="text-xl text-slate-600 dark:text-gray-400">
+              <p className="text-xl text-slate-600 dark:text-muted-foreground">
                 Powerful features designed to make feedback collection
                 effortless
               </p>
@@ -489,7 +489,7 @@ export default function CollectFeedbackPage() {
                   <h3 className="text-xl font-switzer font-bold text-slate-900 dark:text-white mb-3">
                     Public Feedback Boards
                   </h3>
-                  <p className="text-slate-600 dark:text-gray-400">
+                  <p className="text-slate-600 dark:text-muted-foreground">
                     Branded portal for your users with public or private
                     options. Custom domains available.
                   </p>
@@ -502,7 +502,7 @@ export default function CollectFeedbackPage() {
                   <h3 className="text-xl font-switzer font-bold text-slate-900 dark:text-white mb-3">
                     Multiple Input Channels
                   </h3>
-                  <p className="text-slate-600 dark:text-gray-400">
+                  <p className="text-slate-600 dark:text-muted-foreground">
                     Web widget, direct links, email integration, and API for
                     custom integrations.
                   </p>
@@ -515,7 +515,7 @@ export default function CollectFeedbackPage() {
                   <h3 className="text-xl font-switzer font-bold text-slate-900 dark:text-white mb-3">
                     Smart Categorization
                   </h3>
-                  <p className="text-slate-600 dark:text-gray-400">
+                  <p className="text-slate-600 dark:text-muted-foreground">
                     Auto-tag by type (bug, feature, improvement). Custom
                     categories and smart filtering.
                   </p>
@@ -528,7 +528,7 @@ export default function CollectFeedbackPage() {
                   <h3 className="text-xl font-switzer font-bold text-slate-900 dark:text-white mb-3">
                     User Voting
                   </h3>
-                  <p className="text-slate-600 dark:text-gray-400">
+                  <p className="text-slate-600 dark:text-muted-foreground">
                     Let users upvote ideas they love. See what's truly popular
                     and prevent duplicate requests.
                   </p>
@@ -541,7 +541,7 @@ export default function CollectFeedbackPage() {
                   <h3 className="text-xl font-switzer font-bold text-slate-900 dark:text-white mb-3">
                     Rich Submissions
                   </h3>
-                  <p className="text-slate-600 dark:text-gray-400">
+                  <p className="text-slate-600 dark:text-muted-foreground">
                     Text descriptions, image uploads, file attachments, and
                     automatic context capture.
                   </p>
@@ -554,7 +554,7 @@ export default function CollectFeedbackPage() {
                   <h3 className="text-xl font-switzer font-bold text-slate-900 dark:text-white mb-3">
                     Anonymous or Authenticated
                   </h3>
-                  <p className="text-slate-600 dark:text-gray-400">
+                  <p className="text-slate-600 dark:text-muted-foreground">
                     Allow guest submissions or require user login. Track
                     feedback by user with ease.
                   </p>
@@ -565,13 +565,13 @@ export default function CollectFeedbackPage() {
         </section>
 
         {/* Benefits Section - Redesigned */}
-        <section className="py-16 bg-[#f9f9f9] dark:bg-gray-900/50">
+        <section className="py-16 bg-[#f9f9f9] dark:bg-background/50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
               <h2 className="text-2xl font-switzer font-bold text-slate-900 dark:text-white mb-4">
                 Why Teams Love Collecting Feedback with Faddy
               </h2>
-              <p className="text-xl text-slate-600 dark:text-gray-400 max-w-3xl mx-auto">
+              <p className="text-xl text-slate-600 dark:text-muted-foreground max-w-3xl mx-auto">
                 Join hundreds of product teams using Faddy to build better products
               </p>
             </div>
@@ -589,7 +589,7 @@ export default function CollectFeedbackPage() {
                     <h3 className="text-2xl font-switzer font-bold text-slate-900 dark:text-white mb-4">
                       Save Hours Every Week
                     </h3>
-                    <p className="text-slate-600 dark:text-gray-400 mb-6 leading-relaxed">
+                    <p className="text-slate-600 dark:text-muted-foreground mb-6 leading-relaxed">
                       Stop hunting for feedback across emails, Slack, and support tickets. Everything organized in one beautiful dashboard.
                     </p>
                     <div className="space-y-3">
@@ -599,7 +599,7 @@ export default function CollectFeedbackPage() {
                         </div>
                         <div>
                           <p className="font-semibold text-slate-900 dark:text-white text-sm">Centralized hub</p>
-                          <p className="text-xs text-slate-500 dark:text-gray-500">All feedback in one place</p>
+                          <p className="text-xs text-slate-500 dark:text-muted-foreground">All feedback in one place</p>
                         </div>
                       </div>
                       <div className="flex items-start gap-3">
@@ -608,7 +608,7 @@ export default function CollectFeedbackPage() {
                         </div>
                         <div>
                           <p className="font-semibold text-slate-900 dark:text-white text-sm">Smart filters</p>
-                          <p className="text-xs text-slate-500 dark:text-gray-500">Find what you need instantly</p>
+                          <p className="text-xs text-slate-500 dark:text-muted-foreground">Find what you need instantly</p>
                         </div>
                       </div>
                       <div className="flex items-start gap-3">
@@ -617,7 +617,7 @@ export default function CollectFeedbackPage() {
                         </div>
                         <div>
                           <p className="font-semibold text-slate-900 dark:text-white text-sm">Auto-organize</p>
-                          <p className="text-xs text-slate-500 dark:text-gray-500">Categorize automatically</p>
+                          <p className="text-xs text-slate-500 dark:text-muted-foreground">Categorize automatically</p>
                         </div>
                       </div>
                     </div>
@@ -637,7 +637,7 @@ export default function CollectFeedbackPage() {
                     <h3 className="text-2xl font-switzer font-bold text-slate-900 dark:text-white mb-4">
                       Build What Users Want
                     </h3>
-                    <p className="text-slate-600 dark:text-gray-400 mb-6 leading-relaxed">
+                    <p className="text-slate-600 dark:text-muted-foreground mb-6 leading-relaxed">
                       Make data-driven decisions based on real user demand. Prioritize features by votes and user impact.
                     </p>
                     <div className="space-y-3">
@@ -647,7 +647,7 @@ export default function CollectFeedbackPage() {
                         </div>
                         <div>
                           <p className="font-semibold text-slate-900 dark:text-white text-sm">Vote tracking</p>
-                          <p className="text-xs text-slate-500 dark:text-gray-500">See what's most wanted</p>
+                          <p className="text-xs text-slate-500 dark:text-muted-foreground">See what's most wanted</p>
                         </div>
                       </div>
                       <div className="flex items-start gap-3">
@@ -656,7 +656,7 @@ export default function CollectFeedbackPage() {
                         </div>
                         <div>
                           <p className="font-semibold text-slate-900 dark:text-white text-sm">Validate ideas</p>
-                          <p className="text-xs text-slate-500 dark:text-gray-500">Test before building</p>
+                          <p className="text-xs text-slate-500 dark:text-muted-foreground">Test before building</p>
                         </div>
                       </div>
                       <div className="flex items-start gap-3">
@@ -665,7 +665,7 @@ export default function CollectFeedbackPage() {
                         </div>
                         <div>
                           <p className="font-semibold text-slate-900 dark:text-white text-sm">Save resources</p>
-                          <p className="text-xs text-slate-500 dark:text-gray-500">No wasted development</p>
+                          <p className="text-xs text-slate-500 dark:text-muted-foreground">No wasted development</p>
                         </div>
                       </div>
                     </div>
@@ -685,7 +685,7 @@ export default function CollectFeedbackPage() {
                     <h3 className="text-2xl font-switzer font-bold text-slate-900 dark:text-white mb-4">
                       Engage Your Community
                     </h3>
-                    <p className="text-slate-600 dark:text-gray-400 mb-6 leading-relaxed">
+                    <p className="text-slate-600 dark:text-muted-foreground mb-6 leading-relaxed">
                       Show users you're listening. Public voting creates excitement and transparency builds lasting trust.
                     </p>
                     <div className="space-y-3">
@@ -695,7 +695,7 @@ export default function CollectFeedbackPage() {
                         </div>
                         <div>
                           <p className="font-semibold text-slate-900 dark:text-white text-sm">Build loyalty</p>
-                          <p className="text-xs text-slate-500 dark:text-gray-500">Create engaged users</p>
+                          <p className="text-xs text-slate-500 dark:text-muted-foreground">Create engaged users</p>
                         </div>
                       </div>
                       <div className="flex items-start gap-3">
@@ -704,7 +704,7 @@ export default function CollectFeedbackPage() {
                         </div>
                         <div>
                           <p className="font-semibold text-slate-900 dark:text-white text-sm">Boost engagement</p>
-                          <p className="text-xs text-slate-500 dark:text-gray-500">Active participation</p>
+                          <p className="text-xs text-slate-500 dark:text-muted-foreground">Active participation</p>
                         </div>
                       </div>
                       <div className="flex items-start gap-3">
@@ -713,7 +713,7 @@ export default function CollectFeedbackPage() {
                         </div>
                         <div>
                           <p className="font-semibold text-slate-900 dark:text-white text-sm">Show transparency</p>
-                          <p className="text-xs text-slate-500 dark:text-gray-500">Build trust with users</p>
+                          <p className="text-xs text-slate-500 dark:text-muted-foreground">Build trust with users</p>
                         </div>
                       </div>
                     </div>
@@ -724,7 +724,7 @@ export default function CollectFeedbackPage() {
           </div>
         </section>
         {/* Use Cases Section */}
-        <section className="py-16 bg-[#f9f9f9] dark:bg-gray-900/50">
+        <section className="py-16 bg-[#f9f9f9] dark:bg-background/50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
               <h2 className="text-2xl font-switzer font-bold text-slate-900 dark:text-white mb-4">
@@ -739,10 +739,10 @@ export default function CollectFeedbackPage() {
                   <h3 className="text-xl font-switzer font-bold text-slate-900 dark:text-white mb-3">
                     SaaS Products
                   </h3>
-                  <p className="text-slate-600 dark:text-gray-400 mb-4 italic">
+                  <p className="text-slate-600 dark:text-muted-foreground mb-4 italic">
                     "Collect feature requests from customers"
                   </p>
-                  <p className="text-sm text-slate-500 dark:text-gray-500">
+                  <p className="text-sm text-slate-500 dark:text-muted-foreground">
                     Example: Project management tools, CRM platforms
                   </p>
                 </CardContent>
@@ -754,10 +754,10 @@ export default function CollectFeedbackPage() {
                   <h3 className="text-xl font-switzer font-bold text-slate-900 dark:text-white mb-3">
                     Mobile Apps
                   </h3>
-                  <p className="text-slate-600 dark:text-gray-400 mb-4 italic">
+                  <p className="text-slate-600 dark:text-muted-foreground mb-4 italic">
                     "Gather user feedback and bug reports"
                   </p>
-                  <p className="text-sm text-slate-500 dark:text-gray-500">
+                  <p className="text-sm text-slate-500 dark:text-muted-foreground">
                     Example: Fitness apps, social networks
                   </p>
                 </CardContent>
@@ -769,10 +769,10 @@ export default function CollectFeedbackPage() {
                   <h3 className="text-xl font-switzer font-bold text-slate-900 dark:text-white mb-3">
                     Web Agencies
                   </h3>
-                  <p className="text-slate-600 dark:text-gray-400 mb-4 italic">
+                  <p className="text-slate-600 dark:text-muted-foreground mb-4 italic">
                     "Let clients request changes and features"
                   </p>
-                  <p className="text-sm text-slate-500 dark:text-gray-500">
+                  <p className="text-sm text-slate-500 dark:text-muted-foreground">
                     Example: Client portals, development agencies
                   </p>
                 </CardContent>
@@ -826,21 +826,21 @@ export default function CollectFeedbackPage() {
                       }`}
                     />
                   </div>
-                  <span className="text-sm font-semibold text-slate-700 dark:text-gray-300">
+                  <span className="text-sm font-semibold text-slate-700 dark:text-muted-foreground">
                     {channel.label}
                   </span>
                 </div>
               ))}
             </div>
 
-            <p className="text-center text-lg text-slate-600 dark:text-gray-400">
+            <p className="text-center text-lg text-slate-600 dark:text-muted-foreground">
               Embed anywhere • Share instantly • Integrate seamlessly
             </p>
           </div>
         </section>
 
         {/* Social Proof */}
-        <section className="py-16 bg-[#f9f9f9] dark:bg-gray-900/50">
+        <section className="py-16 bg-[#f9f9f9] dark:bg-background/50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-8">
               <h2 className="text-2xl font-switzer font-bold text-slate-900 dark:text-white mb-4">
@@ -859,7 +859,7 @@ export default function CollectFeedbackPage() {
                     />
                   ))}
                 </div>
-                <p className="text-xl text-slate-700 dark:text-gray-300 text-center mb-6 italic">
+                <p className="text-xl text-slate-700 dark:text-muted-foreground text-center mb-6 italic">
                   "We chose Faddy because it cuts through the noise. The setup
                   is instant, and the UI is incredibly straightforward, making
                   it easy for both our team and our customers to use. No
@@ -873,7 +873,7 @@ export default function CollectFeedbackPage() {
                     <p className="font-semibold text-slate-900 dark:text-white">
                       Tushar Prasad
                     </p>
-                    <p className="text-sm text-slate-500 dark:text-gray-400">
+                    <p className="text-sm text-slate-500 dark:text-muted-foreground">
                       Product Manager at Temcia Digital
                     </p>
                   </div>
@@ -892,7 +892,7 @@ export default function CollectFeedbackPage() {
                   <div className="text-4xl lg:text-5xl font-bold text-blue-600 dark:text-blue-400 mb-2">
                     {stat.number}
                   </div>
-                  <div className="text-slate-600 dark:text-gray-400 font-medium">
+                  <div className="text-slate-600 dark:text-muted-foreground font-medium">
                     {stat.label}
                   </div>
                 </div>
@@ -947,13 +947,13 @@ export default function CollectFeedbackPage() {
                           {faq.q}
                         </h3>
                         <ChevronDown
-                          className={`h-5 w-5 text-slate-400 dark:text-gray-500 transition-transform flex-shrink-0 ${
+                          className={`h-5 w-5 text-slate-400 dark:text-muted-foreground transition-transform flex-shrink-0 ${
                             openFaq === i ? "transform rotate-180" : ""
                           }`}
                         />
                       </div>
                       {openFaq === i && (
-                        <p className="mt-4 text-slate-600 dark:text-gray-400 leading-relaxed">
+                        <p className="mt-4 text-slate-600 dark:text-muted-foreground leading-relaxed">
                           {faq.a}
                         </p>
                       )}
