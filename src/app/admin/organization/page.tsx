@@ -52,6 +52,7 @@ import { OrganizationSkeleton, MembersTableSkeleton } from '@/components/admin/O
 import { InviteMemberModal } from '@/components/organization/InviteMemberModal';
 import { PendingInvitations } from '@/components/organization/PendingInvitations';
 import { JobRolesTab } from '@/components/organization/JobRolesTab';
+import { WIDE_CONTAINER } from '@/lib/layout-constants';
 import dynamic from 'next/dynamic';
 const WebhooksPage = dynamic(() => import('@/app/admin/webhooks/page'), { ssr: false });
 const WidgetsPage = dynamic(() => import('@/app/admin/widgets/page'), { ssr: false });
@@ -514,7 +515,7 @@ export default function OrganizationSettingsPage() {
 
       {/* Main Content Area */}
       <div className="flex-1 overflow-auto">
-        <div className="container mx-auto py-5 px-5">
+        <div className={`${WIDE_CONTAINER} py-5`}>
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
             {/* Hidden tab triggers for functionality */}
             <div className="hidden">

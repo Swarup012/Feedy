@@ -52,6 +52,7 @@ import {
   CheckCircle,
   Trash2,
 } from 'lucide-react';
+import { WIDE_CONTAINER } from '@/lib/layout-constants';
 import {
   LineChart,
   Line,
@@ -362,7 +363,7 @@ export default function TrackedUsersPage() {
   if (loading) {
     return (
       <ProtectedRoute>
-        <div className="container mx-auto px-4 py-5">
+        <div className={`${WIDE_CONTAINER} py-5`}>
           <Skeleton className="h-10 w-52 mb-4" />
           <Skeleton className="h-36 mb-4" />
           <div className="grid gap-4 md:grid-cols-4 mb-8">
@@ -378,7 +379,7 @@ export default function TrackedUsersPage() {
 
   return (
     <ProtectedRoute>
-      <div className="container mx-auto px-4 py-5 space-y-5">
+      <div className={`${WIDE_CONTAINER} py-5 space-y-5`}>
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>

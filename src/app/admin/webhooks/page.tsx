@@ -45,6 +45,7 @@ import {
   Check,
   Zap,
 } from "lucide-react";
+import { WIDE_CONTAINER } from '@/lib/layout-constants';
 
 // ─────────────────────────────────────────────────────────────
 // Helpers
@@ -465,7 +466,7 @@ export default function WebhooksPage() {
 
   return (
     <ProtectedRoute allowedRoles={["owner", "admin"]}>
-      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-5 py-5 space-y-5">
+      <div className={`${WIDE_CONTAINER} py-5 space-y-5`}>
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>

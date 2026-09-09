@@ -94,9 +94,9 @@ export function ChangelogPopover() {
         <Button
           variant="ghost"
           size="icon"
-          className="relative hover:bg-gray-100 dark:hover:bg-gray-700"
+          className="relative h-8 w-8 hover:bg-gray-100 dark:hover:bg-gray-700"
         >
-          <Bell className="h-5 w-5" />
+          <Bell className="h-4 w-4" />
           {hasNew && (
             <span className="absolute top-1 right-1 h-2 w-2 bg-blue-600 rounded-full animate-pulse" />
           )}

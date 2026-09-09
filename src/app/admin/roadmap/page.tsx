@@ -51,6 +51,7 @@ import {
   GripVertical,
   ArrowUpCircle,
 } from 'lucide-react';
+import { WIDE_CONTAINER } from '@/lib/layout-constants';
 
 export default function AdminRoadmapPage() {
   const { user } = useAuthContext();
@@ -396,7 +397,7 @@ export default function AdminRoadmapPage() {
   }
 
   return (
-    <div className="container mx-auto p-4 space-y-4">
+    <div className={`${WIDE_CONTAINER} py-4 space-y-4`}>
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>

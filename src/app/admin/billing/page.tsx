@@ -9,6 +9,7 @@ import { CancelFlow } from '@/components/billing/CancelFlow';
 import { InvoiceHistory } from '@/components/billing/InvoiceHistory';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
+import { NARROW_CONTAINER } from '@/lib/layout-constants';
 
 function BillingContent() {
   const searchParams = useSearchParams();
@@ -122,7 +123,7 @@ function BillingContent() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <div className={`${NARROW_CONTAINER} py-8 space-y-8`}>
       {/* Page Header */}
       <div>
         <h1 className="text-2xl font-switzer font-bold text-gray-900 dark:text-white">

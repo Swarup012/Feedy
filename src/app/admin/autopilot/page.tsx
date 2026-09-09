@@ -29,6 +29,7 @@ import {
   ExternalLink,
   Plus,
 } from 'lucide-react';
+import { WIDE_CONTAINER } from '@/lib/layout-constants';
 
 type StatusFilter = AutopilotSuggestionStatus | 'all';
 
@@ -180,7 +181,7 @@ function AutopilotPageInner() {
 
   return (
     <PaidFeatureGate featureName="Autopilot">
-    <div className="mx-auto h-full max-w-6xl flex flex-col px-4 py-6 sm:px-6 bg-background">
+    <div className={`${WIDE_CONTAINER} h-full flex flex-col py-6 bg-background`}>
       {/* Header */}
       <header className="shrink-0 mb-6">
         <div className="flex items-start justify-between">

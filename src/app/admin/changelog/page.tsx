@@ -30,6 +30,7 @@ import { formatDistanceToNow, format, parseISO } from "date-fns";
 import ReactMarkdown from "react-markdown";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { NARROW_CONTAINER } from '@/lib/layout-constants';
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
@@ -349,7 +350,7 @@ export default function ChangelogPage() {
     <div className="flex-1 overflow-hidden bg-background">
       {/* Hero Header */}
       <div className="border-b border-border/50 bg-gradient-to-b from-background to-muted/20">
-        <div className="max-w-3xl mx-auto px-4 py-10">
+        <div className={`${NARROW_CONTAINER} py-10`}>
           <div className="flex items-start justify-between mb-6">
             <div>
               <h1 className="text-2xl font-bold tracking-tight text-foreground mb-3">
@@ -420,7 +421,7 @@ export default function ChangelogPage() {
 
       {/* Timeline Content */}
       <div className="flex-1 overflow-y-auto">
-        <div className="max-w-3xl mx-auto px-4 py-8">
+        <div className={`${NARROW_CONTAINER} py-8`}>
           {loading ? (
             <div className="flex items-center justify-center py-24">
               <div className="text-center">
