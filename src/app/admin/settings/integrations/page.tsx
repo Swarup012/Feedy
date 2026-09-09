@@ -33,7 +33,11 @@ import {
   Zap,
   Mail,
 } from 'lucide-react';
-import { autopilotService, type AutopilotSettings } from '@/services/autopilotService';
+import {
+  autopilotService,
+  type AutopilotSettings,
+  type ChannelBoardMapping,
+} from '@/services/autopilotService';
 import { boardService, type Board } from '@/services/boardService';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -81,16 +85,23 @@ function IntegrationsPageInner() {
   const [slackChannels, setSlackChannels] = useState<SlackChannel[]>([]);
 
   const [intercomAutopilot, setIntercomAutopilot] = useState<AutopilotSettings | null>(null);
-  const [discordAutopilot, setDiscordAutopilot] = useState<AutopilotSettings | null>(null);
-  const [slackAutopilot, setSlackAutopilot] = useState<AutopilotSettings | null>(null);
   const [githubAutopilot, setGithubAutopilot] = useState<AutopilotSettings | null>(null);
+
+  const [discordMappings, setDiscordMappings] = useState<ChannelBoardMapping[]>([]);
+  const [slackMappings, setSlackMappings] = useState<ChannelBoardMapping[]>([]);
 
   const [boards, setBoards] = useState<Board[]>([]);
 
   const [intercomBoardId, setIntercomBoardId] = useState<string | null>(null);
-  const [discordBoardId, setDiscordBoardId] = useState<string | null>(null);
-  const [slackBoardId, setSlackBoardId] = useState<string | null>(null);
   const [githubBoardId, setGithubBoardId] = useState<string | null>(null);
+
+  // New channel mapping form state
+  const [newDiscordChannelId, setNewDiscordChannelId] = useState<string>('');
+  const [newDiscordBoardId, setNewDiscordBoardId] = useState<string>('');
+  const [newSlackChannelId, setNewSlackChannelId] = useState<string>('');
+  const [newSlackBoardId, setNewSlackBoardId] = useState<string>('');
+  const [addingDiscordChannel, setAddingDiscordChannel] = useState(false);
+  const [addingSlackChannel, setAddingSlackChannel] = useState(false);
 
   const [loading, setLoading] = useState(true);
   const [disconnectingIntercom, setDisconnectingIntercom] = useState(false);
@@ -98,11 +109,7 @@ function IntegrationsPageInner() {
   const [disconnectingSlack, setDisconnectingSlack] = useState(false);
   const [disconnectingGithub, setDisconnectingGithub] = useState(false);
   const [savingIntercomAutopilot, setSavingIntercomAutopilot] = useState(false);
-  const [savingDiscordAutopilot, setSavingDiscordAutopilot] = useState(false);
-  const [savingSlackAutopilot, setSavingSlackAutopilot] = useState(false);
   const [savingGithubAutopilot, setSavingGithubAutopilot] = useState(false);
-  const [savingDiscordChannel, setSavingDiscordChannel] = useState(false);
-  const [savingSlackChannel, setSavingSlackChannel] = useState(false);
 
   const loadStatus = useCallback(async () => {
     if (!orgId) return;
@@ -147,6 +154,19 @@ function IntegrationsPageInner() {
           console.error("Failed to load Slack channels:", err);
         });
       }
+
+      // Load channel mappings for Slack/Discord
+      const [discordMappingsRes, slackMappingsRes] = await Promise.all([
+        (discordRes?.data?.status === 'active'
+          ? autopilotService.listChannelMappings(orgId, 'discord').catch(() => ({ data: { mappings: [] } }))
+          : Promise.resolve({ data: { mappings: [] } })),
+        (slackRes?.data?.status === 'active'
+          ? autopilotService.listChannelMappings(orgId, 'slack').catch(() => ({ data: { mappings: [] } }))
+          : Promise.resolve({ data: { mappings: [] } })),
+      ]);
+
+      setDiscordMappings(discordMappingsRes.data?.mappings || []);
+      setSlackMappings(slackMappingsRes.data?.mappings || []);
     } catch (err: any) {
       if (!isPlanUpgradeRequired(err)) {
         toast({
@@ -163,17 +183,10 @@ function IntegrationsPageInner() {
     if (!orgId) return;
     (async () => {
       try {
-        const [intercomRes, discordRes, slackRes, githubRes] = await Promise.all([
+        // Intercom/GitHub: legacy single-row settings
+        const [intercomRes, githubRes] = await Promise.all([
           autopilotService.getSettings(orgId, 'intercom').catch(err => {
             console.error('Failed to load Intercom autopilot settings:', err);
-            return null;
-          }),
-          autopilotService.getSettings(orgId, 'discord').catch(err => {
-            console.error('Failed to load Discord autopilot settings:', err);
-            return null;
-          }),
-          autopilotService.getSettings(orgId, 'slack').catch(err => {
-            console.error('Failed to load Slack autopilot settings:', err);
             return null;
           }),
           autopilotService.getSettings(orgId, 'github').catch(err => {
@@ -186,20 +199,6 @@ function IntegrationsPageInner() {
           setIntercomAutopilot(intercomRes.data.settings);
           if (intercomRes.data.settings.default_board_id) {
             setIntercomBoardId(intercomRes.data.settings.default_board_id);
-          }
-        }
-
-        if (discordRes?.data?.settings) {
-          setDiscordAutopilot(discordRes.data.settings);
-          if (discordRes.data.settings.default_board_id) {
-            setDiscordBoardId(discordRes.data.settings.default_board_id);
-          }
-        }
-
-        if (slackRes?.data?.settings) {
-          setSlackAutopilot(slackRes.data.settings);
-          if (slackRes.data.settings.default_board_id) {
-            setSlackBoardId(slackRes.data.settings.default_board_id);
           }
         }
 
@@ -227,14 +226,45 @@ function IntegrationsPageInner() {
     })();
   }, [orgId]);
 
-  const handleAutopilotModeToggle = async (provider: 'intercom' | 'discord' | 'slack' | 'github', enable: boolean) => {
+  const handleAutopilotModeToggle = async (provider: 'intercom' | 'discord' | 'slack' | 'github', enable: boolean, mappingId?: string) => {
     if (!orgId) return;
 
+    if ((provider === 'discord' || provider === 'slack') && mappingId) {
+      // Multi-channel: update the specific mapping
+      setAddingDiscordChannel(true); // reuse loading state
+      try {
+        await autopilotService.updateChannelMapping(orgId, provider, mappingId, {
+          autopilot_mode: enable ? 'automatic' : 'manual',
+        });
+        // Reload mappings
+        const res = await autopilotService.listChannelMappings(orgId, provider);
+        if (provider === 'discord') {
+          setDiscordMappings(res.data?.mappings || []);
+        } else {
+          setSlackMappings(res.data?.mappings || []);
+        }
+        toast({
+          title: enable ? 'Automatic Mode enabled' : 'Switched to Manual Mode',
+          description: enable
+            ? 'Feedback will now be published directly without review.'
+            : 'Suggestions will queue for manual review.',
+        });
+      } catch (err: unknown) {
+        toast({
+          title: 'Update failed',
+          description: (err as any)?.response?.data?.message || 'Failed to update settings',
+          variant: 'destructive',
+        });
+      } finally {
+        setAddingDiscordChannel(false);
+      }
+      return;
+    }
+
+    // Legacy: Intercom/GitHub
     const selectedBoardId =
       provider === 'intercom' ? intercomBoardId :
-      provider === 'discord' ? discordBoardId :
-      provider === 'github' ? githubBoardId :
-      slackBoardId;
+      githubBoardId;
 
     if (enable && !selectedBoardId) {
       toast({
@@ -252,20 +282,14 @@ function IntegrationsPageInner() {
 
     const setSaving =
       provider === 'intercom' ? setSavingIntercomAutopilot :
-      provider === 'discord' ? setSavingDiscordAutopilot :
-      provider === 'github' ? setSavingGithubAutopilot :
-      setSavingSlackAutopilot;
+      setSavingGithubAutopilot;
     setSaving(true);
     try {
       const res = await autopilotService.updateSettings(orgId, provider, payload);
       if (provider === 'intercom') {
         setIntercomAutopilot(res.data.settings);
-      } else if (provider === 'discord') {
-        setDiscordAutopilot(res.data.settings);
-      } else if (provider === 'github') {
-        setGithubAutopilot(res.data.settings);
       } else {
-        setSlackAutopilot(res.data.settings);
+        setGithubAutopilot(res.data.settings);
       }
       toast({
         title: enable ? 'Automatic Mode enabled' : 'Switched to Manual Mode',
@@ -284,29 +308,46 @@ function IntegrationsPageInner() {
     }
   };
 
-  const handleBoardChange = async (provider: 'intercom' | 'discord' | 'slack' | 'github', boardId: string) => {
+  const handleBoardChange = async (provider: 'intercom' | 'discord' | 'slack' | 'github', boardId: string, mappingId?: string) => {
+    if ((provider === 'discord' || provider === 'slack') && mappingId) {
+      // Multi-channel: update the specific mapping's board
+      try {
+        await autopilotService.updateChannelMapping(orgId!, provider, mappingId, {
+          board_id: boardId,
+        });
+        // Reload mappings
+        const res = await autopilotService.listChannelMappings(orgId!, provider);
+        if (provider === 'discord') {
+          setDiscordMappings(res.data?.mappings || []);
+        } else {
+          setSlackMappings(res.data?.mappings || []);
+        }
+        toast({ title: 'Default board updated' });
+      } catch (err: unknown) {
+        toast({
+          title: 'Update failed',
+          description: (err as any)?.response?.data?.message || 'Failed to update board',
+          variant: 'destructive',
+        });
+      }
+      return;
+    }
+
+    // Legacy: Intercom/GitHub
     if (provider === 'intercom') {
       setIntercomBoardId(boardId);
-    } else if (provider === 'discord') {
-      setDiscordBoardId(boardId);
-    } else if (provider === 'github') {
-      setGithubBoardId(boardId);
     } else {
-      setSlackBoardId(boardId);
+      setGithubBoardId(boardId);
     }
 
     const autopilotSettings =
       provider === 'intercom' ? intercomAutopilot :
-      provider === 'discord' ? discordAutopilot :
-      provider === 'github' ? githubAutopilot :
-      slackAutopilot;
+      githubAutopilot;
 
     if (autopilotSettings?.autopilot_mode === 'automatic' && orgId) {
       const setSaving =
         provider === 'intercom' ? setSavingIntercomAutopilot :
-        provider === 'discord' ? setSavingDiscordAutopilot :
-        provider === 'github' ? setSavingGithubAutopilot :
-        setSavingSlackAutopilot;
+        setSavingGithubAutopilot;
       setSaving(true);
       try {
         const res = await autopilotService.updateSettings(orgId, provider, {
@@ -315,12 +356,8 @@ function IntegrationsPageInner() {
         });
         if (provider === 'intercom') {
           setIntercomAutopilot(res.data.settings);
-        } else if (provider === 'discord') {
-          setDiscordAutopilot(res.data.settings);
-        } else if (provider === 'github') {
-          setGithubAutopilot(res.data.settings);
         } else {
-          setSlackAutopilot(res.data.settings);
+          setGithubAutopilot(res.data.settings);
         }
         toast({ title: 'Default board updated' });
       } catch (err: unknown) {
@@ -335,51 +372,72 @@ function IntegrationsPageInner() {
     }
   };
 
-  const handleDiscordChannelChange = async (channelId: string) => {
+  const handleAddChannelMapping = async (provider: 'discord' | 'slack') => {
     if (!orgId) return;
-    setSavingDiscordChannel(true);
+    const channelId = provider === 'discord' ? newDiscordChannelId : newSlackChannelId;
+    const boardId = provider === 'discord' ? newDiscordBoardId : newSlackBoardId;
+    const setAdding = provider === 'discord' ? setAddingDiscordChannel : setAddingSlackChannel;
+
+    if (!channelId) {
+      toast({ title: 'Select a channel', variant: 'destructive' });
+      return;
+    }
+    if (!boardId) {
+      toast({ title: 'Select a board', variant: 'destructive' });
+      return;
+    }
+
+    const channels = provider === 'discord' ? discordChannels : slackChannels;
+    const channelName = channels.find(c => c.id === channelId)?.name || null;
+
+    setAdding(true);
     try {
-      const res = await discordService.setChannel(orgId, channelId);
-      if (discordStatus) {
-        setDiscordStatus({
-          ...discordStatus,
-          provider_channel_id: res.data.provider_channel_id,
-          updated_at: res.data.updated_at,
-        });
+      await autopilotService.createChannelMapping(orgId, provider, {
+        channel_id: channelId,
+        channel_name: channelName,
+        board_id: boardId,
+      });
+      // Reload mappings
+      const res = await autopilotService.listChannelMappings(orgId, provider);
+      if (provider === 'discord') {
+        setDiscordMappings(res.data?.mappings || []);
+        setNewDiscordChannelId('');
+        setNewDiscordBoardId('');
+      } else {
+        setSlackMappings(res.data?.mappings || []);
+        setNewSlackChannelId('');
+        setNewSlackBoardId('');
       }
-      toast({ title: 'Monitored channel updated' });
+      toast({ title: 'Channel added', description: `Now monitoring #${channelName || channelId}` });
     } catch (err: unknown) {
       toast({
-        title: 'Update failed',
-        description: (err as any)?.response?.data?.message || 'Failed to set channel',
+        title: 'Failed to add channel',
+        description: (err as any)?.response?.data?.message || 'Failed to add channel mapping',
         variant: 'destructive',
       });
     } finally {
-      setSavingDiscordChannel(false);
+      setAdding(false);
     }
   };
 
-  const handleSlackChannelChange = async (channelId: string) => {
+  const handleRemoveChannelMapping = async (provider: 'discord' | 'slack', mappingId: string) => {
     if (!orgId) return;
-    setSavingSlackChannel(true);
     try {
-      const res = await slackService.setChannel(orgId, channelId);
-      if (slackStatus) {
-        setSlackStatus({
-          ...slackStatus,
-          provider_channel_id: res.data.provider_channel_id,
-          updated_at: res.data.updated_at,
-        });
+      await autopilotService.deleteChannelMapping(orgId, provider, mappingId);
+      // Reload mappings
+      const res = await autopilotService.listChannelMappings(orgId, provider);
+      if (provider === 'discord') {
+        setDiscordMappings(res.data?.mappings || []);
+      } else {
+        setSlackMappings(res.data?.mappings || []);
       }
-      toast({ title: 'Monitored channel updated' });
+      toast({ title: 'Channel removed' });
     } catch (err: unknown) {
       toast({
-        title: 'Update failed',
-        description: (err as any)?.response?.data?.message || 'Failed to set channel',
+        title: 'Failed to remove channel',
+        description: (err as any)?.response?.data?.message || 'Failed to remove channel mapping',
         variant: 'destructive',
       });
-    } finally {
-      setSavingSlackChannel(false);
     }
   };
 
@@ -616,45 +674,79 @@ function IntegrationsPageInner() {
                     icon={<DiscordIcon className="h-5 w-5" />}
                     brandColor={INTEGRATION_BRAND_COLORS.discord}
                     status={discordStatus?.status === 'error' ? 'error' : 'active'}
-                    subtitle={`#${discordChannels.find(c => c.id === discordStatus?.provider_channel_id)?.name || 'No channel'} → ${boards.find(b => b.id === discordBoardId)?.name || 'No board'} · connected ${discordStatus?.connected_at ? formatDate(discordStatus.connected_at) : '—'}`}
+                    subtitle={`${discordMappings.length} channel(s) monitored · connected ${discordStatus?.connected_at ? formatDate(discordStatus.connected_at) : '—'}`}
                     settingsContent={
                       <>
-                        {discordChannels.length > 0 && (
+                        {/* Existing channel mappings */}
+                        {discordMappings.length > 0 && (
                           <div className="space-y-2">
                             <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-                              <Hash className="h-3.5 w-3.5" /> Monitored Channel
+                              <Hash className="h-3.5 w-3.5" /> Monitored Channels
                             </Label>
-                            <Select value={discordStatus?.provider_channel_id || undefined} onValueChange={handleDiscordChannelChange} disabled={savingDiscordChannel}>
-                              <SelectTrigger className="h-9"><SelectValue placeholder="Select channel…" /></SelectTrigger>
-                              <SelectContent>
-                                {discordChannels.map(ch => (
-                                  <SelectItem key={ch.id} value={ch.id}># {ch.name}</SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
+                            <div className="space-y-2">
+                              {discordMappings.map(mapping => (
+                                <div key={mapping.id} className="flex items-center gap-2 rounded-lg border p-2">
+                                  <div className="flex-1 min-w-0">
+                                    <div className="text-sm font-medium truncate">
+                                      # {mapping.channel_name || discordChannels.find(c => c.id === mapping.channel_id)?.name || mapping.channel_id}
+                                    </div>
+                                    <div className="text-xs text-muted-foreground">
+                                      → {boards.find(b => b.id === mapping.board_id)?.name || 'Unknown board'}
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center gap-1.5">
+                                    <Switch
+                                      checked={mapping.autopilot_mode === 'automatic'}
+                                      disabled={!canUseAutoMode}
+                                      onCheckedChange={(checked) => handleAutopilotModeToggle('discord', checked, mapping.id)}
+                                    />
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive"
+                                      onClick={() => handleRemoveChannelMapping('discord', mapping.id)}
+                                    >
+                                      ×
+                                    </Button>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
                           </div>
                         )}
 
-                        <div className="space-y-3">
-                          <div className="flex items-center justify-between gap-4">
-                            <div className="space-y-0.5">
-                              <Label className="text-sm font-medium flex items-center gap-1.5"><Zap className="h-3.5 w-3.5 text-amber-500" /> Automatic Mode</Label>
-                              <p className="text-xs text-muted-foreground leading-tight">Bypass review & publish instantly.</p>
-                              {!discordBoardId && <p className="text-xs text-amber-600 dark:text-amber-500 mt-0.5 font-medium">Select a board below first.</p>}
+                        {/* Add channel form */}
+                        {discordChannels.length > 0 && (
+                          <div className="space-y-2 pt-2 border-t">
+                            <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Add Channel</Label>
+                            <div className="flex gap-2">
+                              <Select value={newDiscordChannelId || undefined} onValueChange={setNewDiscordChannelId}>
+                                <SelectTrigger className="h-9 flex-1"><SelectValue placeholder="Channel…" /></SelectTrigger>
+                                <SelectContent>
+                                  {discordChannels
+                                    .filter(ch => !discordMappings.some(m => m.channel_id === ch.id))
+                                    .map(ch => (
+                                      <SelectItem key={ch.id} value={ch.id}># {ch.name}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                              </Select>
+                              <Select value={newDiscordBoardId || undefined} onValueChange={setNewDiscordBoardId}>
+                                <SelectTrigger className="h-9 flex-1"><SelectValue placeholder="Board…" /></SelectTrigger>
+                                <SelectContent>
+                                  {boards.map(b => (<SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>))}
+                                </SelectContent>
+                              </Select>
+                              <Button
+                                size="sm"
+                                className="h-9"
+                                disabled={!newDiscordChannelId || !newDiscordBoardId || addingDiscordChannel}
+                                onClick={() => handleAddChannelMapping('discord')}
+                              >
+                                {addingDiscordChannel ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Add'}
+                              </Button>
                             </div>
-                             <Switch checked={discordAutopilot?.autopilot_mode === 'automatic'} disabled={savingDiscordAutopilot || !discordBoardId || !canUseAutoMode} onCheckedChange={(checked) => handleAutopilotModeToggle('discord', checked)} />
                           </div>
-
-                          <div className="space-y-2 pt-1 border-t">
-                            <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mt-2 block">Default Board</Label>
-                            <Select value={discordBoardId || undefined} onValueChange={(val) => handleBoardChange('discord', val)} disabled={savingDiscordAutopilot}>
-                              <SelectTrigger className="h-9"><SelectValue placeholder="Select a board…" /></SelectTrigger>
-                              <SelectContent>
-                                {boards.map(b => (<SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                        </div>
+                        )}
                       </>
                     }
                     footerContent={
@@ -738,56 +830,82 @@ function IntegrationsPageInner() {
                     icon={<SlackIcon className="h-5 w-5" />}
                     brandColor={INTEGRATION_BRAND_COLORS.slack}
                     status={slackStatus?.status === 'error' ? 'error' : 'active'}
-                    subtitle={`#${slackChannels.find(c => c.id === slackStatus?.provider_channel_id)?.name || 'No channel'} → ${boards.find(b => b.id === slackBoardId)?.name || 'No board'} · connected ${slackStatus?.connected_at ? formatDate(slackStatus.connected_at) : '—'}`}
+                    subtitle={`${slackMappings.length} channel(s) monitored · connected ${slackStatus?.connected_at ? formatDate(slackStatus.connected_at) : '—'}`}
                     settingsContent={
                       <>
-                        {slackChannels.length > 0 && (
+                        {/* Existing channel mappings */}
+                        {slackMappings.length > 0 && (
                           <div className="space-y-2">
                             <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-                              <Hash className="h-3.5 w-3.5" /> Monitored Channel
+                              <Hash className="h-3.5 w-3.5" /> Monitored Channels
                             </Label>
-                            <Select value={slackStatus?.provider_channel_id || undefined} onValueChange={handleSlackChannelChange} disabled={savingSlackChannel}>
-                              <SelectTrigger className="h-9"><SelectValue placeholder="Select channel…" /></SelectTrigger>
-                              <SelectContent>
-                                {slackChannels.map(ch => (
-                                  <SelectItem key={ch.id} value={ch.id}># {ch.name}</SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                            <p className="text-xs text-muted-foreground leading-relaxed">
-                              Invite the Feedy bot to this channel so Events API can deliver messages.
-                            </p>
+                            <div className="space-y-2">
+                              {slackMappings.map(mapping => (
+                                <div key={mapping.id} className="flex items-center gap-2 rounded-lg border p-2">
+                                  <div className="flex-1 min-w-0">
+                                    <div className="text-sm font-medium truncate">
+                                      # {mapping.channel_name || slackChannels.find(c => c.id === mapping.channel_id)?.name || mapping.channel_id}
+                                    </div>
+                                    <div className="text-xs text-muted-foreground">
+                                      → {boards.find(b => b.id === mapping.board_id)?.name || 'Unknown board'}
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center gap-1.5">
+                                    <Switch
+                                      checked={mapping.autopilot_mode === 'automatic'}
+                                      disabled={!canUseAutoMode}
+                                      onCheckedChange={(checked) => handleAutopilotModeToggle('slack', checked, mapping.id)}
+                                    />
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive"
+                                      onClick={() => handleRemoveChannelMapping('slack', mapping.id)}
+                                    >
+                                      ×
+                                    </Button>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
                           </div>
                         )}
 
-                        <div className="space-y-3">
-                          <div className="flex items-center justify-between gap-4">
-                            <div className="space-y-0.5">
-                              <Label className="text-sm font-medium flex items-center gap-1.5"><Zap className="h-3.5 w-3.5 text-amber-500" /> Automatic Mode</Label>
-                              <p className="text-xs text-muted-foreground leading-tight">Bypass review & publish instantly.</p>
-                              {!slackBoardId && <p className="text-xs text-amber-600 dark:text-amber-500 mt-0.5 font-medium">Select a board below first.</p>}
+                        {/* Add channel form */}
+                        {slackChannels.length > 0 && (
+                          <div className="space-y-2 pt-2 border-t">
+                            <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Add Channel</Label>
+                            <p className="text-xs text-muted-foreground leading-relaxed">
+                              Invite the Feedy bot to each channel so Events API can deliver messages.
+                            </p>
+                            <div className="flex gap-2">
+                              <Select value={newSlackChannelId || undefined} onValueChange={setNewSlackChannelId}>
+                                <SelectTrigger className="h-9 flex-1"><SelectValue placeholder="Channel…" /></SelectTrigger>
+                                <SelectContent>
+                                  {slackChannels
+                                    .filter(ch => !slackMappings.some(m => m.channel_id === ch.id))
+                                    .map(ch => (
+                                      <SelectItem key={ch.id} value={ch.id}># {ch.name}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                              </Select>
+                              <Select value={newSlackBoardId || undefined} onValueChange={setNewSlackBoardId}>
+                                <SelectTrigger className="h-9 flex-1"><SelectValue placeholder="Board…" /></SelectTrigger>
+                                <SelectContent>
+                                  {boards.map(b => (<SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>))}
+                                </SelectContent>
+                              </Select>
+                              <Button
+                                size="sm"
+                                className="h-9"
+                                disabled={!newSlackChannelId || !newSlackBoardId || addingSlackChannel}
+                                onClick={() => handleAddChannelMapping('slack')}
+                              >
+                                {addingSlackChannel ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Add'}
+                              </Button>
                             </div>
-                             <Switch checked={slackAutopilot?.autopilot_mode === 'automatic'} disabled={savingSlackAutopilot || !slackBoardId || !canUseAutoMode} onCheckedChange={(checked) => handleAutopilotModeToggle('slack', checked)} />
                           </div>
-
-                          {slackAutopilot?.autopilot_mode === 'automatic' && (
-                            <div className="rounded-lg border border-amber-200 bg-amber-50/80 dark:border-amber-900/50 dark:bg-amber-950/30 px-3 py-2.5 flex gap-2">
-                              <p className="text-xs text-amber-800 dark:text-amber-300 leading-relaxed">
-                                Feedback from this channel will publish directly to the board without manual review.
-                              </p>
-                            </div>
-                          )}
-
-                          <div className="space-y-2 pt-1 border-t">
-                            <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mt-2 block">Default Board</Label>
-                            <Select value={slackBoardId || undefined} onValueChange={(val) => handleBoardChange('slack', val)} disabled={savingSlackAutopilot}>
-                              <SelectTrigger className="h-9"><SelectValue placeholder="Select a board…" /></SelectTrigger>
-                              <SelectContent>
-                                {boards.map(b => (<SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                        </div>
+                        )}
                       </>
                     }
                     footerContent={

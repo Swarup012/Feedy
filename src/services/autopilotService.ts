@@ -20,6 +20,25 @@ export interface AutopilotSettings {
   default_board_id: string | null;
 }
 
+export interface ChannelBoardMapping {
+  id: string;
+  integration_connection_id: string;
+  channel_id: string;
+  channel_name: string | null;
+  board_id: string;
+  autopilot_mode: 'manual' | 'automatic';
+  last_message_id: string | null;
+  status: 'active' | 'disconnected' | 'error';
+  created_at: string;
+  updated_at: string;
+  // Joined fields from integration_connections
+  integration_connections?: {
+    organization_id: string;
+    provider: string;
+    provider_workspace_id: string;
+  };
+}
+
 export const autopilotService = {
   async ingest(orgId: string, text: string) {
     const response = await api.post(`/api/organizations/${orgId}/autopilot/ingest`, { text });
@@ -74,6 +93,68 @@ export const autopilotService = {
     return response.data as {
       success: boolean;
       data: { settings: AutopilotSettings };
+    };
+  },
+
+  // ─── Channel Mapping CRUD (Slack/Discord) ────────────────────────────
+
+  async listChannelMappings(orgId: string, provider: string) {
+    const response = await api.get(
+      `/api/organizations/${orgId}/integrations/${provider}/mappings`
+    );
+    return response.data as {
+      success: boolean;
+      data: { mappings: ChannelBoardMapping[] };
+    };
+  },
+
+  async createChannelMapping(
+    orgId: string,
+    provider: string,
+    mapping: {
+      channel_id: string;
+      channel_name?: string;
+      board_id: string;
+      autopilot_mode?: 'manual' | 'automatic';
+    }
+  ) {
+    const response = await api.post(
+      `/api/organizations/${orgId}/integrations/${provider}/mappings`,
+      mapping
+    );
+    return response.data as {
+      success: boolean;
+      data: { mapping: ChannelBoardMapping };
+    };
+  },
+
+  async updateChannelMapping(
+    orgId: string,
+    provider: string,
+    mappingId: string,
+    updates: {
+      board_id?: string;
+      autopilot_mode?: 'manual' | 'automatic';
+      channel_name?: string;
+      status?: 'active' | 'disconnected' | 'error';
+    }
+  ) {
+    const response = await api.patch(
+      `/api/organizations/${orgId}/integrations/${provider}/mappings/${mappingId}`,
+      updates
+    );
+    return response.data as {
+      success: boolean;
+      data: { mapping: ChannelBoardMapping };
+    };
+  },
+
+  async deleteChannelMapping(orgId: string, provider: string, mappingId: string) {
+    const response = await api.delete(
+      `/api/organizations/${orgId}/integrations/${provider}/mappings/${mappingId}`
+    );
+    return response.data as {
+      success: boolean;
     };
   },
 };
