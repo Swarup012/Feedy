@@ -279,7 +279,7 @@ export default function FeedbackClient() {
                 onClick={() => setSelectedPost(post)}
                 className={`border-b border-border/60 p-4 cursor-pointer transition-colors ${
                   selectedPost?.id === post.id
-                    ? "bg-primary/10 border-l-4 border-l-primary"
+                    ? "bg-primary/10"
                     : "hover:bg-muted/50"
                 }`}
               >

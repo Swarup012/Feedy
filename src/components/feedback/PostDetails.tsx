@@ -938,7 +938,7 @@ export function PostDetails({
               {/* Post Title and Info */}
               <div className="flex-1 space-y-2">
                 <div className="flex items-start justify-between gap-2">
-                  <h1 className="text-2xl font-bold text-foreground">{post.title}</h1>
+                  <h1 className="text-lg font-semibold text-foreground">{post.title}</h1>
                   {(user?.organization_role === "admin" || user?.organization_role === "owner" || post.author?.id === user?.id) && (
                     <div className="flex gap-1">
                       <Button

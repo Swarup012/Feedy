@@ -62,7 +62,7 @@ export const PostsList = memo(function PostsList({
     }, 250);
   }, [onSearchChange]);
   return (
-    <div className="flex flex-col h-full bg-white dark:bg-background border-r border-gray-200 dark:border-border max-md:w-full md:w-[360px] md:min-w-[360px]">
+    <div className="flex flex-col h-full bg-white dark:bg-background border-r border-gray-200 dark:border-border max-md:w-full md:w-[300px] md:min-w-[300px]">
       {/* Header */}
       <div className="p-4 border-b border-gray-200 dark:border-border space-y-3 sticky top-0 bg-white dark:bg-background z-10">
         <div className="flex items-center justify-between">
@@ -143,7 +143,7 @@ export const PostsList = memo(function PostsList({
                 className={cn(
                   "w-full text-left p-4 hover:bg-gray-50 dark:hover:bg-muted transition-colors",
                   selectedPost?.id === post.id &&
-                    "bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500",
+                    "bg-primary/10",
                 )}
               >
                 <div className="space-y-2">

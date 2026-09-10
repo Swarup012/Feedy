@@ -169,24 +169,16 @@ export function IntegrationCardAdd({
 }: IntegrationCardAddProps) {
   return (
     <div
-      className="rounded-xl border bg-card px-6 py-5 flex items-center gap-4 hover:shadow-sm transition-all group"
-      style={{ ['--card-hover-border' as string]: `${brandColor}30` }}
+      className="rounded-xl border bg-card px-4 py-2.5 flex items-center gap-3 transition-colors cursor-pointer hover:border-primary/40 hover:bg-primary/5 group"
+      onClick={onConnect}
     >
       <div
-        className="h-12 w-12 rounded-lg flex items-center justify-center group-hover:scale-105 transition-transform shrink-0"
-        style={{ backgroundColor: `${brandColor}10` }}
+        className="h-8 w-8 rounded-lg flex items-center justify-center shrink-0"
+        style={{ backgroundColor: `${brandColor}15` }}
       >
         {icon}
       </div>
-      <h3 className="font-semibold text-base">{name}</h3>
-      <Button
-        size="sm"
-        className="text-white shrink-0 h-9 text-sm px-4 ml-auto"
-        style={{ backgroundColor: brandColor }}
-        onClick={onConnect}
-      >
-        Connect
-      </Button>
+      <h3 className="text-sm font-semibold flex-1 min-w-0">{name}</h3>
     </div>
   );
 }

@@ -31,7 +31,6 @@ import {
   Loader2,
   Hash,
   Zap,
-  Mail,
 } from 'lucide-react';
 import {
   autopilotService,
@@ -452,11 +451,14 @@ function IntegrationsPageInner() {
     const githubResult = searchParams.get('github');
     const message = searchParams.get('message');
 
+    const hasAnyResult = intercomResult || discordResult || slackResult || githubResult;
+
     if (intercomResult === 'connected') {
       toast({
         title: 'Intercom connected',
         description: 'New closed conversations will feed into Autopilot.',
       });
+      loadStatus();
     } else if (intercomResult === 'error') {
       toast({
         title: 'Intercom connection failed',
@@ -507,7 +509,7 @@ function IntegrationsPageInner() {
       });
     }
 
-    if (intercomResult || discordResult || slackResult || githubResult) {
+    if (hasAnyResult) {
       const url = new URL(window.location.href);
       url.searchParams.delete('intercom');
       url.searchParams.delete('discord');
@@ -515,6 +517,14 @@ function IntegrationsPageInner() {
       url.searchParams.delete('github');
       url.searchParams.delete('message');
       window.history.replaceState({}, '', url.pathname);
+
+      // Retry after delay to handle backend eventual consistency
+      const retry1 = setTimeout(() => loadStatus(), 2000);
+      const retry2 = setTimeout(() => loadStatus(), 5000);
+      return () => {
+        clearTimeout(retry1);
+        clearTimeout(retry2);
+      };
     }
   }, [searchParams, toast, loadStatus]);
 
@@ -1001,7 +1011,7 @@ function IntegrationsPageInner() {
               <h2 className="text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">Add Integrations</h2>
               <p className="text-sm text-muted-foreground mt-1">Supercharge your workflow by connecting with the tools you already use.</p>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-[3.75rem]">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-lg">
               {!isDiscordActive && (
                 <IntegrationCardAdd
                   name="Discord"
@@ -1038,13 +1048,6 @@ function IntegrationsPageInner() {
                   onConnect={handleConnectGithub}
                 />
               )}
-              <div className="rounded-xl border bg-card px-6 py-5 flex items-center gap-4 opacity-60 cursor-not-allowed">
-                <div className="h-12 w-12 rounded-lg bg-amber-500/10 flex items-center justify-center shrink-0">
-                  <Mail className="h-5 w-5 text-amber-600" />
-                </div>
-                <h3 className="font-semibold text-base">Email</h3>
-                <Button size="sm" variant="outline" disabled className="h-9 text-sm px-4 ml-auto">Coming Soon</Button>
-              </div>
             </div>
           </section>
         </>
