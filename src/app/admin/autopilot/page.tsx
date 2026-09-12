@@ -7,6 +7,7 @@ import { PaidFeatureGate } from '@/components/PaidFeatureGate';
 import { useOrganization } from '@/context/OrganizationContext';
 import { useToast } from '@/hooks/use-toast';
 import { isPlanUpgradeRequired } from '@/lib/api';
+import api from '@/lib/api';
 import { boardService, type Board } from '@/services/boardService';
 import {
   autopilotService,
@@ -121,6 +122,12 @@ function AutopilotPageInner() {
   const [connectedProviders, setConnectedProviders] = useState<Set<IntegrationProvider>>(new Set());
   const [loadingIntegrations, setLoadingIntegrations] = useState(true);
 
+  const [rawText, setRawText] = useState('');
+  const [rawAuthor, setRawAuthor] = useState('');
+  const [rawBoardId, setRawBoardId] = useState('');
+  const [trackedUsers, setTrackedUsers] = useState<{ id: string; display_name: string | null; email: string | null }[]>([]);
+  const [submittingRaw, setSubmittingRaw] = useState(false);
+
   const loadSuggestions = useCallback(async () => {
     if (!orgId) return;
     setLoadingList(true);
@@ -184,6 +191,23 @@ function AutopilotPageInner() {
     })();
   }, [orgId]);
 
+  // Fetch tracked users for the username dropdown
+  useEffect(() => {
+    if (!orgId) return;
+    (async () => {
+      try {
+        const billingPeriod = new Date().toISOString().slice(0, 7);
+        const res = await api.get(`/api/organizations/${orgId}/tracked-users`, {
+          params: { billing_period: billingPeriod, limit: 100 },
+        });
+        const users = res.data?.data?.users || res.data?.users || [];
+        setTrackedUsers(users);
+      } catch {
+        // Non-fatal
+      }
+    })();
+  }, [orgId]);
+
   const handleApprove = async (suggestion: AutopilotSuggestion) => {
     if (!orgId) return;
     const boardId = approveBoardById[suggestion.id];
@@ -229,6 +253,39 @@ function AutopilotPageInner() {
     }
   };
 
+  const handleSubmitRaw = async () => {
+    if (!orgId || !rawText.trim()) return;
+    if (!rawBoardId) {
+      toast({ title: 'Select a board', description: 'Choose which board to submit this feedback to.', variant: 'destructive' });
+      return;
+    }
+    setSubmittingRaw(true);
+    try {
+      const metadata: { submitter_name?: string } = {};
+      if (rawAuthor.trim()) {
+        metadata.submitter_name = rawAuthor.trim();
+      }
+      const res = await autopilotService.ingest(orgId, rawText, metadata, rawBoardId);
+      if (res.data?.discarded) {
+        toast({ title: 'Not feedback', description: res.data.reason || 'Text did not contain actionable feedback.', variant: 'destructive' });
+      } else {
+        toast({ title: 'Post created', description: 'Feedback has been posted to the selected board.' });
+        setRawText('');
+        setRawAuthor('');
+        setRawBoardId('');
+        await loadSuggestions();
+      }
+    } catch (err: any) {
+      toast({
+        title: 'Submit failed',
+        description: err?.response?.data?.message || err.message,
+        variant: 'destructive',
+      });
+    } finally {
+      setSubmittingRaw(false);
+    }
+  };
+
   if (orgLoading) {
     return (
       <div className="flex h-full items-center justify-center">
@@ -254,7 +311,7 @@ function AutopilotPageInner() {
         <header className="shrink-0 mb-6">
           <h1 className="font-switzer text-xl font-semibold tracking-tight">Get Started with Autopilot</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Connect your support tools and let Autopilot find feedback for you — no more digging through tickets, emails, and chats.
+            Connect your support tools and let Autopilot find feedback for you 🧠.
           </p>
           <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-lg">
             {INTEGRATION_PROVIDERS.map((provider) => {
@@ -298,7 +355,7 @@ function AutopilotPageInner() {
           <div>
             <h1 className="font-switzer text-lg font-semibold tracking-tight">Autopilot</h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              Watches your connected support tools, detects feedback automatically, and queues it for your review.
+              Approve manually or enable automatic review.
             </p>
           </div>
           <Link href="/admin/organization?tab=integrations">
@@ -308,11 +365,10 @@ function AutopilotPageInner() {
             </Button>
           </Link>
         </div>
-        <div className="mt-5 h-px w-full bg-border" />
       </header>
 
-      <div className="flex-1 min-h-0 grid grid-cols-1 gap-0 items-start overflow-hidden">
-        {/* Right: Queue (scrollable) */}
+      <div className="flex-1 min-h-0 grid grid-cols-[1.5fr_1fr] gap-6 items-start overflow-hidden">
+        {/* Left: Queue (scrollable) */}
         <section className="overflow-y-auto max-h-[calc(100vh-10rem)]">
           {/* Tabs */}
           <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm border-b border-border">
@@ -479,6 +535,66 @@ function AutopilotPageInner() {
               </ul>
             )}
           </div>
+        </section>
+
+        {/* Right: Raw text submission */}
+        <section className="flex flex-col gap-4 rounded-xl border bg-card p-5">
+          <div>
+            <h2 className="text-sm font-semibold">Submit Feedback</h2>
+            <p className="text-xs text-muted-foreground mt-1">Paste raw text and submit as feedback from a tracked user.</p>
+          </div>
+
+          <textarea
+            value={rawText}
+            onChange={(e) => setRawText(e.target.value)}
+            placeholder="Paste your feedback text here..."
+            className="flex min-h-[120px] w-full rounded-lg border bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none"
+          />
+
+          <div className="flex gap-2">
+            <div className="flex flex-col gap-1.5 flex-1">
+              <label className="text-xs font-medium text-muted-foreground">Author</label>
+              <input
+                type="text"
+                value={rawAuthor}
+                onChange={(e) => setRawAuthor(e.target.value)}
+                placeholder="Tracked user or custom..."
+                className="flex h-9 w-full rounded-lg border bg-background px-3 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                list="tracked-users-list"
+              />
+              <datalist id="tracked-users-list">
+                {trackedUsers.map((u) => (
+                  <option key={u.id} value={u.display_name || u.email || ''}>{u.display_name || u.email || ''}</option>
+                ))}
+              </datalist>
+            </div>
+            <div className="flex flex-col gap-1.5 flex-1">
+              <label className="text-xs font-medium text-muted-foreground">Board</label>
+              <Select value={rawBoardId} onValueChange={setRawBoardId}>
+                <SelectTrigger className="h-9 text-xs">
+                  <SelectValue placeholder="Select board…" />
+                </SelectTrigger>
+                <SelectContent>
+                  {boards.map((b) => (
+                    <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <p className="text-[11px] text-muted-foreground">
+            {rawAuthor.trim() ? `Posting as "${rawAuthor.trim()}"` : 'Leave empty to post as yourself'}
+          </p>
+
+          <Button
+            size="sm"
+            onClick={handleSubmitRaw}
+            disabled={!rawText.trim() || !rawBoardId || submittingRaw}
+            className="w-full"
+          >
+            {submittingRaw ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+            Submit
+          </Button>
         </section>
       </div>
     </div>

@@ -62,6 +62,7 @@ interface PostDetailsProps {
   onAuthRequired?: () => void; // Optional callback for when auth is required
   onBack?: () => void;
   isMobile?: boolean;
+  className?: string; // Optional: override container classes (e.g. for Sheet usage)
 }
 
 const STATUS_OPTIONS = [
@@ -313,6 +314,7 @@ export function PostDetails({
   onAuthRequired,
   onBack,
   isMobile,
+  className,
 }: PostDetailsProps) {
   const { toast } = useToast();
   const { user } = useAuth();
@@ -894,7 +896,7 @@ export function PostDetails({
     "U";
 
   return (
-    <div className="flex-1 border-l border-gray-200 dark:border-border bg-gray-50 dark:bg-background flex overflow-hidden max-md:border-l-0" style={{ height: 'calc(100vh - 64px)' }}>
+    <div className={className || "flex-1 border-l border-gray-200 dark:border-border bg-gray-50 dark:bg-background flex overflow-hidden max-md:border-l-0"} style={className ? undefined : { height: 'calc(100vh - 64px)' }}>
       {/* Main Content - Left Side: post + comments as one continuous thread */}
       <div className="flex-1 flex flex-col overflow-hidden bg-white dark:bg-background" style={{ height: '100%' }}>
         {/* Unified scroll: post content flows directly into comments */}

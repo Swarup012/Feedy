@@ -40,8 +40,8 @@ export interface ChannelBoardMapping {
 }
 
 export const autopilotService = {
-  async ingest(orgId: string, text: string) {
-    const response = await api.post(`/api/organizations/${orgId}/autopilot/ingest`, { text });
+  async ingest(orgId: string, text: string, metadata?: { submitter_name?: string; submitter_email?: string }, boardId?: string) {
+    const response = await api.post(`/api/organizations/${orgId}/autopilot/ingest`, { text, metadata, board_id: boardId });
     return response.data as {
       success: boolean;
       message: string;

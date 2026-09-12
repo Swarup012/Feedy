@@ -91,13 +91,12 @@ export default function AdminLayout({
   };
 
   const navItems = [
+    { name: "Autopilot", path: "/admin/autopilot" },
+    { name: "AI Chat", path: "/admin/ai-chat" },
+    { name: "Users", path: "/admin/users" },
     { name: "Feedback", path: feedbackPath },
     { name: "Roadmap", path: "/admin/roadmap" },
     { name: "Changelog", path: "/admin/changelog" },
-    { name: "AI Chat", path: "/admin/ai-chat" },
-    { name: "Autopilot", path: "/admin/autopilot" },
-    { name: "Explore", path: "/feedback"},
-    { name: "Contact Us", path: "/contact"}
   ];
 
   return (
@@ -124,30 +123,13 @@ export default function AdminLayout({
             </div>
 
             <div className="hidden lg:flex items-center gap-1 ml-2">
-              {/* Feedback link - dynamically uses last visited board */}
-              <Link
-                href={feedbackPath}
-                className={cn(
-                  "relative px-3 py-1.5 text-sm font-switzer font-semibold transition-all rounded-lg",
-                  pathname?.startsWith('/admin/feedback')
-                    ? "text-white bg-white/20"
-                    : "text-white/70 hover:text-white hover:bg-white/10"
-                )}
-              >
-                Feedback
-                {pathname?.startsWith('/admin/feedback') && (
-                  <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1/2 h-0.5 bg-white rounded-full" />
-                )}
-              </Link>
-              
-              {/* Other nav items */}
-              {navItems.slice(1).map((item) => (
+              {navItems.map((item) => (
                 <Link
                   key={item.path}
                   href={item.path}
                   className={cn(
                     "relative px-3 py-1.5 text-sm font-switzer font-semibold transition-all rounded-lg",
-                    (item.path === "/admin/autopilot" || item.path === "/admin/ai-chat"
+                    (item.path === "/admin/autopilot" || item.path === "/admin/ai-chat" || item.path === feedbackPath
                       ? pathname?.startsWith(item.path)
                       : pathname === item.path)
                       ? "text-white bg-white/20"
@@ -155,7 +137,7 @@ export default function AdminLayout({
                   )}
                 >
                   {item.name}
-                  {(item.path === "/admin/autopilot" || item.path === "/admin/ai-chat"
+                  {(item.path === "/admin/autopilot" || item.path === "/admin/ai-chat" || item.path === feedbackPath
                     ? pathname?.startsWith(item.path)
                     : pathname === item.path) && (
                     <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1/2 h-0.5 bg-white rounded-full" />
@@ -216,6 +198,13 @@ export default function AdminLayout({
                 </DropdownMenuItem>
 
 
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={() => router.push("/contact")}
+                  className="cursor-pointer rounded-lg py-2.5 font-medium"
+                >
+                  Contact Us
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   className="text-red-600 dark:text-red-400 cursor-pointer rounded-lg py-2.5 font-bold"
