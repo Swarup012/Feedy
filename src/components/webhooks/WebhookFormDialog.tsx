@@ -24,7 +24,8 @@ import {
 } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { webhookService, Webhook, WebhookEvent, WebhookType } from '@/services/webhookService';
-import { Copy, Check, ExternalLink } from 'lucide-react';
+import { useBoards } from '@/hooks/useFeedbackData';
+import { Copy, Check, ExternalLink, X } from 'lucide-react';
 
 // ─────────────────────────────────────────────────────────────
 // Constants
@@ -101,9 +102,12 @@ export function WebhookFormDialog({ open, onClose, onSaved, existing }: WebhookF
   const [url, setUrl] = useState('');
   const [type, setType] = useState<WebhookType>('custom');
   const [events, setEvents] = useState<WebhookEvent[]>([]);
+  const [boardIds, setBoardIds] = useState<string[]>([]);
   const [description, setDescription] = useState('');
   const [isActive, setIsActive] = useState(true);
   const [saving, setSaving] = useState(false);
+
+  const { boards, isLoading: boardsLoading } = useBoards();
 
   // Secret display (shown once after creation)
   const [newSecret, setNewSecret] = useState<string | null>(null);
@@ -116,6 +120,7 @@ export function WebhookFormDialog({ open, onClose, onSaved, existing }: WebhookF
       setUrl(existing.url);
       setType(existing.type);
       setEvents(existing.events);
+      setBoardIds(existing.board_ids || []);
       setDescription(existing.description || '');
       setIsActive(existing.is_active);
     } else {
@@ -123,6 +128,7 @@ export function WebhookFormDialog({ open, onClose, onSaved, existing }: WebhookF
       setUrl('');
       setType('custom');
       setEvents([]);
+      setBoardIds([]);
       setDescription('');
       setIsActive(true);
     }
@@ -155,16 +161,17 @@ export function WebhookFormDialog({ open, onClose, onSaved, existing }: WebhookF
 
     setSaving(true);
     try {
+      const boardIdsPayload = boardIds.length > 0 ? boardIds : null;
       if (isEditing && existing) {
         const updated = await webhookService.updateWebhook(existing.id, {
-          name, url, type, events, description: description || null, is_active: isActive,
+          name, url, type, events, board_ids: boardIdsPayload, description: description || null, is_active: isActive,
         });
         toast({ title: '✅ Webhook updated successfully' });
         onSaved(updated);
         onClose();
       } else {
         const created = await webhookService.createWebhook({
-          name, url, type, events, description: description || null,
+          name, url, type, events, board_ids: boardIdsPayload, description: description || null,
         });
         // Show secret key — only time it's visible
         if (created.secret_key) {
@@ -364,6 +371,72 @@ export function WebhookFormDialog({ open, onClose, onSaved, existing }: WebhookF
               </div>
               {events.length > 0 && (
                 <p className="text-xs text-muted-foreground">{events.length} event{events.length !== 1 ? 's' : ''} selected</p>
+              )}
+            </div>
+
+            {/* Board scope */}
+            <div className="space-y-2">
+              <Label>Boards <span className="text-muted-foreground text-xs">(optional)</span></Label>
+              <p className="text-xs text-muted-foreground">Leave empty to receive events from all boards.</p>
+              {boardsLoading ? (
+                <p className="text-xs text-muted-foreground">Loading boards…</p>
+              ) : boards.length === 0 ? (
+                <p className="text-xs text-muted-foreground">No boards in this organization yet.</p>
+              ) : (
+                <div className="rounded-lg border border-border p-3 space-y-2">
+                  {/* Selected boards as badges */}
+                  {boardIds.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 mb-2">
+                      {boardIds.map(id => {
+                        const board = boards.find(b => b.id === id);
+                        return (
+                          <Badge key={id} variant="secondary" className="gap-1 pr-1">
+                            {board?.icon} {board?.name || id}
+                            <button
+                              type="button"
+                              onClick={() => setBoardIds(prev => prev.filter(b => b !== id))}
+                              className="ml-0.5 rounded-full hover:bg-muted p-0.5"
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                          </Badge>
+                        );
+                      })}
+                    </div>
+                  )}
+                  {/* Board checkboxes */}
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {boards.map(board => (
+                      <button
+                        key={board.id}
+                        role="checkbox"
+                        aria-checked={boardIds.includes(board.id)}
+                        onClick={() => {
+                          setBoardIds(prev =>
+                            prev.includes(board.id)
+                              ? prev.filter(id => id !== board.id)
+                              : [...prev, board.id]
+                          );
+                        }}
+                        className={`flex items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors text-left ${
+                          boardIds.includes(board.id)
+                            ? 'bg-primary/10 text-primary'
+                            : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                        }`}
+                      >
+                        <div className={`w-3.5 h-3.5 rounded border flex-shrink-0 flex items-center justify-center ${
+                          boardIds.includes(board.id) ? 'bg-primary border-primary' : 'border-border'
+                        }`}>
+                          {boardIds.includes(board.id) && <Check className="h-2 w-2 text-white" />}
+                        </div>
+                        <span className="truncate">{board.icon} {board.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {boardIds.length > 0 && (
+                <p className="text-xs text-muted-foreground">{boardIds.length} board{boardIds.length !== 1 ? 's' : ''} selected</p>
               )}
             </div>
 
