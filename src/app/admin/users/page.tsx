@@ -308,10 +308,7 @@ export default function UsersPage() {
       <div className={`${WIDE_CONTAINER} py-5`}>
         {/* Header */}
         <div className="mb-5">
-          <h1 className="text-xl font-bold">Users</h1>
-          <p className="text-muted-foreground mt-1">
-            Manage your valuable customers
-          </p>
+          <h1 className="text-xl font-bold">Manage your valuable customers</h1>
         </div>
 
         {/* 3-column layout */}
