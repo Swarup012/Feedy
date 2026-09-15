@@ -20,6 +20,10 @@ interface Organization {
   max_users: number;
   max_boards: number;
   settings?: any;
+  weekly_briefing?: {
+    summary: string;
+    generated_at: string;
+  };
   created_at: string;
   updated_at: string;
   role?: string;
