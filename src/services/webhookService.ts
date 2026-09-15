@@ -12,10 +12,15 @@ export type WebhookEvent =
   | 'post.updated'
   | 'post.status_changed'
   | 'post.deleted'
+  | 'post.needs_attention'
   | 'comment.created'
   | 'vote.created'
   | 'board.created'
-  | 'changelog.published';
+  | 'changelog.published'
+  | 'user.identified'
+  | 'autopilot.suggestion.created'
+  | 'autopilot.suggestion.approved'
+  | 'autopilot.suggestion.rejected';
 
 export interface Webhook {
   id: string;

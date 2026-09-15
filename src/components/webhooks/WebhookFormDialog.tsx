@@ -36,13 +36,18 @@ const ALL_EVENTS: { value: WebhookEvent; label: string; category: string }[] = [
   { value: 'post.updated',        label: 'Post Updated',        category: 'post' },
   { value: 'post.status_changed', label: 'Post Status Changed', category: 'post' },
   { value: 'post.deleted',        label: 'Post Deleted',        category: 'post' },
+  { value: 'post.needs_attention', label: 'Post Needs Attention', category: 'post' },
   { value: 'comment.created',     label: 'Comment Created',     category: 'comment' },
   { value: 'vote.created',        label: 'Vote Added',          category: 'vote' },
   { value: 'board.created',       label: 'Board Created',       category: 'board' },
   { value: 'changelog.published', label: 'Changelog Published', category: 'changelog' },
+  { value: 'user.identified',     label: 'User Identified',     category: 'user' },
+  { value: 'autopilot.suggestion.created',  label: 'Suggestion Created',  category: 'autopilot' },
+  { value: 'autopilot.suggestion.approved', label: 'Suggestion Approved', category: 'autopilot' },
+  { value: 'autopilot.suggestion.rejected', label: 'Suggestion Rejected', category: 'autopilot' },
 ];
 
-const EVENT_CATEGORIES = ['post', 'comment', 'vote', 'board', 'changelog'];
+const EVENT_CATEGORIES = ['post', 'comment', 'vote', 'board', 'changelog', 'user', 'autopilot'];
 
 const WEBHOOK_TYPES: { value: WebhookType; label: string; description: string; icon: React.ReactNode }[] = [
   {
