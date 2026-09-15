@@ -5,7 +5,14 @@ import api from '@/lib/api';
 // Types
 // ─────────────────────────────────────────────────────────────
 
-export type ApiKeyScope = 'read' | 'write';
+export type ApiKeyScope =
+  | 'boards:read'
+  | 'posts:read'
+  | 'posts:write'
+  | 'comments:write'
+  | 'users:read'
+  | 'users:write';
+
 export type ApiKeyEnvironment = 'live' | 'test';
 
 export interface ApiKey {
@@ -66,10 +73,6 @@ export const apiKeyService = {
    * Get current organization ID from context
    */
   async _getOrgId(): Promise<string> {
-    // The api instance interceptors already attach org context,
-    // but we need the raw ID for these endpoints.
-    // Import from OrganizationContext is not possible in a service file,
-    // so we fetch it from the /api/organizations/me endpoint.
     const res = await api.get('/api/organizations/me');
     return res.data.data.organization.id;
   },

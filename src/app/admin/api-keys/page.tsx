@@ -30,6 +30,12 @@ import { isPlanUpgradeRequired } from '@/lib/api';
 import { timeAgo } from '@/lib/utils';
 import { Plus, Trash2, Key, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
+import { ApiKeyScope } from '@/services/apiKeyService';
+
+function formatScopeLabel(scope: ApiKeyScope): string {
+  const [resource, action] = scope.split(':');
+  return `${resource.charAt(0).toUpperCase() + resource.slice(1)} \u00B7 ${action.charAt(0).toUpperCase() + action.slice(1)}`;
+}
 
 export default function ApiKeysPage() {
   const { toast } = useToast();
@@ -149,10 +155,10 @@ export default function ApiKeysPage() {
                         </code>
                       </TableCell>
                       <TableCell>
-                        <div className="flex gap-1">
+                        <div className="flex gap-1 flex-wrap">
                           {key.scopes.map((s) => (
                             <Badge key={s} variant="outline" className="text-xs">
-                              {s}
+                              {formatScopeLabel(s)}
                             </Badge>
                           ))}
                         </div>

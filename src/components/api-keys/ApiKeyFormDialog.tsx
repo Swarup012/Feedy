@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -21,7 +21,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { apiKeyService, ApiKeyCreated } from '@/services/apiKeyService';
+import { apiKeyService, ApiKeyCreated, ApiKeyScope } from '@/services/apiKeyService';
 import { Copy, Check, AlertTriangle } from 'lucide-react';
 
 interface ApiKeyFormDialogProps {
@@ -30,21 +30,60 @@ interface ApiKeyFormDialogProps {
   onCreated: (key: ApiKeyCreated) => void;
 }
 
+type ResourcePermission = {
+  resource: string;
+  label: string;
+  actions: { action: string; scope: ApiKeyScope }[];
+};
+
+const RESOURCES: ResourcePermission[] = [
+  {
+    resource: 'boards',
+    label: 'Boards',
+    actions: [{ action: 'read', scope: 'boards:read' }],
+  },
+  {
+    resource: 'posts',
+    label: 'Posts',
+    actions: [
+      { action: 'read', scope: 'posts:read' },
+      { action: 'write', scope: 'posts:write' },
+    ],
+  },
+  {
+    resource: 'comments',
+    label: 'Comments',
+    actions: [{ action: 'write', scope: 'comments:write' }],
+  },
+  {
+    resource: 'users',
+    label: 'Users',
+    actions: [
+      { action: 'read', scope: 'users:read' },
+      { action: 'write', scope: 'users:write' },
+    ],
+  },
+];
+
+function formatScopeLabel(scope: ApiKeyScope): string {
+  const [resource, action] = scope.split(':');
+  return `${resource.charAt(0).toUpperCase() + resource.slice(1)} · ${action.charAt(0).toUpperCase() + action.slice(1)}`;
+}
+
 export function ApiKeyFormDialog({ open, onClose, onCreated }: ApiKeyFormDialogProps) {
   const { toast } = useToast();
 
   const [name, setName] = useState('');
-  const [scopes, setScopes] = useState<'read' | 'write'>('read');
+  const [selectedScopes, setSelectedScopes] = useState<Set<ApiKeyScope>>(new Set());
   const [environment, setEnvironment] = useState<'live' | 'test'>('live');
   const [saving, setSaving] = useState(false);
 
-  // Secret display (shown once after creation)
   const [createdKey, setCreatedKey] = useState<ApiKeyCreated | null>(null);
   const [copied, setCopied] = useState(false);
 
   const reset = () => {
     setName('');
-    setScopes('read');
+    setSelectedScopes(new Set());
     setEnvironment('live');
     setCreatedKey(null);
     setCopied(false);
@@ -55,18 +94,43 @@ export function ApiKeyFormDialog({ open, onClose, onCreated }: ApiKeyFormDialogP
     onClose();
   };
 
+  const toggleScope = (scope: ApiKeyScope) => {
+    setSelectedScopes((prev) => {
+      const next = new Set(prev);
+      if (next.has(scope)) {
+        next.delete(scope);
+        // If unchecking posts:write, also uncheck posts:read (implied)
+        if (scope === 'posts:write') {
+          next.delete('posts:read');
+        }
+      } else {
+        next.add(scope);
+        // If checking posts:write, auto-check posts:read (write implies read)
+        if (scope === 'posts:write') {
+          next.add('posts:read');
+        }
+      }
+      return next;
+    });
+  };
+
+  const scopesArray = useMemo(() => [...selectedScopes], [selectedScopes]);
+
   const handleCreate = async () => {
     if (!name.trim()) {
       toast({ title: 'Name is required', variant: 'destructive' });
       return;
     }
+    if (scopesArray.length === 0) {
+      toast({ title: 'Select at least one scope', variant: 'destructive' });
+      return;
+    }
 
     setSaving(true);
     try {
-      const keyScopes = scopes === 'write' ? ['read', 'write'] : ['read'];
       const result = await apiKeyService.createKey({
         name: name.trim(),
-        scopes: keyScopes,
+        scopes: scopesArray,
         environment,
       });
       setCreatedKey(result);
@@ -129,9 +193,11 @@ export function ApiKeyFormDialog({ open, onClose, onCreated }: ApiKeyFormDialogP
               </Button>
             </div>
 
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap">
               <Badge variant="outline">{createdKey.environment}</Badge>
-              <Badge variant="outline">{createdKey.scopes.join(', ')}</Badge>
+              {createdKey.scopes.map((s) => (
+                <Badge key={s} variant="outline">{formatScopeLabel(s)}</Badge>
+              ))}
             </div>
           </div>
 
@@ -166,16 +232,43 @@ export function ApiKeyFormDialog({ open, onClose, onCreated }: ApiKeyFormDialogP
           </div>
 
           <div className="space-y-2">
-            <Label>Scope</Label>
-            <Select value={scopes} onValueChange={(v) => setScopes(v as any)}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="read">Read only</SelectItem>
-                <SelectItem value="write">Read + Write</SelectItem>
-              </SelectContent>
-            </Select>
+            <Label>Permissions</Label>
+            <div className="rounded-md border p-3 space-y-3">
+              {RESOURCES.map((res) => (
+                <div key={res.resource} className="space-y-1.5">
+                  <p className="text-sm font-medium text-muted-foreground">{res.label}</p>
+                  <div className="flex gap-4 pl-1">
+                    {res.actions.map((act) => {
+                      const isChecked = selectedScopes.has(act.scope);
+                      // If this is posts:read and posts:write is checked, it's auto-implied
+                      const isImplied =
+                        act.scope === 'posts:read' && selectedScopes.has('posts:write');
+
+                      return (
+                        <label
+                          key={act.scope}
+                          className={`flex items-center gap-1.5 text-sm cursor-pointer ${
+                            isImplied ? 'opacity-60 cursor-not-allowed' : ''
+                          }`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isChecked}
+                            disabled={isImplied}
+                            onChange={() => toggleScope(act.scope)}
+                            className="rounded border-input"
+                          />
+                          <span className="capitalize">{act.action}</span>
+                          {isImplied && (
+                            <span className="text-xs text-muted-foreground">(implied)</span>
+                          )}
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
 
           <div className="space-y-2">
@@ -194,7 +287,10 @@ export function ApiKeyFormDialog({ open, onClose, onCreated }: ApiKeyFormDialogP
 
         <DialogFooter>
           <Button variant="outline" onClick={handleClose}>Cancel</Button>
-          <Button onClick={handleCreate} disabled={saving || !name.trim()}>
+          <Button
+            onClick={handleCreate}
+            disabled={saving || !name.trim() || scopesArray.length === 0}
+          >
             {saving ? 'Creating...' : 'Create Key'}
           </Button>
         </DialogFooter>
