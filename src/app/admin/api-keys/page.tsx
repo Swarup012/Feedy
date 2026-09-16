@@ -28,7 +28,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { isPlanUpgradeRequired } from '@/lib/api';
 import { timeAgo } from '@/lib/utils';
-import { Plus, Trash2, Key, ExternalLink } from 'lucide-react';
+import { Trash2, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
 import { ApiKeyScope } from '@/services/apiKeyService';
 
@@ -104,35 +104,22 @@ export default function ApiKeysPage() {
               </Button>
             </Link>
             <Button size="sm" className="gap-1.5" onClick={() => setFormOpen(true)}>
-              <Plus className="h-3.5 w-3.5" />
-              Create Key
+              Create New Key
             </Button>
           </div>
         </div>
 
-        <Card>
-          <CardContent className="p-0">
-            {loading ? (
+        {loading ? (
+          <Card>
+            <CardContent className="p-0">
               <div className="flex items-center justify-center py-12 text-muted-foreground">
                 Loading API keys...
               </div>
-            ) : keys.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 gap-3">
-                <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
-                  <Key className="h-5 w-5 text-muted-foreground" />
-                </div>
-                <div className="text-center">
-                  <p className="text-sm font-medium">No API keys</p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Create a key to access the Faddy REST API.
-                  </p>
-                </div>
-                <Button size="sm" onClick={() => setFormOpen(true)}>
-                  <Plus className="h-3.5 w-3.5 mr-1.5" />
-                  Create your first key
-                </Button>
-              </div>
-            ) : (
+            </CardContent>
+          </Card>
+        ) : keys.length > 0 && (
+          <Card>
+            <CardContent className="p-0">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -191,9 +178,9 @@ export default function ApiKeysPage() {
                   ))}
                 </TableBody>
               </Table>
-            )}
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        )}
 
         <ApiKeyFormDialog
           open={formOpen}

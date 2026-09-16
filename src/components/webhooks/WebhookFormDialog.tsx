@@ -25,7 +25,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { webhookService, Webhook, WebhookEvent, WebhookType } from '@/services/webhookService';
 import { useBoards } from '@/hooks/useFeedbackData';
-import { Copy, Check, ExternalLink, X } from 'lucide-react';
+import { Copy, Check, ExternalLink, X, ChevronDown, ChevronRight } from 'lucide-react';
 
 // ─────────────────────────────────────────────────────────────
 // Constants
@@ -111,6 +111,8 @@ export function WebhookFormDialog({ open, onClose, onSaved, existing }: WebhookF
   const [description, setDescription] = useState('');
   const [isActive, setIsActive] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [eventsExpanded, setEventsExpanded] = useState(true);
+  const [boardsExpanded, setBoardsExpanded] = useState(true);
 
   const { boards, isLoading: boardsLoading } = useBoards();
 
@@ -210,77 +212,80 @@ export function WebhookFormDialog({ open, onClose, onSaved, existing }: WebhookF
 
   return (
     <Dialog open={open} onOpenChange={v => { if (!v) onClose(); }}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="text-xl font-semibold">
+      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto p-0">
+        <DialogHeader className="px-5 pt-5 pb-3">
+          <DialogTitle className="text-lg font-semibold">
             {isEditing ? 'Edit Webhook' : 'Create Webhook'}
           </DialogTitle>
           <DialogDescription>
             {isEditing
               ? 'Update webhook configuration and event subscriptions.'
-              : 'Send real-time HTTP notifications to external services when events happen.'}
+              : ''}
           </DialogDescription>
         </DialogHeader>
 
         {/* ── Secret Display (shown once after creation) ── */}
         {newSecret && (
-          <div className="rounded-lg border border-amber-300 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-700 p-4 space-y-3">
+          <div className="mx-5 mb-5 rounded-lg border border-amber-300 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-700 p-3 space-y-2">
             <div className="flex items-center gap-2">
-              <span className="text-amber-700 dark:text-amber-400 font-semibold text-sm">
+              <span className="text-amber-700 dark:text-amber-400 font-semibold text-xs">
                 🔑 Save your signing secret — it won&apos;t be shown again
               </span>
             </div>
-            <div className="flex items-center gap-2 bg-white dark:bg-zinc-900 rounded-md border px-3 py-2">
+            <div className="flex items-center gap-2 bg-white dark:bg-zinc-900 rounded-md border px-2 py-1.5">
               <code className="text-xs font-mono flex-1 break-all select-all text-foreground">
                 {newSecret}
               </code>
-              <Button size="sm" variant="ghost" onClick={copySecret} className="shrink-0">
-                {secretCopied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
+              <Button size="sm" variant="ghost" onClick={copySecret} className="shrink-0 h-6 w-6 p-0">
+                {secretCopied ? <Check className="h-3.5 w-3.5 text-green-500" /> : <Copy className="h-3.5 w-3.5" />}
               </Button>
             </div>
-            <p className="text-xs text-amber-600 dark:text-amber-400">
-              Use this secret to verify incoming webhook signatures using HMAC-SHA256.
-            </p>
-            <Button onClick={handleDone} className="w-full mt-1">
+            <Button onClick={handleDone} className="w-full" size="sm">
               I&apos;ve saved my secret — Done
             </Button>
           </div>
         )}
 
         {!newSecret && (
-          <div className="space-y-5 py-1">
+          <div className="space-y-3 px-5 pb-5">
             {/* Name */}
-            <div className="space-y-1.5">
-              <Label htmlFor="wh-name">Name <span className="text-red-500">*</span></Label>
+            <div className="space-y-1">
+              <Label htmlFor="wh-name" className="text-sm">Name <span className="text-red-500">*</span></Label>
               <Input
                 id="wh-name"
                 placeholder="e.g. Slack Notifications"
                 value={name}
                 onChange={e => setName(e.target.value)}
+                className="h-9"
               />
             </div>
 
             {/* Type */}
-            <div className="space-y-1.5">
-              <Label>Type <span className="text-red-500">*</span></Label>
-              <div role="radiogroup" aria-label="Webhook type" className="grid grid-cols-3 gap-2">
+            <div className="space-y-1">
+              <Label className="text-sm">Type <span className="text-red-500">*</span></Label>
+              <div role="radiogroup" aria-label="Webhook type" className="flex gap-2">
                 {WEBHOOK_TYPES.map(t => (
                   <button
                     key={t.value}
                     role="radio"
                     aria-checked={type === t.value}
                     onClick={() => setType(t.value)}
-                    className={`rounded-lg border p-4 text-left transition-all ${
+                    title={t.label}
+                    className={`relative flex items-center justify-center h-11 w-11 rounded-lg border-2 transition-all ${
                       type === t.value
-                        ? 'border-primary bg-primary/5 ring-1 ring-primary'
-                        : 'border-border hover:border-primary/50'
+                        ? 'border-primary bg-primary/5 shadow-sm'
+                        : 'border-border hover:border-primary/30 hover:bg-muted/30'
                     }`}
                   >
-                    <div className="flex items-center gap-3">
-                      <div className={`flex-shrink-0 ${type === t.value ? 'text-primary' : 'text-muted-foreground'}`}>
-                        {t.icon}
+                    {type === t.value && (
+                      <div className="absolute -top-1 -right-1">
+                        <div className="w-3.5 h-3.5 rounded-full bg-primary flex items-center justify-center">
+                          <Check className="h-2.5 w-2.5 text-white" />
+                        </div>
                       </div>
-                      <div className="font-medium text-sm">{t.label}</div>
+                    )}
+                    <div className={type === t.value ? 'text-primary' : 'text-muted-foreground'}>
+                      {t.icon}
                     </div>
                   </button>
                 ))}
@@ -288,8 +293,8 @@ export function WebhookFormDialog({ open, onClose, onSaved, existing }: WebhookF
             </div>
 
             {/* URL */}
-            <div className="space-y-1.5">
-              <Label htmlFor="wh-url">
+            <div className="space-y-1">
+              <Label htmlFor="wh-url" className="text-sm">
                 {type === 'discord' ? 'Discord Webhook URL' : type === 'slack' ? 'Slack Incoming Webhook URL' : 'Endpoint URL'}
                 {' '}<span className="text-red-500">*</span>
               </Label>
@@ -304,150 +309,189 @@ export function WebhookFormDialog({ open, onClose, onSaved, existing }: WebhookF
                 }
                 value={url}
                 onChange={e => setUrl(e.target.value)}
+                className="h-9"
               />
               {type !== 'custom' && (
                 <p className="text-xs text-muted-foreground">
                   {type === 'discord'
-                    ? 'Go to your Discord channel → Edit Channel → Integrations → Webhooks'
-                    : 'Go to your Slack workspace → Apps → Incoming Webhooks'}
+                    ? 'Discord channel → Edit → Integrations → Webhooks'
+                    : 'Slack workspace → Apps → Incoming Webhooks'}
                 </p>
               )}
             </div>
 
             {/* Events */}
-            <div className="space-y-2">
-              <Label>Events <span className="text-red-500">*</span></Label>
-              <p className="text-xs text-muted-foreground">Select which events trigger this webhook.</p>
-              <div className="space-y-3 rounded-lg border border-border p-3">
-                {EVENT_CATEGORIES.map(category => {
-                  const catEvents = ALL_EVENTS.filter(e => e.category === category);
-                  const allSelected = catEvents.every(e => events.includes(e.value));
-                  const someSelected = catEvents.some(e => events.includes(e.value));
+            <div className="space-y-1.5">
+              <button
+                type="button"
+                onClick={() => setEventsExpanded(!eventsExpanded)}
+                className="flex items-center gap-2 group"
+              >
+                {eventsExpanded ? (
+                  <ChevronDown className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+                ) : (
+                  <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+                )}
+                <Label className="cursor-pointer">Events <span className="text-red-500">*</span></Label>
+                {events.length > 0 && !eventsExpanded && (
+                  <span className="text-xs text-muted-foreground ml-1">
+                    ({events.length} selected)
+                  </span>
+                )}
+              </button>
+              {eventsExpanded && (
+                <>
+                  <div className="space-y-3 rounded-lg border border-border p-3">
+                    {EVENT_CATEGORIES.map(category => {
+                      const catEvents = ALL_EVENTS.filter(e => e.category === category);
+                      const allSelected = catEvents.every(e => events.includes(e.value));
+                      const someSelected = catEvents.some(e => events.includes(e.value));
 
-                  return (
-                    <div key={category}>
-                      {/* Category header */}
-                      <button
-                        role="checkbox"
-                        aria-checked={allSelected}
-                        aria-label={`Select all ${category} events`}
-                        onClick={() => toggleCategory(category)}
-                        className="flex items-center gap-2 mb-1.5 group"
-                      >
-                        <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${
-                          allSelected
-                            ? 'bg-primary border-primary'
-                            : someSelected
-                            ? 'bg-primary/30 border-primary'
-                            : 'border-border group-hover:border-primary/50'
-                        }`}>
-                          {allSelected && <Check className="h-2.5 w-2.5 text-white" />}
-                          {someSelected && !allSelected && <div className="w-2 h-2 bg-primary rounded-sm" />}
-                        </div>
-                        <span className="text-sm font-medium capitalize text-foreground">{category}</span>
-                      </button>
-
-                      {/* Events in this category */}
-                      <div className="ml-6 grid grid-cols-2 gap-1.5">
-                        {catEvents.map(event => (
+                      return (
+                        <div key={category}>
+                          {/* Category header */}
                           <button
-                            key={event.value}
                             role="checkbox"
-                            aria-checked={events.includes(event.value)}
-                            onClick={() => toggleEvent(event.value)}
-                            className={`flex items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors text-left ${
-                              events.includes(event.value)
-                                ? 'bg-primary/10 text-primary'
-                                : 'text-muted-foreground hover:text-foreground hover:bg-muted'
-                            }`}
+                            aria-checked={allSelected}
+                            aria-label={`Select all ${category} events`}
+                            onClick={() => toggleCategory(category)}
+                            className="flex items-center gap-2 mb-1.5 group"
                           >
-                            <div className={`w-3.5 h-3.5 rounded border flex-shrink-0 flex items-center justify-center ${
-                              events.includes(event.value) ? 'bg-primary border-primary' : 'border-border'
+                            <div className={`w-3.5 h-3.5 rounded border flex items-center justify-center transition-colors ${
+                              allSelected
+                                ? 'bg-primary border-primary'
+                                : someSelected
+                                ? 'bg-primary/30 border-primary'
+                                : 'border-border group-hover:border-primary/50'
                             }`}>
-                              {events.includes(event.value) && <Check className="h-2 w-2 text-white" />}
+                              {allSelected && <Check className="h-2 w-2 text-white" />}
+                              {someSelected && !allSelected && <div className="w-1.5 h-1.5 bg-primary rounded-sm" />}
                             </div>
-                            {event.label}
+                            <span className="text-xs font-medium capitalize text-foreground">{category}</span>
                           </button>
-                        ))}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-              {events.length > 0 && (
-                <p className="text-xs text-muted-foreground">{events.length} event{events.length !== 1 ? 's' : ''} selected</p>
+
+                          {/* Events in this category */}
+                          <div className="ml-5 grid grid-cols-2 gap-1">
+                            {catEvents.map(event => (
+                              <button
+                                key={event.value}
+                                role="checkbox"
+                                aria-checked={events.includes(event.value)}
+                                onClick={() => toggleEvent(event.value)}
+                                className={`flex items-center gap-1.5 rounded-md px-2 py-1 text-xs transition-colors text-left ${
+                                  events.includes(event.value)
+                                    ? 'bg-primary/10 text-primary'
+                                    : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                                }`}
+                              >
+                                <div className={`w-3 h-3 rounded border flex-shrink-0 flex items-center justify-center ${
+                                  events.includes(event.value) ? 'bg-primary border-primary' : 'border-border'
+                                }`}>
+                                  {events.includes(event.value) && <Check className="h-2 w-2 text-white" />}
+                                </div>
+                                {event.label}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  {events.length > 0 && (
+                    <p className="text-xs text-muted-foreground">{events.length} event{events.length !== 1 ? 's' : ''} selected</p>
+                  )}
+                </>
               )}
             </div>
 
             {/* Board scope */}
-            <div className="space-y-2">
-              <Label>Boards <span className="text-muted-foreground text-xs">(optional)</span></Label>
-              <p className="text-xs text-muted-foreground">Leave empty to receive events from all boards.</p>
-              {boardsLoading ? (
-                <p className="text-xs text-muted-foreground">Loading boards…</p>
-              ) : boards.length === 0 ? (
-                <p className="text-xs text-muted-foreground">No boards in this organization yet.</p>
-              ) : (
-                <div className="rounded-lg border border-border p-3 space-y-2">
-                  {/* Selected boards as badges */}
-                  {boardIds.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5 mb-2">
-                      {boardIds.map(id => {
-                        const board = boards.find(b => b.id === id);
-                        return (
-                          <Badge key={id} variant="secondary" className="gap-1 pr-1">
-                            {board?.icon} {board?.name || id}
-                            <button
-                              type="button"
-                              onClick={() => setBoardIds(prev => prev.filter(b => b !== id))}
-                              className="ml-0.5 rounded-full hover:bg-muted p-0.5"
-                            >
-                              <X className="h-3 w-3" />
-                            </button>
-                          </Badge>
-                        );
-                      })}
+            <div className="space-y-1.5">
+              <button
+                type="button"
+                onClick={() => setBoardsExpanded(!boardsExpanded)}
+                className="flex items-center gap-2 group"
+              >
+                {boardsExpanded ? (
+                  <ChevronDown className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+                ) : (
+                  <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+                )}
+                <Label className="cursor-pointer">Boards <span className="text-muted-foreground text-xs">(optional)</span></Label>
+                {boardIds.length > 0 && !boardsExpanded && (
+                  <span className="text-xs text-muted-foreground ml-1">
+                    ({boardIds.length} selected)
+                  </span>
+                )}
+              </button>
+              {boardsExpanded && (
+                <>
+                  {boardsLoading ? (
+                    <p className="text-xs text-muted-foreground">Loading boards…</p>
+                  ) : boards.length === 0 ? (
+                    <p className="text-xs text-muted-foreground">No boards in this organization yet.</p>
+                  ) : (
+                    <div className="rounded-lg border border-border p-3 space-y-2">
+                      {/* Selected boards as badges */}
+                      {boardIds.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mb-2">
+                          {boardIds.map(id => {
+                            const board = boards.find(b => b.id === id);
+                            return (
+                              <Badge key={id} variant="secondary" className="gap-1 pr-1 text-xs h-5">
+                                {board?.icon} {board?.name || id}
+                                <button
+                                  type="button"
+                                  onClick={() => setBoardIds(prev => prev.filter(b => b !== id))}
+                                  className="ml-0.5 rounded-full hover:bg-muted p-0.5"
+                                >
+                                  <X className="h-2.5 w-2.5" />
+                                </button>
+                              </Badge>
+                            );
+                          })}
+                        </div>
+                      )}
+                      {/* Board checkboxes */}
+                      <div className="grid grid-cols-2 gap-1">
+                        {boards.map(board => (
+                          <button
+                            key={board.id}
+                            role="checkbox"
+                            aria-checked={boardIds.includes(board.id)}
+                            onClick={() => {
+                              setBoardIds(prev =>
+                                prev.includes(board.id)
+                                  ? prev.filter(id => id !== board.id)
+                                  : [...prev, board.id]
+                              );
+                            }}
+                            className={`flex items-center gap-1.5 rounded-md px-2 py-1 text-xs transition-colors text-left ${
+                              boardIds.includes(board.id)
+                                ? 'bg-primary/10 text-primary'
+                                : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                            }`}
+                          >
+                            <div className={`w-3 h-3 rounded border flex-shrink-0 flex items-center justify-center ${
+                              boardIds.includes(board.id) ? 'bg-primary border-primary' : 'border-border'
+                            }`}>
+                              {boardIds.includes(board.id) && <Check className="h-2 w-2 text-white" />}
+                            </div>
+                            <span className="truncate">{board.icon} {board.name}</span>
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   )}
-                  {/* Board checkboxes */}
-                  <div className="grid grid-cols-2 gap-1.5">
-                    {boards.map(board => (
-                      <button
-                        key={board.id}
-                        role="checkbox"
-                        aria-checked={boardIds.includes(board.id)}
-                        onClick={() => {
-                          setBoardIds(prev =>
-                            prev.includes(board.id)
-                              ? prev.filter(id => id !== board.id)
-                              : [...prev, board.id]
-                          );
-                        }}
-                        className={`flex items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors text-left ${
-                          boardIds.includes(board.id)
-                            ? 'bg-primary/10 text-primary'
-                            : 'text-muted-foreground hover:text-foreground hover:bg-muted'
-                        }`}
-                      >
-                        <div className={`w-3.5 h-3.5 rounded border flex-shrink-0 flex items-center justify-center ${
-                          boardIds.includes(board.id) ? 'bg-primary border-primary' : 'border-border'
-                        }`}>
-                          {boardIds.includes(board.id) && <Check className="h-2 w-2 text-white" />}
-                        </div>
-                        <span className="truncate">{board.icon} {board.name}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-              {boardIds.length > 0 && (
-                <p className="text-xs text-muted-foreground">{boardIds.length} board{boardIds.length !== 1 ? 's' : ''} selected</p>
+                  {boardIds.length > 0 && (
+                    <p className="text-xs text-muted-foreground">{boardIds.length} board{boardIds.length !== 1 ? 's' : ''} selected</p>
+                  )}
+                </>
               )}
             </div>
 
             {/* Description (optional) */}
-            <div className="space-y-1.5">
-              <Label htmlFor="wh-desc">Description <span className="text-muted-foreground text-xs">(optional)</span></Label>
+            <div className="space-y-1">
+              <Label htmlFor="wh-desc" className="text-sm">Description <span className="text-muted-foreground text-xs">(optional)</span></Label>
               <Textarea
                 id="wh-desc"
                 placeholder="What is this webhook used for?"
@@ -472,11 +516,11 @@ export function WebhookFormDialog({ open, onClose, onSaved, existing }: WebhookF
         )}
 
         {!newSecret && (
-          <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={onClose} disabled={saving}>
+          <DialogFooter className="gap-2 px-5 pb-5 pt-2">
+            <Button variant="outline" onClick={onClose} disabled={saving} size="sm">
               Cancel
             </Button>
-            <Button onClick={handleSubmit} disabled={saving}>
+            <Button onClick={handleSubmit} disabled={saving} size="sm">
               {saving ? 'Saving…' : isEditing ? 'Save Changes' : 'Create Webhook'}
             </Button>
           </DialogFooter>

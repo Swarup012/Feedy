@@ -6,7 +6,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -22,7 +21,7 @@ import {
 } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { apiKeyService, ApiKeyCreated, ApiKeyScope } from '@/services/apiKeyService';
-import { Copy, Check, AlertTriangle } from 'lucide-react';
+import { Copy, Check, AlertTriangle, ChevronDown } from 'lucide-react';
 
 interface ApiKeyFormDialogProps {
   open: boolean;
@@ -67,7 +66,7 @@ const RESOURCES: ResourcePermission[] = [
 
 function formatScopeLabel(scope: ApiKeyScope): string {
   const [resource, action] = scope.split(':');
-  return `${resource.charAt(0).toUpperCase() + resource.slice(1)} · ${action.charAt(0).toUpperCase() + action.slice(1)}`;
+  return `${resource.charAt(0).toUpperCase() + resource.slice(1)} \u00B7 ${action.charAt(0).toUpperCase() + action.slice(1)}`;
 }
 
 export function ApiKeyFormDialog({ open, onClose, onCreated }: ApiKeyFormDialogProps) {
@@ -77,6 +76,7 @@ export function ApiKeyFormDialog({ open, onClose, onCreated }: ApiKeyFormDialogP
   const [selectedScopes, setSelectedScopes] = useState<Set<ApiKeyScope>>(new Set());
   const [environment, setEnvironment] = useState<'live' | 'test'>('live');
   const [saving, setSaving] = useState(false);
+  const [permissionsOpen, setPermissionsOpen] = useState(false);
 
   const [createdKey, setCreatedKey] = useState<ApiKeyCreated | null>(null);
   const [copied, setCopied] = useState(false);
@@ -87,6 +87,7 @@ export function ApiKeyFormDialog({ open, onClose, onCreated }: ApiKeyFormDialogP
     setEnvironment('live');
     setCreatedKey(null);
     setCopied(false);
+    setPermissionsOpen(false);
   };
 
   const handleClose = () => {
@@ -99,13 +100,11 @@ export function ApiKeyFormDialog({ open, onClose, onCreated }: ApiKeyFormDialogP
       const next = new Set(prev);
       if (next.has(scope)) {
         next.delete(scope);
-        // If unchecking posts:write, also uncheck posts:read (implied)
         if (scope === 'posts:write') {
           next.delete('posts:read');
         }
       } else {
         next.add(scope);
-        // If checking posts:write, auto-check posts:read (write implies read)
         if (scope === 'posts:write') {
           next.add('posts:read');
         }
@@ -160,9 +159,6 @@ export function ApiKeyFormDialog({ open, onClose, onCreated }: ApiKeyFormDialogP
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>API Key Created</DialogTitle>
-            <DialogDescription>
-              Copy your key now. You will not be able to see it again.
-            </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-3">
@@ -215,9 +211,6 @@ export function ApiKeyFormDialog({ open, onClose, onCreated }: ApiKeyFormDialogP
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Create API Key</DialogTitle>
-          <DialogDescription>
-            Generate a new key for programmatic access to the Faddy API.
-          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
@@ -232,43 +225,60 @@ export function ApiKeyFormDialog({ open, onClose, onCreated }: ApiKeyFormDialogP
           </div>
 
           <div className="space-y-2">
-            <Label>Permissions</Label>
-            <div className="rounded-md border p-3 space-y-3">
-              {RESOURCES.map((res) => (
-                <div key={res.resource} className="space-y-1.5">
-                  <p className="text-sm font-medium text-muted-foreground">{res.label}</p>
-                  <div className="flex gap-4 pl-1">
-                    {res.actions.map((act) => {
-                      const isChecked = selectedScopes.has(act.scope);
-                      // If this is posts:read and posts:write is checked, it's auto-implied
-                      const isImplied =
-                        act.scope === 'posts:read' && selectedScopes.has('posts:write');
+            <button
+              type="button"
+              onClick={() => setPermissionsOpen((o) => !o)}
+              className="flex items-center gap-1.5 text-sm font-medium text-foreground cursor-pointer select-none w-full"
+            >
+              <ChevronDown
+                className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${
+                  permissionsOpen ? 'rotate-180' : ''
+                }`}
+              />
+              Permissions
+              {scopesArray.length > 0 && (
+                <Badge variant="secondary" className="text-[10px] ml-1">
+                  {scopesArray.length} selected
+                </Badge>
+              )}
+            </button>
+            {permissionsOpen && (
+              <div className="rounded-md border p-3 space-y-3">
+                {RESOURCES.map((res) => (
+                  <div key={res.resource} className="space-y-1.5">
+                    <p className="text-sm font-medium text-muted-foreground">{res.label}</p>
+                    <div className="flex gap-4 pl-1">
+                      {res.actions.map((act) => {
+                        const isChecked = selectedScopes.has(act.scope);
+                        const isImplied =
+                          act.scope === 'posts:read' && selectedScopes.has('posts:write');
 
-                      return (
-                        <label
-                          key={act.scope}
-                          className={`flex items-center gap-1.5 text-sm cursor-pointer ${
-                            isImplied ? 'opacity-60 cursor-not-allowed' : ''
-                          }`}
-                        >
-                          <input
-                            type="checkbox"
-                            checked={isChecked}
-                            disabled={isImplied}
-                            onChange={() => toggleScope(act.scope)}
-                            className="rounded border-input"
-                          />
-                          <span className="capitalize">{act.action}</span>
-                          {isImplied && (
-                            <span className="text-xs text-muted-foreground">(implied)</span>
-                          )}
-                        </label>
-                      );
-                    })}
+                        return (
+                          <label
+                            key={act.scope}
+                            className={`flex items-center gap-1.5 text-sm cursor-pointer ${
+                              isImplied ? 'opacity-60 cursor-not-allowed' : ''
+                            }`}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={isChecked}
+                              disabled={isImplied}
+                              onChange={() => toggleScope(act.scope)}
+                              className="rounded border-input"
+                            />
+                            <span className="capitalize">{act.action}</span>
+                            {isImplied && (
+                              <span className="text-xs text-muted-foreground">(implied)</span>
+                            )}
+                          </label>
+                        );
+                      })}
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="space-y-2">

@@ -217,7 +217,7 @@ console.log(data);`;
 }
 
 // ─────────────────────────────────────────────────────────────
-// Page data
+// Page data — all response shapes verified against real output
 // ─────────────────────────────────────────────────────────────
 
 const endpoints = [
@@ -225,7 +225,7 @@ const endpoints = [
     method: 'GET',
     path: '/api/v1/boards',
     description: 'List all boards in your organization.',
-    scopes: ['read'],
+    scopes: ['boards:read'],
     examples: examples('/api/v1/boards'),
     response: `{
   "success": true,
@@ -233,13 +233,20 @@ const endpoints = [
   "data": {
     "boards": [
       {
-        "id": "abc-123",
+        "id": "5d37ba74-ca2b-4ad5-a4ea-d6b8c300de73",
         "name": "Feature Requests",
         "slug": "feature-requests",
         "description": "Suggest new features",
         "is_private": false,
-        "icon": "💡",
-        "created_at": "2026-01-15T10:00:00Z"
+        "owner_id": "ccffc95b-8c67-43e1-901c-b8892d92d9fe",
+        "created_at": "2026-09-13T00:20:03.211023+00:00",
+        "updated_at": "2026-09-15T10:40:38.088199+00:00",
+        "allow_anonymous": false,
+        "require_approval": false,
+        "icon": "Lightbulb",
+        "post_count": 25,
+        "organization_id": "34c02762-b708-4751-8b31-ef5b5c134925",
+        "visible_to_roles": ["product_manager", "founder", "developer"]
       }
     ]
   }
@@ -249,7 +256,7 @@ const endpoints = [
     method: 'GET',
     path: '/api/v1/posts',
     description: 'List posts with optional filters. Supports pagination.',
-    scopes: ['read'],
+    scopes: ['posts:read'],
     examples: {
       curl: `# List all posts
 curl -H "Authorization: Bearer ${KEY}" \\
@@ -279,11 +286,25 @@ data = await res.json();
 console.log(data);`,
       typescript: `interface Post {
   id: string;
+  board_id: string;
   title: string;
+  description: string;
+  author_id: string;
   status: string;
   upvotes: number;
-  board: { id: string; name: string; slug: string };
+  comment_count: number;
+  is_pinned: boolean;
+  is_archived: boolean;
+  needs_approval: boolean;
   created_at: string;
+  updated_at: string;
+  organization_id: string;
+  images: string[];
+  source: string;
+  severity: string;
+  ai_classification: string;
+  author: { id: string; name: string; email: string } | null;
+  board: { id: string; icon: string; name: string; slug: string };
 }
 
 interface ListResponse {
@@ -318,14 +339,35 @@ console.log(data);`,
   "data": {
     "posts": [
       {
-        "id": "post-456",
+        "id": "ec9f4d97-c054-4052-962f-c0c7346c3b36",
+        "board_id": "5d37ba74-ca2b-4ad5-a4ea-d6b8c300de73",
         "title": "Dark mode support",
         "description": "Would love a dark theme",
+        "author_id": "ccffc95b-8c67-43e1-901c-b8892d92d9fe",
         "status": "open",
         "upvotes": 42,
         "comment_count": 5,
-        "board": { "id": "abc-123", "name": "Feature Requests", "slug": "feature-requests" },
-        "created_at": "2026-08-10T14:30:00Z"
+        "is_pinned": false,
+        "is_archived": false,
+        "needs_approval": false,
+        "created_at": "2026-09-14T06:23:41.460983+00:00",
+        "updated_at": "2026-09-15T10:37:11.424539+00:00",
+        "organization_id": "34c02762-b708-4751-8b31-ef5b5c134925",
+        "images": [],
+        "source": "web",
+        "severity": "low",
+        "ai_classification": "other",
+        "author": {
+          "id": "ccffc95b-8c67-43e1-901c-b8892d92d9fe",
+          "name": "Jane",
+          "email": "jane@example.com"
+        },
+        "board": {
+          "id": "5d37ba74-ca2b-4ad5-a4ea-d6b8c300de73",
+          "icon": "Lightbulb",
+          "name": "Feature Requests",
+          "slug": "feature-requests"
+        }
       }
     ],
     "limit": 10,
@@ -337,22 +379,44 @@ console.log(data);`,
     method: 'GET',
     path: '/api/v1/posts/:id',
     description: 'Get a single post by ID.',
-    scopes: ['read'],
+    scopes: ['posts:read'],
     examples: examples('/api/v1/posts/post-456'),
     response: `{
   "success": true,
   "message": "Post retrieved",
   "data": {
     "post": {
-      "id": "post-456",
+      "id": "ec9f4d97-c054-4052-962f-c0c7346c3b36",
+      "board_id": "5d37ba74-ca2b-4ad5-a4ea-d6b8c300de73",
       "title": "Dark mode support",
       "description": "Would love a dark theme",
+      "author_id": "ccffc95b-8c67-43e1-901c-b8892d92d9fe",
       "status": "open",
       "upvotes": 42,
       "comment_count": 5,
-      "board": { "id": "abc-123", "name": "Feature Requests", "slug": "feature-requests" },
-      "author": { "id": "user-789", "name": "Jane" },
-      "created_at": "2026-08-10T14:30:00Z"
+      "is_pinned": false,
+      "is_archived": false,
+      "needs_approval": false,
+      "created_at": "2026-09-14T06:23:41.460983+00:00",
+      "updated_at": "2026-09-15T10:37:11.424539+00:00",
+      "organization_id": "34c02762-b708-4751-8b31-ef5b5c134925",
+      "images": [],
+      "source": "web",
+      "severity": "low",
+      "ai_classification": "other",
+      "author": {
+        "id": "ccffc95b-8c67-43e1-901c-b8892d92d9fe",
+        "name": "Jane",
+        "email": "jane@example.com",
+        "avatar_url": "https://lh3.googleusercontent.com/..."
+      },
+      "board": {
+        "id": "5d37ba74-ca2b-4ad5-a4ea-d6b8c300de73",
+        "icon": "Lightbulb",
+        "name": "Feature Requests",
+        "slug": "feature-requests",
+        "is_private": false
+      }
     }
   }
 }`,
@@ -361,7 +425,7 @@ console.log(data);`,
     method: 'GET',
     path: '/api/v1/posts/:id/comments',
     description: 'Get all comments for a post.',
-    scopes: ['read'],
+    scopes: ['posts:read'],
     examples: examples('/api/v1/posts/post-456/comments'),
     response: `{
   "success": true,
@@ -369,11 +433,21 @@ console.log(data);`,
   "data": {
     "comments": [
       {
-        "id": "cmt-001",
+        "id": "89a99485-79fa-4170-8f6e-1b88ba162fd1",
+        "post_id": "ec9f4d97-c054-4052-962f-c0c7346c3b36",
+        "author_id": "ccffc95b-8c67-43e1-901c-b8892d92d9fe",
         "content": "Great idea!",
-        "is_admin": false,
-        "created_at": "2026-08-11T09:00:00Z",
-        "author": { "id": "user-789", "name": "Jane" }
+        "is_admin": true,
+        "created_at": "2026-09-15T12:20:40.61535+00:00",
+        "updated_at": "2026-09-15T12:20:40.61535+00:00",
+        "parent_id": null,
+        "like_count": 3,
+        "tracking_code": null,
+        "author": {
+          "id": "ccffc95b-8c67-43e1-901c-b8892d92d9fe",
+          "name": "Jane",
+          "email": "jane@example.com"
+        }
       }
     ]
   }
@@ -383,7 +457,7 @@ console.log(data);`,
     method: 'POST',
     path: '/api/v1/posts',
     description: 'Create a new post. Webhooks fire automatically (post.created).',
-    scopes: ['write'],
+    scopes: ['posts:write'],
     examples: examples('/api/v1/posts', {
       body: `{
   "board_id": "abc-123",
@@ -396,14 +470,30 @@ console.log(data);`,
   "message": "Post created",
   "data": {
     "post": {
-      "id": "post-789",
+      "id": "f726bd3b-644c-425a-a339-6e55d8e7b7a2",
+      "board_id": "5d37ba74-ca2b-4ad5-a4ea-d6b8c300de73",
       "title": "New feature",
       "description": "Details here",
+      "author_id": null,
       "status": "open",
       "upvotes": 0,
+      "comment_count": 0,
+      "is_pinned": false,
+      "is_archived": false,
+      "needs_approval": false,
+      "created_at": "2026-09-15T12:20:18.073355+00:00",
+      "updated_at": "2026-09-15T12:20:18.073355+00:00",
+      "organization_id": "34c02762-b708-4751-8b31-ef5b5c134925",
+      "images": [],
       "source": "api",
-      "board": { "id": "abc-123", "name": "Feature Requests", "slug": "feature-requests" },
-      "created_at": "2026-08-20T12:00:00Z"
+      "severity": null,
+      "ai_classification": null,
+      "author": null,
+      "board": {
+        "id": "5d37ba74-ca2b-4ad5-a4ea-d6b8c300de73",
+        "name": "Feature Requests",
+        "slug": "feature-requests"
+      }
     }
   }
 }`,
@@ -412,7 +502,7 @@ console.log(data);`,
     method: 'PATCH',
     path: '/api/v1/posts/:id/status',
     description: 'Update a post\'s status. Webhooks fire automatically (post.status_changed).',
-    scopes: ['write'],
+    scopes: ['posts:write'],
     examples: examples('/api/v1/posts/post-456/status', {
       body: `{
   "status": "in_progress",
@@ -425,9 +515,24 @@ console.log(data);`,
   "message": "Post status updated",
   "data": {
     "post": {
-      "id": "post-456",
-      "title": "Dark mode support",
-      "status": "in_progress"
+      "id": "f726bd3b-644c-425a-a339-6e55d8e7b7a2",
+      "board_id": "5d37ba74-ca2b-4ad5-a4ea-d6b8c300de73",
+      "title": "New feature",
+      "description": "Details here",
+      "author_id": null,
+      "status": "in_progress",
+      "upvotes": 0,
+      "comment_count": 0,
+      "is_pinned": false,
+      "is_archived": false,
+      "needs_approval": false,
+      "created_at": "2026-09-15T12:20:18.073355+00:00",
+      "updated_at": "2026-09-15T12:20:39.367974+00:00",
+      "organization_id": "34c02762-b708-4751-8b31-ef5b5c134925",
+      "images": [],
+      "source": "api",
+      "severity": "low",
+      "ai_classification": "other"
     }
   }
 }`,
@@ -436,7 +541,7 @@ console.log(data);`,
     method: 'POST',
     path: '/api/v1/posts/:id/comments',
     description: 'Add a comment to a post. Webhooks fire automatically (comment.created).',
-    scopes: ['write'],
+    scopes: ['comments:write'],
     examples: examples('/api/v1/posts/post-456/comments', {
       body: `{
   "content": "Thanks for the feedback!"
@@ -447,10 +552,120 @@ console.log(data);`,
   "message": "Comment added",
   "data": {
     "comment": {
-      "id": "cmt-002",
+      "id": "89a99485-79fa-4170-8f6e-1b88ba162fd1",
+      "post_id": "ec9f4d97-c054-4052-962f-c0c7346c3b36",
+      "author_id": null,
       "content": "Thanks for the feedback!",
       "is_admin": false,
-      "created_at": "2026-08-20T12:05:00Z"
+      "created_at": "2026-09-15T12:20:40.61535+00:00",
+      "updated_at": "2026-09-15T12:20:40.61535+00:00",
+      "parent_id": null,
+      "like_count": 0,
+      "tracking_code": null,
+      "author": null
+    }
+  }
+}`,
+  },
+  {
+    method: 'GET',
+    path: '/api/v1/users',
+    description: 'List end users in your organization. Supports pagination and optional exact-match filters.',
+    scopes: ['users:read'],
+    examples: {
+      curl: `# List all users
+curl -H "Authorization: Bearer ${KEY}" \\
+  ${BASE}/api/v1/users
+
+# Filter by email
+curl -H "Authorization: Bearer ${KEY}" \\
+  "${BASE}/api/v1/users?email=jane@example.com"
+
+# Filter by external_user_id
+curl -H "Authorization: Bearer ${KEY}" \\
+  "${BASE}/api/v1/users?external_user_id=usr_abc"
+
+# Paginated
+curl -H "Authorization: Bearer ${KEY}" \\
+  "${BASE}/api/v1/users?limit=10&offset=0"`,
+      node: `// List all users
+let res = await fetch('${BASE}/api/v1/users', {
+  headers: { 'Authorization': 'Bearer ${KEY}' }
+});
+let data = await res.json();
+console.log(data);
+
+// Filter by email
+const params = new URLSearchParams({ email: 'jane@example.com' });
+res = await fetch(\`${BASE}/api/v1/users?\${params}\`, {
+  headers: { 'Authorization': 'Bearer ${KEY}' }
+});
+data = await res.json();
+console.log(data);`,
+      typescript: `interface User {
+  id: string;
+  external_user_id: string;
+  email: string;
+  name: string;
+  identity_type: string;
+  custom_fields: Record<string, unknown>;
+  created_at: string;
+  last_seen_at: string;
+}
+
+interface ListResponse {
+  success: boolean;
+  message: string;
+  data: { users: User[]; limit: number; offset: number };
+}
+
+// List all users
+const res = await fetch('${BASE}/api/v1/users', {
+  headers: { 'Authorization': 'Bearer ${KEY}' }
+});
+const data: ListResponse = await res.json();
+console.log(data);`,
+    },
+    response: `{
+  "success": true,
+  "message": "Users retrieved",
+  "data": {
+    "users": [
+      {
+        "id": "9e8f844b-76f3-4189-bd6c-5848e0bea205",
+        "external_user_id": "usr_abc",
+        "email": "jane@example.com",
+        "name": "Jane",
+        "identity_type": "verified",
+        "custom_fields": {},
+        "created_at": "2026-09-15T12:20:42.458248+00:00",
+        "last_seen_at": "2026-09-15T12:20:41.993+00:00"
+      }
+    ],
+    "limit": 25,
+    "offset": 0
+  }
+}`,
+  },
+  {
+    method: 'GET',
+    path: '/api/v1/users/:id',
+    description: 'Get a single end user by ID.',
+    scopes: ['users:read'],
+    examples: examples('/api/v1/users/9e8f844b-76f3-4189-bd6c-5848e0bea205'),
+    response: `{
+  "success": true,
+  "message": "User retrieved",
+  "data": {
+    "user": {
+      "id": "9e8f844b-76f3-4189-bd6c-5848e0bea205",
+      "external_user_id": "usr_abc",
+      "email": "jane@example.com",
+      "name": "Jane",
+      "identity_type": "verified",
+      "custom_fields": {},
+      "created_at": "2026-09-15T12:20:42.458248+00:00",
+      "last_seen_at": "2026-09-15T12:20:41.993+00:00"
     }
   }
 }`,
@@ -459,7 +674,7 @@ console.log(data);`,
     method: 'POST',
     path: '/api/v1/users/identify',
     description: 'Upsert an end user identity into your organization.',
-    scopes: ['write'],
+    scopes: ['users:write'],
     examples: examples('/api/v1/users/identify', {
       body: `{
   "external_user_id": "usr_abc",
@@ -472,12 +687,14 @@ console.log(data);`,
   "message": "User identified",
   "data": {
     "user": {
-      "id": "uuid-123",
-      "organization_id": "org-456",
+      "id": "9e8f844b-76f3-4189-bd6c-5848e0bea205",
       "external_user_id": "usr_abc",
       "email": "jane@example.com",
       "name": "Jane",
-      "identity_type": "verified"
+      "identity_type": "verified",
+      "custom_fields": {},
+      "created_at": "2026-09-15T12:20:42.458248+00:00",
+      "last_seen_at": "2026-09-15T12:20:41.993+00:00"
     }
   }
 }`,
@@ -552,12 +769,28 @@ export default function ApiDocsPage() {
                 <p className="font-medium text-xs uppercase tracking-wider text-muted-foreground">Scopes</p>
                 <ul className="text-xs text-muted-foreground space-y-1.5">
                   <li className="flex items-center gap-2">
-                    <code className="font-mono bg-muted px-1.5 py-0.5 rounded">read</code>
-                    <span>List and retrieve data</span>
+                    <code className="font-mono bg-muted px-1.5 py-0.5 rounded">boards:read</code>
+                    <span>List boards</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <code className="font-mono bg-muted px-1.5 py-0.5 rounded">write</code>
-                    <span>Create and update (implies read)</span>
+                    <code className="font-mono bg-muted px-1.5 py-0.5 rounded">posts:read</code>
+                    <span>List and retrieve posts + comments</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <code className="font-mono bg-muted px-1.5 py-0.5 rounded">posts:write</code>
+                    <span>Create posts and update status</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <code className="font-mono bg-muted px-1.5 py-0.5 rounded">comments:write</code>
+                    <span>Add comments</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <code className="font-mono bg-muted px-1.5 py-0.5 rounded">users:read</code>
+                    <span>List and retrieve end users</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <code className="font-mono bg-muted px-1.5 py-0.5 rounded">users:write</code>
+                    <span>Upsert end user identities</span>
                   </li>
                 </ul>
               </div>
