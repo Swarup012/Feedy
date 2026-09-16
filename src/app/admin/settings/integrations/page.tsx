@@ -6,7 +6,7 @@ import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { PaidFeatureGate } from '@/components/PaidFeatureGate';
 import { useOrganization } from '@/context/OrganizationContext';
 import { useToast } from '@/hooks/use-toast';
-import { planAllowsFeature, resolvePlan } from '@/config/plans';
+import { resolvePlan } from '@/config/plans';
 import { isPlanUpgradeRequired } from '@/lib/api';
 import {
   intercomService,
@@ -74,7 +74,7 @@ function IntegrationsPageInner() {
   const searchParams = useSearchParams();
   const orgId = organization?.id;
   const currentPlan = resolvePlan(organization);
-  const canUseAutoMode = planAllowsFeature(currentPlan, 'autopilot_auto');
+  const isStarter = currentPlan === 'starter';
 
   const [intercomStatus, setIntercomStatus] = useState<IntercomStatus | null>(null);
   const [discordStatus, setDiscordStatus] = useState<DiscordStatus | null>(null);
@@ -655,6 +655,7 @@ function IntegrationsPageInner() {
   const needsGithubReconnect = githubStatus?.status === 'error';
 
   const activeCount = [isDiscordActive, isIntercomActive, isSlackActive, isGithubActive].filter(Boolean).length;
+  const starterLimitReached = isStarter && activeCount >= 1;
 
   return (
     <PaidFeatureGate featureName="Integrations">
@@ -707,7 +708,6 @@ function IntegrationsPageInner() {
                                   <div className="flex items-center gap-1.5">
                                     <Switch
                                       checked={mapping.autopilot_mode === 'automatic'}
-                                      disabled={!canUseAutoMode}
                                       onCheckedChange={(checked) => handleAutopilotModeToggle('discord', checked, mapping.id)}
                                     />
                                     <Button
@@ -794,7 +794,7 @@ function IntegrationsPageInner() {
                               <p className="text-xs text-muted-foreground leading-tight">Bypass review & publish instantly.</p>
                               {!intercomBoardId && <p className="text-xs text-amber-600 dark:text-amber-500 mt-0.5 font-medium">Select a board below first.</p>}
                             </div>
-                             <Switch checked={intercomAutopilot?.autopilot_mode === 'automatic'} disabled={savingIntercomAutopilot || !intercomBoardId || !canUseAutoMode} onCheckedChange={(checked) => handleAutopilotModeToggle('intercom', checked)} />
+                             <Switch checked={intercomAutopilot?.autopilot_mode === 'automatic'} disabled={savingIntercomAutopilot || !intercomBoardId} onCheckedChange={(checked) => handleAutopilotModeToggle('intercom', checked)} />
                           </div>
 
                           <div className="space-y-2 pt-1 border-t">
@@ -863,7 +863,6 @@ function IntegrationsPageInner() {
                                   <div className="flex items-center gap-1.5">
                                     <Switch
                                       checked={mapping.autopilot_mode === 'automatic'}
-                                      disabled={!canUseAutoMode}
                                       onCheckedChange={(checked) => handleAutopilotModeToggle('slack', checked, mapping.id)}
                                     />
                                     <Button
@@ -953,7 +952,7 @@ function IntegrationsPageInner() {
                               <p className="text-xs text-muted-foreground leading-tight">Bypass review & publish instantly.</p>
                               {!githubBoardId && <p className="text-xs text-amber-600 dark:text-amber-500 mt-0.5 font-medium">Select a board below first.</p>}
                             </div>
-                             <Switch checked={githubAutopilot?.autopilot_mode === 'automatic'} disabled={savingGithubAutopilot || !githubBoardId || !canUseAutoMode} onCheckedChange={(checked) => handleAutopilotModeToggle('github', checked)} />
+                             <Switch checked={githubAutopilot?.autopilot_mode === 'automatic'} disabled={savingGithubAutopilot || !githubBoardId} onCheckedChange={(checked) => handleAutopilotModeToggle('github', checked)} />
                           </div>
 
                           {githubAutopilot?.autopilot_mode === 'automatic' && (
@@ -1011,6 +1010,11 @@ function IntegrationsPageInner() {
               <h2 className="text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">Add Integrations</h2>
               <p className="text-sm text-muted-foreground mt-1">Supercharge your workflow by connecting with the tools you already use.</p>
             </div>
+            {starterLimitReached && (
+              <p className="text-sm text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 rounded-lg px-3 py-2">
+                Starter plan allows 1 connected integration. Disconnect your current integration to connect a different one, or upgrade to Pro for unlimited.
+              </p>
+            )}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-lg">
               {!isDiscordActive && (
                 <IntegrationCardAdd
@@ -1019,6 +1023,7 @@ function IntegrationsPageInner() {
                   brandColor={INTEGRATION_BRAND_COLORS.discord}
                   description="Monitor Discord channels and convert conversations into actionable feedback."
                   onConnect={handleConnectDiscord}
+                  disabled={starterLimitReached}
                 />
               )}
               {!isIntercomActive && (
@@ -1028,6 +1033,7 @@ function IntegrationsPageInner() {
                   brandColor={INTEGRATION_BRAND_COLORS.intercom}
                   description="Receive closed conversation transcripts and generate feedback suggestions."
                   onConnect={handleConnectIntercom}
+                  disabled={starterLimitReached}
                 />
               )}
               {!isSlackActive && (
@@ -1037,6 +1043,7 @@ function IntegrationsPageInner() {
                   brandColor={INTEGRATION_BRAND_COLORS.slack}
                   description="Monitor a Slack channel and convert messages into actionable feedback."
                   onConnect={handleConnectSlack}
+                  disabled={starterLimitReached}
                 />
               )}
               {!isGithubActive && (
@@ -1046,6 +1053,7 @@ function IntegrationsPageInner() {
                   brandColor={INTEGRATION_BRAND_COLORS.github}
                   description="Track issues and pull requests as feedback via GitHub App webhooks."
                   onConnect={handleConnectGithub}
+                  disabled={starterLimitReached}
                 />
               )}
             </div>

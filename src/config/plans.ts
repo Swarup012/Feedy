@@ -107,7 +107,7 @@ export const PLANS: Record<PlanTier, PlanConfig> = {
       autopilot_manual: true,
       ai_chat: true,
       ai_chat_messages: 50,
-      autopilot_auto: false,
+      autopilot_auto: true,
       severity_rules: true,
       severity_ai: false,
       notifications: false,
@@ -266,23 +266,25 @@ export function getPlanFeatureDisplay(tier: PlanTier): {
     features.push(
       { text: 'Everything in Free, plus:', bold: true, included: true },
       { text: 'Unlimited boards & posts', included: true, highlight: true },
-      { text: 'Up to 5 admins', included: true },
-      { text: 'Grow past 125 users (simple pay-as-you-grow pricing)', included: true, highlight: true },
-      { text: 'Connect Slack, Intercom and more', included: true },
-      { text: 'AI chat to explore your feedback', included: true },
-      { text: 'Auto-collect feedback from support conversations', included: true },
-      { text: 'Custom branding & deeper analytics', included: true },
+      { text: 'Up to 125+ tracked users', included: true },
+      { text: '5 admins', included: true },
+      { text: 'Autopilot', included: true, highlight: true },
+      { text: 'AI chat - 50 credits/month', included: true },
+      { text: '1 integration', included: true },
+      { text: 'AI Insights dashboard', included: true, highlight: true },
     );
   } else {
     features.push(
       { text: 'Everything in Starter, plus:', bold: true, included: true },
-      { text: 'Fully automatic feedback triage — no manual review needed', included: true, highlight: true },
-      { text: 'AI flags what\'s urgent, so nothing slips through', included: true, highlight: true },
-      { text: 'Instant alerts when something needs attention', included: true, highlight: true },
-      { text: 'Total 10 admins', included: true },
-      { text: 'Your own custom domain', included: true, highlight: true },
-      { text: 'Advanced analytics & reporting', included: true },
-      { text: 'Developer access (API & webhooks)', included: true, highlight: true },
+      { text: 'Automatic feedback triage', included: true, highlight: true },
+      { text: 'Urgent-issue flagging', included: true, highlight: true },
+      { text: 'Instant alerts', included: true, highlight: true },
+      { text: 'Up to 125+ tracked users', included: true },
+      { text: '10 admins', included: true },
+      { text: 'All integrations', included: true },
+      { text: 'AI chat - unlimited', included: true },
+      { text: 'Custom domain', included: true, highlight: true },
+      { text: 'API & webhooks', included: true, highlight: true },
     );
   }
 

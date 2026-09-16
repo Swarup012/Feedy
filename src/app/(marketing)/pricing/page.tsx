@@ -169,7 +169,7 @@ export default function PricingPage() {
             >
               Yearly
               <Badge className="bg-green-500 text-white text-xs px-2 py-0.5">
-                Save ${starterPlan.savings}–${proPlan.savings}
+                Save {Math.round((starterPlan.savings / (starterPlan.monthlyPrice * 12)) * 100)}%–{Math.round((proPlan.savings / (proPlan.monthlyPrice * 12)) * 100)}%
               </Badge>
             </button>
           </div>
@@ -261,6 +261,9 @@ export default function PricingPage() {
                     <div className="text-sm text-blue-600 mt-1">
                       Billed yearly (${starterPlan.yearlyTotal}/year)
                     </div>
+                    <Badge className="bg-green-500 text-white text-xs px-2 py-0.5 mt-2">
+                      Save ${starterPlan.savings}/yr
+                    </Badge>
                   </div>
                 )}
               </div>
@@ -358,6 +361,9 @@ export default function PricingPage() {
                     <div className="text-sm text-blue-600 mt-1">
                       Billed yearly (${proPlan.yearlyTotal}/year)
                     </div>
+                    <Badge className="bg-green-500 text-white text-xs px-2 py-0.5 mt-2">
+                      Save ${proPlan.savings}/yr
+                    </Badge>
                   </div>
                 )}
               </div>
@@ -526,7 +532,7 @@ export default function PricingPage() {
                         Team Members
                       </td>
                       <td className="py-4 px-6 text-center text-sm text-gray-700 dark:text-muted-foreground">
-                        3 total members
+                        3 admins
                       </td>
                       <td className="py-4 px-6 text-center text-sm font-semibold text-blue-600 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-900/10">
                         Unlimited
@@ -655,7 +661,7 @@ export default function PricingPage() {
                     </tr>
                     <tr>
                       <td className="py-4 px-6 text-sm text-gray-900 dark:text-white">
-                        Integrations (Slack, Discord, Intercom)
+                        Integrations
                       </td>
                       <td className="py-4 px-6 text-center">
                         <X className="w-5 h-5 text-gray-300 mx-auto" />
@@ -689,10 +695,10 @@ export default function PricingPage() {
                         <X className="w-5 h-5 text-gray-300 mx-auto" />
                       </td>
                       <td className="py-4 px-6 text-center bg-blue-50/50 dark:bg-blue-900/10">
-                        <span className="text-sm font-semibold text-blue-600 dark:text-blue-400">Manual only</span>
+                        <Check className="w-5 h-5 text-green-500 mx-auto" />
                       </td>
                       <td className="py-4 px-6 text-center bg-blue-50/50 dark:bg-blue-900/10">
-                        <span className="text-sm font-semibold text-blue-600 dark:text-blue-400">Full access</span>
+                        <Check className="w-5 h-5 text-green-500 mx-auto" />
                       </td>
                     </tr>
                     <tr>
@@ -885,179 +891,100 @@ export default function PricingPage() {
 
             <Collapsible.Content className="overflow-hidden data-[state=open]:animate-accordion-down data-[state=closed]:animate-accordion-up">
 
-          {/* Three-zone usage bar */}
           <div className="rounded-2xl border border-gray-200 dark:border-border bg-white dark:bg-background shadow-sm overflow-hidden mb-6">
-            <div className="px-8 pt-7 pb-6">
-              <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 dark:text-muted-foreground mb-5">
-                User Zones at a Glance
-              </p>
-              {/* Bar */}
-              <div className="flex h-10 rounded-xl overflow-hidden gap-0.5 mb-3">
-                <div className="flex-[5] bg-green-500 flex items-center justify-center">
-                  <span className="text-white text-xs font-semibold">0 – 125</span>
+            {/* Simple 3-column breakdown */}
+            <div className="grid md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-gray-200 dark:divide-border">
+              {/* Zone 1 */}
+              <div className="p-6 text-center">
+                <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">0–125</div>
+                <div className="text-sm font-medium text-gray-500 dark:text-muted-foreground mb-3">users</div>
+                <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gray-100 dark:bg-gray-800 text-sm font-semibold text-gray-900 dark:text-white">
+                  $0 /mo
                 </div>
-                <div className="flex-[1] bg-blue-400 flex items-center justify-center">
-                  <span className="text-white text-xs font-semibold hidden sm:block">126 – 150</span>
-                </div>
-                <div className="flex-[1] bg-blue-600 flex items-center justify-center rounded-r-xl">
-                  <span className="text-white text-xs font-semibold">151+</span>
-                </div>
+                <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">Included in your plan</p>
               </div>
-              {/* Zone labels */}
-              <div className="flex gap-0.5">
-                <div className="flex-[5] text-center">
-                  <span className="inline-flex items-center gap-1.5 text-xs text-gray-600 dark:text-muted-foreground">
-                    <span className="w-2 h-2 rounded-full bg-green-500 inline-block" />
-                    Included &mdash; <strong className="text-gray-800 dark:text-foreground">$0</strong>
-                  </span>
+
+              {/* Zone 2 */}
+              <div className="p-6 text-center">
+                <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">126–150</div>
+                <div className="text-sm font-medium text-gray-500 dark:text-muted-foreground mb-3">users</div>
+                <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gray-100 dark:bg-gray-800 text-sm font-semibold text-gray-900 dark:text-white">
+                  $0 /mo
                 </div>
-                <div className="flex-[1] text-center">
-                  <span className="inline-flex items-center gap-1 text-xs text-gray-600 dark:text-muted-foreground">
-                    <span className="w-2 h-2 rounded-full bg-blue-400 inline-block" />
-                    Grace &mdash; <strong className="text-gray-800 dark:text-foreground">$0</strong>
-                  </span>
+                <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">Free grace buffer</p>
+              </div>
+
+              {/* Zone 3 */}
+              <div className="p-6 text-center">
+                <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">151+</div>
+                <div className="text-sm font-medium text-gray-500 dark:text-muted-foreground mb-3">users</div>
+                <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800/50 text-sm font-semibold text-blue-700 dark:text-blue-300">
+                  $12 / 50 users
                 </div>
-                <div className="flex-[1] text-center">
-                  <span className="inline-flex items-center gap-1 text-xs text-gray-600 dark:text-muted-foreground">
-                    <span className="w-2 h-2 rounded-full bg-blue-600 inline-block" />
-                    Overage &mdash; <strong className="text-gray-800 dark:text-foreground">$12/50 users</strong>
-                  </span>
+                <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">Pay only for what you use</p>
+              </div>
+            </div>
+          </div>
+
+          {/* How it works — minimal steps */}
+          <div className="rounded-2xl border border-gray-200 dark:border-border bg-white dark:bg-background shadow-sm overflow-hidden mb-6">
+            <div className="px-7 py-5 border-b border-gray-100 dark:border-border">
+              <h3 className="font-semibold text-gray-900 dark:text-white text-sm">How It Works</h3>
+            </div>
+            <div className="px-7 py-6">
+              <div className="grid md:grid-cols-3 gap-6">
+                <div className="flex gap-3">
+                  <div className="w-7 h-7 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-gray-400 font-bold text-xs flex-shrink-0 mt-0.5">1</div>
+                  <div>
+                    <h4 className="font-medium text-gray-900 dark:text-white text-sm mb-1">Included users</h4>
+                    <p className="text-sm text-gray-500 dark:text-muted-foreground leading-relaxed">125 tracked users come with your plan at no extra cost.</p>
+                  </div>
+                </div>
+                <div className="flex gap-3">
+                  <div className="w-7 h-7 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-gray-400 font-bold text-xs flex-shrink-0 mt-0.5">2</div>
+                  <div>
+                    <h4 className="font-medium text-gray-900 dark:text-white text-sm mb-1">Grace buffer</h4>
+                    <p className="text-sm text-gray-500 dark:text-muted-foreground leading-relaxed">25 extra users free — no charges until you hit 150.</p>
+                  </div>
+                </div>
+                <div className="flex gap-3">
+                  <div className="w-7 h-7 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-gray-400 font-bold text-xs flex-shrink-0 mt-0.5">3</div>
+                  <div>
+                    <h4 className="font-medium text-gray-900 dark:text-white text-sm mb-1">Simple overage</h4>
+                    <p className="text-sm text-gray-500 dark:text-muted-foreground leading-relaxed">$12 per 50 additional users, billed monthly. Cancel anytime.</p>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Steps + Rate table in a two-column grid */}
-          <div className="grid md:grid-cols-[1fr_auto] gap-6 mb-6">
-            {/* Vertical timeline */}
-            <div className="rounded-2xl border border-gray-200 dark:border-border bg-white dark:bg-background shadow-sm overflow-hidden">
-              <div className="flex items-center gap-3 px-7 py-5 border-b border-gray-100 dark:border-border bg-gray-50 dark:bg-card/60">
-                <div className="w-7 h-7 rounded-lg bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center">
-                  <TrendingUp className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
-                </div>
-                <span className="font-semibold text-gray-900 dark:text-white text-sm">How It Works</span>
-              </div>
-              <div className="px-7 py-6 space-y-0">
-                {/* Step 1 */}
-                <div className="flex gap-5">
-                  <div className="flex flex-col items-center">
-                    <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/30 border-2 border-green-400 dark:border-green-600 flex items-center justify-center text-green-700 dark:text-green-400 font-bold text-xs flex-shrink-0">1</div>
-                    <div className="w-px flex-1 bg-gradient-to-b from-green-300 to-blue-300 dark:from-green-700 dark:to-blue-700 my-2 min-h-[2rem]" />
-                  </div>
-                  <div className="pb-6 flex-1">
-                    <h4 className="font-semibold text-gray-900 dark:text-white text-sm mb-1">Start with 125 Included Users</h4>
-                    <p className="text-sm text-gray-500 dark:text-muted-foreground leading-relaxed">Your Starter plan includes 125 tracked users at no extra cost — unique visitors who engage with your feedback boards.</p>
-                  </div>
-                </div>
-                {/* Step 2 */}
-                <div className="flex gap-5">
-                  <div className="flex flex-col items-center">
-                    <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 border-2 border-blue-400 dark:border-blue-600 flex items-center justify-center text-blue-700 dark:text-blue-400 font-bold text-xs flex-shrink-0">2</div>
-                    <div className="w-px flex-1 bg-gradient-to-b from-blue-300 to-blue-400 dark:from-blue-700 dark:to-blue-600 my-2 min-h-[2rem]" />
-                  </div>
-                  <div className="pb-6 flex-1">
-                    <h4 className="font-semibold text-gray-900 dark:text-white text-sm mb-1">Get a Free 20% Grace Buffer</h4>
-                    <p className="text-sm text-gray-500 dark:text-muted-foreground leading-relaxed">We won't charge you until you reach <span className="font-semibold text-gray-700 dark:text-foreground">150 users</span>. 25 extra users, completely free — giving you room to grow without surprise bills.</p>
-                  </div>
-                </div>
-                {/* Step 3 */}
-                <div className="flex gap-5">
-                  <div className="flex flex-col items-center">
-                    <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 border-2 border-blue-500 dark:border-blue-500 flex items-center justify-center text-blue-700 dark:text-blue-400 font-bold text-xs flex-shrink-0">3</div>
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="font-semibold text-gray-900 dark:text-white text-sm mb-1">Pay Only for What You Use</h4>
-                    <p className="text-sm text-gray-500 dark:text-muted-foreground leading-relaxed">After 150 users, pay <span className="font-semibold text-gray-700 dark:text-foreground">$12 per 50 additional users</span> each month. No commitments, cancel anytime.</p>
-                  </div>
-                </div>
-              </div>
+          {/* Example calculation — clean invoice */}
+          <div className="rounded-2xl border border-gray-200 dark:border-border bg-white dark:bg-background shadow-sm overflow-hidden">
+            <div className="px-7 py-5 border-b border-gray-100 dark:border-border">
+              <h3 className="font-semibold text-gray-900 dark:text-white text-sm">Example: 180 Tracked Users</h3>
             </div>
-
-            {/* Overage rate card */}
-            <div className="rounded-2xl border border-gray-200 dark:border-border bg-white dark:bg-background shadow-sm overflow-hidden self-start min-w-[200px]">
-              <div className="px-6 py-4 border-b border-gray-100 dark:border-border bg-gray-50 dark:bg-card/60">
-                <span className="text-xs font-semibold uppercase tracking-widest text-gray-400 dark:text-muted-foreground">Overage Rates</span>
-              </div>
-              <div className="divide-y divide-gray-100 dark:divide-border">
-                {[
-                  { range: "151 – 200", cost: "+$12" },
-                  { range: "201 – 250", cost: "+$24" },
-                  { range: "251 – 300", cost: "+$36" },
-                  { range: "301 – 350", cost: "+$48" },
-                ].map((row, i) => (
-                  <div key={i} className="flex items-center justify-between px-6 py-3 bg-gray-50/40 dark:bg-card/30">
-                    <span className="text-sm text-gray-500 dark:text-muted-foreground tabular-nums">{row.range}</span>
-                    <span className="text-sm font-bold text-gray-900 dark:text-white tabular-nums ml-6">{row.cost}</span>
-                  </div>
-                ))}
-              </div>
-              <div className="px-6 py-3 bg-blue-50 dark:bg-blue-900/20 border-t border-blue-100 dark:border-blue-800/50">
-                <p className="text-xs text-blue-600 dark:text-blue-400 font-medium">Per 50 users / month</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Example calculation — invoice style */}
-          <div className="rounded-2xl border border-blue-200 dark:border-blue-800/60 bg-white dark:bg-background shadow-md overflow-hidden">
-            <div className="flex items-center gap-3 px-8 py-5 bg-blue-600 dark:bg-blue-700">
-              <Users className="w-5 h-5 text-white/90" />
-              <span className="font-semibold text-white text-sm">Example: 180 Tracked Users This Month</span>
-            </div>
-            <div className="px-8 py-7 space-y-6">
-              {/* Segmented usage bar */}
-              <div>
-                <div className="flex items-center justify-between mb-2 text-sm">
-                  <span className="font-medium text-gray-700 dark:text-muted-foreground">Your Usage</span>
-                  <span className="font-bold text-blue-600 tabular-nums">180 / 125 included</span>
-                </div>
-                <div className="h-5 bg-gray-100 dark:bg-card rounded-full overflow-hidden flex gap-0.5">
-                  <div className="bg-green-500 h-full rounded-l-full" style={{ width: "69.4%" }} title="0–125: Included" />
-                  <div className="bg-blue-400 h-full" style={{ width: "13.9%" }} title="126–150: Grace" />
-                  <div className="bg-blue-600 h-full rounded-r-full" style={{ width: "11.1%" }} title="151–180: Overage" />
-                </div>
-                <div className="relative mt-1.5 text-xs text-gray-400" style={{ height: "1.1rem" }}>
-                  <span className="absolute left-0">0</span>
-                  <span className="absolute" style={{ left: "69.4%" }}>125</span>
-                  <span className="absolute" style={{ left: "83.3%" }}>150</span>
-                  <span className="absolute right-0 font-semibold text-blue-600">180</span>
-                </div>
-                <div className="flex items-center gap-4 mt-3 text-xs text-gray-500 dark:text-muted-foreground">
-                  <span className="flex items-center gap-1.5"><span className="inline-block w-2.5 h-2.5 rounded-sm bg-green-500" />Included</span>
-                  <span className="flex items-center gap-1.5"><span className="inline-block w-2.5 h-2.5 rounded-sm bg-blue-400" />Grace (free)</span>
-                  <span className="flex items-center gap-1.5"><span className="inline-block w-2.5 h-2.5 rounded-sm bg-blue-600" />Overage</span>
-                </div>
-              </div>
-
-              {/* Invoice breakdown */}
+            <div className="px-7 py-6">
               <div className="rounded-xl border border-gray-100 dark:border-border overflow-hidden">
-                {[
-                  { dot: "bg-green-500", label: "Base Plan (125 users included)", value: "$25", valueClass: "" },
-                  { dot: "bg-blue-400", label: "Grace Buffer (26–150 users)", value: "$0", valueClass: "text-green-600" },
-                  { dot: "bg-blue-600", label: "Overage (30 users = 1 block × $12)", value: "+$12", valueClass: "" },
-                ].map((row, i) => (
-                  <div key={i} className="flex items-center justify-between px-5 py-3.5 border-b border-gray-100 dark:border-border last:border-0 bg-gray-50/40 dark:bg-card/30">
-                    <div className="flex items-center gap-3">
-                      <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${row.dot}`} />
-                      <span className="text-sm text-gray-700 dark:text-muted-foreground">{row.label}</span>
-                    </div>
-                    <span className={`text-sm font-semibold tabular-nums ${row.valueClass || "text-gray-900 dark:text-white"}`}>{row.value}</span>
-                  </div>
-                ))}
-                <div className="flex items-center justify-between px-5 py-4 bg-blue-50 dark:bg-blue-900/20 border-t-2 border-blue-200 dark:border-blue-700">
-                  <span className="font-bold text-gray-900 dark:text-white">Total This Month</span>
-                  <span className="text-lg font-bold text-blue-600 tabular-nums">$37</span>
+                <div className="flex items-center justify-between px-5 py-3.5 border-b border-gray-100 dark:border-border bg-gray-50/50 dark:bg-card/30">
+                  <span className="text-sm text-gray-600 dark:text-muted-foreground">Base plan (125 users included)</span>
+                  <span className="text-sm font-semibold text-gray-900 dark:text-white tabular-nums">$25</span>
                 </div>
-              </div>
-
-              {/* Callout */}
-              <div className="flex items-start gap-3 rounded-xl bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800/60 px-5 py-4">
-                <Check className="w-4 h-4 text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5" />
-                <p className="text-sm text-green-900 dark:text-green-100 leading-relaxed">
-                  <strong>You only pay for 30 extra users</strong> thanks to the grace buffer — not 55. Track your usage in real-time on your dashboard.
-                </p>
+                <div className="flex items-center justify-between px-5 py-3.5 border-b border-gray-100 dark:border-border bg-gray-50/50 dark:bg-card/30">
+                  <span className="text-sm text-gray-600 dark:text-muted-foreground">Grace buffer (26–150 users)</span>
+                  <span className="text-sm font-semibold text-green-600 dark:text-green-400 tabular-nums">$0</span>
+                </div>
+                <div className="flex items-center justify-between px-5 py-3.5 border-b border-gray-100 dark:border-border bg-gray-50/50 dark:bg-card/30">
+                  <span className="text-sm text-gray-600 dark:text-muted-foreground">Overage (30 users = 1 block)</span>
+                  <span className="text-sm font-semibold text-gray-900 dark:text-white tabular-nums">+$12</span>
+                </div>
+                <div className="flex items-center justify-between px-5 py-4 bg-gray-50 dark:bg-card">
+                  <span className="font-bold text-gray-900 dark:text-white">Total</span>
+                  <span className="text-lg font-bold text-gray-900 dark:text-white tabular-nums">$37/mo</span>
+                </div>
               </div>
             </div>
           </div>
+
           </Collapsible.Content>
           </Collapsible.Root>
         </div>
@@ -1093,7 +1020,7 @@ export default function PricingPage() {
               <CardContent>
                 <p className="text-gray-600 dark:text-muted-foreground">
                   You get full access to all Starter plan features for 7 days,
-                  completely free. No credit card required until you decide to
+                  completely free. You'll need to add a payment method to start the trial, but you won't be charged until after 7 days.
                   continue. We'll remind you 7, 3, and 1 day before your trial
                   ends.
                 </p>
@@ -1139,9 +1066,7 @@ export default function PricingPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-gray-600 dark:text-muted-foreground">
-                  Monthly plans can be canceled anytime with access until the
-                  end of your paid period. Annual plans are non-refundable but
-                  you'll have access for the full year.
+                  We don't offer refunds. You can cancel your monthly plan anytime and keep access until the end of your current billing period. Annual plans are non-refundable with access for the full year.
                 </p>
               </CardContent>
             </Card>
@@ -1157,7 +1082,7 @@ export default function PricingPage() {
                 Ready to Grow Your Feedback Community?
               </h3>
               <p className="text-blue-100 mb-6">
-                Start your 7-day free trial today. No credit card required.
+                Start your 7-day free trial today. Payment method required.
               </p>
               <Button
                 size="lg"

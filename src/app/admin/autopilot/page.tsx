@@ -7,6 +7,7 @@ import { PaidFeatureGate } from '@/components/PaidFeatureGate';
 import { useOrganization } from '@/context/OrganizationContext';
 import { useToast } from '@/hooks/use-toast';
 import { isPlanUpgradeRequired } from '@/lib/api';
+import { resolvePlan } from '@/config/plans';
 import api from '@/lib/api';
 import { boardService, type Board } from '@/services/boardService';
 import {
@@ -121,6 +122,9 @@ function AutopilotPageInner() {
   const [actionId, setActionId] = useState<string | null>(null);
   const [connectedProviders, setConnectedProviders] = useState<Set<IntegrationProvider>>(new Set());
   const [loadingIntegrations, setLoadingIntegrations] = useState(true);
+
+  const currentPlan = resolvePlan(organization);
+  const isStarter = currentPlan === 'starter';
 
   const [rawText, setRawText] = useState('');
   const [rawAuthor, setRawAuthor] = useState('');
@@ -303,6 +307,7 @@ function AutopilotPageInner() {
   }
 
   const hasConnectedIntegrations = connectedProviders.size > 0;
+  const starterLimitReached = isStarter && connectedProviders.size >= 1;
 
   if (!loadingIntegrations && !hasConnectedIntegrations) {
     return (

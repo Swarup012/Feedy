@@ -814,7 +814,7 @@ function AiChatContent() {
           </div>
 
           {/* Input */}
-          <div className="flex-shrink-0 bg-card/50 backdrop-blur-sm px-3 py-3">
+          <div className="flex-shrink-0 px-3 py-3">
             <div className="max-w-3xl mx-auto space-y-2">
               {/* Message limit counter (starter only) */}
               {orgId && currentPlan !== "free" && (

@@ -40,7 +40,7 @@ export function MessageLimitCounter({
     async function fetchUsage() {
       try {
         setLoading(true);
-        const res = await api.get(`/organizations/${orgId}/feedback-chat/usage`);
+        const res = await api.get(`/api/organizations/${orgId}/feedback-chat/usage`);
         if (!cancelled && res.data?.success) {
           setUsage(res.data.data);
         }

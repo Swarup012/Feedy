@@ -399,7 +399,7 @@ function PlanSplitCard({
 
       {billingCycle === "yearly" && (
         <p className="text-[10px] text-green-600 dark:text-green-400 mt-1 font-medium">
-          Save ${(base * 12 - (name === "Starter" ? PLANS.starter.yearlyTotal : PLANS.pro.yearlyTotal))}/yr on base
+          Save ${(PLANS[name.toLowerCase() as keyof typeof PLANS].monthlyPrice * 12 - PLANS[name.toLowerCase() as keyof typeof PLANS].yearlyTotal)}/yr on base
         </p>
       )}
     </div>

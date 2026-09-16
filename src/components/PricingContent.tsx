@@ -437,9 +437,9 @@ export default function PricingContent() {
                     <td className="py-4 px-6 text-center"><Check className="w-5 h-5 text-green-500 mx-auto" /></td>
                   </tr>
                   <tr>
-                    <td className="py-4 px-6 text-sm text-gray-900 dark:text-white">Custom Integrations</td>
+                    <td className="py-4 px-6 text-sm text-gray-900 dark:text-white">Integrations</td>
                     <td className="py-4 px-6 text-center"><X className="w-5 h-5 text-gray-300 mx-auto" /></td>
-                    <td className="py-4 px-6 text-center bg-blue-50/50 dark:bg-blue-900/10"><X className="w-5 h-5 text-gray-300 mx-auto" /></td>
+                    <td className="py-4 px-6 text-center bg-blue-50/50 dark:bg-blue-900/10 text-sm font-medium">1</td>
                     <td className="py-4 px-6 text-center"><Check className="w-5 h-5 text-green-500 mx-auto" /></td>
                   </tr>
                   <tr>
