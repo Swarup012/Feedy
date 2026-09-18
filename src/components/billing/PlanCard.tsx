@@ -3,7 +3,7 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { CreditCard, Zap, ArrowDown, XCircle, Settings, Loader2 } from 'lucide-react';
+import { CreditCard, Zap, ArrowDown, XCircle, Loader2 } from 'lucide-react';
 import { SubscriptionInfo } from '@/services/paddleService';
 import { PLANS } from '@/config/plans';
 
@@ -12,7 +12,6 @@ interface PlanCardProps {
   onUpgrade: () => void;
   onDowngrade: () => void;
   onCancel: () => void;
-  onManageBilling: () => void;
   actionLoading: boolean;
 }
 
@@ -21,7 +20,6 @@ export function PlanCard({
   onUpgrade,
   onDowngrade,
   onCancel,
-  onManageBilling,
   actionLoading,
 }: PlanCardProps) {
   const planName = subscription.plan
@@ -177,17 +175,6 @@ export function PlanCard({
                       <ArrowDown className="h-4 w-4 mr-2" />
                     )}
                     Downgrade to Starter
-                  </Button>
-                )}
-
-                {!isCancelled && (
-                  <Button
-                    variant="outline"
-                    onClick={onManageBilling}
-                    disabled={actionLoading}
-                  >
-                    <Settings className="h-4 w-4 mr-2" />
-                    Manage Billing
                   </Button>
                 )}
 

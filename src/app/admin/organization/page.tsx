@@ -247,29 +247,6 @@ export default function OrganizationSettingsPage() {
     }
   };
 
-  const handleManageBilling = async () => {
-    try {
-      setBillingActionLoading(true);
-      const response = await fetch('/api/paddle/portal', { method: 'POST' });
-      const data = await response.json();
-      if (data.url) {
-        window.open(data.url, '_blank');
-      } else {
-        toast({
-          title: 'Portal unavailable',
-          description: 'Contact support@faddy.site for billing changes.',
-        });
-      }
-    } catch {
-      toast({
-        title: 'Portal unavailable',
-        description: 'Contact support@faddy.site for billing changes.',
-      });
-    } finally {
-      setBillingActionLoading(false);
-    }
-  };
-
   const fetchMembers = async () => {
     if (!organization) return;
 
@@ -820,7 +797,6 @@ export default function OrganizationSettingsPage() {
                         onUpgrade={() => setShowUpgradeDialog(true)}
                         onDowngrade={() => setShowUpgradeDialog(true)}
                         onCancel={() => setShowCancelFlow(true)}
-                        onManageBilling={handleManageBilling}
                         actionLoading={billingActionLoading}
                       />
                     </div>
