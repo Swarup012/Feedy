@@ -28,17 +28,18 @@ const PADDLE_CLIENT_TOKEN = process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN || 'test
 const IS_SANDBOX = !PADDLE_CLIENT_TOKEN.startsWith('live_');
 
 const STARTER_HIGHLIGHTS = [
-  'Unlimited boards & posts',
-  'Slack, Discord & Intercom',
-  'AI Chat & Autopilot',
-  'Webhooks & API',
+  '1 Integration',
+  'AI chat',
+  'Autopilot',
+  'AI insight dashboard',
 ];
 
 const PRO_HIGHLIGHTS = [
-  'Everything in Starter',
-  'Autopilot Automatic Mode',
-  'AI severity classification',
-  'Slack/Discord alerts',
+  'Everything in Starter, plus:',
+  'All Integrations',
+  'Insert Alert',
+  'Unlimited AI chat',
+  'Custom domain',
 ];
 
 export function UpgradeDialog({
