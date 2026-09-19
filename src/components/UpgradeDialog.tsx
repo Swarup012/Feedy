@@ -70,6 +70,15 @@ export function UpgradeDialog({
   // Use prop if provided, otherwise use internally fetched value
   const resolvedSubscription = subscription !== undefined ? subscription : fetchedSubscription;
 
+  // Sync billing cycle toggle with subscriber's actual cycle
+  useEffect(() => {
+    const cycle = resolvedSubscription?.billingCycle;
+    if (cycle === 'monthly' || cycle === 'yearly') {
+      setBillingCycle(cycle);
+    }
+    // If cycle is undefined/null/missing, keep the default ('monthly')
+  }, [resolvedSubscription?.billingCycle]);
+
   const starterPrice = billingCycle === 'monthly' ? PLANS.starter.monthlyPrice : PLANS.starter.yearlyPrice;
   const proPrice = billingCycle === 'monthly' ? PLANS.pro.monthlyPrice : PLANS.pro.yearlyPrice;
   const starterSavings = Math.round((1 - PLANS.starter.yearlyPrice / PLANS.starter.monthlyPrice) * 100);
