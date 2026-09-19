@@ -281,6 +281,13 @@ export default function PricingPage() {
                   >
                     {loading ? "Loading..." : "Start 7-Day Free Trial"}
                   </Button>
+                  <button
+                    className="w-full text-xs text-muted-foreground hover:text-foreground transition-colors py-1"
+                    onClick={() => handleUpgrade("starter", billingCycle, true)}
+                    disabled={loading}
+                  >
+                    Skip trial, pay now
+                  </button>
 
                 </div>
               ) : currentPlan === "starter" ? (
@@ -379,6 +386,13 @@ export default function PricingPage() {
                   >
                     {loading ? "Loading..." : "Start 7-Day Free Trial"}
                   </Button>
+                  <button
+                    className="w-full text-xs text-muted-foreground hover:text-foreground transition-colors py-1"
+                    onClick={() => handleUpgrade("pro", billingCycle, true)}
+                    disabled={loading}
+                  >
+                    Skip trial, pay now
+                  </button>
 
                 </div>
               ) : currentPlan === "starter" ? (
@@ -1104,6 +1118,15 @@ export default function PricingPage() {
                     ? "Upgrade to Pro"
                     : "Manage Subscription"}
               </Button>
+              {currentPlan === "free" && (
+                <button
+                  className="w-full text-xs text-blue-200 hover:text-white transition-colors py-1 mt-2"
+                  onClick={() => handleUpgrade("starter", billingCycle, true)}
+                  disabled={loading}
+                >
+                  Skip trial, pay now
+                </button>
+              )}
             </CardContent>
           </Card>
         </div>

@@ -21,10 +21,10 @@ interface UpgradeDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   currentPlan?: string;
-  onSuccess: () => void;
+  onSuccess?: () => void;
 }
 
-export function UpgradeDialog({ open, onOpenChange, currentPlan, onSuccess }: UpgradeDialogProps) {
+export function UpgradeDialog({ open, onOpenChange, currentPlan, onSuccess = () => {} }: UpgradeDialogProps) {
   const [selectedPlan, setSelectedPlan] = useState<'starter' | 'pro'>('pro');
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
   const [loading, setLoading] = useState(false);

@@ -190,6 +190,13 @@ export default function PricingContent() {
                 >
                   {loading ? "Loading..." : "Start 14-Day Free Trial"}
                 </Button>
+                <button
+                  className="w-full text-xs text-muted-foreground hover:text-foreground transition-colors py-1"
+                  onClick={() => handleUpgrade("starter", billingCycle, true)}
+                  disabled={loading}
+                >
+                  Skip trial, pay now
+                </button>
               </div>
             ) : currentPlan === "starter" ? (
               <Button variant="outline" className="w-full mb-6" disabled>
@@ -272,6 +279,13 @@ export default function PricingContent() {
                 >
                   {loading ? "Loading..." : "Start Pro Trial"}
                 </Button>
+                <button
+                  className="w-full text-xs text-muted-foreground hover:text-foreground transition-colors py-1"
+                  onClick={() => handleUpgrade("pro", billingCycle, true)}
+                  disabled={loading}
+                >
+                  Skip trial, pay now
+                </button>
               </div>
             ) : currentPlan === "starter" ? (
               <Button
@@ -775,6 +789,15 @@ export default function PricingContent() {
                 ? "Already Subscribed"
                 : "Start Free Trial"}
             </Button>
+            {currentPlan === "free" && (
+              <button
+                className="w-full text-xs text-blue-200 hover:text-white transition-colors py-1 mt-2"
+                onClick={() => handleUpgrade("starter", billingCycle, true)}
+                disabled={loading}
+              >
+                Skip trial, pay now
+              </button>
+            )}
           </CardContent>
         </Card>
       </div>
