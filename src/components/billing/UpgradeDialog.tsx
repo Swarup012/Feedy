@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -13,7 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { CheckCircle, Loader2, Zap } from 'lucide-react';
-import paddleService from '@/services/paddleService';
+import paddleService, { type SubscriptionInfo } from '@/services/paddleService';
 import { PLANS } from '@/config/plans';
 import { useToast } from '@/hooks/use-toast';
 
@@ -28,65 +28,123 @@ export function UpgradeDialog({ open, onOpenChange, currentPlan, onSuccess = () 
   const [selectedPlan, setSelectedPlan] = useState<'starter' | 'pro'>('pro');
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
   const [loading, setLoading] = useState(false);
+  const [subscription, setSubscription] = useState<SubscriptionInfo | null>(null);
   const { toast } = useToast();
 
-  const handleUpgrade = async (skipTrial: boolean = false) => {
+  // Fetch subscription info when dialog opens
+  useEffect(() => {
+    if (!open) return;
+    let cancelled = false;
+    paddleService.getSubscription().then((res) => {
+      if (!cancelled && res.success) {
+        setSubscription(res.data);
+      }
+    }).catch(() => {});
+    return () => { cancelled = true; };
+  }, [open]);
+
+  // Sync billing cycle toggle with subscriber's actual cycle
+  useEffect(() => {
+    const cycle = subscription?.billingCycle;
+    if (cycle === 'monthly' || cycle === 'yearly') {
+      setBillingCycle(cycle);
+    }
+  }, [subscription?.billingCycle]);
+
+  // Set target plan based on current plan
+  useEffect(() => {
+    if (currentPlan === 'starter') {
+      setSelectedPlan('pro');
+    } else if (currentPlan === 'pro') {
+      setSelectedPlan('starter');
+    }
+  }, [currentPlan]);
+
+  const isActiveSubscriber = subscription?.hasActiveSubscription &&
+    ['active', 'trialing'].includes(subscription?.status || '');
+  const isUpgrade = currentPlan === 'starter' && selectedPlan === 'pro';
+  const isDowngrade = currentPlan === 'pro' && selectedPlan === 'starter';
+  const targetPrice = billingCycle === 'monthly'
+    ? PLANS[selectedPlan].monthlyPrice
+    : PLANS[selectedPlan].yearlyPrice;
+
+  const formatDate = (dateStr: string | null) =>
+    dateStr ? new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+
+  const handleAction = async () => {
     try {
       setLoading(true);
-      const response = await paddleService.createCheckoutSession({
-        plan: selectedPlan,
-        billingCycle,
-        skipTrial,
-      });
 
-      if (response.success && response.data.url) {
-        if (response.data.transactionId) {
-          try {
-            if (!(window as any).Paddle) {
-              const script = document.createElement('script');
-              script.src = 'https://cdn.paddle.com/paddle/v2/paddle.js';
-              script.async = true;
-              document.body.appendChild(script);
+      if (isActiveSubscriber) {
+        const response = await paddleService.updateSubscriptionPlan(selectedPlan, billingCycle);
+        if (response.success) {
+          toast({
+            title: isUpgrade ? 'Upgrade initiated' : 'Downgrade scheduled',
+            description: isUpgrade
+              ? 'You have been upgraded to Pro. Your new features are available now.'
+              : `Your plan will switch to Starter at the end of your current billing period.`,
+          });
+          onOpenChange(false);
+          onSuccess();
+        } else {
+          throw new Error(response.data?.message || 'Failed to update plan');
+        }
+      } else {
+        const response = await paddleService.createCheckoutSession({
+          plan: selectedPlan,
+          billingCycle,
+          skipTrial: false,
+        });
 
-              await new Promise((resolve, reject) => {
-                script.onload = () => resolve(true);
-                script.onerror = () => reject(new Error('Failed to load Paddle SDK'));
-                setTimeout(() => reject(new Error('Paddle SDK load timeout')), 10000);
+        if (response.success && response.data.url) {
+          if (response.data.transactionId) {
+            try {
+              if (!(window as any).Paddle) {
+                const script = document.createElement('script');
+                script.src = 'https://cdn.paddle.com/paddle/v2/paddle.js';
+                script.async = true;
+                document.body.appendChild(script);
+
+                await new Promise((resolve, reject) => {
+                  script.onload = () => resolve(true);
+                  script.onerror = () => reject(new Error('Failed to load Paddle SDK'));
+                  setTimeout(() => reject(new Error('Paddle SDK load timeout')), 10000);
+                });
+              }
+
+              const Paddle = (window as any).Paddle;
+              if (!Paddle) throw new Error('Paddle SDK not available');
+
+              const paddleToken = process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN || '';
+              const isSandbox = !paddleToken.startsWith('live_');
+              if (isSandbox) Paddle.Environment.set('sandbox');
+              Paddle.Setup({ token: paddleToken });
+
+              Paddle.Checkout.open({
+                transactionId: response.data.transactionId,
+                settings: {
+                  displayMode: 'overlay',
+                  theme: 'light',
+                  successUrl: window.location.origin + '/admin/billing?checkout=success',
+                },
               });
+
+              onOpenChange(false);
+              onSuccess();
+            } catch {
+              window.location.href = response.data.url;
             }
-
-            const Paddle = (window as any).Paddle;
-            if (!Paddle) throw new Error('Paddle SDK not available');
-
-            const paddleToken = process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN || '';
-            const isSandbox = !paddleToken.startsWith('live_');
-            if (isSandbox) Paddle.Environment.set('sandbox');
-            Paddle.Setup({ token: paddleToken });
-
-            Paddle.Checkout.open({
-              transactionId: response.data.transactionId,
-              settings: {
-                displayMode: 'overlay',
-                theme: 'light',
-                successUrl: window.location.origin + '/admin/billing?checkout=success',
-              },
-            });
-
-            onOpenChange(false);
-            onSuccess();
-          } catch {
+          } else {
             window.location.href = response.data.url;
           }
         } else {
-          window.location.href = response.data.url;
+          throw new Error('Failed to create checkout session');
         }
-      } else {
-        throw new Error('Failed to create checkout session');
       }
     } catch (error) {
       toast({
         title: 'Something went wrong',
-        description: 'Could not start checkout. Please try again.',
+        description: 'Could not complete this action. Please try again.',
         variant: 'destructive',
       });
     } finally {
@@ -102,12 +160,14 @@ export function UpgradeDialog({ open, onOpenChange, currentPlan, onSuccess = () 
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle className="text-xl font-switzer font-bold">
-            {currentPlan === 'starter' ? 'Upgrade to Pro' : 'Choose Your Plan'}
+            {isUpgrade && 'Upgrade to Pro'}
+            {isDowngrade && 'Switch to Starter'}
+            {!isUpgrade && !isDowngrade && 'Choose Your Plan'}
           </DialogTitle>
           <DialogDescription>
-            {currentPlan === 'starter'
-              ? 'Get unlimited members and advanced AI features'
-              : 'Start a 14-day free trial, no commitment'}
+            {isUpgrade && 'Get unlimited members and advanced AI features'}
+            {isDowngrade && 'Your Pro access continues until your current billing period ends'}
+            {!isUpgrade && !isDowngrade && 'Start a 14-day free trial, no commitment'}
           </DialogDescription>
         </DialogHeader>
 
@@ -227,32 +287,61 @@ export function UpgradeDialog({ open, onOpenChange, currentPlan, onSuccess = () 
 
           {/* Action Buttons */}
           <div className="space-y-2">
-            <Button
-              className="w-full bg-blue-600 hover:bg-blue-700"
-              onClick={() => handleUpgrade(false)}
-              disabled={loading}
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Starting checkout...
-                </>
-              ) : (
-                <>
-                  <Zap className="h-4 w-4 mr-2" />
-                  Start {selectedPlan === 'pro' ? 'Pro' : 'Starter'} Trial
-                </>
-              )}
-            </Button>
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={() => handleUpgrade(true)}
-              disabled={loading}
-            >
-              Skip trial and subscribe now
-            </Button>
+            {isActiveSubscriber ? (
+              // Active subscriber: plan change (no checkout)
+              <Button
+                className="w-full bg-blue-600 hover:bg-blue-700"
+                onClick={handleAction}
+                disabled={loading}
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Processing...
+                  </>
+                ) : isUpgrade ? (
+                  <>
+                    <Zap className="h-4 w-4 mr-2" />
+                    Upgrade to Pro — ${targetPrice}/{billingCycle === 'monthly' ? 'mo' : 'mo (billed yearly)'}
+                  </>
+                ) : (
+                  <>
+                    Switch to Starter — ${targetPrice}/{billingCycle === 'monthly' ? 'mo' : 'mo (billed yearly)'}
+                  </>
+                )}
+              </Button>
+            ) : (
+              // Free/new subscriber: checkout flow
+              <>
+                <Button
+                  className="w-full bg-blue-600 hover:bg-blue-700"
+                  onClick={handleAction}
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Starting checkout...
+                    </>
+                  ) : (
+                    <>
+                      <Zap className="h-4 w-4 mr-2" />
+                      Start {selectedPlan === 'pro' ? 'Pro' : 'Starter'} Trial
+                    </>
+                  )}
+                </Button>
+              </>
+            )}
           </div>
+
+          {/* Confirmation note for active subscribers */}
+          {isActiveSubscriber && (
+            <p className="text-xs text-center text-muted-foreground">
+              {isUpgrade
+                ? 'You will be charged a prorated amount today for the upgrade.'
+                : `Your Pro features continue until ${formatDate(subscription?.currentPeriodEnd || null)}. No charge today — the switch happens at renewal.`}
+            </p>
+          )}
         </div>
       </DialogContent>
     </Dialog>
