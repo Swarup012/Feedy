@@ -40,6 +40,7 @@ import {
 import { boardService, type Board } from '@/services/boardService';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   IntegrationCardConnected,
@@ -805,6 +806,35 @@ function IntegrationsPageInner() {
                                 {boards.map(b => (<SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>))}
                               </SelectContent>
                             </Select>
+                          </div>
+
+                          <div className="space-y-2 pt-1 border-t">
+                            <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mt-2 block">Plan Attribute Key</Label>
+                            <Input
+                              className="h-9"
+                              placeholder="e.g. plan, subscription_plan"
+                              value={intercomAutopilot?.settings?.intercom_plan_attribute_key || ''}
+                              onChange={(e) => {
+                                const key = e.target.value.trim();
+                                setIntercomAutopilot(prev => prev ? { ...prev, settings: { ...prev.settings, intercom_plan_attribute_key: key || undefined } } : prev);
+                              }}
+                              onBlur={async () => {
+                                if (!orgId) return;
+                                const key = intercomAutopilot?.settings?.intercom_plan_attribute_key || null;
+                                setSavingIntercomAutopilot(true);
+                                try {
+                                  const res = await autopilotService.updateSettings(orgId, 'intercom', {
+                                    settings: { intercom_plan_attribute_key: key || undefined },
+                                  });
+                                  if (res.data?.settings) setIntercomAutopilot(res.data.settings);
+                                } catch (err) {
+                                  console.error('Failed to save plan attribute key:', err);
+                                } finally {
+                                  setSavingIntercomAutopilot(false);
+                                }
+                              }}
+                            />
+                            <p className="text-xs text-muted-foreground leading-tight">Map an Intercom Contact custom attribute to "plan" for revenue-weighted prioritization.</p>
                           </div>
                         </div>
 

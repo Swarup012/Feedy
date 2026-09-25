@@ -66,6 +66,7 @@ import { UpgradeDialog } from '@/components/billing/UpgradeDialog';
 import { CancelFlow } from '@/components/billing/CancelFlow';
 import { InvoiceHistory } from '@/components/billing/InvoiceHistory';
 import { CustomDomainSettings } from '@/components/organization/CustomDomainSettings';
+import { PlanWeightsSection } from '@/components/organization/PlanWeightsSection';
 import { NotificationsTab } from '@/components/organization/NotificationsTab';
 import { ProFeatureGate } from '@/components/ProFeatureGate';
 import { motion } from 'motion/react';
@@ -579,6 +580,9 @@ export default function OrganizationSettingsPage() {
                     </Button>
                   )}
                 </div>
+
+                {/* Revenue plan weights — severity scoring multiplier */}
+                <PlanWeightsSection />
               </div>
             </TabsContent>
 

@@ -18,6 +18,9 @@ export interface AutopilotSuggestion {
 export interface AutopilotSettings {
   autopilot_mode: 'manual' | 'automatic';
   default_board_id: string | null;
+  settings?: {
+    intercom_plan_attribute_key?: string | null;
+  } | null;
 }
 
 export interface ChannelBoardMapping {
