@@ -27,6 +27,11 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import {
   ArrowUp,
   ArrowLeft,
   MessageSquare,
@@ -39,6 +44,7 @@ import {
   Heart,
   Reply,
   BotMessageSquare,
+  GitMerge,
 } from "lucide-react";
 import { Post, Comment, postService, getPostAuthorDisplayName, isAutopilotPost, getSourcePlatformBadgeStyle } from "@/services/postService";
 import { Board } from "@/services/boardService";
@@ -52,6 +58,29 @@ import api from "@/lib/api";
 
 // 🔥 GLOBAL cache for comments (persists across post switches!)
 const commentsCache: Record<string, Comment[]> = {};
+
+// 🔥 GLOBAL cache for merged history (folded-away sibling reports)
+const mergedHistoryCache: Record<string, Post[]> = {};
+
+// Provider icons — lifted verbatim from
+// src/app/admin/settings/integrations/page.tsx:55-65
+const DiscordIcon = ({ className }: { className?: string }) => (
+  <img src="/images/icons/discord.svg" alt="Discord" className={className} />
+);
+
+const IntercomIcon = ({ className }: { className?: string }) => (
+  <img src="/images/icons/intercom.svg" alt="Intercom" className={className} />
+);
+
+const SlackIcon = ({ className }: { className?: string }) => (
+  <img src="/images/icons/slack-new.svg" alt="Slack" className={className} />
+);
+
+const SOURCE_PLATFORM_ICONS: Record<string, typeof DiscordIcon> = {
+  discord: DiscordIcon,
+  intercom: IntercomIcon,
+  slack: SlackIcon,
+};
 
 interface PostDetailsProps {
   post: Post | null;
@@ -322,6 +351,8 @@ export function PostDetails({
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState("");
   const [loadingComments, setLoadingComments] = useState(false);
+  const [mergedHistory, setMergedHistory] = useState<Post[]>([]);
+  const [loadingMergedHistory, setLoadingMergedHistory] = useState(false);
   const [loadingPost, setLoadingPost] = useState(false);
   const [submittingComment, setSubmittingComment] = useState(false);
   const [upvoted, setUpvoted] = useState(false);
@@ -444,6 +475,25 @@ export function PostDetails({
     }
   }, [post?.id]);
 
+  // Fetch merged history when post changes
+  useEffect(() => {
+    if (post) {
+      if (mergedHistoryCache[post.id]) {
+        setMergedHistory(mergedHistoryCache[post.id]);
+
+        postService
+          .getFoldedPosts(post.id)
+          .then((response) => {
+            mergedHistoryCache[post.id] = response.data.posts;
+            setMergedHistory(response.data.posts);
+          })
+          .catch(() => {});
+      } else {
+        fetchMergedHistory();
+      }
+    }
+  }, [post?.id]);
+
   // Fetch labels from API when organization is available
   useEffect(() => {
     if (!organization?.id) return;
@@ -482,6 +532,25 @@ export function PostDetails({
       });
     } finally {
       setLoadingComments(false);
+    }
+  };
+
+  const fetchMergedHistory = async () => {
+    if (!post) return;
+
+    try {
+      setLoadingMergedHistory(true);
+      const response = await postService.getFoldedPosts(post.id);
+      mergedHistoryCache[post.id] = response.data.posts;
+      setMergedHistory(response.data.posts);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: "Failed to load merged reports",
+        variant: "destructive",
+      });
+    } finally {
+      setLoadingMergedHistory(false);
     }
   };
 
@@ -1047,6 +1116,45 @@ export function PostDetails({
               </div>
             </div>
           </div>
+
+          {/* Merged history — reports folded into this post (read-only) */}
+          {mergedHistory.length > 0 && (
+            <div className="px-6 pb-4">
+              <Collapsible defaultOpen={false}>
+                <CollapsibleTrigger className="flex w-full items-center gap-2 mb-1 pt-1 text-left">
+                  <GitMerge className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm font-medium text-muted-foreground">
+                    {mergedHistory.length} similar report
+                    {mergedHistory.length === 1 ? "" : "s"} merged into this
+                  </span>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <div className="space-y-3 pt-1">
+                    {mergedHistory.map((item) => {
+                      const SourceIcon = SOURCE_PLATFORM_ICONS[item.source_platform ?? ""];
+                      return (
+                        <div key={item.id} className="flex gap-2">
+                          <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center">
+                            {SourceIcon && <SourceIcon className="h-4 w-4" />}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm text-foreground/80 dark:text-foreground/70 leading-relaxed whitespace-pre-wrap">
+                              {item.description}
+                            </p>
+                            <span className="text-xs text-muted-foreground">
+                              {formatDistanceToNow(new Date(item.created_at), {
+                                addSuffix: true,
+                              })}
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+            </div>
+          )}
 
           {/* Comments — continuous with post, no Activity Feed barrier */}
           <div className="px-6 pb-4">

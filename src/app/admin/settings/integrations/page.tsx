@@ -38,6 +38,7 @@ import {
   type ChannelBoardMapping,
 } from '@/services/autopilotService';
 import { boardService, type Board } from '@/services/boardService';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -94,6 +95,17 @@ function IntegrationsPageInner() {
 
   const [intercomBoardId, setIntercomBoardId] = useState<string | null>(null);
   const [githubBoardId, setGithubBoardId] = useState<string | null>(null);
+
+  // Slack connection-level defaults (source: integration_connections.{autopilot_mode,default_board_id}).
+  // These pre-fill NEW mappings and drive the fan-out; live behavior always
+  // resolves per-channel from channel_board_mappings.
+  const [slackBoardId, setSlackBoardId] = useState<string | null>(null);
+  const [slackMode, setSlackMode] = useState<'manual' | 'automatic'>('manual');
+  const [savingSlackConnection, setSavingSlackConnection] = useState(false);
+  const [slackPendingDefault, setSlackPendingDefault] = useState<{
+    autopilot_mode: 'manual' | 'automatic';
+    default_board_id: string;
+  } | null>(null);
 
   // New channel mapping form state
   const [newDiscordChannelId, setNewDiscordChannelId] = useState<string>('');
@@ -183,14 +195,18 @@ function IntegrationsPageInner() {
     if (!orgId) return;
     (async () => {
       try {
-        // Intercom/GitHub: legacy single-row settings
-        const [intercomRes, githubRes] = await Promise.all([
+        // Intercom/GitHub: legacy single-row settings · Slack: connection-level defaults
+        const [intercomRes, githubRes, slackSettingsRes] = await Promise.all([
           autopilotService.getSettings(orgId, 'intercom').catch(err => {
             console.error('Failed to load Intercom autopilot settings:', err);
             return null;
           }),
           autopilotService.getSettings(orgId, 'github').catch(err => {
             console.error('Failed to load GitHub autopilot settings:', err);
+            return null;
+          }),
+          autopilotService.getSettings(orgId, 'slack').catch(err => {
+            console.error('Failed to load Slack connection defaults:', err);
             return null;
           }),
         ]);
@@ -206,6 +222,16 @@ function IntegrationsPageInner() {
           setGithubAutopilot(githubRes.data.settings);
           if (githubRes.data.settings.default_board_id) {
             setGithubBoardId(githubRes.data.settings.default_board_id);
+          }
+        }
+
+        if (slackSettingsRes?.data?.settings) {
+          const defaults = slackSettingsRes.data.settings;
+          setSlackMode(defaults.autopilot_mode || 'manual');
+          if (defaults.default_board_id) {
+            setSlackBoardId(defaults.default_board_id);
+            // Pre-fill the Add Channel form's board with the connection default
+            setNewSlackBoardId(defaults.default_board_id);
           }
         }
       } catch (err) {
@@ -308,20 +334,101 @@ function IntegrationsPageInner() {
     }
   };
 
+  // Per-mapping primitives — extracted from the Slack/Discord branch of
+  // handleBoardChange (previously dead: no caller passed a mappingId).
+  // Reused by handleBoardChange and by the connection-level fan-out below.
+  const patchChannelMapping = async (
+    provider: 'discord' | 'slack',
+    mappingId: string,
+    patch: { board_id?: string; autopilot_mode?: 'manual' | 'automatic' }
+  ) => {
+    await autopilotService.updateChannelMapping(orgId!, provider, mappingId, patch);
+  };
+
+  const reloadChannelMappings = async (provider: 'discord' | 'slack') => {
+    const res = await autopilotService.listChannelMappings(orgId!, provider);
+    if (provider === 'discord') {
+      setDiscordMappings(res.data?.mappings || []);
+    } else {
+      setSlackMappings(res.data?.mappings || []);
+    }
+  };
+
+  /**
+   * Slack connection-level default: applies {mode, board} to EVERY existing
+   * mapping (channel_board_mappings stays the per-channel source of truth),
+   * then persists the pair on integration_connections so future mappings
+   * pre-fill with it. Guarded by ConfirmDialog when channels exist — it
+   * overwrites individually-configured mappings.
+   */
+  const applySlackConnectionDefault = async (next: {
+    autopilot_mode: 'manual' | 'automatic';
+    default_board_id: string;
+  }) => {
+    if (!orgId) return;
+    setSavingSlackConnection(true);
+    try {
+      // a. fan-out to all existing mappings
+      await Promise.all(
+        slackMappings.map(m => patchChannelMapping('slack', m.id, {
+          board_id: next.default_board_id,
+          autopilot_mode: next.autopilot_mode,
+        }))
+      );
+      await reloadChannelMappings('slack');
+      // b. persist as the default for future mappings
+      await autopilotService.updateSettings(orgId, 'slack', {
+        autopilot_mode: next.autopilot_mode,
+        default_board_id: next.default_board_id,
+      });
+      setSlackMode(next.autopilot_mode);
+      setSlackBoardId(next.default_board_id);
+      setNewSlackBoardId(next.default_board_id); // keep Add Channel pre-fill in sync
+      const boardName = boards.find(b => b.id === next.default_board_id)?.name || 'selected board';
+      toast({
+        title: `${slackMappings.length} channel(s) updated`,
+        description: `All monitored channels now use ${boardName} · ${next.autopilot_mode === 'automatic' ? 'Automatic' : 'Manual'} Mode.`,
+      });
+    } catch (err: unknown) {
+      toast({
+        title: 'Update failed',
+        description: (err as any)?.response?.data?.message || 'Failed to update channels',
+        variant: 'destructive',
+      });
+    } finally {
+      setSavingSlackConnection(false);
+      setSlackPendingDefault(null);
+    }
+  };
+
+  const requestSlackConnectionDefault = (next: {
+    autopilot_mode: 'manual' | 'automatic';
+    default_board_id: string;
+  }) => {
+    if (!orgId) return;
+    if (next.autopilot_mode === 'automatic' && !next.default_board_id) {
+      toast({
+        title: 'Select a board first',
+        description: 'Choose a default board before enabling Automatic Mode.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    if (slackMappings.length === 0) {
+      // Nothing to overwrite — no confirmation needed
+      void applySlackConnectionDefault(next);
+      return;
+    }
+    // Confirmation required: this silently overwrites every existing mapping
+    setSlackPendingDefault(next);
+  };
+
   const handleBoardChange = async (provider: 'intercom' | 'discord' | 'slack' | 'github', boardId: string, mappingId?: string) => {
     if ((provider === 'discord' || provider === 'slack') && mappingId) {
-      // Multi-channel: update the specific mapping's board
+      // Multi-channel: update the specific mapping's board (shared helpers)
       try {
-        await autopilotService.updateChannelMapping(orgId!, provider, mappingId, {
-          board_id: boardId,
-        });
-        // Reload mappings
-        const res = await autopilotService.listChannelMappings(orgId!, provider);
-        if (provider === 'discord') {
-          setDiscordMappings(res.data?.mappings || []);
-        } else {
-          setSlackMappings(res.data?.mappings || []);
-        }
+        await patchChannelMapping(provider, mappingId, { board_id: boardId });
+        await reloadChannelMappings(provider);
         toast({ title: 'Default board updated' });
       } catch (err: unknown) {
         toast({
@@ -396,6 +503,8 @@ function IntegrationsPageInner() {
         channel_id: channelId,
         channel_name: channelName,
         board_id: boardId,
+        // Slack: new mappings inherit the connection-level default mode
+        ...(provider === 'slack' ? { autopilot_mode: slackMode } : {}),
       });
       // Reload mappings
       const res = await autopilotService.listChannelMappings(orgId, provider);
@@ -873,6 +982,51 @@ function IntegrationsPageInner() {
                     subtitle={`${slackMappings.length} channel(s) monitored · connected ${slackStatus?.connected_at ? formatDate(slackStatus.connected_at) : '—'}`}
                     settingsContent={
                       <>
+                        {/* Connection-level defaults — mirrors the Intercom layout.
+                            On change: confirm, then fan out to every mapping and
+                            persist for future mappings (integration_connections). */}
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between gap-4">
+                            <div className="space-y-0.5">
+                              <Label className="text-sm font-medium flex items-center gap-1.5"><Zap className="h-3.5 w-3.5 text-amber-500" /> Automatic Mode</Label>
+                              <p className="text-xs text-muted-foreground leading-tight">Bypass review & publish instantly.</p>
+                              {!slackBoardId && <p className="text-xs text-amber-600 dark:text-amber-500 mt-0.5 font-medium">Select a board below first.</p>}
+                            </div>
+                            <Switch
+                              checked={slackMode === 'automatic'}
+                              disabled={savingSlackConnection || !slackBoardId}
+                              onCheckedChange={(checked) => requestSlackConnectionDefault({
+                                autopilot_mode: checked ? 'automatic' : 'manual',
+                                default_board_id: slackBoardId!,
+                              })}
+                            />
+                          </div>
+
+                          <div className="space-y-2 pt-1 border-t">
+                            <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mt-2 block">Default Board</Label>
+                            <Select
+                              value={slackBoardId || undefined}
+                              onValueChange={(val) => requestSlackConnectionDefault({ autopilot_mode: slackMode, default_board_id: val })}
+                              disabled={savingSlackConnection}
+                            >
+                              <SelectTrigger className="h-9"><SelectValue placeholder="Select a board…" /></SelectTrigger>
+                              <SelectContent>
+                                {boards.map(b => (<SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>))}
+                              </SelectContent>
+                            </Select>
+                            <p className="text-xs text-muted-foreground leading-tight">Applies to all monitored channels and pre-fills new ones. You can still override per channel.</p>
+                          </div>
+
+                          <ConfirmDialog
+                            open={slackPendingDefault !== null}
+                            onOpenChange={(open) => { if (!open) setSlackPendingDefault(null); }}
+                            title="Update all monitored channels?"
+                            description={`This will update ${slackMappings.length} existing channel(s) to use this board and mode. Continue?`}
+                            confirmLabel="Update channels"
+                            onConfirm={() => { if (slackPendingDefault) void applySlackConnectionDefault(slackPendingDefault); }}
+                          />
+                        </div>
+
                         {/* Existing channel mappings */}
                         {slackMappings.length > 0 && (
                           <div className="space-y-2">

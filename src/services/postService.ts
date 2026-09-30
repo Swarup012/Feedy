@@ -234,6 +234,15 @@ export const postService = {
     return response.data;
   },
 
+  // Get posts that were folded into this one (merged history)
+  async getFoldedPosts(postId: string): Promise<{
+    success: boolean;
+    data: { posts: Post[]; count: number };
+  }> {
+    const response = await api.get(`/api/posts/${postId}/merged-history`);
+    return response.data;
+  },
+
   // Add comment (supports replies via parent_id)
   async addComment(
     postId: string,
