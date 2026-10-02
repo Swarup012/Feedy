@@ -456,13 +456,15 @@ console.log(data);`,
   {
     method: 'POST',
     path: '/api/v1/posts',
-    description: 'Create a new post. Webhooks fire automatically (post.created).',
+    description: 'Create a new post. Webhooks fire automatically (post.created). Optional attribution: author_name is stored on the post; author_email links (or creates) an end-user contact — existing contacts are never modified.',
     scopes: ['posts:write'],
     examples: examples('/api/v1/posts', {
       body: `{
   "board_id": "abc-123",
   "title": "New feature",
-  "description": "Details here"
+  "description": "Details here",
+  "author_name": "Jane Doe",
+  "author_email": "jane@example.com"
 }`,
     }),
     response: `{
@@ -488,6 +490,8 @@ console.log(data);`,
       "source": "api",
       "severity": null,
       "ai_classification": null,
+      "external_submitter_name": "Jane Doe",
+      "org_end_user_id": "2a5c4e5c-9f6e-4a4b-9a4c-7e4b8f9d1c22",
       "author": null,
       "board": {
         "id": "5d37ba74-ca2b-4ad5-a4ea-d6b8c300de73",
@@ -699,6 +703,110 @@ console.log(data);`,
   }
 }`,
   },
+  {
+    method: 'POST',
+    path: '/api/v1/webhooks',
+    description:
+      'Subscribe: create a webhook that delivers events (e.g. post.created) to your URL. HTTPS required. Subscribing the same URL twice is idempotent (returns the existing webhook, 200). The secret_key is returned on creation only and is used to sign deliveries.',
+    scopes: ['webhooks:write'],
+    examples: examples('/api/v1/webhooks', {
+      body: `{
+  "url": "https://hooks.example.com/faddy",
+  "events": ["post.created"]
+}`,
+    }),
+    response: `{
+  "success": true,
+  "message": "Webhook subscribed",
+  "data": {
+    "webhook": {
+      "id": "8b0d7e4a-1f2c-4a6e-9f0e-3d5b7c9a1e44",
+      "organization_id": "34c02762-b708-4751-8b31-ef5b5c134925",
+      "name": "zapier-9f2c4e1a7b3d5e80",
+      "url": "https://hooks.example.com/faddy",
+      "type": "custom",
+      "events": ["post.created"],
+      "board_ids": null,
+      "is_active": true,
+      "is_verified": false,
+      "description": null,
+      "created_by": null,
+      "created_at": "2026-10-01T12:05:11.482+00:00",
+      "updated_at": "2026-10-01T12:05:11.482+00:00",
+      "last_triggered_at": null,
+      "total_deliveries": 0,
+      "failed_deliveries": 0
+    }
+  }
+}`,
+  },
+  {
+    method: 'GET',
+    path: '/api/v1/webhooks',
+    description:
+      'List the API-managed webhooks for your organization. Never exposes secret_key.',
+    scopes: ['webhooks:read'],
+    examples: examples('/api/v1/webhooks'),
+    response: `{
+  "success": true,
+  "message": "Webhooks retrieved",
+  "data": {
+    "webhooks": [
+      {
+        "id": "8b0d7e4a-1f2c-4a6e-9f0e-3d5b7c9a1e44",
+        "organization_id": "34c02762-b708-4751-8b31-ef5b5c134925",
+        "name": "zapier-9f2c4e1a7b3d5e80",
+        "url": "https://hooks.example.com/faddy",
+        "type": "custom",
+        "events": ["post.created"],
+        "board_ids": null,
+        "is_active": true,
+        "is_verified": false,
+        "description": null,
+        "created_by": null,
+        "created_at": "2026-10-01T12:05:11.482+00:00",
+        "updated_at": "2026-10-01T12:05:11.482+00:00",
+        "last_triggered_at": null,
+        "total_deliveries": 3,
+        "failed_deliveries": 0
+      }
+    ]
+  }
+}`,
+  },
+  {
+    method: 'DELETE',
+    path: '/api/v1/webhooks/:id',
+    description:
+      'Unsubscribe: delete one of your organization\'s webhooks. Returns 404 for unknown ids or webhooks you do not manage.',
+    scopes: ['webhooks:write'],
+    examples: {
+      curl: `curl -X DELETE \\
+  -H "Authorization: Bearer ${KEY}" \\
+  ${BASE}/api/v1/webhooks/8b0d7e4a-1f2c-4a6e-9f0e-3d5b7c9a1e44`,
+      node: `const res = await fetch('${BASE}/api/v1/webhooks/8b0d7e4a-1f2c-4a6e-9f0e-3d5b7c9a1e44', {
+  method: 'DELETE',
+  headers: { 'Authorization': 'Bearer ${KEY}' }
+});
+const data = await res.json();
+console.log(data);`,
+      typescript: `interface ApiResponse {
+  success: boolean;
+  message: string;
+}
+
+const res = await fetch('${BASE}/api/v1/webhooks/8b0d7e4a-1f2c-4a6e-9f0e-3d5b7c9a1e44', {
+  method: 'DELETE',
+  headers: { 'Authorization': 'Bearer ${KEY}' }
+});
+const data: ApiResponse = await res.json();
+console.log(data);`,
+    },
+    response: `{
+  "success": true,
+  "message": "Webhook unsubscribed"
+}`,
+  },
 ];
 
 // ─────────────────────────────────────────────────────────────
@@ -791,6 +899,14 @@ export default function ApiDocsPage() {
                   <li className="flex items-center gap-2">
                     <code className="font-mono bg-muted px-1.5 py-0.5 rounded">users:write</code>
                     <span>Upsert end user identities</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <code className="font-mono bg-muted px-1.5 py-0.5 rounded">webhooks:read</code>
+                    <span>List your organization's webhooks</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <code className="font-mono bg-muted px-1.5 py-0.5 rounded">webhooks:write</code>
+                    <span>Subscribe and unsubscribe webhooks</span>
                   </li>
                 </ul>
               </div>

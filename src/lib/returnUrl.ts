@@ -41,7 +41,8 @@ function getSubdomain(): string | null {
 function isPublicPage(path: string): boolean {
   return path.startsWith('/feedback') || 
          path.startsWith('/roadmap') || 
-         path.startsWith('/changelog');
+         path.startsWith('/changelog') ||
+         path.startsWith('/oauth/authorize');
 }
 
 /**
@@ -187,6 +188,11 @@ export function getPublicReturnUrl(): string | null {
       return null;
     }
     
+    // OAuth: always return same-origin relative path, never an absolute URL
+    if (context.path === '/oauth/authorize') {
+      return context.path + context.search;
+    }
+
     // Build full URL with subdomain if it exists
     let fullUrl;
     if (context.subdomain) {
@@ -208,6 +214,31 @@ export function getPublicReturnUrl(): string | null {
   } catch (error) {
     console.error('Failed to get public return URL:', error);
     return null;
+  }
+}
+
+/**
+ * Check that a saved return URL is safe to navigate to.
+ * Relative paths must stay same-origin; absolute URLs must be http(s) on the
+ * current site (same host or a subdomain of it).
+ */
+export function isSafeReturnUrl(url: string): boolean {
+  if (typeof window === 'undefined') return false;
+
+  if (url.startsWith('/')) return !url.startsWith('//');
+
+  try {
+    const parsed = new URL(url);
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return false;
+    const currentHost = window.location.hostname;
+    const baseHost = currentHost.includes('localhost') ? 'localhost' : currentHost.split('.').slice(-2).join('.');
+    return (
+      parsed.hostname === currentHost ||
+      parsed.hostname === baseHost ||
+      parsed.hostname.endsWith(`.${baseHost}`)
+    );
+  } catch {
+    return false;
   }
 }
 

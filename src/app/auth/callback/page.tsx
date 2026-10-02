@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import axios from 'axios';
-import { getPublicReturnUrl, clearReturnUrl } from '@/lib/returnUrl';
+import { getPublicReturnUrl, clearReturnUrl, isSafeReturnUrl } from '@/lib/returnUrl';
 import { TokenManager } from '@/lib/tokenManager';
 
 export default function AuthCallback() {
@@ -96,10 +96,14 @@ export default function AuthCallback() {
 
           // Check for saved return URL (from public pages like upvoting/commenting)
           const returnUrl = getPublicReturnUrl();
-          console.log('🔍 Checking for return URL:', { returnUrl, hasReturnUrl: !!returnUrl });
 
-          if (returnUrl) {
-            console.log('🔙 Returning to saved URL after Google login:', returnUrl);
+          if (returnUrl && isSafeReturnUrl(returnUrl)) {
+            const isOAuthReturn = returnUrl.split('?')[0] === '/oauth/authorize';
+            console.log(
+              isOAuthReturn
+                ? '🔙 Returning to saved OAuth URL after Google login'
+                : `🔙 Returning to saved URL after Google login: ${returnUrl}`
+            );
             clearReturnUrl();
             // Use window.location.href for full page reload to refresh AuthContext
             window.location.href = returnUrl;

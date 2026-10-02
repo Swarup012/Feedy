@@ -11,7 +11,9 @@ export type ApiKeyScope =
   | 'posts:write'
   | 'comments:write'
   | 'users:read'
-  | 'users:write';
+  | 'users:write'
+  | 'webhooks:read'
+  | 'webhooks:write';
 
 export type ApiKeyEnvironment = 'live' | 'test';
 

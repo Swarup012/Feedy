@@ -48,6 +48,20 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  // The OAuth consent screen carries secrets in its query string — never let
+  // it be framed (clickjacking) and never leak the URL via Referer.
+  async headers() {
+    return [
+      {
+        source: '/oauth/authorize',
+        headers: [
+          { key: 'X-Frame-Options', value: 'DENY' },
+          { key: 'Content-Security-Policy', value: "frame-ancestors 'none'" },
+          { key: 'Referrer-Policy', value: 'no-referrer' },
+        ],
+      },
+    ];
+  },
   // Proxy unmatched /api/* requests to the Express backend.
   // IMPORTANT: Using "fallback" (not the default array/afterFiles) so that
   // Next.js App Router Route Handlers always take priority.

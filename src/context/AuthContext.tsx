@@ -12,7 +12,7 @@ import { authService, User, ApiError } from "@/services/authService";
 import { TokenManager } from "@/lib/tokenManager";
 import { AxiosError } from "axios";
 import { initSocketWithTicket, disconnectSocket } from "@/lib/socket";
-import { getPublicReturnUrl, clearReturnUrl } from "@/lib/returnUrl";
+import { getPublicReturnUrl, clearReturnUrl, isSafeReturnUrl } from "@/lib/returnUrl";
 
 // ─── Public page list ────────────────────────────────────────────────────────
 // These routes do NOT require an auth check on mount. Visiting them as a guest
@@ -47,6 +47,7 @@ const PUBLIC_PATHS: Array<string | { prefix: string }> = [
   { prefix: "/policy" },
   { prefix: "/docs" },
   { prefix: "/auth/callback" },
+  "/oauth/authorize",
   { prefix: "/onboarding" },
   { prefix: "/invite" },
   { prefix: "/feedback/boards/" },
@@ -223,7 +224,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // Priority 2: saved return URL
       const returnUrl = getPublicReturnUrl();
-      if (returnUrl) {
+      if (returnUrl && isSafeReturnUrl(returnUrl)) {
         clearReturnUrl();
         router.push(returnUrl);
         return;

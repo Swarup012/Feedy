@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -27,12 +27,17 @@ interface ApiKeyFormDialogProps {
   open: boolean;
   onClose: () => void;
   onCreated: (key: ApiKeyCreated) => void;
+  /** Preselect these scopes when the dialog opens (e.g. Zapier card). */
+  defaultScopes?: ApiKeyScope[];
+  /** Prefill the key name when the dialog opens (e.g. "Zapier"). */
+  defaultName?: string;
 }
 
 type ResourcePermission = {
   resource: string;
   label: string;
   actions: { action: string; scope: ApiKeyScope }[];
+  note?: string;
 };
 
 const RESOURCES: ResourcePermission[] = [
@@ -62,6 +67,15 @@ const RESOURCES: ResourcePermission[] = [
       { action: 'write', scope: 'users:write' },
     ],
   },
+  {
+    resource: 'webhooks',
+    label: 'Webhooks',
+    actions: [
+      { action: 'read', scope: 'webhooks:read' },
+      { action: 'write', scope: 'webhooks:write' },
+    ],
+    note: "Lets this key create webhooks that send your organization's data to the URLs it is given. Only enable for integrations you trust, like Zapier.",
+  },
 ];
 
 function formatScopeLabel(scope: ApiKeyScope): string {
@@ -69,7 +83,7 @@ function formatScopeLabel(scope: ApiKeyScope): string {
   return `${resource.charAt(0).toUpperCase() + resource.slice(1)} \u00B7 ${action.charAt(0).toUpperCase() + action.slice(1)}`;
 }
 
-export function ApiKeyFormDialog({ open, onClose, onCreated }: ApiKeyFormDialogProps) {
+export function ApiKeyFormDialog({ open, onClose, onCreated, defaultScopes, defaultName }: ApiKeyFormDialogProps) {
   const { toast } = useToast();
 
   const [name, setName] = useState('');
@@ -80,6 +94,24 @@ export function ApiKeyFormDialog({ open, onClose, onCreated }: ApiKeyFormDialogP
 
   const [createdKey, setCreatedKey] = useState<ApiKeyCreated | null>(null);
   const [copied, setCopied] = useState(false);
+
+  // Preselect scopes when the dialog opens. Depends on the scope VALUES
+  // (joined key), not the array reference — a parent re-render with an inline
+  // array can never reset the user's choices while the dialog is open.
+  const defaultScopesKey = defaultScopes?.join(',');
+  useEffect(() => {
+    if (!open || !defaultScopesKey) return;
+    const preset = new Set<ApiKeyScope>(defaultScopes);
+    if (preset.has('posts:write')) preset.add('posts:read'); // same implication as toggleScope
+    setSelectedScopes(preset);
+  }, [open, defaultScopesKey]); // eslint-disable-line react-hooks/exhaustive-deps -- defaultScopesKey IS defaultScopes' identity
+
+  // Prefill name when the dialog opens; keyed on the string value so a
+  // parent re-render never overwrites what the user has typed.
+  useEffect(() => {
+    if (!open || !defaultName) return;
+    setName(defaultName);
+  }, [open, defaultName]);
 
   const reset = () => {
     setName('');
@@ -275,6 +307,9 @@ export function ApiKeyFormDialog({ open, onClose, onCreated }: ApiKeyFormDialogP
                         );
                       })}
                     </div>
+                    {res.note && (
+                      <p className="text-xs text-muted-foreground pl-1 leading-relaxed">{res.note}</p>
+                    )}
                   </div>
                 ))}
               </div>
