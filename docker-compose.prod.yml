@@ -5,6 +5,7 @@ services:
       dockerfile: Dockerfile
       args:
         NEXT_PUBLIC_API_URL: $NEXT_PUBLIC_API_URL
+        NEXT_PUBLIC_ZAPIER_APP_URL: $NEXT_PUBLIC_ZAPIER_APP_URL
     image: swarup325/faddy-frontend:latest
     ports:
       - "5173:5173"
