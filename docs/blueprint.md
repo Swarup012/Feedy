@@ -18,4 +18,4 @@
 - Body and headline font: 'Inter' (sans-serif) for a modern and readable interface.
 - Code font: 'Source Code Pro' for displaying code snippets.
 - Use simple, clear icons to represent feedback categories and actions.
-- Maintain a clean and organized layout with a focus on readability.
+- Maintain a clean and organized layout with a focus on readability ..
