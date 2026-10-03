@@ -5,7 +5,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { PaidFeatureGate } from "@/components/PaidFeatureGate";
 import { useOrganization } from "@/context/OrganizationContext";
 import api, { isPlanUpgradeRequired } from "@/lib/api";
-import { resolvePlan } from "@/config/plans";
+import { planAllowsFeature, resolvePlan } from "@/config/plans";
 import { MessageLimitCounter } from "@/components/MessageLimitCounter";
 import { Button } from "@/components/ui/button";
 import {
@@ -587,8 +587,10 @@ function AiChatContent() {
         }
         if (response.status === 403) {
           const json = await response.json().catch(() => ({}));
-          if (json.code === "AI_CHAT_LIMIT_REACHED") {
+          const code = json.errors?.code ?? json.code;
+          if (code === "AI_CHAT_LIMIT_REACHED") {
             setLimitReached(true);
+            setUsageRefreshKey((k) => k + 1);
             setMessages((prev) => prev.filter((m) => m.id !== aiMsgId));
             return;
           }
@@ -747,7 +749,7 @@ function AiChatContent() {
   };
 
   return (
-    <PaidFeatureGate featureName="AI Feedback Chat">
+    <PaidFeatureGate featureName="AI Feedback Chat" feature="ai_chat">
       <style>{`
         @keyframes msg-enter {
           from { opacity: 0; transform: translateY(6px); }
@@ -816,8 +818,8 @@ function AiChatContent() {
           {/* Input */}
           <div className="flex-shrink-0 px-3 py-3">
             <div className="max-w-3xl mx-auto space-y-2">
-              {/* Message limit counter (starter only) */}
-              {orgId && currentPlan !== "free" && (
+              {/* Message limit counter (any plan with a monthly quota) */}
+              {orgId && planAllowsFeature(currentPlan, "ai_chat") && (
                 <MessageLimitCounter
                   orgId={orgId}
                   plan={currentPlan}

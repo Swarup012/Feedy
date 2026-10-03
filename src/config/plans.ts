@@ -26,6 +26,7 @@ export interface PlanFeatures {
   integrations: boolean;
   autopilot_manual: boolean;
   ai_chat: boolean;
+  ai_chat_messages?: number;
   autopilot_auto: boolean;
   severity_rules: boolean;
   severity_ai: boolean;
@@ -58,24 +59,25 @@ export const PLANS: Record<PlanTier, PlanConfig> = {
     yearlyTotal: 0,
     features: {
       organizations: 1,
-      boards: 3,
-      posts_per_board: 5,
-      posts_per_month: 50,
+      boards: -1,
+      posts_per_board: -1,
+      posts_per_month: -1,
       team_members: 3,
-      admin_members: -1,
+      admin_members: 3,
       tracked_users: 20,
-      roadmap_items: 1,
-      custom_branding: false,
+      roadmap_items: -1,
+      custom_branding: true,
       custom_domain: 0,
-      advanced_analytics: false,
+      advanced_analytics: true,
       overage_allowed: false,
       // Feature access (tier gating)
       widget: true,
       webhooks_api: false,
-      integrations: false,
-      autopilot_manual: false,
-      ai_chat: false,
-      autopilot_auto: false,
+      integrations: true,
+      autopilot_manual: true,
+      ai_chat: true,
+      ai_chat_messages: 10,
+      autopilot_auto: true,
       severity_rules: true,
       severity_ai: false,
       notifications: false,
@@ -215,6 +217,7 @@ export function hasUnlimited(organization: { subscription_plan?: string; plan?: 
  */
 export function getFeatureLimit(plan: PlanTier, feature: keyof PlanFeatures): number {
   const value = PLANS[plan].features[feature];
+  if (typeof value !== 'number') return 0;
   return value === -1 ? Infinity : value;
 }
 
@@ -256,22 +259,22 @@ export function getPlanFeatureDisplay(tier: PlanTier): {
 
   if (tier === 'free') {
     features.push(
-      { text: '3 feedback boards', included: true },
-      { text: 'Track up to 20 users', included: true },
+      { text: 'Unlimited boards & posts', included: true, highlight: true },
       { text: 'Public roadmap & changelog', included: true },
-      { text: 'Feedback widget for your site', included: true },
+      { text: 'Track up to 20 users', included: true },
+      { text: 'Autopilot & 1 integration', included: true },
+      { text: 'AI chat - 10 credits/month', included: true },
+      { text: 'AI Insights dashboard', included: true, highlight: true },
       { text: 'Up to 3 team members', included: true },
+      { text: '3 admins', included: true },
     );
   } else if (tier === 'starter') {
     features.push(
       { text: 'Everything in Free, plus:', bold: true, included: true },
-      { text: 'Unlimited boards & posts', included: true, highlight: true },
-      { text: 'Up to 125+ tracked users', included: true },
-      { text: '5 admins', included: true },
-      { text: 'Autopilot', included: true, highlight: true },
+      { text: '125+ tracked users with overage', included: true, highlight: true },
       { text: 'AI chat - 50 credits/month', included: true },
-      { text: '1 integration', included: true },
-      { text: 'AI Insights dashboard', included: true, highlight: true },
+      { text: 'Unlimited team members', included: true },
+      { text: '5 admins', included: true },
     );
   } else {
     features.push(
@@ -279,7 +282,7 @@ export function getPlanFeatureDisplay(tier: PlanTier): {
       { text: 'Automatic feedback triage', included: true, highlight: true },
       { text: 'Urgent-issue flagging', included: true, highlight: true },
       { text: 'Instant alerts', included: true, highlight: true },
-      { text: 'Up to 125+ tracked users', included: true },
+      { text: '125+ tracked users', included: true },
       { text: '10 admins', included: true },
       { text: 'All integrations', included: true },
       { text: 'AI chat - unlimited', included: true },

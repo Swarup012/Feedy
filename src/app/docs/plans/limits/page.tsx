@@ -19,11 +19,11 @@ export default function PlanLimitsPage() {
             <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1">Free</h3>
             <p className="text-sm text-blue-600 dark:text-blue-400 font-semibold mb-3">$0/mo</p>
             <ul className="space-y-2 text-sm text-slate-600 dark:text-slate-400">
-              <li><strong>3</strong> boards</li>
-              <li><strong>5</strong> posts per board</li>
+              <li><strong>Unlimited</strong> boards &amp; posts</li>
               <li><strong>20</strong> tracked users (hard limit, no overage)</li>
-              <li><strong>3</strong> team members</li>
-              <li><strong>1</strong> roadmap item</li>
+              <li><strong>3</strong> team members, 3 admins</li>
+              <li><strong>Unlimited</strong> roadmap items</li>
+              <li>AI chat: <strong>10</strong> credits/month</li>
             </ul>
           </CardContent>
         </Card>

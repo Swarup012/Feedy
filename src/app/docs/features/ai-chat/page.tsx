@@ -159,7 +159,7 @@ export default function AIChatDocsPage() {
                   Understanding your plan
                 </p>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                  AI Chat requires Starter or Pro
+                  AI Chat: 10 credits/mo on Free, 50 on Starter, unlimited on Pro
                 </p>
               </CardContent>
             </Card>

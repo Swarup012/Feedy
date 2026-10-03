@@ -382,7 +382,7 @@ export default function PricingContent() {
                   </tr>
                   <tr>
                     <td className="py-4 px-6 text-sm text-gray-900 dark:text-white">Admin Roles</td>
-                    <td className="py-4 px-6 text-center text-sm text-gray-700 dark:text-gray-300">Included in 3</td>
+                    <td className="py-4 px-6 text-center text-sm text-gray-700 dark:text-gray-300">Up to 3 admins</td>
                     <td className="py-4 px-6 text-center text-sm font-semibold text-blue-600 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-900/10">Up to 5 admins</td>
                     <td className="py-4 px-6 text-center text-sm font-semibold text-blue-600 dark:text-blue-400">Up to 10 admins</td>
                   </tr>
@@ -399,13 +399,13 @@ export default function PricingContent() {
                   </tr>
                   <tr>
                     <td className="py-4 px-6 text-sm text-gray-900 dark:text-white">Feedback Boards</td>
-                    <td className="py-4 px-6 text-center text-sm text-gray-700 dark:text-gray-300">3 boards</td>
+                    <td className="py-4 px-6 text-center text-sm text-gray-700 dark:text-gray-300">Unlimited</td>
                     <td className="py-4 px-6 text-center text-sm font-semibold text-blue-600 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-900/10">Unlimited</td>
                     <td className="py-4 px-6 text-center text-sm font-semibold text-blue-600 dark:text-blue-400">Unlimited</td>
                   </tr>
                   <tr>
                     <td className="py-4 px-6 text-sm text-gray-900 dark:text-white">Posts per Board</td>
-                    <td className="py-4 px-6 text-center text-sm text-gray-700 dark:text-gray-300">5 posts</td>
+                    <td className="py-4 px-6 text-center text-sm text-gray-700 dark:text-gray-300">Unlimited</td>
                     <td className="py-4 px-6 text-center text-sm font-semibold text-blue-600 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-900/10">Unlimited</td>
                     <td className="py-4 px-6 text-center text-sm font-semibold text-blue-600 dark:text-blue-400">Unlimited</td>
                   </tr>
@@ -417,8 +417,8 @@ export default function PricingContent() {
                   </tr>
                   <tr>
                     <td className="py-4 px-6 text-sm text-gray-900 dark:text-white">Roadmap Items</td>
-                    <td className="py-4 px-6 text-center text-sm text-gray-700 dark:text-gray-300">1 roadmap</td>
-                    <td className="py-4 px-6 text-center text-sm font-semibold text-blue-600 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-900/10">1 roadmap</td>
+                    <td className="py-4 px-6 text-center text-sm text-gray-700 dark:text-gray-300">Unlimited</td>
+                    <td className="py-4 px-6 text-center text-sm font-semibold text-blue-600 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-900/10">Unlimited</td>
                     <td className="py-4 px-6 text-center text-sm font-semibold text-blue-600 dark:text-blue-400">Unlimited</td>
                   </tr>
 
@@ -428,7 +428,7 @@ export default function PricingContent() {
                   </tr>
                   <tr>
                     <td className="py-4 px-6 text-sm text-gray-900 dark:text-white">Custom Branding</td>
-                    <td className="py-4 px-6 text-center"><X className="w-5 h-5 text-gray-300 mx-auto" /></td>
+                    <td className="py-4 px-6 text-center"><Check className="w-5 h-5 text-green-500 mx-auto" /></td>
                     <td className="py-4 px-6 text-center bg-blue-50/50 dark:bg-blue-900/10"><Check className="w-5 h-5 text-green-500 mx-auto" /></td>
                     <td className="py-4 px-6 text-center"><Check className="w-5 h-5 text-green-500 mx-auto" /></td>
                   </tr>
@@ -440,7 +440,7 @@ export default function PricingContent() {
                   </tr>
                   <tr>
                     <td className="py-4 px-6 text-sm text-gray-900 dark:text-white">Analytics</td>
-                    <td className="py-4 px-6 text-center text-sm text-gray-700 dark:text-gray-300">Basic</td>
+                    <td className="py-4 px-6 text-center text-sm font-semibold text-blue-600 dark:text-blue-400">Advanced</td>
                     <td className="py-4 px-6 text-center text-sm font-semibold text-blue-600 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-900/10">Advanced</td>
                     <td className="py-4 px-6 text-center text-sm font-semibold text-blue-600 dark:text-blue-400">Advanced</td>
                   </tr>
@@ -452,7 +452,7 @@ export default function PricingContent() {
                   </tr>
                   <tr>
                     <td className="py-4 px-6 text-sm text-gray-900 dark:text-white">Integrations</td>
-                    <td className="py-4 px-6 text-center"><X className="w-5 h-5 text-gray-300 mx-auto" /></td>
+                    <td className="py-4 px-6 text-center text-sm text-gray-700 dark:text-gray-300">1</td>
                     <td className="py-4 px-6 text-center bg-blue-50/50 dark:bg-blue-900/10 text-sm font-medium">1</td>
                     <td className="py-4 px-6 text-center"><Check className="w-5 h-5 text-green-500 mx-auto" /></td>
                   </tr>

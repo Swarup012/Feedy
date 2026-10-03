@@ -560,7 +560,7 @@ export default function PricingPage() {
                         Admin Roles
                       </td>
                       <td className="py-4 px-6 text-center text-sm text-gray-700 dark:text-muted-foreground">
-                        Included in 3
+                        Up to 3 admins
                       </td>
                       <td className="py-4 px-6 text-center text-sm font-semibold text-blue-600 dark:text-blue-400">
                         Up to 5 admins
@@ -598,7 +598,7 @@ export default function PricingPage() {
                         Feedback Boards
                       </td>
                       <td className="py-4 px-6 text-center text-sm text-gray-700 dark:text-muted-foreground">
-                        3 boards
+                        Unlimited
                       </td>
                       <td className="py-4 px-6 text-center text-sm font-semibold text-blue-600 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-900/10">
                         Unlimited
@@ -612,7 +612,7 @@ export default function PricingPage() {
                         Posts per Board
                       </td>
                       <td className="py-4 px-6 text-center text-sm text-gray-700 dark:text-muted-foreground">
-                        5 posts
+                        Unlimited
                       </td>
                       <td className="py-4 px-6 text-center text-sm font-semibold text-blue-600 dark:text-blue-400">
                         Unlimited
@@ -640,10 +640,10 @@ export default function PricingPage() {
                         Roadmap Items
                       </td>
                       <td className="py-4 px-6 text-center text-sm text-gray-700 dark:text-muted-foreground">
-                        1 roadmap
+                        Unlimited
                       </td>
                       <td className="py-4 px-6 text-center text-sm font-semibold text-blue-600 dark:text-blue-400">
-                        1 roadmap
+                        Unlimited
                       </td>
                         <td className="py-4 px-6 text-center text-sm font-semibold text-blue-600 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-900/10">
                         Unlimited
@@ -678,7 +678,7 @@ export default function PricingPage() {
                         Integrations
                       </td>
                       <td className="py-4 px-6 text-center">
-                        <X className="w-5 h-5 text-gray-300 mx-auto" />
+                        <Check className="w-5 h-5 text-green-500 mx-auto" />
                       </td>
                       <td className="py-4 px-6 text-center bg-blue-50/50 dark:bg-blue-900/10">
                         <Check className="w-5 h-5 text-green-500 mx-auto" />
@@ -691,14 +691,14 @@ export default function PricingPage() {
                       <td className="py-4 px-6 text-sm text-gray-900 dark:text-white">
                         AI Chat
                       </td>
-                      <td className="py-4 px-6 text-center">
-                        <X className="w-5 h-5 text-gray-300 mx-auto" />
+                      <td className="py-4 px-6 text-center text-sm text-gray-700 dark:text-muted-foreground">
+                        10 credits
                       </td>
-                      <td className="py-4 px-6 text-center bg-blue-50/50 dark:bg-blue-900/10">
-                        <Check className="w-5 h-5 text-green-500 mx-auto" />
+                      <td className="py-4 px-6 text-center text-sm font-semibold text-blue-600 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-900/10">
+                        50 credits
                       </td>
-                      <td className="py-4 px-6 text-center bg-blue-50/50 dark:bg-blue-900/10">
-                        <Check className="w-5 h-5 text-green-500 mx-auto" />
+                      <td className="py-4 px-6 text-center text-sm font-semibold text-blue-600 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-900/10">
+                        Unlimited
                       </td>
                     </tr>
                     <tr>
@@ -706,7 +706,7 @@ export default function PricingPage() {
                         Autopilot
                       </td>
                       <td className="py-4 px-6 text-center">
-                        <X className="w-5 h-5 text-gray-300 mx-auto" />
+                        <Check className="w-5 h-5 text-green-500 mx-auto" />
                       </td>
                       <td className="py-4 px-6 text-center bg-blue-50/50 dark:bg-blue-900/10">
                         <Check className="w-5 h-5 text-green-500 mx-auto" />
@@ -748,7 +748,7 @@ export default function PricingPage() {
                         Custom Branding
                       </td>
                       <td className="py-4 px-6 text-center">
-                        <X className="w-5 h-5 text-gray-300 mx-auto" />
+                        <Check className="w-5 h-5 text-green-500 mx-auto" />
                       </td>
                       <td className="py-4 px-6 text-center bg-blue-50/50 dark:bg-blue-900/10">
                         <Check className="w-5 h-5 text-green-500 mx-auto" />
@@ -776,7 +776,7 @@ export default function PricingPage() {
                         Analytics
                       </td>
                       <td className="py-4 px-6 text-center text-sm text-gray-700 dark:text-muted-foreground">
-                        Basic
+                        Advanced
                       </td>
                       <td className="py-4 px-6 text-center text-sm font-semibold text-blue-600 dark:text-blue-400">
                         Advanced

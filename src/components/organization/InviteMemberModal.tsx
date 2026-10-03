@@ -233,7 +233,7 @@ export function InviteMemberModal({
       open={showUpgradeDialog}
       onOpenChange={setShowUpgradeDialog}
       title="Upgrade to Add More Team Members"
-      description="You've reached the team member limit for the Free plan (3 members). Upgrade to Starter for 5 team members."
+      description="You've reached the team member limit for the Free plan (3 members). Upgrade to Starter for unlimited team members."
       feature="team_members"
     />
   </>

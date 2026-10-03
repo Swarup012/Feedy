@@ -124,7 +124,6 @@ function AutopilotPageInner() {
   const [loadingIntegrations, setLoadingIntegrations] = useState(true);
 
   const currentPlan = resolvePlan(organization);
-  const isStarter = currentPlan === 'starter';
 
   const [rawText, setRawText] = useState('');
   const [rawAuthor, setRawAuthor] = useState('');
@@ -307,11 +306,11 @@ function AutopilotPageInner() {
   }
 
   const hasConnectedIntegrations = connectedProviders.size > 0;
-  const starterLimitReached = isStarter && connectedProviders.size >= 1;
+  const starterLimitReached = currentPlan !== 'pro' && connectedProviders.size >= 1;
 
   if (!loadingIntegrations && !hasConnectedIntegrations) {
     return (
-      <PaidFeatureGate featureName="Autopilot">
+      <PaidFeatureGate featureName="Autopilot" feature="autopilot_manual">
       <div className={`${WIDE_CONTAINER} h-full flex flex-col py-6 bg-background`}>
         <header className="shrink-0 mb-6">
           <h1 className="font-switzer text-xl font-semibold tracking-tight">Get Started with Autopilot</h1>
@@ -352,7 +351,7 @@ function AutopilotPageInner() {
   const empty = EMPTY_MESSAGES[statusFilter] || EMPTY_MESSAGES.all;
 
   return (
-    <PaidFeatureGate featureName="Autopilot">
+    <PaidFeatureGate featureName="Autopilot" feature="autopilot_manual">
     <div className={`${WIDE_CONTAINER} h-full flex flex-col py-6 bg-background`}>
       {/* Header */}
       <header className="shrink-0 mb-6">

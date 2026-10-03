@@ -84,7 +84,6 @@ function IntegrationsPageInner() {
   const searchParams = useSearchParams();
   const orgId = organization?.id;
   const currentPlan = resolvePlan(organization);
-  const isStarter = currentPlan === 'starter';
 
   const [intercomStatus, setIntercomStatus] = useState<IntercomStatus | null>(null);
   const [discordStatus, setDiscordStatus] = useState<DiscordStatus | null>(null);
@@ -773,10 +772,10 @@ function IntegrationsPageInner() {
   const needsGithubReconnect = githubStatus?.status === 'error';
 
   const activeCount = [isDiscordActive, isIntercomActive, isSlackActive, isGithubActive].filter(Boolean).length;
-  const starterLimitReached = isStarter && activeCount >= 1;
+  const starterLimitReached = currentPlan !== 'pro' && activeCount >= 1;
 
   return (
-    <PaidFeatureGate featureName="Integrations">
+    <PaidFeatureGate featureName="Integrations" feature="integrations">
     <div className="space-y-6">
       <div>
         <h1 className="text-lg font-bold tracking-tight">Integrations</h1>

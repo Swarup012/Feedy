@@ -1,7 +1,7 @@
 'use client';
 
 import { useOrganization } from '@/context/OrganizationContext';
-import { isFree } from '@/config/plans';
+import { isFree, planAllowsFeature, resolvePlan, type PlanFeatures } from '@/config/plans';
 import { Lock, Sparkles } from 'lucide-react';
 import { useState } from 'react';
 import { UpgradeDialog } from '@/components/UpgradeDialog';
@@ -10,13 +10,18 @@ import { Button } from '@/components/ui/button';
 interface PaidFeatureGateProps {
   children: React.ReactNode;
   featureName?: string;
+  /** Plan feature key that unlocks this content. Defaults to "any paid plan". */
+  feature?: keyof PlanFeatures;
 }
 
-export function PaidFeatureGate({ children, featureName = 'this feature' }: PaidFeatureGateProps) {
+export function PaidFeatureGate({ children, featureName = 'this feature', feature }: PaidFeatureGateProps) {
   const { organization, loading } = useOrganization();
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  const showGate = !organization || isFree(organization);
+  const showGate = !organization
+    || (feature
+      ? !planAllowsFeature(resolvePlan(organization), feature)
+      : isFree(organization));
 
   if (loading) return <>{children}</>;
   if (!showGate) return <>{children}</>;

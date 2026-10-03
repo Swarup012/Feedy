@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { useErrorHandler } from "@/hooks/useErrorHandler";
 import { useOrganization } from "@/context/OrganizationContext";
-import { isPaidPlan } from "@/config/plans";
+import { planAllowsFeature, resolvePlan } from "@/config/plans";
 import { boardService } from "@/services/boardService";
 import api from "@/lib/api";
 
@@ -59,10 +59,10 @@ export default function AdminPage() {
 
   const pageRef = useRef(null);
 
-  // Check if user has a paid plan (Starter or Pro)
-  const hasPaidPlan = isPaidPlan(organization);
+  // Expert view requires the advanced_analytics feature (Free, Starter, Pro)
+  const hasPaidPlan = !!organization && planAllowsFeature(resolvePlan(organization), "advanced_analytics");
 
-  // Free users are locked to basic view, paid users default to expert view
+  // Users without advanced analytics are locked to basic view
   const [isBasicView, setIsBasicView] = useState(!hasPaidPlan);
   const [upgradeDialogOpen, setUpgradeDialogOpen] = useState(false);
 
