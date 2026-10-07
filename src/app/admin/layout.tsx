@@ -17,6 +17,7 @@ import { OrganizationSwitcher } from "@/components/organization/OrganizationSwit
 import { ChangelogPopover } from "@/components/changelog/ChangelogPopover";
 import { LayoutDashboard, Sun, Moon, CreditCard, BotMessageSquare } from "lucide-react";
 import {useState,useEffect} from "react"
+import { useTheme } from "@/components/theme-provider";
 
 export default function AdminLayout({
   children,
@@ -25,21 +26,12 @@ export default function AdminLayout({
   const router = useRouter();
   const { user, logout } = useAuth();
 
-  const [theme, setTheme] = useState<"light" | "dark">("light");
+  const { resolvedTheme, setTheme } = useTheme();
   const [viewMode, setViewMode] = useState<"admin" | "public">("admin");
   const [feedbackPath, setFeedbackPath] = useState('/admin/feedback'); // Default to redirect page (handles board routing)
   const [boardsLoaded, setBoardsLoaded] = useState(false);
 
   useEffect(() => {
-    const savedTheme = localStorage.getItem("theme") as "light" | "dark";
-    const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
-      .matches
-      ? "dark"
-      : "light";
-    const initialTheme = savedTheme || systemTheme;
-    setTheme(initialTheme);
-    document.documentElement.className = initialTheme;
-
     // Validate and set feedback path
     const validateFeedbackPath = async () => {
       try {
@@ -75,10 +67,7 @@ export default function AdminLayout({
   }, []);
 
   const toggleTheme = () => {
-    const newTheme = theme === "light" ? "dark" : "light";
-    setTheme(newTheme);
-    document.documentElement.className = newTheme;
-    localStorage.setItem("theme", newTheme);
+    setTheme(resolvedTheme === "light" ? "dark" : "light");
   };
   const handleToggle = () => {
     if (viewMode === "admin") {
@@ -156,9 +145,9 @@ export default function AdminLayout({
             <button
               onClick={toggleTheme}
               className="p-2 rounded-lg bg-white/20 hover:bg-white/30 hover:scale-105 transition-all duration-300"
-              aria-label={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
+              aria-label={`Switch to ${resolvedTheme === "light" ? "dark" : "light"} mode`}
             >
-              {theme === "light" ? (
+              {resolvedTheme === "light" ? (
                 <Moon className="h-4 w-4 text-white" />
               ) : (
                 <Sun className="h-4 w-4 text-white" />

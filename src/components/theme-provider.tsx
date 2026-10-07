@@ -12,15 +12,24 @@ type ThemeProviderProps = {
 
 type ThemeProviderState = {
   theme: string
+  resolvedTheme: "light" | "dark"
   setTheme: (theme: string) => void
 }
 
 const initialState: ThemeProviderState = {
   theme: "system",
+  resolvedTheme: "light",
   setTheme: () => null,
 }
 
 const ThemeProviderContext = React.createContext<ThemeProviderState>(initialState)
+
+const LEGACY_STORAGE_KEY = "theme"
+
+function resolveTheme(theme: string, prefersDark: boolean): "light" | "dark" {
+  if (theme === "system") return prefersDark ? "dark" : "light"
+  return theme === "dark" ? "dark" : "light"
+}
 
 export function ThemeProvider({
   children,
@@ -29,34 +38,38 @@ export function ThemeProvider({
   ...props
 }: ThemeProviderProps) {
   const [theme, setTheme] = React.useState(defaultTheme)
+  const [resolvedTheme, setResolvedTheme] = React.useState<"light" | "dark">(
+    defaultTheme === "dark" ? "dark" : "light",
+  )
 
   // Sync from localStorage after mount (client-only) to avoid SSR/client mismatch
   React.useEffect(() => {
-    const stored = window.localStorage.getItem(storageKey)
+    const stored =
+      window.localStorage.getItem(storageKey) ??
+      window.localStorage.getItem(LEGACY_STORAGE_KEY)
     if (stored) setTheme(stored)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   React.useEffect(() => {
     const root = window.document.documentElement
+    const media = window.matchMedia("(prefers-color-scheme: dark)")
 
-    root.classList.remove("light", "dark")
-
-    if (theme === "system") {
-      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
-        .matches
-        ? "dark"
-        : "light"
-
-      root.classList.add(systemTheme)
-      return
+    const apply = () => {
+      const resolved = resolveTheme(theme, media.matches)
+      setResolvedTheme(resolved)
+      root.classList.remove("light", "dark")
+      root.classList.add(resolved)
     }
 
-    root.classList.add(theme)
+    apply()
+    media.addEventListener("change", apply)
+    return () => media.removeEventListener("change", apply)
   }, [theme])
 
   const value = {
     theme,
+    resolvedTheme,
     setTheme: (theme: string) => {
       if (typeof window !== 'undefined') {
         window.localStorage.setItem(storageKey, theme)

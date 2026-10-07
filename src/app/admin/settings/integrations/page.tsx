@@ -2,7 +2,6 @@
 
 import { Suspense, useCallback, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import Link from 'next/link';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { PaidFeatureGate } from '@/components/PaidFeatureGate';
 import { ProFeatureGate } from '@/components/ProFeatureGate';
@@ -33,7 +32,6 @@ import {
   Loader2,
   Hash,
   Zap,
-  ExternalLink,
 } from 'lucide-react';
 import {
   autopilotService,
@@ -665,6 +663,21 @@ function IntegrationsPageInner() {
     githubService.startConnect(orgId);
   };
 
+  const handleConnectZapier = () => {
+    if (ZAPIER_APP_URL) {
+      window.open(ZAPIER_APP_URL, '_blank', 'noopener,noreferrer');
+      toast({
+        title: 'Opening Zapier',
+        description:
+          'Approving access creates an API key for Zapier — revoke it any time on the API keys page.',
+      });
+      return;
+    }
+    // No listing URL configured yet: the manual path still works —
+    // create an API key and paste it into Zapier.
+    window.open('/admin/api-keys', '_blank', 'noopener,noreferrer');
+  };
+
   const handleDisconnectIntercom = async () => {
     if (!orgId) return;
     setDisconnectingIntercom(true);
@@ -1247,63 +1260,14 @@ function IntegrationsPageInner() {
                   disabled={starterLimitReached}
                 />
               )}
-            </div>
-
-            {/* ── Zapier — visible to everyone; actions are admin/owner only and Pro-gated ── */}
-            <div className="max-w-lg">
               <ProFeatureGate featureName="API Access">
-                <div className="rounded-xl border bg-card px-4 py-3 space-y-3">
-                  <div className="flex items-center gap-3">
-                    <div
-                      className="h-8 w-8 rounded-lg flex items-center justify-center shrink-0"
-                      style={{ backgroundColor: `${ZAPIER_BRAND_COLOR}15` }}
-                    >
-                      <Zap className="h-4 w-4" style={{ color: ZAPIER_BRAND_COLOR }} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-sm font-semibold">Zapier</h3>
-                      <p className="text-xs text-muted-foreground mt-0.5">
-                        Send feedback into Faddy from 7,000+ apps, or trigger Zaps when new posts arrive.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-wrap items-center gap-2">
-                    {ZAPIER_APP_URL ? (
-                      <Button asChild variant="outline" size="sm" className="gap-1.5">
-                        <a href={ZAPIER_APP_URL} target="_blank" rel="noopener noreferrer">
-                          <ExternalLink className="h-3.5 w-3.5" /> Open in Zapier
-                        </a>
-                      </Button>
-                    ) : (
-                      <Button variant="outline" size="sm" disabled>
-                        Coming soon
-                      </Button>
-                    )}
-                  </div>
-
-                  <ol className="space-y-1 text-xs text-muted-foreground list-decimal pl-4">
-                    <li>Open the Faddy app in Zapier</li>
-                    <li>Click Connect and approve access</li>
-                    <li>Build your Zap</li>
-                  </ol>
-
-                  <p className="text-xs text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 rounded-lg px-3 py-2">
-                    Approving access creates an API key for Zapier. You can revoke it any
-                    time on the API keys page.
-                  </p>
-
-                  <p className="text-xs text-muted-foreground">
-                    <Link
-                      href="/admin/api-docs"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="underline underline-offset-2 hover:text-foreground"
-                    >
-                      Read the API docs
-                    </Link>
-                  </p>
-                </div>
+                <IntegrationCardAdd
+                  name="Zapier"
+                  icon={<Zap className="h-5 w-5" style={{ color: ZAPIER_BRAND_COLOR }} />}
+                  brandColor={ZAPIER_BRAND_COLOR}
+                  description="Send feedback into Faddy from 7,000+ apps, or trigger Zaps when new posts arrive."
+                  onConnect={handleConnectZapier}
+                />
               </ProFeatureGate>
             </div>
           </section>

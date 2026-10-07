@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { Moon, Sun } from 'lucide-react';
+import { Check, Moon, Sun } from 'lucide-react';
 import { useTheme } from '@/components/theme-provider';
 import { Button } from '@/components/ui/button';
 import {
@@ -12,7 +12,16 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 export function ThemeToggle() {
-  const { setTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
+
+  const item = (value: string, label: string) => (
+    <DropdownMenuItem onClick={() => setTheme(value)}>
+      <span className="flex items-center gap-2">
+        {theme === value && <Check className="h-4 w-4" />}
+        {label}
+      </span>
+    </DropdownMenuItem>
+  );
 
   return (
     <DropdownMenu>
@@ -24,15 +33,9 @@ export function ThemeToggle() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="z-[100]">
-        <DropdownMenuItem onClick={() => setTheme('light')}>
-          Light
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme('dark')}>
-          Dark
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme('system')}>
-          System
-        </DropdownMenuItem>
+        {item('light', 'Light')}
+        {item('dark', 'Dark')}
+        {item('system', 'System')}
       </DropdownMenuContent>
     </DropdownMenu>
   );
