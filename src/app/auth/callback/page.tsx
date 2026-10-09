@@ -107,12 +107,14 @@ export default function AuthCallback() {
             clearReturnUrl();
             // Use window.location.href for full page reload to refresh AuthContext
             window.location.href = returnUrl;
-          } else if (needsOnboarding) {
+          } else if (needsOnboarding || !backendUser?.current_organization_id) {
             console.log('🔄 Redirecting to onboarding (new user)');
             router.push('/onboarding');
           } else {
-            console.log('🔄 Redirecting to admin dashboard');
-            router.push('/admin/feedback');
+            const orgRole = backendUser?.organization_role;
+            const dest = orgRole === 'owner' || orgRole === 'admin' ? '/admin' : '/dashboard';
+            console.log(`🔄 Redirecting to ${dest} (role: ${orgRole})`);
+            router.push(dest);
           }
         } else {
           console.error('Backend response:', response.data);

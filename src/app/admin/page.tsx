@@ -16,7 +16,15 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { UpgradeDialog } from "@/components/UpgradeDialog";
 
-import { Clock, Users, ThumbsUp, FileText } from "lucide-react";
+import {
+  Clock,
+  Users,
+  ThumbsUp,
+  FileText,
+  Zap,
+  LayoutGrid,
+  ArrowRight,
+} from "lucide-react";
 
 import { TrackedUsersWidget } from "@/components/TrackedUsersWidget";
 import { TrackedUsersLimitBanner } from "@/components/TrackedUsersLimitBanner";
@@ -132,6 +140,9 @@ export default function AdminPage() {
     }
   };
 
+  const isEmpty =
+    !loading && stats.totalPosts === 0 && boards.length === 0;
+
   return (
     <ProtectedRoute allowedRoles={["owner", "admin"]}>
       <UpgradeDialog
@@ -144,57 +155,63 @@ export default function AdminPage() {
         className="bg-background flex flex-col min-h-full"
       >
         <div className="max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 flex flex-col space-y-4">
-          {/* HEADER - Clean Canny-style header */}
-          <section className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 shrink-0">
-            <div className="space-y-1">
-              <div>
-                <h1 className="text-2xl sm:text-3xl font-switzer font-semibold tracking-tight text-foreground">
-                  {organization?.name || "Dashboard"}
-                </h1>
-                <p className="text-sm text-muted-foreground mt-0.5">
-                  What needs your attention right now
-                </p>
-              </div>
-            </div>
+          {/* HEADER */}
+          <section className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 shrink-0">
+            <h1 className="text-xl sm:text-2xl font-switzer font-medium tracking-tight text-foreground">
+              What needs your attention right now
+            </h1>
             <div className="flex items-center gap-4">
-              {/* View Mode Switcher */}
-              <div className="inline-flex items-center rounded-lg border border-border bg-background p-1 shadow-sm">
-                <button
-                  onClick={() => setIsBasicView(true)}
-                  className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
-                    isBasicView
-                      ? "bg-primary text-primary-foreground shadow-sm"
-                      : "text-muted-foreground hover:text-foreground"
+              <div className="flex items-center gap-2.5">
+                <span
+                  className={`text-sm font-medium transition-colors ${
+                    isBasicView ? "text-foreground" : "text-muted-foreground"
                   }`}
                 >
                   Basic
-                </button>
+                </span>
                 <button
+                  role="switch"
+                  aria-checked={!isBasicView}
+                  aria-label="Toggle expert view"
                   onClick={() =>
                     hasPaidPlan
-                      ? setIsBasicView(false)
+                      ? setIsBasicView(v => !v)
                       : setUpgradeDialogOpen(true)
                   }
-                  className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
+                  className={`relative inline-flex h-6 w-11 flex-shrink-0 items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
                     !isBasicView && hasPaidPlan
-                      ? "bg-primary text-primary-foreground shadow-sm"
-                      : "text-muted-foreground hover:text-foreground"
+                      ? "bg-primary"
+                      : "bg-muted border border-border"
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 rounded-full bg-background shadow-sm transition-transform ${
+                      !isBasicView && hasPaidPlan
+                        ? "translate-x-6"
+                        : "translate-x-1"
+                    }`}
+                  />
+                </button>
+                <span
+                  className={`text-sm font-medium transition-colors ${
+                    !isBasicView && hasPaidPlan
+                      ? "text-foreground"
+                      : "text-muted-foreground"
                   }`}
                 >
                   Expert
-                </button>
+                </span>
               </div>
               <Button
                 onClick={() => router.push("/dashboard")}
                 variant="outline"
-                className="gap-2 h-11 px-5 transition-all"
+                className="gap-2 h-9 px-4 text-sm font-medium"
               >
                 <Users className="h-4 w-4" />
-                <span className="font-semibold">Preview member view</span>
+                Member view
               </Button>
             </div>
           </section>
-
           {/* TRACKED USERS LIMIT WARNING */}
           <TrackedUsersLimitBanner />
 
@@ -325,6 +342,49 @@ export default function AdminPage() {
                         ))}
                       </div>
                     </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : isEmpty ? (
+            /* ===== EMPTY STATE — first-run ===== */
+            <div className="flex-1 overflow-y-auto min-h-0 pb-4">
+              <div className="rounded-xl border border-border bg-card">
+                <div className="flex flex-col items-center text-center px-6 py-12 sm:py-16">
+                  <img
+                    src="/images/dashboard/undraw_generating-response_y0h5.svg"
+                    alt=""
+                    aria-hidden="true"
+                    className="w-[260px] sm:w-[320px] h-auto mb-8 select-none"
+                  />
+                  <h2 className="text-xl font-switzer font-semibold text-foreground">
+                    No feedback yet
+                  </h2>
+                  <p className="text-sm text-muted-foreground mt-2 max-w-md">
+                    Create a board, connect Autopilot, and know what your
+                    customers want.
+                  </p>
+                  <Button
+                    onClick={() => router.push("/admin/feedback/welcome")}
+                    className="h-11 px-6 gap-2 mt-6 font-switzer font-semibold"
+                  >
+                    Create board
+                  </Button>
+                  <div className="flex items-center gap-3 sm:gap-4 mt-10 pt-8 border-t border-border w-full max-w-md justify-center text-xs text-muted-foreground">
+                    <span className="flex items-center gap-1.5">
+                      <LayoutGrid className="w-3.5 h-3.5 text-primary" />
+                      Create board
+                    </span>
+                    <ArrowRight className="w-3 h-3 opacity-40" />
+                    <span className="flex items-center gap-1.5">
+                      <Zap className="w-3.5 h-3.5 text-primary" />
+                      Connect Autopilot
+                    </span>
+                    <ArrowRight className="w-3 h-3 opacity-40" />
+                    <span className="flex items-center gap-1.5">
+                      <ThumbsUp className="w-3.5 h-3.5 text-primary" />
+                      Know your customers
+                    </span>
                   </div>
                 </div>
               </div>

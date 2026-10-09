@@ -66,7 +66,7 @@ export const PLANS: Record<PlanTier, PlanConfig> = {
       admin_members: 3,
       tracked_users: 20,
       roadmap_items: -1,
-      custom_branding: true,
+      custom_branding: false,
       custom_domain: 0,
       advanced_analytics: true,
       overage_allowed: false,

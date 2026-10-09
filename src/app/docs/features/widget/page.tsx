@@ -189,7 +189,7 @@ export default function WidgetDocsPage() {
                   Understanding your plan
                 </p>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                  Custom branding included on all plans
+                  Custom branding is available on Starter and Pro plans.
                 </p>
               </CardContent>
             </Card>

@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { CreditCard, Zap, ArrowDown, XCircle, Loader2 } from 'lucide-react';
 import { SubscriptionInfo } from '@/services/paddleService';
 import { PLANS } from '@/config/plans';
+import { useOrganization } from '@/context/OrganizationContext';
 
 interface PlanCardProps {
   subscription: SubscriptionInfo;
@@ -22,6 +23,10 @@ export function PlanCard({
   onCancel,
   actionLoading,
 }: PlanCardProps) {
+  // Backend gates create-checkout / cancel / update-plan to the org owner (authorize(['owner'])).
+  const { organizationRole } = useOrganization();
+  const canManageBilling = organizationRole === 'owner';
+
   const planName = subscription.plan
     ? subscription.plan.charAt(0).toUpperCase() + subscription.plan.slice(1)
     : 'Free';
@@ -139,59 +144,65 @@ export function PlanCard({
             </div>
           )}
 
-          {/* Action Buttons */}
-          <div className="flex flex-wrap gap-3 pt-2">
-            {isFree ? (
-              <Button className="bg-blue-600 hover:bg-blue-700" onClick={onUpgrade}>
-                <Zap className="h-4 w-4 mr-2" />
-                Choose a Plan
-              </Button>
-            ) : (
-              <>
-                {subscription.plan === 'starter' && !isCancelled && (
-                  <Button
-                    className="bg-blue-600 hover:bg-blue-700"
-                    onClick={onUpgrade}
-                    disabled={actionLoading}
-                  >
-                    {actionLoading ? (
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    ) : (
-                      <Zap className="h-4 w-4 mr-2" />
-                    )}
-                    Upgrade to Pro
-                  </Button>
-                )}
+          {/* Action Buttons — owner only (billing mutations are 403 for everyone else) */}
+          {!canManageBilling ? (
+            <p className="pt-2 text-sm text-gray-500 dark:text-gray-400" data-testid="owner-only-note">
+              Only the organization owner can change billing.
+            </p>
+          ) : (
+            <div className="flex flex-wrap gap-3 pt-2">
+              {isFree ? (
+                <Button className="bg-blue-600 hover:bg-blue-700" onClick={onUpgrade}>
+                  <Zap className="h-4 w-4 mr-2" />
+                  Choose a Plan
+                </Button>
+              ) : (
+                <>
+                  {subscription.plan === 'starter' && !isCancelled && (
+                    <Button
+                      className="bg-blue-600 hover:bg-blue-700"
+                      onClick={onUpgrade}
+                      disabled={actionLoading}
+                    >
+                      {actionLoading ? (
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      ) : (
+                        <Zap className="h-4 w-4 mr-2" />
+                      )}
+                      Upgrade to Pro
+                    </Button>
+                  )}
 
-                {subscription.plan === 'pro' && !isCancelled && (
-                  <Button
-                    variant="outline"
-                    onClick={onDowngrade}
-                    disabled={actionLoading}
-                  >
-                    {actionLoading ? (
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    ) : (
-                      <ArrowDown className="h-4 w-4 mr-2" />
-                    )}
-                    Downgrade to Starter
-                  </Button>
-                )}
+                  {subscription.plan === 'pro' && !isCancelled && (
+                    <Button
+                      variant="outline"
+                      onClick={onDowngrade}
+                      disabled={actionLoading}
+                    >
+                      {actionLoading ? (
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      ) : (
+                        <ArrowDown className="h-4 w-4 mr-2" />
+                      )}
+                      Downgrade to Starter
+                    </Button>
+                  )}
 
-                {!isCancelled && (
-                  <Button
-                    variant="ghost"
-                    className="text-gray-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
-                    onClick={onCancel}
-                    disabled={actionLoading}
-                  >
-                    <XCircle className="h-4 w-4 mr-2" />
-                    Cancel Subscription
-                  </Button>
-                )}
-              </>
-            )}
-          </div>
+                  {!isCancelled && (
+                    <Button
+                      variant="ghost"
+                      className="text-gray-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                      onClick={onCancel}
+                      disabled={actionLoading}
+                    >
+                      <XCircle className="h-4 w-4 mr-2" />
+                      Cancel Subscription
+                    </Button>
+                  )}
+                </>
+              )}
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>

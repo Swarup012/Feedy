@@ -27,7 +27,7 @@ export default function PlansComparisonPage() {
               "Unlimited roadmap items",
               "Autopilot & 1 integration",
               "AI chat - 10 credits/month",
-              "Custom branding & advanced analytics",
+              "Advanced analytics",
               "Public roadmap & changelog",
               "Feedback widget",
             ],

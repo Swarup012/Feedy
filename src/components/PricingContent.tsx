@@ -428,7 +428,7 @@ export default function PricingContent() {
                   </tr>
                   <tr>
                     <td className="py-4 px-6 text-sm text-gray-900 dark:text-white">Custom Branding</td>
-                    <td className="py-4 px-6 text-center"><Check className="w-5 h-5 text-green-500 mx-auto" /></td>
+                    <td className="py-4 px-6 text-center"><X className="w-5 h-5 text-gray-300 mx-auto" /></td>
                     <td className="py-4 px-6 text-center bg-blue-50/50 dark:bg-blue-900/10"><Check className="w-5 h-5 text-green-500 mx-auto" /></td>
                     <td className="py-4 px-6 text-center"><Check className="w-5 h-5 text-green-500 mx-auto" /></td>
                   </tr>

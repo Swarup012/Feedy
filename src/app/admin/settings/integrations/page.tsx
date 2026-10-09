@@ -4,7 +4,6 @@ import { Suspense, useCallback, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { PaidFeatureGate } from '@/components/PaidFeatureGate';
-import { ProFeatureGate } from '@/components/ProFeatureGate';
 import { useOrganization } from '@/context/OrganizationContext';
 import { useToast } from '@/hooks/use-toast';
 import { resolvePlan } from '@/config/plans';
@@ -39,6 +38,7 @@ import {
   type ChannelBoardMapping,
 } from '@/services/autopilotService';
 import { boardService, type Board } from '@/services/boardService';
+import { apiKeyService } from '@/services/apiKeyService';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -87,6 +87,7 @@ function IntegrationsPageInner() {
   const [discordStatus, setDiscordStatus] = useState<DiscordStatus | null>(null);
   const [slackStatus, setSlackStatus] = useState<SlackStatus | null>(null);
   const [githubStatus, setGithubStatus] = useState<GitHubStatus | null>(null);
+  const [zapierActive, setZapierActive] = useState(false);
   const [discordChannels, setDiscordChannels] = useState<DiscordChannel[]>([]);
   const [slackChannels, setSlackChannels] = useState<SlackChannel[]>([]);
 
@@ -195,6 +196,22 @@ function IntegrationsPageInner() {
       setLoading(false);
     }
   }, [orgId, toast]);
+
+  // Zapier connection = a live "Zapier OAuth ·" API key minted by the OAuth flow.
+  // Counts toward the free/starter 1-integration slot like every other card.
+  // Re-checked on focus because the OAuth flow opens in another tab.
+  useEffect(() => {
+    if (!orgId) return;
+    const check = () => {
+      apiKeyService
+        .listKeys()
+        .then(keys => setZapierActive(keys.some(k => k.name.startsWith('Zapier OAuth'))))
+        .catch(err => console.error('Failed to load Zapier status:', err));
+    };
+    check();
+    window.addEventListener('focus', check);
+    return () => window.removeEventListener('focus', check);
+  }, [orgId]);
 
   useEffect(() => {
     if (!orgId) return;
@@ -784,7 +801,7 @@ function IntegrationsPageInner() {
   const isGithubActive = githubStatus?.status === 'active';
   const needsGithubReconnect = githubStatus?.status === 'error';
 
-  const activeCount = [isDiscordActive, isIntercomActive, isSlackActive, isGithubActive].filter(Boolean).length;
+  const activeCount = [isDiscordActive, isIntercomActive, isSlackActive, isGithubActive, zapierActive].filter(Boolean).length;
   const starterLimitReached = currentPlan !== 'pro' && activeCount >= 1;
 
   return (
@@ -1260,15 +1277,16 @@ function IntegrationsPageInner() {
                   disabled={starterLimitReached}
                 />
               )}
-              <ProFeatureGate featureName="API Access">
+              {!zapierActive && (
                 <IntegrationCardAdd
                   name="Zapier"
                   icon={<Zap className="h-5 w-5" style={{ color: ZAPIER_BRAND_COLOR }} />}
                   brandColor={ZAPIER_BRAND_COLOR}
                   description="Send feedback into Faddy from 7,000+ apps, or trigger Zaps when new posts arrive."
                   onConnect={handleConnectZapier}
+                  disabled={starterLimitReached}
                 />
-              </ProFeatureGate>
+              )}
             </div>
           </section>
         </>

@@ -3,6 +3,7 @@ export const INTEGRATION_BRAND_COLORS = {
   intercom: '#1F8DED',
   slack: '#E01E5A',
   github: '#24292F',
+  zapier: '#FF4F00',
 } as const;
 
 export type IntegrationProvider = keyof typeof INTEGRATION_BRAND_COLORS;

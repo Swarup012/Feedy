@@ -143,7 +143,7 @@ function AuthorizeInner() {
       organizations.filter(
         (org) =>
           (org.role === 'owner' || org.role === 'admin') &&
-          planAllowsFeature(resolvePlan(org), 'api_access')
+          planAllowsFeature(resolvePlan(org), 'integrations')
       ),
     [organizations]
   );
@@ -258,7 +258,7 @@ function AuthorizeInner() {
     return (
       <ErrorScreen
         title="No organization can connect"
-        message="You need to be an owner or admin of an organization on the Pro plan to connect Zapier."
+        message="You need to be an owner or admin of an organization to connect Zapier."
       />
     );
   }

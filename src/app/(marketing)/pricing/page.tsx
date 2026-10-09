@@ -39,7 +39,9 @@ const IS_SANDBOX = !PADDLE_CLIENT_TOKEN.startsWith('live_');
 export default function PricingPage() {
   const router = useRouter();
   const { user } = useAuth();
-  const { organization } = useOrganization();
+  const { organization, organizationRole } = useOrganization();
+  // Checkout creation is owner-only on the backend; null role = logged out (existing redirect flow).
+  const canManageBilling = !organizationRole || organizationRole === "owner";
   const { toast } = useToast();
   const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">(
     "monthly",
@@ -69,6 +71,14 @@ export default function PricingPage() {
     if (!user || !organization) {
       sessionStorage.setItem("pendingCheckout", JSON.stringify({ plan, billingCycle: planType, skipTrial }));
       router.push("/login?redirect=/pricing");
+      return;
+    }
+
+    if (!canManageBilling) {
+      toast({
+        title: "Ask your organization owner to upgrade",
+        description: "Only the organization owner can change billing.",
+      });
       return;
     }
 
@@ -174,6 +184,16 @@ export default function PricingPage() {
             </button>
           </div>
         </div>
+
+        {/* Non-owner notice */}
+        {user && organization && !canManageBilling && (
+          <p
+            className="text-center text-sm text-gray-600 dark:text-muted-foreground mb-8"
+            data-testid="owner-only-note"
+          >
+            Ask your organization owner to upgrade — only the organization owner can change billing.
+          </p>
+        )}
 
         {/* Pricing Cards */}
         <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto mb-16">
@@ -748,7 +768,7 @@ export default function PricingPage() {
                         Custom Branding
                       </td>
                       <td className="py-4 px-6 text-center">
-                        <Check className="w-5 h-5 text-green-500 mx-auto" />
+                        <X className="w-5 h-5 text-gray-300 mx-auto" />
                       </td>
                       <td className="py-4 px-6 text-center bg-blue-50/50 dark:bg-blue-900/10">
                         <Check className="w-5 h-5 text-green-500 mx-auto" />

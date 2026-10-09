@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import paddleService, { type SubscriptionInfo } from '@/services/paddleService';
 import { PLANS, type PlanTier } from '@/config/plans';
+import { useOrganization } from '@/context/OrganizationContext';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import {
   Dialog,
@@ -49,6 +50,9 @@ export function UpgradeDialog({
   subscription,
 }: UpgradeDialogProps) {
   const { toast } = useToast();
+  // Backend gates create-checkout / update-plan to the org owner (authorize(['owner'])).
+  const { organizationRole } = useOrganization();
+  const canManageBilling = organizationRole === 'owner';
   const [loading, setLoading] = useState(false);
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
   const [confirmPlan, setConfirmPlan] = useState<PlanTier | null>(null);
@@ -172,6 +176,12 @@ export function UpgradeDialog({
   const confirmPrice = confirmPlan === 'starter' ? starterPrice : proPrice;
   const isTrialing = resolvedSubscription?.status === 'trialing';
 
+  const ownerOnlyNote = (
+    <p className="w-full text-center text-xs text-muted-foreground" data-testid="owner-only-note">
+      Ask your organization owner to upgrade
+    </p>
+  );
+
   const dialogContent = (
     <DialogContent
       className="sm:max-w-[520px] p-0 gap-0 overflow-hidden border-border/50 bg-card"
@@ -236,14 +246,18 @@ export function UpgradeDialog({
               </li>
             ))}
           </ul>
-          <Button
-            onClick={() => handleUpgrade('starter')}
-            disabled={loading}
-            variant="outline"
-            className="w-full h-8 text-xs font-semibold border-border/60"
-          >
-            {loading ? '...' : 'Start Free Trial'}
-          </Button>
+          {canManageBilling ? (
+            <Button
+              onClick={() => handleUpgrade('starter')}
+              disabled={loading}
+              variant="outline"
+              className="w-full h-8 text-xs font-semibold border-border/60"
+            >
+              {loading ? '...' : 'Start Free Trial'}
+            </Button>
+          ) : (
+            ownerOnlyNote
+          )}
         </div>
 
         {/* Pro — highlighted */}
@@ -274,13 +288,17 @@ export function UpgradeDialog({
               </li>
             ))}
           </ul>
-          <Button
-            onClick={() => handleUpgrade('pro')}
-            disabled={loading}
-            className="w-full h-8 text-xs font-semibold"
-          >
-            {loading ? '...' : 'Start Free Trial'}
-          </Button>
+          {canManageBilling ? (
+            <Button
+              onClick={() => handleUpgrade('pro')}
+              disabled={loading}
+              className="w-full h-8 text-xs font-semibold"
+            >
+              {loading ? '...' : 'Start Free Trial'}
+            </Button>
+          ) : (
+            ownerOnlyNote
+          )}
         </div>
       </div>
     </DialogContent>
@@ -317,12 +335,16 @@ export function UpgradeDialog({
   return (
     <>
       <Dialog>
-        <DialogTrigger asChild>
-          <Button size="sm" className="gap-1.5">
-            <Sparkles className="w-3.5 h-3.5" />
-            Upgrade
-          </Button>
-        </DialogTrigger>
+        {canManageBilling ? (
+          <DialogTrigger asChild>
+            <Button size="sm" className="gap-1.5">
+              <Sparkles className="w-3.5 h-3.5" />
+              Upgrade
+            </Button>
+          </DialogTrigger>
+        ) : (
+          ownerOnlyNote
+        )}
         {dialogContent}
       </Dialog>
       {confirmDialog}

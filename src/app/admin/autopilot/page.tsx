@@ -34,11 +34,15 @@ import {
   X,
   ExternalLink,
   Plus,
+  Zap,
 } from 'lucide-react';
 import { WIDE_CONTAINER } from '@/lib/layout-constants';
 import { INTEGRATION_BRAND_COLORS, type IntegrationProvider } from '@/components/admin/integration-brands';
 
 type StatusFilter = AutopilotSuggestionStatus | 'all';
+
+// Where Zapier opens the Faddy app; empty until the listing is live.
+const ZAPIER_APP_URL = process.env.NEXT_PUBLIC_ZAPIER_APP_URL || '';
 
 const TAB_LIST: { key: StatusFilter; label: string }[] = [
   { key: 'pending', label: 'Pending' },
@@ -92,6 +96,18 @@ const INTEGRATION_PROVIDERS: {
       </svg>
     ),
     startConnect: (orgId) => githubService.startConnect(orgId),
+  },
+  {
+    key: 'zapier',
+    name: 'Zapier',
+    icon: ({ className }) => (
+      <Zap className={className} style={{ color: INTEGRATION_BRAND_COLORS.zapier }} />
+    ),
+    // Same flow as the integrations page: open the Zapier listing (or the
+    // API keys page as the manual fallback) in a new tab.
+    startConnect: () => {
+      window.open(ZAPIER_APP_URL || '/admin/api-keys', '_blank', 'noopener,noreferrer');
+    },
   },
 ];
 

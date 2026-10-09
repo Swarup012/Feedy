@@ -1,4 +1,5 @@
 import { render, act } from "@testing-library/react";
+import { describe, it, expect, beforeEach } from "vitest";
 import { ThemeProvider, useTheme } from "@/components/theme-provider";
 
 let captured!: ReturnType<typeof useTheme>;
