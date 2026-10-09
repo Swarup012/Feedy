@@ -178,11 +178,7 @@ export function FirstBoardWelcomeDialog({
             </div>
 
             <DialogFooter>
-              <Button
-                onClick={handleNext}
-                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-                size="lg"
-              >
+              <Button onClick={handleNext} className="w-full" size="lg">
                 Create Your First Board
                 <Sparkles className="ml-2 h-4 w-4" />
               </Button>

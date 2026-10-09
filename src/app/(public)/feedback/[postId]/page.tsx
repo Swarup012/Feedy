@@ -526,7 +526,7 @@ export default function PostDetailPage() {
 
   const getStatusColor = (status: string) => {
     const colors: { [key: string]: string } = {
-      open: "bg-blue-500/10 text-blue-700 dark:text-blue-400",
+      open: "bg-primary/10 text-primary",
       "under-review":
         "bg-yellow-500/10 text-yellow-700 dark:text-yellow-400",
       planned: "bg-purple-500/10 text-purple-700 dark:text-purple-400",

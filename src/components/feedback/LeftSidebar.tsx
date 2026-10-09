@@ -268,7 +268,7 @@ export function LeftSidebar({
               id="select-all"
               checked={isAllSelected}
               onCheckedChange={handleSelectAll}
-              className="data-[state=checked]:bg-blue-600 dark:data-[state=checked]:bg-blue-500"
+              className="data-[state=checked]:bg-primary"
             />
             <Label
               htmlFor="select-all"
@@ -299,7 +299,7 @@ export function LeftSidebar({
                 checked={selectedBoards.includes(board.id)}
                 onCheckedChange={() => handleBoardToggle(board.id)}
                 onClick={(e) => e.stopPropagation()}
-                className="data-[state=checked]:bg-blue-600"
+                className="data-[state=checked]:bg-primary"
               />
             )}
 
@@ -364,7 +364,7 @@ export function LeftSidebar({
           <Button
             variant="ghost"
             onClick={() => setShowAllBoards(!showAllBoards)}
-            className="w-full mt-2 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+            className="w-full mt-2 text-sm text-primary hover:bg-primary/10"
           >
             {showAllBoards ? (
               <>Show Less</>

@@ -145,7 +145,7 @@ export default function AddToRoadmapModal({
 
           {loading ? (
             <div className="flex items-center justify-center py-8">
-              <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
           ) : roadmaps.length === 0 ? (
             <div className="py-8 text-center">
@@ -166,7 +166,7 @@ export default function AddToRoadmapModal({
                     disabled={isLoading}
                     className={`w-full rounded-lg border p-4 text-left transition-all ${
                       isLinked
-                        ? 'border-indigo-500 bg-indigo-50 dark:border-indigo-400 dark:bg-indigo-900/20'
+                        ? 'border-primary bg-primary/10'
                         : 'border-gray-200 bg-white hover:border-gray-300 dark:border-border dark:bg-card dark:hover:border-gray-600'
                     } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
@@ -193,9 +193,9 @@ export default function AddToRoadmapModal({
                       </div>
                       <div className="ml-4">
                         {isLoading ? (
-                          <Loader2 className="h-5 w-5 animate-spin text-indigo-600" />
+                          <Loader2 className="h-5 w-5 animate-spin text-primary" />
                         ) : isLinked ? (
-                          <div className="rounded-full bg-indigo-600 p-1 text-white">
+                          <div className="rounded-full bg-primary p-1 text-primary-foreground">
                             <Minus className="h-4 w-4" />
                           </div>
                         ) : (
@@ -216,7 +216,7 @@ export default function AddToRoadmapModal({
         <div className="border-t border-gray-200 p-6 dark:border-border">
           <button
             onClick={onClose}
-            className="w-full rounded-lg bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700 transition-colors"
+            className="w-full rounded-lg bg-primary px-4 py-2 text-primary-foreground hover:bg-primary/90 transition-colors"
           >
             Done
           </button>

@@ -184,7 +184,7 @@ function CommentItem({
               {comment.author?.name}
             </span>
             {comment.is_admin && (
-              <Badge variant="secondary" className="text-xs px-1.5 py-0 h-4 bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300">
+              <Badge variant="secondary" className="text-xs px-1.5 py-0 h-4 bg-primary/10 text-primary">
                 Admin
               </Badge>
             )}
@@ -240,7 +240,7 @@ function CommentItem({
               variant="ghost"
               size="sm"
               onClick={() => setReplyingTo(comment.id)}
-              className="h-7 px-2 gap-1.5 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600"
+              className="h-7 px-2 gap-1.5 hover:bg-primary/10 hover:text-primary"
             >
               <Reply className="h-3.5 w-3.5" />
               <span className="text-xs font-medium">Reply</span>

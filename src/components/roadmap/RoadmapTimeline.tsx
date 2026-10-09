@@ -15,7 +15,7 @@ export default function RoadmapTimeline({ items, onVote, onRemoveVote, user }: R
       {quarters.map(quarter => (
         <div key={quarter}>
           <div className="flex items-center mb-4">
-            <div className="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold">
+            <div className="bg-primary text-primary-foreground px-4 py-2 rounded-lg font-semibold">
               {quarter}
             </div>
             <div className="flex-1 h-px bg-gray-300 ml-4"></div>
@@ -47,7 +47,7 @@ export default function RoadmapTimeline({ items, onVote, onRemoveVote, user }: R
 function TimelineCard({ item, onVote, onRemoveVote, user }: any) {
   const statusColors = {
     planned: 'border-l-gray-400',
-    in_progress: 'border-l-blue-500',
+    in_progress: 'border-l-primary',
     in_review: 'border-l-yellow-500',
     completed: 'border-l-green-500',
     cancelled: 'border-l-red-500',

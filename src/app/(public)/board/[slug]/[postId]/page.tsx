@@ -30,7 +30,7 @@ import { cn } from '@/lib/utils';
 
 const STATUS_COLORS = {
   open: 'bg-gray-100 text-gray-800',
-  'under-review': 'bg-blue-100 text-blue-800',
+  'under-review': 'bg-primary/10 text-primary',
   planned: 'bg-purple-100 text-purple-800',
   'in-progress': 'bg-yellow-100 text-yellow-800',
   completed: 'bg-green-100 text-green-800',

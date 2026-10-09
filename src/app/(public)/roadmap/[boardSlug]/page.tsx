@@ -285,7 +285,7 @@ function TimelineView({ groupedByQuarter, votedItems, onVote, user }: any) {
       {quarters.map((quarter) => (
         <div key={quarter}>
           <div className="flex items-center mb-4">
-            <div className="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold text-lg">
+            <div className="bg-primary text-primary-foreground px-4 py-2 rounded-lg font-semibold text-lg">
               {quarter}
             </div>
             <div className="flex-1 h-px bg-gray-300 ml-4"></div>
@@ -392,14 +392,14 @@ function StatusColumn({ title, icon, color, items, votedItems, onVote, user }: a
 function RoadmapCard({ item, hasVoted, onVote, user }: any) {
   const statusColors: any = {
     planned: 'border-l-gray-500',
-    in_progress: 'border-l-blue-500',
+    in_progress: 'border-l-primary',
     in_review: 'border-l-yellow-500',
     completed: 'border-l-green-500',
   };
 
   const priorityBadges: any = {
     low: { color: 'bg-gray-100 text-gray-700', label: 'Low' },
-    medium: { color: 'bg-blue-100 text-blue-700', label: 'Medium' },
+    medium: { color: 'bg-primary/10 text-primary', label: 'Medium' },
     high: { color: 'bg-orange-100 text-orange-700', label: 'High' },
     critical: { color: 'bg-red-100 text-red-700', label: 'Critical' },
   };

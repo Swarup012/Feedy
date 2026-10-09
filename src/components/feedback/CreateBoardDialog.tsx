@@ -268,7 +268,7 @@ export function CreateBoardDialog({
                     onClick={() => handleRoleToggle(role.key)}
                     className={`px-3 py-1 rounded-full border text-xs font-medium transition-colors ${
                       selected
-                        ? "bg-blue-500 text-white border-blue-500"
+                        ? "bg-primary text-primary-foreground border-primary"
                         : "bg-white dark:bg-muted text-muted-foreground border-gray-300 dark:border-border hover:border-primary"
                     }`}
                   >

@@ -7,7 +7,6 @@ import { Bell, Eye, AlertCircle } from "lucide-react";
 
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
-import { LandingFooter } from "@/components/ui/landing-footer";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,6 +20,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
 import { saveReturnUrl } from "@/lib/returnUrl";
+import { hexToHslTriplet, contrastForeground } from "@/lib/branding-color";
 import api from "@/lib/api";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -29,6 +29,8 @@ interface Organization {
   name: string;
   subdomain: string;
   logo_url?: string;
+  // {} when the plan allows branding but no color is set; null for Free.
+  branding?: { primaryColor?: string } | null;
 }
 
 // ─── Subdomain detection (pure, synchronous, side-effect free) ───────────────
@@ -76,6 +78,27 @@ function AdminViewToggle() {
 }
 
 // ─── AppHeader ───────────────────────────────────────────────────────────────
+function OrgLogo({ organization }: { organization: Organization | null }) {
+  const [failed, setFailed] = useState(false);
+  const src = organization?.logo_url;
+
+  if (!src || failed) return null;
+
+  return (
+    // Fixed box avoids layout shift when the image loads.
+    <span className="mr-3 flex h-8 w-32 items-center justify-center">
+      <img
+        src={src}
+        alt={organization?.name || "Organization logo"}
+        height={32}
+        width={128}
+        className="h-8 w-32 object-contain object-left"
+        onError={() => setFailed(true)}
+      />
+    </span>
+  );
+}
+
 function AppHeader({
   organization,
 }: {
@@ -101,6 +124,7 @@ function AppHeader({
         {/* Left — org branding + nav */}
         <div className="mr-4 hidden md:flex">
           <Link href="/feedback" className="mr-6 flex items-center space-x-2">
+            <OrgLogo organization={organization} />
             <span className="font-switzer font-medium text-gray-900 dark:text-white">
               {organization?.name || "Faddy"}
             </span>
@@ -223,6 +247,36 @@ function InvalidOrganizationBanner() {
   );
 }
 
+// ─── PortalFooter ────────────────────────────────────────────────────────────
+// Free / main domain: small "Powered by Faddy" link.
+// Paid (branding object present, even {}): minimal org-name footer.
+function PortalFooter({ organization }: { organization: Organization | null }) {
+  const isPaid = organization?.branding != null;
+
+  if (isPaid) {
+    return (
+      <footer className="border-t py-4">
+        <div className="container text-sm text-muted-foreground">
+          {organization?.name}
+        </div>
+      </footer>
+    );
+  }
+
+  return (
+    <footer className="border-t py-4">
+      <div className="container text-sm text-muted-foreground">
+        <a
+          href="https://faddy.site"
+          className="hover:text-foreground transition-colors"
+        >
+          Powered by Faddy
+        </a>
+      </div>
+    </footer>
+  );
+}
+
 // ─── AppLayout ───────────────────────────────────────────────────────────────
 export default function AppLayout({
   children,
@@ -237,6 +291,10 @@ export default function AppLayout({
   // orgError is only true when we KNOW there's a subdomain AND the lookup failed.
   // It is never true on the main domain (no subdomain → no error possible).
   const [orgError, setOrgError] = useState(false);
+
+  // True once a subdomain fetch settled (success or error). While false on a
+  // subdomain, we must not flash the Faddy footer for what may be a paid org.
+  const [orgFetched, setOrgFetched] = useState(false);
 
   // Fetch organization data in the background — does NOT block initial render.
   useEffect(() => {
@@ -261,6 +319,8 @@ export default function AppLayout({
           console.error("Failed to fetch organization for subdomain:", activeSubdomain);
           setOrgError(true);
         }
+      } finally {
+        if (!cancelled) setOrgFetched(true);
       }
     };
 
@@ -268,18 +328,56 @@ export default function AppLayout({
     return () => { cancelled = true; };
   }, [activeSubdomain]);
 
+  // ── Brand color → CSS vars on the wrapper (first paint) AND body ──────
+  // Radix Dialog/DropdownMenu portal to document.body — outside this wrapper
+  // — so vars on the wrapper alone leave every portaled button default blue.
+  // Wrapper inline style still wins for first paint; body covers portals.
+  // Invalid/missing color → no style.
+  const brandHex = organization?.branding?.primaryColor;
+  const primaryTriplet = brandHex ? hexToHslTriplet(brandHex) : null;
+  const foregroundTriplet = brandHex ? contrastForeground(brandHex) : null;
+  const brandStyle =
+    primaryTriplet && foregroundTriplet
+      ? ({
+          "--primary": primaryTriplet,
+          "--primary-foreground": foregroundTriplet,
+          "--ring": primaryTriplet,
+        } as React.CSSProperties)
+      : undefined;
+
+  // Same vars on document.body so portaled dialogs/dropdowns see them.
+  // Cleanup restores defaults (setProperty with "" removes the declaration).
+  useEffect(() => {
+    if (!primaryTriplet || !foregroundTriplet) return;
+    const bodyStyle = document.body.style;
+    const prevPrimary = bodyStyle.getPropertyValue("--primary");
+    const prevPrimaryFg = bodyStyle.getPropertyValue("--primary-foreground");
+    const prevRing = bodyStyle.getPropertyValue("--ring");
+    bodyStyle.setProperty("--primary", primaryTriplet);
+    bodyStyle.setProperty("--primary-foreground", foregroundTriplet);
+    bodyStyle.setProperty("--ring", primaryTriplet); // focus rings match brand
+    return () => {
+      bodyStyle.setProperty("--primary", prevPrimary);
+      bodyStyle.setProperty("--primary-foreground", prevPrimaryFg);
+      bodyStyle.setProperty("--ring", prevRing);
+    };
+  }, [primaryTriplet, foregroundTriplet]);
+
+  // Footer only after a subdomain fetch settles (no marketing-footer flash).
+  const showFooter = !activeSubdomain || orgFetched;
+
   // ── Always render immediately — no spinner, no blocking ─────────────────
   // Children get the page content visible to crawlers on first paint.
   // The header will silently update its org name once the fetch resolves.
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col" style={brandStyle}>
       <AppHeader organization={organization} />
 
       {/* Non-blocking org error banner — only shown when on a known-bad subdomain */}
       {orgError && <InvalidOrganizationBanner />}
 
       <main className="flex-1">{children}</main>
-      <LandingFooter showCTA={false} />
+      {showFooter && <PortalFooter organization={organization} />}
     </div>
   );
 }
