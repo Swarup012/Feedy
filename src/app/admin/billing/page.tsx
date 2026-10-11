@@ -8,12 +8,17 @@ import { UpgradeDialog } from '@/components/billing/UpgradeDialog';
 import { CancelFlow } from '@/components/billing/CancelFlow';
 import { InvoiceHistory } from '@/components/billing/InvoiceHistory';
 import { useToast } from '@/hooks/use-toast';
+import { useOrganization } from '@/context/OrganizationContext';
 import { Loader2 } from 'lucide-react';
 import { NARROW_CONTAINER } from '@/lib/layout-constants';
 
 function BillingContent() {
   const searchParams = useSearchParams();
   const { toast } = useToast();
+  const { organizationRole } = useOrganization();
+
+  // Invoices are owner/admin only on the backend — hide the fetch + panel for members.
+  const canViewInvoices = ['owner', 'admin'].includes(organizationRole ?? '');
 
   const [subscription, setSubscription] = useState<SubscriptionInfo | null>(null);
   const [invoices, setInvoices] = useState<Invoice[]>([]);
@@ -43,7 +48,9 @@ function BillingContent() {
       setLoading(true);
       const [subResponse, invoicesResponse] = await Promise.all([
         paddleService.getSubscription(),
-        paddleService.getInvoices(10),
+        canViewInvoices
+          ? paddleService.getInvoices(10)
+          : Promise.resolve({ success: false, data: { invoices: [] } }),
       ]);
 
       if (subResponse.success) {
@@ -123,10 +130,12 @@ function BillingContent() {
           />
         </div>
 
-        {/* Invoice History — 1 column */}
-        <div>
-          <InvoiceHistory invoices={invoices} />
-        </div>
+        {/* Invoice History — owner/admin only */}
+        {canViewInvoices && (
+          <div>
+            <InvoiceHistory invoices={invoices} />
+          </div>
+        )}
       </div>
 
       {/* Upgrade Dialog */}

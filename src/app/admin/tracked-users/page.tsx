@@ -147,12 +147,14 @@ export default function TrackedUsersPage() {
   const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
+    if (!isAdmin) return;
     loadAllData();
-  }, []);
+  }, [isAdmin]);
 
   useEffect(() => {
+    if (!isAdmin) return;
     loadUsers();
-  }, [currentPage, sortBy, sortOrder]);
+  }, [isAdmin, currentPage, sortBy, sortOrder]);
 
   const loadUsage = useCallback(async () => {
     try {
@@ -362,7 +364,7 @@ export default function TrackedUsersPage() {
 
   if (loading) {
     return (
-      <ProtectedRoute>
+      <ProtectedRoute allowedRoles={["owner", "admin"]}>
         <div className={`${WIDE_CONTAINER} py-5`}>
           <Skeleton className="h-10 w-52 mb-4" />
           <Skeleton className="h-36 mb-4" />
@@ -378,7 +380,7 @@ export default function TrackedUsersPage() {
   }
 
   return (
-    <ProtectedRoute>
+    <ProtectedRoute allowedRoles={["owner", "admin"]}>
       <div className={`${WIDE_CONTAINER} py-5 space-y-5`}>
         {/* Header */}
         <div className="flex items-center justify-between">

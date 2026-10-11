@@ -209,9 +209,14 @@ export default function OrganizationSettingsPage() {
   const loadBillingData = async () => {
     try {
       setBillingLoading(true);
+      // Invoices are owner/admin only on the backend — skip the call for members
+      // so the open subscription fetch isn't dragged down by a 403.
+      const canViewInvoices = ['owner', 'admin'].includes(organizationRole ?? '');
       const [subResponse, invoicesResponse] = await Promise.all([
         paddleService.getSubscription(),
-        paddleService.getInvoices(10),
+        canViewInvoices
+          ? paddleService.getInvoices(10)
+          : Promise.resolve({ success: false, data: { invoices: [] } }),
       ]);
 
       if (subResponse.success) {
@@ -808,9 +813,12 @@ export default function OrganizationSettingsPage() {
                         actionLoading={billingActionLoading}
                       />
                     </div>
-                    <div>
-                      <InvoiceHistory invoices={billingInvoices} />
-                    </div>
+                    {/* Invoice history is owner/admin only (backend 403s members) */}
+                    {['owner', 'admin'].includes(organizationRole ?? '') && (
+                      <div>
+                        <InvoiceHistory invoices={billingInvoices} />
+                      </div>
+                    )}
                   </div>
 
                   <UpgradeDialog

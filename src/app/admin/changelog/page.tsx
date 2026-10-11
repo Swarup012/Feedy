@@ -25,6 +25,7 @@ import {
   Filter,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useOrganization } from "@/context/OrganizationContext";
 import { changelogService, Changelog } from "@/services/changelogService";
 import { formatDistanceToNow, format, parseISO } from "date-fns";
 import ReactMarkdown from "react-markdown";
@@ -65,6 +66,9 @@ const TYPE_CONFIG = {
 
 export default function ChangelogPage() {
   const { toast } = useToast();
+  const { organizationRole } = useOrganization();
+  // Writes are owner/admin only on the backend — hide create/edit/delete entry points.
+  const canManage = ["owner", "admin"].includes(organizationRole ?? "");
   const [changelogs, setChangelogs] = useState<Changelog[]>([]);
   const [filteredChangelogs, setFilteredChangelogs] = useState<Changelog[]>([]);
   const [selectedChangelog, setSelectedChangelog] = useState<Changelog | null>(null);
@@ -382,10 +386,12 @@ export default function ChangelogPage() {
               <Filter className="h-4 w-4" />
               Filter
             </Button>
-            <Button onClick={handleCreateNew} size="sm" className="gap-2">
-              <Plus className="h-4 w-4" />
-              New Entry
-            </Button>
+            {canManage && (
+              <Button onClick={handleCreateNew} size="sm" className="gap-2">
+                <Plus className="h-4 w-4" />
+                New Entry
+              </Button>
+            )}
           </div>
 
           {/* Type Filters */}
@@ -439,10 +445,12 @@ export default function ChangelogPage() {
                 <p className="text-sm text-muted-foreground mb-6">
                   Start documenting your product journey by creating your first changelog entry.
                 </p>
-                <Button onClick={handleCreateNew} size="sm">
-                  <Plus className="mr-2 h-4 w-4" />
-                  Create First Entry
-                </Button>
+                {canManage && (
+                  <Button onClick={handleCreateNew} size="sm">
+                    <Plus className="mr-2 h-4 w-4" />
+                    Create First Entry
+                  </Button>
+                )}
               </div>
             </div>
           ) : (
@@ -483,14 +491,16 @@ export default function ChangelogPage() {
                             </div>
 
                             {/* Edit Button */}
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="absolute -top-2 right-0 h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                              onClick={() => handleEditChangelog(changelog)}
-                            >
-                              <Edit className="h-4 w-4 text-muted-foreground" />
-                            </Button>
+                            {canManage && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="absolute -top-2 right-0 h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                                onClick={() => handleEditChangelog(changelog)}
+                              >
+                                <Edit className="h-4 w-4 text-muted-foreground" />
+                              </Button>
+                            )}
 
                             {/* Header */}
                             <div className="mb-4">
