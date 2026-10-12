@@ -18,8 +18,6 @@ import { LeftSidebar } from "@/components/feedback/LeftSidebar";
 import { PostsList } from "@/components/feedback/PostsList";
 import { PostDetails } from "@/components/feedback/PostDetails";
 import { CreatePostDialog } from "@/components/feedback/CreatePostDialog";
-import { UpgradeDialog } from "@/components/UpgradeDialog";
-import usageService from "@/services/usageService";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -61,10 +59,7 @@ export default function PublicBoardPage() {
   const [loading, setLoading] = useState(true);
   const [showCreatePost, setShowCreatePost] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
   const [selectedBoards, setSelectedBoards] = useState<string[]>([]);
-  const [canCreatePost, setCanCreatePost] = useState(true);
-  const [postLimitReason, setPostLimitReason] = useState<string>("");
   const [multiBoardError, setMultiBoardError] = useState<string | null>(null);
 
   // ── Filters ──
@@ -76,15 +71,6 @@ export default function PublicBoardPage() {
     sortBy: "created_at",
     sortOrder: "desc",
   });
-
-  // ── Pre-load usage data (only if authenticated) ──
-  useEffect(() => {
-    if (!user || !slug) return;
-    usageService.canCreatePost(slug).then(({ allowed, reason }) => {
-      setCanCreatePost(allowed);
-      if (!allowed && reason) setPostLimitReason(reason);
-    });
-  }, [posts.length, user, slug]);
 
   // ── Check private board access ──
   useEffect(() => {
@@ -122,13 +108,11 @@ export default function PublicBoardPage() {
       try {
         const { postService } = await import("@/services/postService");
         const boardsToFetch = boards.filter((b) => selectedBoards.includes(b.id));
+        // Public route: resolves the board from the visited org (subdomain),
+        // never the visitor's own org — /api/boards/:slug/posts is session-org
+        // scoped and 404s for cross-org portal visitors.
         const results = await Promise.all(
-          boardsToFetch.map((b) =>
-            postService.getPostsByBoard(b.slug, {
-              sortBy: "created_at",
-              sortOrder: "desc",
-            }),
-          ),
+          boardsToFetch.map((b) => postService.getPublicBoardPosts(b.slug)),
         );
         if (cancelled) return;
         const combined = results.flatMap((r) => r.data.posts);
@@ -225,13 +209,12 @@ export default function PublicBoardPage() {
   };
 
   // ── Create post — show auth modal if guest ──
+  // Post-limit enforcement is the server's job (checkPostLimit on the VISITED
+  // org). No client pre-check: the visitor's own org plan must never gate
+  // posting on another org's board.
   const handleCreatePost = () => {
     if (!user) {
       setShowAuthModal(true);
-      return;
-    }
-    if (!canCreatePost) {
-      setShowUpgradeDialog(true);
       return;
     }
     setShowCreatePost(true);
@@ -350,8 +333,7 @@ export default function PublicBoardPage() {
         <CreatePostDialog
           open={showCreatePost}
           onOpenChange={setShowCreatePost}
-          boards={boards}
-          defaultBoardId={currentBoard?.id}
+          boardSlug={slug}
           onPostCreated={handlePostCreated}
         />
       )}
@@ -400,17 +382,6 @@ export default function PublicBoardPage() {
           </div>
         </DialogContent>
       </Dialog>
-
-      {/* Upgrade Dialog for Post Limit */}
-      <UpgradeDialog
-        open={showUpgradeDialog}
-        onOpenChange={setShowUpgradeDialog}
-        limitType="posts"
-        message={
-          postLimitReason ||
-          "This board has reached its post limit. Upgrade to Starter for unlimited posts."
-        }
-      />
     </div>
   );
 }

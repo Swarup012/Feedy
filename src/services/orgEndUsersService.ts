@@ -17,6 +17,9 @@ export interface OrgEndUser {
 export interface OrgEndUserDetail extends OrgEndUser {
   user_id: string | null;
   verified_at: string | null;
+  posts_count: number;
+  upvotes_given_count: number;
+  comments_count: number;
 }
 
 export interface OrgEndUsersListResponse {

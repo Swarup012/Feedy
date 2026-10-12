@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
 
     if (!authHeader) {
       return NextResponse.json(
-        { success: false, error: 'Not authenticated' },
+        { success: false, error: 'Not authenticated', message: 'Not authenticated' },
         { status: 401 }
       );
     }

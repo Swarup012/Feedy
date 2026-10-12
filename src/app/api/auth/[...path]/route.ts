@@ -17,6 +17,12 @@ async function handler(request: NextRequest, { params }: Params) {
     const extraHeaders: Record<string, string> = { 'Content-Type': contentType };
     if (request.headers.get('origin')) extraHeaders['origin'] = request.headers.get('origin')!;
 
+    // Forward the browser's Cookie header so backend endpoints that read
+    // req.cookies (refreshSession → refresh_token, signup's stale-session
+    // extraction) see the same cookies the browser sent. Never logged.
+    const cookieHeader = request.headers.get('cookie');
+    if (cookieHeader) extraHeaders['cookie'] = cookieHeader;
+
     const headers = buildBackendHeaders(authHeader, extraHeaders);
 
     let body: BodyInit | undefined;

@@ -151,7 +151,12 @@ export function CreatePostDialog({
     } catch (error: any) {
       toast({
         title: "Error",
-        description: error.message || "Failed to create post",
+        // Prefer the server message (e.g. the VISITED org's post-limit 403)
+        // over the generic axios error text.
+        description:
+          error?.response?.data?.message ||
+          error.message ||
+          "Failed to create post",
         variant: "destructive",
       });
     } finally {

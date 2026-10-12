@@ -12,7 +12,7 @@ export async function GET(
     const search = request.nextUrl.search; // preserve query params (filters)
 
     if (!authHeader) {
-      return NextResponse.json({ success: false, error: 'Not authenticated' }, { status: 401 });
+      return NextResponse.json({ success: false, error: 'Not authenticated', message: 'Not authenticated' }, { status: 401 });
     }
 
     const response = await fetch(`${BACKEND_URL}/api/boards/${slug}/posts${search}`, {
@@ -38,7 +38,7 @@ export async function POST(
     const subdomain = request.headers.get('x-subdomain') || '';
 
     if (!authHeader) {
-      return NextResponse.json({ success: false, error: 'Not authenticated' }, { status: 401 });
+      return NextResponse.json({ success: false, error: 'Not authenticated', message: 'Not authenticated' }, { status: 401 });
     }
 
     const body = await request.json();

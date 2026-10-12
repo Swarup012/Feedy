@@ -115,6 +115,7 @@ export default function UsersPage() {
   const [postsLoading, setPostsLoading] = useState(false);
   const [postsPage, setPostsPage] = useState(1);
   const [postsTotalPages, setPostsTotalPages] = useState(1);
+  const [postsTotal, setPostsTotal] = useState(0);
 
   // Post detail sheet state
   const [sheetPost, setSheetPost] = useState<Post | null>(null);
@@ -194,6 +195,7 @@ export default function UsersPage() {
       if (response.success) {
         setSelectedUserPosts(response.data.posts);
         setPostsTotalPages(response.data.pagination.pages);
+        setPostsTotal(response.data.pagination.total);
         setPostsPage(page);
       }
     } catch {
@@ -230,6 +232,7 @@ export default function UsersPage() {
     setSelectedUser(user as OrgEndUserDetail);
     setSelectedUserPosts([]);
     setPostsPage(1);
+    setPostsTotal(0);
     loadUserPosts(user.id, 1);
     loadUserDetail(user.id);
   }, [loadUserPosts, loadUserDetail]);
@@ -290,6 +293,7 @@ export default function UsersPage() {
     setSheetOpen(false);
     setSheetPost(null);
     setSelectedUserPosts(prev => prev.filter(p => p.id !== postId));
+    setPostsTotal(t => Math.max(t - 1, 0));
   }, []);
 
   // ── Format date ────────────────────────────────────────────────────
@@ -449,7 +453,7 @@ export default function UsersPage() {
                       Posts by {selectedUser.name || 'Anonymous'}
                     </h3>
                     <p className="text-xs text-muted-foreground">
-                      {postsLoading ? 'Loading...' : `${selectedUserPosts.length} post${selectedUserPosts.length !== 1 ? 's' : ''}`}
+                      {postsLoading ? 'Loading...' : `${postsTotal} post${postsTotal !== 1 ? 's' : ''}`}
                     </p>
                   </div>
                 </div>
@@ -574,6 +578,28 @@ export default function UsersPage() {
                   >
                     {IDENTITY_BADGES[selectedUser.identity_type]?.label || selectedUser.identity_type}
                   </Badge>
+                </div>
+
+                {/* Lifetime activity counts */}
+                <div className="grid grid-cols-3 gap-2 border-t border-border pt-4">
+                  {(
+                    [
+                      { label: 'Posts', value: selectedUser.posts_count },
+                      { label: 'Upvotes', value: selectedUser.upvotes_given_count },
+                      { label: 'Comments', value: selectedUser.comments_count },
+                    ] as const
+                  ).map((stat) => (
+                    <div key={stat.label} className="text-center">
+                      <p className="text-lg font-bold leading-tight">
+                        {detailLoading && stat.value === undefined ? (
+                          <Skeleton className="h-6 w-8 mx-auto" />
+                        ) : (
+                          stat.value ?? 0
+                        )}
+                      </p>
+                      <p className="text-xs text-muted-foreground">{stat.label}</p>
+                    </div>
+                  ))}
                 </div>
 
                 {/* Info rows */}

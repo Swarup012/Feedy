@@ -12,7 +12,7 @@ export async function GET(
     const subdomain = request.headers.get('x-subdomain') || '';
 
     if (!authHeader) {
-      return NextResponse.json({ success: false, error: 'Not authenticated' }, { status: 401 });
+      return NextResponse.json({ success: false, error: 'Not authenticated', message: 'Not authenticated' }, { status: 401 });
     }
 
     const response = await fetch(`${BACKEND_URL}/api/boards/${slug}`, {
@@ -39,7 +39,7 @@ export async function PUT(
     const subdomain = request.headers.get('x-subdomain') || '';
 
     if (!authHeader) {
-      return NextResponse.json({ success: false, error: 'Not authenticated' }, { status: 401 });
+      return NextResponse.json({ success: false, error: 'Not authenticated', message: 'Not authenticated' }, { status: 401 });
     }
 
     const body = await request.json();
@@ -68,7 +68,7 @@ export async function DELETE(
     const subdomain = request.headers.get('x-subdomain') || '';
 
     if (!authHeader) {
-      return NextResponse.json({ success: false, error: 'Not authenticated' }, { status: 401 });
+      return NextResponse.json({ success: false, error: 'Not authenticated', message: 'Not authenticated' }, { status: 401 });
     }
 
     const response = await fetch(`${BACKEND_URL}/api/boards/${slug}`, {
