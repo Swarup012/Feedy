@@ -11,7 +11,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { Building2, Check, ChevronDown, Plus } from 'lucide-react';
+import { Building2, Check, ChevronDown } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 export function OrganizationSwitcher() {
@@ -33,25 +33,6 @@ export function OrganizationSwitcher() {
       });
       setSwitching(false);
     }
-  };
-
-  // Every plan allows 1 organization
-  const organizationLimit = 1;
-
-  // Count organizations owned by user
-  const ownedOrganizations = organizations.filter(org => org.role === 'owner');
-  const canCreateOrganization = ownedOrganizations.length < organizationLimit;
-
-  const handleCreateOrganization = () => {
-    if (!canCreateOrganization) {
-      toast({
-        title: 'Organization Limit Reached',
-        description: `Each plan allows 1 organization. Delete an existing organization first.`,
-        variant: 'destructive',
-      });
-      return;
-    }
-    window.location.href = '/create-organization';
   };
 
   if (!organization || organizations.length === 0) {
@@ -92,21 +73,6 @@ export function OrganizationSwitcher() {
             )}
           </DropdownMenuItem>
         ))}
-        
-        <DropdownMenuSeparator />
-        <DropdownMenuItem
-          onClick={handleCreateOrganization}
-          className="flex items-center gap-2 cursor-pointer text-primary"
-          disabled={!canCreateOrganization}
-        >
-          <Plus className="h-4 w-4" />
-          <div className="flex flex-col">
-            <span>Create New Organization</span>
-            <span className="text-xs text-muted-foreground">
-              {ownedOrganizations.length}/{organizationLimit} organizations
-            </span>
-          </div>
-        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );

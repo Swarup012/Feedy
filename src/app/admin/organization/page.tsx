@@ -185,7 +185,7 @@ export default function OrganizationSettingsPage() {
         description: 'You need to create an organization first.',
         variant: 'destructive',
       });
-      router.push('/create-organization');
+      router.push('/onboarding');
     }
   }, [isAuthenticated, authLoading, loading, orgsFetchStatus, organization, organizations, router, toast]);
 

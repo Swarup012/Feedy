@@ -47,9 +47,13 @@ export default function OnboardingFlow() {
   const [companyNameError, setCompanyNameError] = useState<string | null>(null);
   const [onboardingError, setOnboardingError] = useState<string | null>(null);
 
-  // Check if user already completed onboarding
+  // Check if user already completed onboarding — but only when they actually
+  // have an organization to show. A user with onboarding_completed=true and
+  // ZERO memberships (removed from their only org / org deleted) must still be
+  // able to reach this flow and create their first organization, otherwise the
+  // /admin → /onboarding → /admin round-trip would bounce them forever.
   useEffect(() => {
-    if (user?.onboarding_completed) {
+    if (user?.onboarding_completed && user?.current_organization_id) {
       router.push('/admin');
     }
   }, [user, router]);
