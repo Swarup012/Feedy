@@ -26,6 +26,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import {
+  Activity,
   Building2,
   Users,
   Settings,
@@ -58,6 +59,7 @@ const WebhooksPage = dynamic(() => import('@/app/admin/webhooks/page'), { ssr: f
 const WidgetsPage = dynamic(() => import('@/app/admin/widgets/page'), { ssr: false });
 const IntegrationsPage = dynamic(() => import('@/app/admin/settings/integrations/page'), { ssr: false });
 const ApiKeysPage = dynamic(() => import('@/app/admin/api-keys/page'), { ssr: false });
+const TrackedUsersPage = dynamic(() => import('@/app/admin/tracked-users/page'), { ssr: false });
 import { ProfileTab } from '@/components/organization/ProfileTab';
 // Billing components moved from old BillingSection
 import paddleService, { SubscriptionInfo, Invoice } from '@/services/paddleService';
@@ -484,6 +486,7 @@ export default function OrganizationSettingsPage() {
             { tab: 'integrations', icon: Plug, label: 'Integrations' },
             { tab: 'notifications', icon: Bell, label: 'Notifications' },
             { tab: 'billing', icon: CreditCard, label: 'Billing' },
+            { tab: 'tracked-users', icon: Activity, label: 'Tracked Users' },
           ].map(({ tab, icon: Icon, label }) => (
             <SidebarNavItem
               key={tab}
@@ -515,6 +518,7 @@ export default function OrganizationSettingsPage() {
                 <TabsTrigger value="integrations" id="tab-integrations">Integrations</TabsTrigger>
                 <TabsTrigger value="notifications" id="tab-notifications">Notifications</TabsTrigger>
                 <TabsTrigger value="billing" id="tab-billing">Billing</TabsTrigger>
+                <TabsTrigger value="tracked-users" id="tab-tracked-users">Tracked Users</TabsTrigger>
               </TabsList>
             </div>
 
@@ -851,7 +855,7 @@ export default function OrganizationSettingsPage() {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => router.push('/admin/tracked-users')}
+                            onClick={() => setActiveTab('tracked-users')}
                           >
                             Manage Tracked Users →
                           </Button>
@@ -861,6 +865,10 @@ export default function OrganizationSettingsPage() {
                   )}
                 </div>
               )}
+            </TabsContent>
+
+            <TabsContent value="tracked-users">
+              <TrackedUsersPage />
             </TabsContent>
 
           </Tabs>

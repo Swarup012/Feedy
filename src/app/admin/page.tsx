@@ -8,25 +8,20 @@ import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { useErrorHandler } from "@/hooks/useErrorHandler";
 import { useOrganization } from "@/context/OrganizationContext";
-import { planAllowsFeature, resolvePlan } from "@/config/plans";
 import { boardService } from "@/services/boardService";
 import api from "@/lib/api";
 
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { UpgradeDialog } from "@/components/UpgradeDialog";
 
 import {
-  Clock,
   Users,
   ThumbsUp,
-  FileText,
   Zap,
   LayoutGrid,
   ArrowRight,
 } from "lucide-react";
 
-import { TrackedUsersWidget } from "@/components/TrackedUsersWidget";
 import { TrackedUsersLimitBanner } from "@/components/TrackedUsersLimitBanner";
 import { ExpertView } from "@/components/admin/ExpertView";
 
@@ -58,21 +53,9 @@ export default function AdminPage() {
     statusDistribution: {},
   });
 
-  const [recentPosts, setRecentPosts] = useState([]);
-  const [trending, setTrending] = useState([]);
-  const [topBoards, setTopBoards] = useState([]);
-  const [topContributors, setTopContributors] = useState([]);
-  const [feedbackTrend, setFeedbackTrend] = useState([]);
   const [boards, setBoards] = useState([]);
 
   const pageRef = useRef(null);
-
-  // Expert view requires the advanced_analytics feature (Free, Starter, Pro)
-  const hasPaidPlan = !!organization && planAllowsFeature(resolvePlan(organization), "advanced_analytics");
-
-  // Users without advanced analytics are locked to basic view
-  const [isBasicView, setIsBasicView] = useState(!hasPaidPlan);
-  const [upgradeDialogOpen, setUpgradeDialogOpen] = useState(false);
 
   /* =======================
      DATA LOADING (UNCHANGED)
@@ -114,17 +97,7 @@ export default function AdminPage() {
         activeUsers: data.activeUsers || 0,
         totalComments: data.totalComments || 0,
         statusDistribution: data.statusDistribution || {},
-        pendingTrend: data.pendingTrend || [],
-        newThisWeekTrend: data.newThisWeekTrend || [],
-        activeUsersTrend: data.activeUsersTrend || [],
-        trendingTrend: data.trendingTrend || [],
       });
-
-      setRecentPosts(data.recentPosts || []);
-      setTrending(data.trending || []);
-      setTopBoards(data.topBoards || []);
-      setTopContributors(data.topContributors || []);
-      setFeedbackTrend(data.feedbackTrend || []);
 
       // Fetch boards separately for the board list (lightweight)
       try {
@@ -145,11 +118,6 @@ export default function AdminPage() {
 
   return (
     <ProtectedRoute allowedRoles={["owner", "admin"]}>
-      <UpgradeDialog
-        open={upgradeDialogOpen}
-        onOpenChange={setUpgradeDialogOpen}
-        featureName="Expert View"
-      />
       <div
         ref={pageRef}
         className="bg-background flex flex-col min-h-full"
@@ -157,51 +125,16 @@ export default function AdminPage() {
         <div className="max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 flex flex-col space-y-4">
           {/* HEADER */}
           <section className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 shrink-0">
-            <h1 className="text-xl sm:text-2xl font-switzer font-medium tracking-tight text-foreground">
-              What needs your attention right now
-            </h1>
+            <div>
+              <h1 className="text-xl sm:text-2xl font-switzer font-medium tracking-tight text-foreground">
+                What needs your attention right now
+              </h1>
+              <p className="text-sm text-muted-foreground mt-1">
+                An AI-assisted read on your feedback, so you know where to look
+                first.
+              </p>
+            </div>
             <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2.5">
-                <span
-                  className={`text-sm font-medium transition-colors ${
-                    isBasicView ? "text-foreground" : "text-muted-foreground"
-                  }`}
-                >
-                  Basic
-                </span>
-                <button
-                  role="switch"
-                  aria-checked={!isBasicView}
-                  aria-label="Toggle expert view"
-                  onClick={() =>
-                    hasPaidPlan
-                      ? setIsBasicView(v => !v)
-                      : setUpgradeDialogOpen(true)
-                  }
-                  className={`relative inline-flex h-6 w-11 flex-shrink-0 items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
-                    !isBasicView && hasPaidPlan
-                      ? "bg-primary"
-                      : "bg-muted border border-border"
-                  }`}
-                >
-                  <span
-                    className={`inline-block h-4 w-4 rounded-full bg-background shadow-sm transition-transform ${
-                      !isBasicView && hasPaidPlan
-                        ? "translate-x-6"
-                        : "translate-x-1"
-                    }`}
-                  />
-                </button>
-                <span
-                  className={`text-sm font-medium transition-colors ${
-                    !isBasicView && hasPaidPlan
-                      ? "text-foreground"
-                      : "text-muted-foreground"
-                  }`}
-                >
-                  Expert
-                </span>
-              </div>
               <Button
                 onClick={() => router.push("/dashboard")}
                 variant="outline"
@@ -389,266 +322,8 @@ export default function AdminPage() {
                 </div>
               </div>
             </div>
-          ) : /* ===== BASIC VIEW / EXPERT VIEW ===== */
-          isBasicView ? (
-            <div className="flex-1 overflow-y-auto min-h-0 pb-4 space-y-4">
-              {/* ── Stat Cards ── */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-                {[
-                  {
-                    label: "Total Posts",
-                    value: stats.totalPosts,
-                    sub: `${stats.newThisWeek} new this week`,
-                    icon: FileText,
-                    accent: false,
-                  },
-                  {
-                    label: "Needs Review",
-                    value: stats.pendingPosts,
-                    sub: "Waiting for your action",
-                    icon: Clock,
-                    accent: true,
-                  },
-                  {
-                    label: "Total Votes",
-                    value: stats.totalVotes,
-                    sub: "Across all boards",
-                    icon: ThumbsUp,
-                    accent: false,
-                  },
-                  {
-                    label: "Active Users",
-                    value: stats.activeUsers,
-                    sub: "Contributing members",
-                    icon: Users,
-                    accent: false,
-                  },
-                ].map(({ label, value, sub, icon: Icon, accent }) => (
-                  <div
-                    key={label}
-                    className="rounded-xl border border-border bg-card p-4 flex items-start gap-3"
-                  >
-                    <div
-                      className={`mt-0.5 w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${accent ? "bg-primary/10" : "bg-muted"}`}
-                    >
-                      <Icon
-                        className={`w-4 h-4 ${accent ? "text-primary" : "text-muted-foreground"}`}
-                      />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-2xl font-bold text-foreground leading-none">
-                        {value ?? 0}
-                      </p>
-                      <p className="text-xs font-medium text-foreground mt-1">
-                        {label}
-                      </p>
-                      <p className="text-[11px] text-muted-foreground mt-0.5 truncate">
-                        {sub}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* ── Two-column layout ── */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                {/* Left — Recent Posts + Tracked Users */}
-                <div className="space-y-4">
-                  {/* Recent Posts */}
-                  <div className="rounded-xl border border-border bg-card overflow-hidden">
-                    <div className="px-5 py-4 border-b border-border flex items-center justify-between">
-                      <div>
-                        <h3 className="text-sm font-semibold text-foreground">
-                          Recent Posts
-                        </h3>
-                        <p className="text-xs text-muted-foreground mt-0.5">
-                          Latest feedback from your users
-                        </p>
-                      </div>
-                      <button
-                        onClick={() => router.push("/admin/feedback")}
-                        className="text-xs text-primary hover:underline font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
-                      >
-                        View all feedback →
-                      </button>
-                    </div>
-                    <div className="divide-y divide-border">
-                      {recentPosts.length > 0 ? (
-                        recentPosts.slice(0, 5).map((p: any) => {
-                          const statusDot: Record<string, string> = {
-                            open: "bg-blue-500",
-                            "under-review": "bg-amber-500",
-                            planned: "bg-cyan-500",
-                            "in-progress": "bg-violet-500",
-                            completed: "bg-emerald-500",
-                            closed: "bg-gray-400",
-                          };
-                          return (
-                            <div
-                              key={p.id}
-                              className="px-5 py-3 flex items-center gap-3 hover:bg-muted/40 transition-colors"
-                            >
-                              <div className="flex items-center gap-2 flex-shrink-0">
-                                <span
-                                  className={`w-2 h-2 rounded-full ${statusDot[p.status] || "bg-gray-300"}`}
-                                />
-                                <span className="text-[11px] text-muted-foreground capitalize">
-                                  {(p.status || "open").replace("-", " ")}
-                                </span>
-                              </div>
-                              <span className="flex-1 text-sm font-medium text-foreground truncate">
-                                {p.title}
-                              </span>
-                              <span className="flex items-center gap-1 text-xs text-muted-foreground flex-shrink-0">
-                                <ThumbsUp className="w-3 h-3" />
-                                {p.vote_count ?? 0}
-                              </span>
-                            </div>
-                          );
-                        })
-                      ) : (
-                        <div className="px-5 py-8 text-center text-sm text-muted-foreground">
-                          No posts yet — submit your first piece of feedback to
-                          get started
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Tracked Users */}
-                  <TrackedUsersWidget
-                    variant="basic"
-                    onUsageClick={() => router.push("/admin/tracked-users")}
-                  />
-                </div>
-
-                {/* Right — Boards + Status */}
-                <div className="space-y-4">
-                  {/* Boards */}
-                  <div className="rounded-xl border border-border bg-card overflow-hidden">
-                    <div className="px-5 py-4 border-b border-border flex items-center justify-between">
-                      <div>
-                        <h3 className="text-sm font-semibold text-foreground">
-                          Your Boards
-                        </h3>
-                        <p className="text-xs text-muted-foreground mt-0.5">
-                          {boards.length} active board
-                          {boards.length !== 1 ? "s" : ""}
-                        </p>
-                      </div>
-                      <button
-                        onClick={() => router.push("/admin/feedback")}
-                        className="text-xs text-primary hover:underline font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
-                      >
-                        See all boards →
-                      </button>
-                    </div>
-                    <div className="divide-y divide-border">
-                      {boards.length > 0 ? (
-                        boards.slice(0, 5).map((b: any) => (
-                          <div
-                            key={b.id}
-                            onClick={() =>
-                              router.push(`/admin/feedback/boards/${b.slug}`)
-                            }
-                            onKeyDown={(e) => {
-                              if (e.key === "Enter" || e.key === " ") {
-                                e.preventDefault();
-                                router.push(`/admin/feedback/boards/${b.slug}`);
-                              }
-                            }}
-                            tabIndex={0}
-                            role="button"
-                            className="px-5 py-3 flex items-center justify-between gap-3 hover:bg-muted/40 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-lg"
-                          >
-                            <div className="flex items-center gap-2.5 min-w-0">
-                              <div className="w-2 h-2 rounded-full bg-primary flex-shrink-0" />
-                              <span className="text-sm font-medium text-foreground truncate">
-                                {b.name}
-                              </span>
-                            </div>
-                            <span className="text-xs text-muted-foreground flex-shrink-0">
-                              {b.postCount ?? 0} posts
-                            </span>
-                          </div>
-                        ))
-                      ) : (
-                        <div className="px-5 py-8 text-center space-y-2">
-                          <p className="text-sm text-muted-foreground">
-                            No boards yet — a board is where feedback lives
-                          </p>
-                          <button
-                            onClick={() =>
-                              router.push("/admin/feedback/welcome")
-                            }
-                            className="text-xs text-primary hover:underline font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
-                          >
-                            Create your first board →
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Status Overview */}
-                  <div className="rounded-xl border border-border bg-card overflow-hidden">
-                    <div className="px-5 py-4 border-b border-border">
-                      <h3 className="text-sm font-semibold text-foreground">
-                        Feedback Status
-                      </h3>
-                      <p className="text-xs text-muted-foreground mt-0.5">
-                        Distribution across {stats.totalPosts} posts
-                      </p>
-                    </div>
-                    <div className="px-5 py-4">
-                      {Object.entries(stats.statusDistribution || {}).length >
-                      0 ? (
-                        (() => {
-                          const colors: Record<string, string> = {
-                            open: "bg-blue-500",
-                            "under-review": "bg-amber-500",
-                            planned: "bg-cyan-500",
-                            "in-progress": "bg-violet-500",
-                            completed: "bg-emerald-500",
-                            closed: "bg-gray-400",
-                          };
-                          const entries = Object.entries(stats.statusDistribution);
-                          const maxVal = Math.max(...entries.map(([, v]: [string, any]) => v), 1);
-                          return (
-                            <div className="flex items-end gap-3 h-40">
-                              {entries.map(([k, v]: [string, any]) => {
-                                const pct = stats.totalPosts > 0 ? Math.round((v / stats.totalPosts) * 100) : 0;
-                                const barHeight = maxVal > 0 ? (v / maxVal) * 100 : 0;
-                                return (
-                                  <div key={k} className="flex-1 flex flex-col items-center gap-1.5">
-                                    <span className="text-[11px] font-medium text-foreground">{v}</span>
-                                    <div className="w-full flex items-end justify-center" style={{ height: '80px' }}>
-                                      <div
-                                        className={`w-full max-w-[32px] rounded-t-md ${colors[k] || "bg-primary"} transition-all duration-700`}
-                                        style={{ height: `${Math.max(barHeight, 4)}%` }}
-                                      />
-                                    </div>
-                                    <span className="text-[10px] text-muted-foreground capitalize leading-none text-center">
-                                      {k.replace("-", " ")}
-                                    </span>
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          );
-                        })()
-                      ) : (
-                        <p className="text-sm text-muted-foreground text-center py-4">
-                          No data yet
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
           ) : (
-            /* ===== EXPERT VIEW (Part 2 — deeper operational analytics) ===== */
+            /* ===== EXPERT VIEW ===== */
             <div className="pb-2">
               <ExpertView organizationId={organization?.id} />
             </div>

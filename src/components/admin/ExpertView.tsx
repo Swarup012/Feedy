@@ -15,16 +15,14 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   TrendingUp,
-  TrendingDown,
-  Minus,
   Bot,
   AlertTriangle,
   RefreshCw,
-  ChevronDown,
-  ChevronUp,
   FileText,
   Users,
-  ArrowRight,
+  CheckCircle2,
+  ChevronRight,
+  Sparkles,
 } from 'lucide-react';
 import api from '@/lib/api';
 
@@ -93,10 +91,30 @@ const RANGES: { value: ExpertRange; label: string }[] = [
   { value: '90d', label: '90d' },
 ];
 
+const RANGE_DAYS: Record<ExpertRange, number> = { '7d': 7, '30d': 30, '90d': 90 };
+
+const SUMMARY_CARD_LABELS = ['High-severity posts', 'Pending review', 'Ingested by Autopilot', 'Approval rate'];
+
 const SEVERITY_CONFIG: Record<string, { variant: 'destructive' | 'warning' | 'secondary'; label: string }> = {
   high: { variant: 'destructive', label: 'HIGH' },
   medium: { variant: 'warning', label: 'MED' },
   low: { variant: 'secondary', label: 'LOW' },
+};
+
+const SEVERITY_DOT: Record<string, string> = {
+  high: 'bg-destructive',
+  medium: 'bg-warning',
+  low: 'bg-muted-foreground/50',
+};
+
+const EMPTY_AUTOPILOT: AutopilotStats = {
+  ingested: 0,
+  approved: 0,
+  rejected: 0,
+  pending: 0,
+  approvalRate: null,
+  byPlatform: {},
+  byStatus: {},
 };
 
 /* ======================================================
@@ -110,10 +128,56 @@ function humanize(key: string) {
     .join(' ');
 }
 
-function DirectionIcon({ direction }: { direction: 'up' | 'down' | 'flat' }) {
-  if (direction === 'up') return <TrendingUp className="h-3 w-3 text-emerald-500" />;
-  if (direction === 'down') return <TrendingDown className="h-3 w-3 text-red-500" />;
-  return <Minus className="h-3 w-3 text-muted-foreground" />;
+function getInitials(name: string) {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return '?';
+  if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+  return (parts[0].charAt(0) + parts[1].charAt(0)).toUpperCase();
+}
+
+/**
+ * Format an ISO timestamp as an explicit UTC date, never local time.
+ * e.g. "Oct 14, 09:00 UTC". Returns null when the input is missing or invalid.
+ */
+export function formatGeneratedAt(iso?: string | null): string | null {
+  if (!iso) return null;
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return null;
+  const formatted = new Intl.DateTimeFormat('en-US', {
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+    timeZone: 'UTC',
+  }).format(date);
+  return `${formatted} UTC`;
+}
+
+/**
+ * Briefing caption. Built ONLY from the briefing's own stored range and
+ * generated_at — never from the selected 7d/30d/90d range. Missing parts
+ * are omitted; an empty string means no caption.
+ */
+export function buildBriefingCaption(range?: string | null, generatedAt?: string | null): string {
+  const parts: string[] = [];
+  if (range === '7d') parts.push('Last 7 days · updated daily');
+  const generated = formatGeneratedAt(generatedAt);
+  if (generated) parts.push(`Generated ${generated}`);
+  return parts.join(' · ');
+}
+
+/**
+ * High-severity post count for the summary card. The API caps the list at 5,
+ * so 5 or more renders as "5+".
+ */
+export function highSeverityCountLabel(count: number): string {
+  return count >= 5 ? '5+' : String(count);
+}
+
+/** Approval rate display: null (no decisions yet) renders as an em dash. */
+export function approvalRateLabel(rate: number | null): string {
+  return rate === null ? '—' : `${rate}%`;
 }
 
 /* ======================================================
@@ -123,17 +187,25 @@ function DirectionIcon({ direction }: { direction: 'up' | 'down' | 'flat' }) {
 function ExpertSkeleton() {
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-end gap-2 shrink-0">
-        <Skeleton className="h-8 w-16 rounded-lg" />
+      <div className="flex items-center justify-between gap-2 shrink-0">
+        <Skeleton className="h-9 w-40 rounded-lg" />
         <Skeleton className="h-8 w-8 rounded-lg" />
       </div>
-      <Skeleton className="h-28 w-full rounded-xl" />
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <Skeleton className="h-48 rounded-xl" />
-        <Skeleton className="h-48 rounded-xl" />
-        <Skeleton className="h-48 rounded-xl" />
+      <Skeleton className="h-32 w-full rounded-xl" />
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <Skeleton className="h-24 rounded-xl" />
+        <Skeleton className="h-24 rounded-xl" />
+        <Skeleton className="h-24 rounded-xl" />
+        <Skeleton className="h-24 rounded-xl" />
       </div>
-      <Skeleton className="h-64 rounded-xl" />
+      <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-4">
+        <Skeleton className="h-56 rounded-xl" />
+        <Skeleton className="h-56 rounded-xl" />
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.4fr] gap-4">
+        <Skeleton className="h-56 rounded-xl" />
+        <Skeleton className="h-56 rounded-xl" />
+      </div>
     </div>
   );
 }
@@ -165,8 +237,32 @@ function PanelHeader({ icon: Icon, title, description, iconColor }: {
   );
 }
 
-/* Panel — Weekly Briefing (full-width) */
-function BriefingPanel({ summary }: { summary: string | null }) {
+/* Card — one number for the summary row */
+function SummaryCard({ label, value, sub, subTone = 'muted' }: {
+  label: string;
+  value: string;
+  sub: string;
+  subTone?: 'muted' | 'success';
+}) {
+  return (
+    <div className="rounded-xl border border-border bg-card p-4 flex flex-col gap-1.5">
+      <p className="text-xs font-medium text-muted-foreground">{label}</p>
+      <p className="text-3xl font-bold text-foreground leading-none">{value}</p>
+      <p className={`text-xs ${subTone === 'success' ? 'font-medium text-success' : 'text-muted-foreground'}`}>
+        {sub}
+      </p>
+    </div>
+  );
+}
+
+/* Panel — AI Briefing (full-width hero) */
+function BriefingPanel({ summary, briefingRange, generatedAt }: {
+  summary: string | null;
+  briefingRange?: string | null;
+  generatedAt?: string | null;
+}) {
+  const caption = buildBriefingCaption(briefingRange, generatedAt);
+
   if (!summary) {
     return (
       <Card>
@@ -174,7 +270,7 @@ function BriefingPanel({ summary }: { summary: string | null }) {
           <FileText className="h-8 w-8 text-muted-foreground/40 mx-auto mb-2" />
           <p className="text-sm font-medium text-foreground">No briefing yet</p>
           <p className="text-xs text-muted-foreground mt-1">
-            Your first briefing generates next Monday.
+            Your first briefing will appear after the next daily run.
           </p>
         </CardContent>
       </Card>
@@ -182,25 +278,52 @@ function BriefingPanel({ summary }: { summary: string | null }) {
   }
 
   return (
-    <Card>
+    <Card className="border-primary/20 bg-primary/5">
       <CardContent className="py-5">
-        <p className="text-sm text-foreground leading-relaxed">{summary}</p>
+        <div className="flex items-start gap-3 min-w-0">
+          <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0 mt-0.5">
+            <Sparkles className="h-4 w-4" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+              <span className="text-xs font-semibold uppercase tracking-wide text-primary">
+                AI Briefing
+              </span>
+              {caption && (
+                <span className="text-xs text-muted-foreground">{caption}</span>
+              )}
+            </div>
+            <p className="text-sm text-foreground leading-relaxed mt-1.5">{summary}</p>
+          </div>
+        </div>
       </CardContent>
     </Card>
   );
 }
 
+/* Neutral placeholder shown in place of good-news empty states when the request failed */
+function LoadFailedNote() {
+  return (
+    <div className="flex flex-col items-center justify-center py-10 text-center">
+      <p className="text-sm font-medium text-muted-foreground">Couldn&apos;t load data</p>
+    </div>
+  );
+}
+
 /* Panel — Needs Attention (high-severity posts) */
-function NeedsAttentionPanel({ posts }: { posts: TopSeverePost[] }) {
+function NeedsAttentionPanel({ posts, rangeDays }: { posts: TopSeverePost[]; rangeDays: number }) {
   const router = useRouter();
 
   if (posts.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-10 text-center">
-        <AlertTriangle className="h-8 w-8 text-muted-foreground/40 mb-2" />
-        <p className="text-sm font-medium text-foreground">Nothing urgent</p>
-        <p className="text-xs text-muted-foreground mt-1 max-w-[200px]">
-          High-severity posts will appear here.
+        <div className="w-10 h-10 rounded-full bg-success/10 flex items-center justify-center mb-2.5">
+          <CheckCircle2 className="h-5 w-5 text-success" />
+        </div>
+        <p className="text-sm font-semibold text-foreground">All clear</p>
+        <p className="text-xs text-muted-foreground mt-1 max-w-[260px]">
+          No high-severity posts in the last {rangeDays} days. They will show up
+          here as soon as one appears.
         </p>
       </div>
     );
@@ -212,18 +335,19 @@ function NeedsAttentionPanel({ posts }: { posts: TopSeverePost[] }) {
         <button
           key={p.id}
           onClick={() => router.push(`/admin/feedback?post=${p.id}`)}
-          className="w-full flex items-center gap-2 rounded-lg bg-red-50/70 dark:bg-red-950/20 px-3 py-2.5 text-left hover:bg-red-100/70 dark:hover:bg-red-950/30 transition-colors"
+          className="w-full flex items-center gap-2.5 rounded-lg border border-border bg-background px-3 py-2.5 text-left hover:bg-accent/60 transition-colors"
         >
-          <span className="flex-1 min-w-0 text-xs font-medium text-foreground truncate">
+          <span
+            className={`h-2 w-2 rounded-full shrink-0 ${SEVERITY_DOT[p.severity] || 'bg-muted-foreground/50'}`}
+            aria-hidden="true"
+          />
+          <span className="flex-1 min-w-0 text-sm font-medium text-foreground truncate">
             {p.title}
           </span>
-          <div className="flex items-center gap-2 shrink-0">
-            <Badge variant={SEVERITY_CONFIG[p.severity]?.variant || 'secondary'} className="text-[10px] px-1.5 py-0">
-              {SEVERITY_CONFIG[p.severity]?.label || p.severity}
-            </Badge>
-            <span className="text-[11px] text-muted-foreground">{p.upvotes + p.comment_count}</span>
-            <ArrowRight className="h-3 w-3 text-muted-foreground/50" />
-          </div>
+          <span className="text-xs text-muted-foreground shrink-0 tabular-nums">
+            {p.upvotes + p.comment_count}
+          </span>
+          <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/50 shrink-0" />
         </button>
       ))}
     </div>
@@ -244,50 +368,91 @@ function TrendingThemesPanel({ trends }: { trends: ClassificationTrend[] }) {
     );
   }
 
+  const maxCount = Math.max(...trends.map((t) => t.thisPeriodCount), 1);
+
   return (
-    <div className="space-y-2">
-      {trends.map((t) => (
-        <div key={t.classification} className="flex items-center gap-2">
-          <DirectionIcon direction={t.direction} />
-          <span className="flex-1 min-w-0 text-xs font-medium text-foreground truncate">
-            {humanize(t.classification)}
-          </span>
-          <span className="text-[11px] text-muted-foreground w-8 text-right">
-            {t.thisPeriodCount}
-          </span>
-          <span className={`text-[11px] w-10 text-right ${
-            t.direction === 'up' ? 'text-emerald-600 dark:text-emerald-400' :
-            t.direction === 'down' ? 'text-red-600 dark:text-red-400' :
-            'text-muted-foreground'
-          }`}>
-            {t.direction === 'up' ? '+' : ''}{t.delta}
-          </span>
-        </div>
-      ))}
+    <div className="space-y-3.5">
+      {trends.map((t) => {
+        const chipClass =
+          t.direction === 'up'
+            ? 'bg-success/10 text-success'
+            : t.direction === 'down'
+              ? 'bg-destructive/10 text-destructive'
+              : 'bg-muted text-muted-foreground';
+        const deltaLabel =
+          t.direction === 'up' ? `+${t.delta}` : t.direction === 'down' ? `${t.delta}` : '0';
+
+        return (
+          <div key={t.classification} className="space-y-1.5">
+            <div className="flex items-center gap-2">
+              <span className="flex-1 min-w-0 text-sm font-medium text-foreground truncate">
+                {humanize(t.classification)}
+              </span>
+              <span className="text-sm font-semibold text-foreground w-8 text-right tabular-nums">
+                {t.thisPeriodCount}
+              </span>
+              <span className={`text-[11px] font-semibold px-1.5 py-0.5 rounded-full ${chipClass}`}>
+                {deltaLabel}
+              </span>
+            </div>
+            <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
+              <div
+                className="h-full rounded-full bg-primary"
+                style={{ width: `${Math.max((t.thisPeriodCount / maxCount) * 100, 3)}%` }}
+              />
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }
 
 /* Panel — Autopilot Pipeline Health */
-function AutopilotPipelinePanel({ autopilot }: { autopilot: AutopilotStats }) {
+function AutopilotPipelinePanel({
+  autopilot,
+  loadFailed,
+}: {
+  autopilot: AutopilotStats;
+  loadFailed: boolean;
+}) {
   const router = useRouter();
+
+  const decided = autopilot.approved + autopilot.pending + autopilot.rejected;
+  const tiles = [
+    { label: 'Ingested', value: autopilot.ingested, tone: 'text-foreground' },
+    { label: 'Pending review', value: autopilot.pending, tone: 'text-warning' },
+    { label: 'Approved', value: autopilot.approved, tone: 'text-success' },
+    { label: 'Rejected', value: autopilot.rejected, tone: 'text-foreground' },
+  ];
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-3">
-        <div className="rounded-lg bg-muted/50 px-3 py-2.5 text-center">
-          <div className="text-2xl font-bold text-foreground">{autopilot.ingested}</div>
-          <div className="text-[10px] text-muted-foreground mt-0.5">Ingested</div>
-        </div>
-        <div className="rounded-lg bg-muted/50 px-3 py-2.5 text-center">
-          <div className="text-2xl font-bold text-amber-600 dark:text-amber-400">{autopilot.pending}</div>
-          <div className="text-[10px] text-muted-foreground mt-0.5">Pending review</div>
-        </div>
-      </div>
-      <div className="flex items-center justify-between text-[11px] text-muted-foreground">
-        <span>Approved: <span className="font-semibold text-emerald-600 dark:text-emerald-400">{autopilot.approved}</span></span>
-        <span>Rejected: <span className="font-semibold text-red-600 dark:text-red-400">{autopilot.rejected}</span></span>
-      </div>
+      {loadFailed ? (
+        <LoadFailedNote />
+      ) : (
+        <>
+          {decided > 0 && (
+            <div
+              className="flex h-2 w-full overflow-hidden rounded-full bg-muted"
+              role="img"
+              aria-label={`Pipeline: ${autopilot.approved} approved, ${autopilot.pending} pending, ${autopilot.rejected} rejected`}
+            >
+              <div className="bg-success" style={{ width: `${(autopilot.approved / decided) * 100}%` }} />
+              <div className="bg-warning" style={{ width: `${(autopilot.pending / decided) * 100}%` }} />
+              <div className="bg-destructive" style={{ width: `${(autopilot.rejected / decided) * 100}%` }} />
+            </div>
+          )}
+          <div className="grid grid-cols-2 gap-3">
+            {tiles.map((t) => (
+              <div key={t.label} className="rounded-lg bg-muted/50 px-3 py-3 text-center">
+                <div className={`text-2xl font-bold ${t.tone}`}>{t.value}</div>
+                <div className="text-[11px] text-muted-foreground mt-0.5">{t.label}</div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
       <Button
         variant="outline"
         size="sm"
@@ -301,65 +466,68 @@ function AutopilotPipelinePanel({ autopilot }: { autopilot: AutopilotStats }) {
   );
 }
 
-/* Panel — Customers to Watch (full-width table) */
+/* Panel — Customers to Watch (table) */
 function CustomersToWatchPanel({ customers }: { customers: CustomerToWatch[] }) {
   const router = useRouter();
 
   if (customers.length === 0) {
     return (
-      <Card>
-        <CardContent className="py-8 text-center">
-          <Users className="h-8 w-8 text-muted-foreground/40 mx-auto mb-2" />
-          <p className="text-sm font-medium text-foreground">No customers to watch</p>
-          <p className="text-xs text-muted-foreground mt-1">
-            End users with high-severity posts will appear here.
-          </p>
-        </CardContent>
-      </Card>
+      <div className="flex flex-col items-center justify-center py-10 text-center">
+        <Users className="h-8 w-8 text-muted-foreground/40 mb-2" />
+        <p className="text-sm font-medium text-foreground">No customers to watch</p>
+        <p className="text-xs text-muted-foreground mt-1">
+          End users with high-severity posts will appear here.
+        </p>
+      </div>
     );
   }
 
+  const columns = 'grid grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_auto_auto_auto] gap-3 items-center';
+
   return (
-    <Card>
-      <CardHeader className="pb-3">
-        <PanelHeader
-          icon={Users}
-          title="Customers to Watch"
-          description="End users with the highest-severity posts"
-          iconColor="bg-orange-100 text-orange-600"
-        />
-      </CardHeader>
-      <CardContent className="pt-0">
-        <div className="rounded-lg border">
-          <div className="grid grid-cols-[1fr_1fr_auto_auto] gap-3 px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground border-b">
-            <span>Customer</span>
-            <span>Post</span>
-            <span className="text-center">Severity</span>
-            <span className="text-right">Engagement</span>
-          </div>
-          {customers.map((c) => (
+    <div className="overflow-x-auto">
+      <div className="min-w-[440px]">
+        <div className={`${columns} px-1 py-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground border-b border-border`}>
+          <span>Customer</span>
+          <span>Top post</span>
+          <span className="text-center">Severity</span>
+          <span className="text-right">Engagement</span>
+          <span className="w-4" aria-hidden="true" />
+        </div>
+        {customers.map((c) => {
+          const name = c.userName || c.userEmail || c.userExternalId || 'Anonymous';
+          return (
             <button
               key={c.userId}
               onClick={() => router.push('/admin/users')}
-              className="w-full grid grid-cols-[1fr_1fr_auto_auto] gap-3 px-3 py-2.5 text-left hover:bg-muted/50 transition-colors border-b last:border-b-0"
+              className={`${columns} w-full px-1 py-2.5 text-left hover:bg-muted/50 transition-colors border-b border-border last:border-b-0`}
             >
-              <span className="min-w-0 text-xs font-medium text-foreground truncate">
-                {c.userName || c.userEmail || c.userExternalId || 'Anonymous'}
+              <span className="flex items-center gap-2 min-w-0">
+                <span className="h-6 w-6 rounded-full bg-primary/10 text-primary text-[10px] font-semibold flex items-center justify-center shrink-0">
+                  {getInitials(name)}
+                </span>
+                <span className="min-w-0 text-sm font-medium text-foreground truncate">
+                  {name}
+                </span>
               </span>
-              <span className="min-w-0 text-xs text-muted-foreground truncate">
+              <span className="min-w-0 text-sm text-muted-foreground truncate">
                 {c.postTitle}
               </span>
-              <Badge variant={SEVERITY_CONFIG[c.severity]?.variant || 'secondary'} className="text-[10px] px-1.5 py-0 shrink-0">
+              <Badge
+                variant={SEVERITY_CONFIG[c.severity]?.variant || 'secondary'}
+                className="text-[10px] px-1.5 py-0 shrink-0"
+              >
                 {SEVERITY_CONFIG[c.severity]?.label || c.severity}
               </Badge>
-              <span className="text-[11px] text-muted-foreground text-right shrink-0">
+              <span className="text-xs text-muted-foreground text-right shrink-0 tabular-nums">
                 {c.upvotes + c.comment_count}
               </span>
+              <ChevronRight className="h-4 w-4 text-muted-foreground/50 shrink-0" />
             </button>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
+          );
+        })}
+      </div>
+    </div>
   );
 }
 
@@ -373,12 +541,12 @@ interface ExpertViewProps {
 
 export function ExpertView({ organizationId }: ExpertViewProps) {
   const { organization } = useOrganization();
+  const router = useRouter();
   const [range, setRange] = useState<ExpertRange>('30d');
   const [stats, setStats] = useState<ExpertStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
-  const [rangeOpen, setRangeOpen] = useState(false);
 
   const load = async (r: ExpertRange, showRefresh = false) => {
     if (showRefresh) setRefreshing(true);
@@ -404,46 +572,37 @@ export function ExpertView({ organizationId }: ExpertViewProps) {
     return <ExpertSkeleton />;
   }
 
-  const rangeLabel = RANGES.find((r) => r.value === range)?.label || range;
-  const briefingSummary = organization?.weekly_briefing?.summary ?? null;
+  const rangeDays = RANGE_DAYS[range];
+  const briefing = organization?.weekly_briefing;
+  const loadFailed = stats === null;
+  const highSeverityCount = stats?.topSeverePosts?.length ?? 0;
+  const autopilot = stats?.autopilot ?? EMPTY_AUTOPILOT;
 
   return (
     <div className="flex flex-col">
-      {/* Top bar */}
-      <div className="flex items-center justify-end gap-2 mb-4 shrink-0">
-        <div className="relative">
-          <button
-            onClick={() => setRangeOpen(!rangeOpen)}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-background px-3 py-1.5 text-xs font-medium shadow-sm hover:bg-accent transition-colors"
-          >
-            {rangeLabel}
-            {rangeOpen ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
-          </button>
-          {rangeOpen && (
-            <>
-              <div className="fixed inset-0 z-40" onClick={() => setRangeOpen(false)} />
-              <div className="absolute right-0 mt-1 z-50 w-28 rounded-lg border border-border bg-background shadow-md overflow-hidden">
-                {RANGES.map((r) => (
-                  <button
-                    key={r.value}
-                    onClick={() => { setRange(r.value); setRangeOpen(false); }}
-                    className={`w-full text-left px-3 py-2 text-xs font-medium transition-colors ${
-                      range === r.value
-                        ? 'bg-primary/10 text-primary'
-                        : 'text-foreground hover:bg-accent'
-                    }`}
-                  >
-                    {r.label}
-                  </button>
-                ))}
-              </div>
-            </>
-          )}
+      {/* Range pills + refresh */}
+      <div className="flex items-center justify-between gap-3 mb-4 shrink-0">
+        <div className="inline-flex items-center gap-1 rounded-lg border border-border bg-muted/50 p-1">
+          {RANGES.map((r) => (
+            <button
+              key={r.value}
+              type="button"
+              aria-pressed={range === r.value}
+              onClick={() => setRange(r.value)}
+              className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                range === r.value
+                  ? 'bg-background text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              {r.label}
+            </button>
+          ))}
         </div>
         <Button
-          variant="ghost"
+          variant="outline"
           size="sm"
-          className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
+          className="h-8 w-8 p-0 shrink-0"
           onClick={() => load(range, true)}
           disabled={refreshing}
           title="Refresh"
@@ -459,32 +618,104 @@ export function ExpertView({ organizationId }: ExpertViewProps) {
       )}
 
       <div className="grid gap-4">
-        {/* Row 1: Weekly Briefing (full-width) */}
-        <BriefingPanel summary={briefingSummary} />
+        {/* Row 1: AI Briefing (full-width) */}
+        <BriefingPanel
+          summary={briefing?.summary ?? null}
+          briefingRange={briefing?.range}
+          generatedAt={briefing?.generated_at}
+        />
 
-        {/* Row 2: Needs Attention + Trending Themes + Autopilot Pipeline (3-col) */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {/* Row 2: summary cards */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {loadFailed ? (
+            SUMMARY_CARD_LABELS.map((label) => (
+              <SummaryCard key={label} label={label} value="—" sub="Couldn't load" subTone="muted" />
+            ))
+          ) : (
+            <>
+              <SummaryCard
+                label="High-severity posts"
+                value={highSeverityCountLabel(highSeverityCount)}
+                sub={highSeverityCount === 0 ? 'Nothing urgent' : `High-severity in the last ${rangeDays} days`}
+                subTone={highSeverityCount === 0 ? 'success' : 'muted'}
+              />
+              <SummaryCard
+                label="Pending review"
+                value={String(autopilot.pending)}
+                sub={autopilot.pending === 0 ? 'Queue is clear' : 'Waiting for your action'}
+                subTone={autopilot.pending === 0 ? 'success' : 'muted'}
+              />
+              <SummaryCard
+                label="Ingested by Autopilot"
+                value={String(autopilot.ingested)}
+                sub={`In the last ${rangeDays} days`}
+              />
+              <SummaryCard
+                label="Approval rate"
+                value={approvalRateLabel(autopilot.approvalRate)}
+                sub={
+                  autopilot.approvalRate === null
+                    ? 'No decisions yet'
+                    : `${autopilot.approved} approved · ${autopilot.rejected} rejected`
+                }
+              />
+            </>
+          )}
+        </div>
+
+        {/* Row 3: Needs attention + Autopilot pipeline */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-4">
           <Card className="flex flex-col">
             <CardHeader className="pb-3 shrink-0">
               <PanelHeader
                 icon={AlertTriangle}
-                title="Needs Attention"
-                description="High-severity posts"
-                iconColor="bg-red-100 text-red-600"
+                title="Needs attention"
+                description="High-severity posts, most engaged first"
+                iconColor="bg-destructive/10 text-destructive"
               />
             </CardHeader>
             <CardContent className="pt-0 flex-1">
-              <NeedsAttentionPanel posts={stats?.topSeverePosts || []} />
+              {loadFailed ? (
+                <LoadFailedNote />
+              ) : (
+                <NeedsAttentionPanel posts={stats?.topSeverePosts || []} rangeDays={rangeDays} />
+              )}
             </CardContent>
+            <div className="px-6 pb-6 shrink-0">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => router.push('/admin/feedback')}
+              >
+                View all feedback
+              </Button>
+            </div>
           </Card>
 
           <Card className="flex flex-col">
             <CardHeader className="pb-3 shrink-0">
               <PanelHeader
+                icon={Bot}
+                title="Autopilot pipeline"
+                description={`Ingestion and review, last ${rangeDays} days`}
+                iconColor="bg-progress/10 text-progress"
+              />
+            </CardHeader>
+            <CardContent className="pt-0 flex-1">
+              <AutopilotPipelinePanel autopilot={autopilot} loadFailed={loadFailed} />
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Row 4: Trending themes + Customers to watch */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.4fr] gap-4">
+          <Card className="flex flex-col">
+            <CardHeader className="pb-3 shrink-0">
+              <PanelHeader
                 icon={TrendingUp}
-                title="Trending Themes"
-                description="Classification trends this period"
-                iconColor="bg-blue-100 text-blue-600"
+                title="Trending themes"
+                description="Posts by classification vs previous period"
+                iconColor="bg-primary/10 text-primary"
               />
             </CardHeader>
             <CardContent className="pt-0 flex-1">
@@ -495,20 +726,21 @@ export function ExpertView({ organizationId }: ExpertViewProps) {
           <Card className="flex flex-col">
             <CardHeader className="pb-3 shrink-0">
               <PanelHeader
-                icon={Bot}
-                title="Autopilot Pipeline"
-                description="Ingestion and review status"
-                iconColor="bg-indigo-100 text-indigo-600"
+                icon={Users}
+                title="Customers to watch"
+                description="End users with the most severe posts"
+                iconColor="bg-warning/10 text-warning"
               />
             </CardHeader>
             <CardContent className="pt-0 flex-1">
-              <AutopilotPipelinePanel autopilot={stats?.autopilot || { ingested: 0, approved: 0, rejected: 0, pending: 0, approvalRate: null, byPlatform: {}, byStatus: {} }} />
+              {loadFailed ? (
+                <LoadFailedNote />
+              ) : (
+                <CustomersToWatchPanel customers={stats?.customersToWatch || []} />
+              )}
             </CardContent>
           </Card>
         </div>
-
-        {/* Row 3: Customers to Watch (full-width table) */}
-        <CustomersToWatchPanel customers={stats?.customersToWatch || []} />
       </div>
     </div>
   );

@@ -23,6 +23,7 @@ interface Organization {
   weekly_briefing?: {
     summary: string;
     generated_at: string;
+    range?: string;
   };
   created_at: string;
   updated_at: string;
