@@ -182,6 +182,99 @@ export function usePublicBoardPosts(
   };
 }
 
+// ── Member dashboard (org-scoped keys) ─────────────────────────────────
+
+/** Shape returned by GET /api/dashboard/my-overview (data field). */
+export interface MyOverviewStats {
+  myPosts: number;
+  newThisMonth: number;
+  votesReceived: number;
+  votesThisWeek: number;
+  pipeline: {
+    open: number;
+    underReview: number;
+    planned: number;
+    inProgress: number;
+    shipped: number;
+    closed: number;
+  };
+  shippedPercent: number;
+}
+
+export interface MyOverviewUpdate {
+  type: "status_change" | "reply";
+  post_id: string;
+  post_title: string | null;
+  old_status?: string;
+  new_status?: string;
+  excerpt?: string;
+  actor_name: string | null;
+  is_admin?: boolean;
+  created_at: string;
+}
+
+export interface MyOverviewResponse {
+  success: boolean;
+  data: {
+    stats: MyOverviewStats;
+    posts: Post[];
+    updates: MyOverviewUpdate[];
+  };
+}
+
+export interface TrendingPostsResponse {
+  success: boolean;
+  data: { posts: Post[]; count: number };
+}
+
+// Fetchers for the array-key hooks: SWR spreads array keys as arguments,
+// so the org id rides along purely as a cache discriminator. The BACKEND
+// never reads it from the query string — it resolves the org from the
+// session/subdomain and verifies membership server-side.
+const keyFetcher = async ([url]: [string, string]) => {
+  const response = await api.get(url);
+  return response.data;
+};
+
+/**
+ * Member dashboard overview (stats + posts + updates timeline).
+ * The SWR key embeds the active organization id, so switching orgs
+ * refetches and never serves another org's cached data.
+ */
+export function useMyOverview(orgId: string | null | undefined) {
+  const { data, error, isLoading, mutate } = useSWR<MyOverviewResponse>(
+    orgId ? ["/api/dashboard/my-overview", orgId] : null,
+    keyFetcher,
+  );
+
+  return {
+    stats: data?.data?.stats ?? null,
+    posts: data?.data?.posts ?? [],
+    updates: data?.data?.updates ?? [],
+    error,
+    isLoading,
+    refresh: () => mutate(),
+  };
+}
+
+/**
+ * Top public-board posts by votes (trending widget).
+ * Org-scoped SWR key — see useMyOverview for the rationale.
+ */
+export function useTrendingPosts(orgId: string | null | undefined) {
+  const { data, error, isLoading, mutate } = useSWR<TrendingPostsResponse>(
+    orgId ? ["/api/public/trending-posts?limit=3", orgId] : null,
+    keyFetcher,
+  );
+
+  return {
+    posts: data?.data?.posts ?? [],
+    error,
+    isLoading,
+    refresh: () => mutate(),
+  };
+}
+
 // ── Optimistic helpers (for post CRUD — wired up in next step) ─────────
 // These are exported so the board page can call them after the API call.
 // They manipulate the SWR cache directly, no extra network requests.

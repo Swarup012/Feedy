@@ -61,6 +61,10 @@ export default {
 				DEFAULT: 'hsl(var(--warning))',
 				foreground: 'hsl(var(--warning-foreground))'
 			},
+			progress: {
+				DEFAULT: 'hsl(var(--progress))',
+				foreground: 'hsl(var(--progress-foreground))'
+			},
   			muted: {
   				DEFAULT: 'hsl(var(--muted))',
   				foreground: 'hsl(var(--muted-foreground))'

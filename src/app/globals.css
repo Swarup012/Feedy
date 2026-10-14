@@ -99,6 +99,11 @@
     --warning: 25 95% 53%;
     --warning-foreground: 0 0% 100%;
 
+    /* Semantic: In-progress status (violet — distinct from blue primary,
+       orange warning, green success, and gray muted in the pipeline bar) */
+    --progress: 262 83% 58%;
+    --progress-foreground: 0 0% 100%;
+
     --radius: 0.5rem;                 /* Canny uses a slightly more professional 8px radius */
   }
   /* -------------------------------------------------------------------------
@@ -142,6 +147,10 @@
     --success-foreground: 0 0% 100%;
     --warning: 25 95% 58%;
     --warning-foreground: 0 0% 100%;
+
+    /* Semantic: In-progress status (lighter violet for dark surfaces) */
+    --progress: 262 80% 64%;
+    --progress-foreground: 0 0% 12%;
     
     /* Borders & Inputs */
     --border: 215 20% 35%;               /* #3f4a5c - Subtle separation */

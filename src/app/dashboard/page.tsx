@@ -7,7 +7,11 @@ import { useAuth } from "@/hooks/useAuth";
 import { useOrganization } from "@/context/OrganizationContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { boardService, Board } from "@/services/boardService";
-import { postService, Post } from "@/services/postService";
+import { Post } from "@/services/postService";
+import { useMyOverview, useTrendingPosts } from "@/hooks/useFeedbackData";
+import { OverviewPanel } from "@/components/dashboard/OverviewPanel";
+import { StatusPill } from "@/components/dashboard/StatusPill";
+import { formatDate } from "@/components/dashboard/format";
 import { useToast } from "@/hooks/use-toast";
 import { IconDisplay } from "@/components/ui/icon-picker";
 import {
@@ -17,14 +21,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -38,7 +34,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { OrganizationSwitcher } from "@/components/organization/OrganizationSwitcher";
 import { RoleSelectionModal } from "@/components/RoleSelectionModal";
-import { Building2, Loader2, User, LogOut, Briefcase, Rocket, Palette, Code, TrendingUp, UserCircle, MessageSquare, ThumbsUp, Plus, ArrowRight, Lock, Globe, LayoutDashboard, Activity, CheckCircle2 } from "lucide-react";
+import { Building2, Loader2, User, LogOut, Briefcase, Rocket, Palette, Code, TrendingUp, UserCircle, MessageSquare, ThumbsUp, Plus, ArrowRight, Lock, Globe, LayoutDashboard, Activity, CheckCircle2, Map } from "lucide-react";
 
 export default function DashboardPage() {
   const { user, refreshUser } = useAuth();
@@ -46,62 +42,34 @@ export default function DashboardPage() {
   const { toast } = useToast();
 
   const [boards, setBoards] = useState<Board[]>([]);
-  const [myPosts, setMyPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [showRoleModal, setShowRoleModal] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
-  const [stats, setStats] = useState({
-    totalBoards: 0,
-    myPosts: 0,
-    totalVotes: 0,
-    implementedPosts: 0
-  });
+
+  // Member overview: ONE endpoint feeds the stat cards, pipeline bar,
+  // recent table, submissions list, and updates timeline. The SWR key
+  // embeds the active org id, so switching orgs refetches cleanly.
+  const {
+    stats,
+    posts: myPosts,
+    updates,
+    error: overviewError,
+    isLoading: overviewLoading,
+    refresh: refreshOverview,
+  } = useMyOverview(organization?.id);
+  const { posts: trendingPosts } = useTrendingPosts(organization?.id);
 
   useEffect(() => {
     if (!orgLoading) {
-      fetchDashboardData();
+      fetchBoards();
     }
-  }, [orgLoading, user]);
+  }, [orgLoading]);
 
-  const fetchDashboardData = async () => {
+  const fetchBoards = async () => {
     try {
       setLoading(true);
-
-      // Fetch boards
       const boardsResponse = await boardService.getAllBoards();
-      const fetchedBoards = boardsResponse.data.boards || [];
-      setBoards(fetchedBoards);
-
-      // Fetch user's posts from all boards
-      let allMyPosts: Post[] = [];
-      for (const board of fetchedBoards) {
-        try {
-          const postsResponse = await postService.getPostsByBoard(board.slug);
-          const boardPosts = postsResponse.data.posts || [];
-          
-          // Filter posts created by current user
-          const userPosts = boardPosts.filter(p => p.author_id === user?.id);
-          allMyPosts = [...allMyPosts, ...userPosts];
-        } catch (error) {
-          console.error(`Failed to fetch posts for board ${board.slug}:`, error);
-        }
-      }
-
-      setMyPosts(allMyPosts);
-
-      // Calculate stats
-      const totalVotes = allMyPosts.reduce((sum, post) => sum + (post.upvotes || 0), 0);
-      const implementedCount = allMyPosts.filter(post => 
-        post.status === 'completed' || post.status === 'complete'
-      ).length;
-
-      setStats({
-        totalBoards: fetchedBoards.length,
-        myPosts: allMyPosts.length,
-        totalVotes: totalVotes,
-        implementedPosts: implementedCount
-      });
-
+      setBoards(boardsResponse.data.boards || []);
     } catch (error: any) {
       console.error('Dashboard error:', error);
       toast({
@@ -114,41 +82,19 @@ export default function DashboardPage() {
     }
   };
 
-  const getStatusBadge = (status: string) => {
-    switch (status?.toLowerCase()) {
-      case 'open':
-      case 'under-review':
-        return <Badge variant="default" className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-450 hover:bg-yellow-100">Under Review</Badge>;
-      case 'planned':
-        return <Badge variant="secondary" className="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-450 hover:bg-blue-100">Planned</Badge>;
-      case 'in-progress':
-        return <Badge className="bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-450 hover:bg-purple-100">In Progress</Badge>;
-      case 'completed':
-      case 'complete':
-        return <Badge variant="outline" className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-450 hover:bg-green-100 border-none">Completed</Badge>;
-      default:
-        return <Badge>{status}</Badge>;
-    }
-  };
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffTime = Math.abs(now.getTime() - date.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-    if (diffDays === 0) return 'Today';
-    if (diffDays === 1) return 'Yesterday';
-    if (diffDays < 7) return `${diffDays} days ago`;
-    if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-  };
-
   const router = useRouter();
   const { logout } = useAuth();
 
   const handleLogout = async () => {
     await logout();
+  };
+
+  const handleNewFeedback = () => {
+    if (boards.length > 0) {
+      router.push(`/feedback/boards/${boards[0].slug}`);
+    } else {
+      router.push("/feedback");
+    }
   };
 
   const getUserInitials = () => {
@@ -312,6 +258,15 @@ export default function DashboardPage() {
                       <span>My Feedback</span>
                     </TabsTrigger>
 
+                    {/* Roadmap is a route, not a tab — same data as the navbar link */}
+                    <Link
+                      href="/roadmap"
+                      className="w-full justify-start gap-3 px-3 py-2 h-10 rounded-md transition-all text-left text-sm font-medium flex items-center border-0 bg-transparent text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-zinc-900/50 hover:text-gray-900 dark:hover:text-white shrink-0"
+                    >
+                      <Map className="h-4 w-4 shrink-0" />
+                      <span>Roadmap</span>
+                    </Link>
+
                     <TabsTrigger
                       value="activity"
                       className="w-full justify-start gap-3 px-3 py-2 h-10 rounded-md transition-all text-left text-sm font-medium border-0 bg-transparent text-gray-600 dark:text-gray-400 data-[state=active]:bg-gray-100 dark:data-[state=active]:bg-zinc-900 data-[state=active]:text-gray-900 dark:data-[state=active]:text-white hover:bg-gray-50 dark:hover:bg-zinc-900/50 hover:text-gray-900 dark:hover:text-white shrink-0 shadow-none"
@@ -323,18 +278,28 @@ export default function DashboardPage() {
                 </div>
               </div>
 
-              {/* Sidebar Footer Info */}
+              {/* Sidebar Footer Info — Job Role card with Change */}
               <div className="pt-4 border-t border-gray-100 dark:border-zinc-900">
-                <div className="flex items-center gap-3 p-2.5 rounded-lg bg-gray-50 dark:bg-zinc-900/50 border border-gray-100 dark:border-zinc-900/40">
+                <div className="flex items-center gap-2 p-2.5 rounded-lg bg-gray-50 dark:bg-zinc-900/50 border border-gray-100 dark:border-zinc-900/40">
                   <div className="p-2 rounded-md bg-primary/10 text-primary shrink-0">
                     <IconDisplay iconName={user?.job_role_icon || "UserCircle"} className="h-4 w-4" />
                   </div>
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     <p className="text-[10px] uppercase font-bold text-gray-400 dark:text-zinc-500">Job Role</p>
                     <p className="text-xs font-semibold text-gray-900 dark:text-white truncate">
                       {user?.job_role_name || user?.job_role?.replace('_', ' ') || "Not Set"}
                     </p>
                   </div>
+                  {(organizationRole === 'admin' || organizationRole === 'owner') && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowRoleModal(true)}
+                      className="h-7 text-[11px] px-2 shrink-0"
+                    >
+                      Change
+                    </Button>
+                  )}
                 </div>
               </div>
             </div>
@@ -343,210 +308,39 @@ export default function DashboardPage() {
             <div className="flex-1 overflow-y-auto bg-gray-50/50 dark:bg-zinc-900/10 h-full">
               <div className="max-w-[1200px] mx-auto py-5 px-5 space-y-5">
                 {/* Header Title */}
-                <div className="flex justify-between items-center">
+                <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center">
                   <div>
                     <h1 className="text-xl font-bold font-headline text-gray-900 dark:text-white">
-                      Welcome, {user?.name || user?.email || 'User'}!
+                      Welcome back{user?.name ? `, ${user.name.split(" ")[0]}` : ""}
                     </h1>
                     <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                      Here's your personal dashboard, quick stats, and feedback overview.
+                      Here's what's happening with your feedback.
                     </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button variant="outline" size="sm" asChild>
+                      <Link href="/roadmap">View roadmap</Link>
+                    </Button>
+                    <Button size="sm" onClick={handleNewFeedback} className="gap-1.5">
+                      <Plus className="h-4 w-4" /> New feedback
+                    </Button>
                   </div>
                 </div>
 
                 {/* Overview Tab Content */}
                 <TabsContent value="overview" className="mt-0 space-y-6 focus-visible:outline-none">
-                  {/* Stats Cards */}
-                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                    <Card className="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 shadow-sm transition-all hover:shadow-md">
-                      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                          Organization Boards
-                        </CardTitle>
-                        <Building2 className="h-4 w-4 text-blue-500" />
-                      </CardHeader>
-                      <CardContent>
-                        <div className="text-xl font-bold text-gray-900 dark:text-white">{stats.totalBoards}</div>
-                        <p className="text-xs text-gray-500 dark:text-gray-450 mt-1">
-                          Total active boards
-                        </p>
-                      </CardContent>
-                    </Card>
-
-                    <Card className="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 shadow-sm transition-all hover:shadow-md">
-                      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                          My Feedback
-                        </CardTitle>
-                        <MessageSquare className="h-4 w-4 text-indigo-500" />
-                      </CardHeader>
-                      <CardContent>
-                        <div className="text-xl font-bold text-gray-900 dark:text-white">{stats.myPosts}</div>
-                        <p className="text-xs text-gray-500 dark:text-gray-455 mt-1">
-                          Total submissions
-                        </p>
-                      </CardContent>
-                    </Card>
-
-                    <Card className="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 shadow-sm transition-all hover:shadow-md">
-                      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                          Total Votes
-                        </CardTitle>
-                        <ThumbsUp className="h-4 w-4 text-amber-500" />
-                      </CardHeader>
-                      <CardContent>
-                        <div className="text-xl font-bold text-gray-900 dark:text-white">{stats.totalVotes}</div>
-                        <p className="text-xs text-gray-500 dark:text-gray-455 mt-1">
-                          Across all submissions
-                        </p>
-                      </CardContent>
-                    </Card>
-
-                    <Card className="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 shadow-sm transition-all hover:shadow-md">
-                      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                          Implemented
-                        </CardTitle>
-                        <Rocket className="h-4 w-4 text-emerald-500" />
-                      </CardHeader>
-                      <CardContent>
-                        <div className="text-xl font-bold text-gray-900 dark:text-white">{stats.implementedPosts}</div>
-                        <p className="text-xs text-gray-500 dark:text-gray-455 mt-1">
-                          Your suggestions completed
-                        </p>
-                      </CardContent>
-                    </Card>
-                  </div>
-
-                  <div className="grid gap-4 md:grid-cols-3">
-                    {/* Profile & Quick Actions */}
-                    <div className="md:col-span-1 space-y-6">
-                      {/* Job Role Profile Card */}
-                      <Card className="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 shadow-sm">
-                        <CardHeader className="pb-3">
-                          <CardTitle className="text-lg font-bold">Your Profile</CardTitle>
-                          <CardDescription className="text-xs text-gray-500">
-                            Manage your job role and preferences
-                          </CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                          <div className="flex items-center justify-between p-3 border border-gray-100 dark:border-zinc-800 rounded-lg bg-gray-50 dark:bg-zinc-950">
-                            <div className="flex items-center gap-3">
-                              <div className="p-2.5 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">
-                                <IconDisplay iconName={user?.job_role_icon || "UserCircle"} className="h-5 w-5" />
-                              </div>
-                              <div className="min-w-0">
-                                <p className="text-[10px] uppercase text-gray-400 font-bold tracking-wider">Job Role</p>
-                                <p className="font-semibold text-sm text-gray-900 dark:text-white truncate">
-                                  {user?.job_role_name || user?.job_role?.replace('_', ' ') || "Not Set"}
-                                </p>
-                              </div>
-                            </div>
-                            {(organizationRole === 'admin' || organizationRole === 'owner') && (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => setShowRoleModal(true)}
-                                className="h-8 text-xs"
-                              >
-                                Change
-                              </Button>
-                            )}
-                          </div>
-                          <p className="text-[11px] text-gray-500 leading-normal">
-                            Your job role helps us personalize your experience and show relevant content.
-                          </p>
-                        </CardContent>
-                      </Card>
-
-                      {/* Quick Actions */}
-                      <Card className="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 shadow-sm">
-                        <CardHeader className="pb-3">
-                          <CardTitle className="text-lg font-bold">Quick Actions</CardTitle>
-                          <CardDescription className="text-xs text-gray-500">
-                            Explore feedback boards and roadmap
-                          </CardDescription>
-                        </CardHeader>
-                        <CardContent className="flex flex-col gap-2.5">
-                          {boards.length > 0 ? (
-                            <>
-                              <Button
-                                onClick={() => router.push(`/feedback/${boards[0]?.slug || 'general'}`)}
-                                className="w-full text-xs h-9"
-                              >
-                                Submit Feedback
-                              </Button>
-                              <Button
-                                variant="outline"
-                                onClick={() => router.push('/feedback')}
-                                className="w-full text-xs h-9 hover:bg-gray-50 dark:hover:bg-zinc-800"
-                              >
-                                View All Boards
-                              </Button>
-                              <Button
-                                variant="outline"
-                                onClick={() => router.push(`/roadmap/${boards[0]?.slug || 'general'}`)}
-                                className="w-full text-xs h-9 hover:bg-gray-50 dark:hover:bg-zinc-800"
-                              >
-                                View Roadmap
-                              </Button>
-                            </>
-                          ) : (
-                            <p className="text-sm text-gray-500">No boards available yet.</p>
-                          )}
-                        </CardContent>
-                      </Card>
-                    </div>
-
-                    {/* Recent Activity Table */}
-                    <div className="md:col-span-2">
-                      <Card className="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 shadow-sm h-full flex flex-col">
-                        <CardHeader className="pb-3">
-                          <CardTitle className="text-lg font-bold">Recent Activity</CardTitle>
-                          <CardDescription className="text-xs text-gray-500">
-                            Your latest feedback submissions and interactions
-                          </CardDescription>
-                        </CardHeader>
-                        <CardContent className="flex-1 overflow-auto">
-                          {myPosts.length === 0 ? (
-                            <div className="text-center py-8 text-gray-500">
-                              <p className="font-semibold text-sm">No feedback submissions yet.</p>
-                              <p className="text-xs text-gray-400 mt-1">Start by creating your first post!</p>
-                            </div>
-                          ) : (
-                            <Table>
-                              <TableHeader>
-                                <TableRow className="hover:bg-transparent border-gray-150 dark:border-zinc-800">
-                                  <TableHead className="text-xs text-gray-400 font-bold uppercase tracking-wider">Feedback</TableHead>
-                                  <TableHead className="text-xs text-gray-400 font-bold uppercase tracking-wider">Board</TableHead>
-                                  <TableHead className="text-xs text-gray-400 font-bold uppercase tracking-wider">Status</TableHead>
-                                  <TableHead className="text-xs text-gray-400 font-bold uppercase tracking-wider text-right">Votes</TableHead>
-                                  <TableHead className="text-xs text-gray-400 font-bold uppercase tracking-wider text-right">Date</TableHead>
-                                </TableRow>
-                              </TableHeader>
-                              <TableBody>
-                                {myPosts.slice(0, 5).map((post) => (
-                                  <TableRow key={post.id} className="border-gray-100 dark:border-zinc-850 hover:bg-gray-50/50 dark:hover:bg-zinc-800/40">
-                                    <TableCell className="font-semibold text-sm text-gray-900 dark:text-white max-w-[200px] truncate">{post.title}</TableCell>
-                                    <TableCell className="text-xs text-gray-600 dark:text-gray-300">
-                                      <span className="inline-flex items-center gap-1.5">
-                                        <span className="w-2 h-2 rounded-full" style={{ backgroundColor: post.board?.color || '#3b82f6' }} />
-                                        {post.board?.name || 'N/A'}
-                                      </span>
-                                    </TableCell>
-                                    <TableCell>{getStatusBadge(post.status)}</TableCell>
-                                    <TableCell className="text-right text-xs font-semibold text-gray-900 dark:text-white">{post.upvotes || 0}</TableCell>
-                                    <TableCell className="text-right text-xs text-gray-400 dark:text-gray-500">{formatDate(post.created_at)}</TableCell>
-                                  </TableRow>
-                                ))}
-                              </TableBody>
-                            </Table>
-                          )}
-                        </CardContent>
-                      </Card>
-                    </div>
-                  </div>
+                  <OverviewPanel
+                    organizationId={organization?.id}
+                    isLoading={overviewLoading}
+                    error={overviewError}
+                    onRetry={refreshOverview}
+                    stats={stats}
+                    myPosts={myPosts}
+                    updates={updates}
+                    trendingPosts={trendingPosts}
+                    onNewFeedback={handleNewFeedback}
+                    onViewAll={() => setActiveTab("my-feedback")}
+                  />
                 </TabsContent>
 
                 {/* My Feedback Tab Content */}
@@ -665,7 +459,7 @@ export default function DashboardPage() {
                                     <div className="flex-1 min-w-0">
                                       <div className="flex items-center gap-2 mb-1">
                                         <h4 className="font-semibold text-sm text-gray-900 dark:text-white truncate">{post.title}</h4>
-                                        {getStatusBadge(post.status)}
+                                        <StatusPill status={post.status} />
                                       </div>
                                       {post.description && (
                                         <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-1 mb-2">
