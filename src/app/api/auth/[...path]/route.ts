@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { extractAuthHeader, buildBackendHeaders, BACKEND_URL } from '@/lib/proxyHelper';
+import { extractAuthHeader, buildBackendHeaders, PublicOnlyProxyError, BACKEND_URL } from '@/lib/proxyHelper';
 
 type Params = { params: Promise<{ path: string[] }> };
 
@@ -23,7 +23,7 @@ async function handler(request: NextRequest, { params }: Params) {
     const cookieHeader = request.headers.get('cookie');
     if (cookieHeader) extraHeaders['cookie'] = cookieHeader;
 
-    const headers = buildBackendHeaders(authHeader, extraHeaders);
+    const headers = await buildBackendHeaders(request, authHeader, extraHeaders);
 
     let body: BodyInit | undefined;
     if (request.method !== 'GET' && request.method !== 'HEAD') {
@@ -53,6 +53,8 @@ async function handler(request: NextRequest, { params }: Params) {
 
     return nextResponse;
   } catch (error: any) {
+    if (error instanceof PublicOnlyProxyError)
+      return NextResponse.json({ success: false, error: 'Not found' }, { status: 404 });
     return NextResponse.json(
       { success: false, message: error.message || 'Internal server error' },
       { status: 500 }

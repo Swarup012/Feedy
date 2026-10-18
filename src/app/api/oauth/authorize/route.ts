@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { extractAuthHeader, buildBackendHeaders, BACKEND_URL } from '@/lib/proxyHelper';
+import { extractAuthHeader, buildBackendHeaders, PublicOnlyProxyError, BACKEND_URL } from '@/lib/proxyHelper';
 
 /**
  * Proxy for the backend's GET/POST /api/oauth/authorize.
@@ -19,7 +19,7 @@ async function handler(request: NextRequest) {
     const extraHeaders: Record<string, string> = { 'Content-Type': contentType };
     if (request.headers.get('origin')) extraHeaders['origin'] = request.headers.get('origin')!;
 
-    const headers = buildBackendHeaders(authHeader, extraHeaders);
+    const headers = await buildBackendHeaders(request, authHeader, extraHeaders);
 
     let body: BodyInit | undefined;
     if (request.method !== 'GET' && request.method !== 'HEAD') {
@@ -50,6 +50,8 @@ async function handler(request: NextRequest) {
 
     return nextResponse;
   } catch (error: any) {
+    if (error instanceof PublicOnlyProxyError)
+      return NextResponse.json({ success: false, error: 'Not found' }, { status: 404 });
     const errorResponse = NextResponse.json(
       { success: false, message: error.message || 'Internal server error' },
       { status: 500 }

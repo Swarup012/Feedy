@@ -34,7 +34,9 @@ const BACKEND_BODY = {
 function makeRequest(headers: Record<string, string>) {
   return new NextRequest('http://localhost:3000/api/auth/refresh', {
     method: 'POST',
-    headers,
+    // Real HTTP requests always carry a Host header; isCustomHost() fails
+    // closed (treats a missing host as restricted), so model reality here.
+    headers: { host: 'localhost:3000', ...headers },
     body: '{}',
   });
 }

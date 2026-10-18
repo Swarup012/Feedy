@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { extractAuthHeader, buildBackendHeaders, BACKEND_URL } from '@/lib/proxyHelper';
+import { extractAuthHeader, buildBackendHeaders, PublicOnlyProxyError, BACKEND_URL } from '@/lib/proxyHelper';
 
 type Params = { params: Promise<{ organizationId: string; userId: string }> };
 
@@ -23,13 +23,15 @@ export async function DELETE(
       `${BACKEND_URL}/api/organizations/${organizationId}/end-users/${userId}`,
       {
         method: 'DELETE',
-        headers: buildBackendHeaders(authHeader),
+        headers: await buildBackendHeaders(request, authHeader),
       }
     );
 
     const data = await response.json();
     return NextResponse.json(data, { status: response.status });
   } catch (error) {
+    if (error instanceof PublicOnlyProxyError)
+      return NextResponse.json({ success: false, error: 'Not found' }, { status: 404 });
     console.error('Delete end user API error:', error);
     return NextResponse.json(
       { success: false, error: 'Internal server error' },

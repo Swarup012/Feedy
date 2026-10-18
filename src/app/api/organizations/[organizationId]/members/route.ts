@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { extractAuthHeader, buildBackendHeaders, BACKEND_URL } from '@/lib/proxyHelper';
+import { extractAuthHeader, buildBackendHeaders, PublicOnlyProxyError, BACKEND_URL } from '@/lib/proxyHelper';
 
 export async function GET(
   request: NextRequest,
@@ -19,12 +19,14 @@ export async function GET(
 
     const response = await fetch(`${BACKEND_URL}/api/organizations/${organizationId}/members`, {
       method: 'GET',
-      headers: buildBackendHeaders(authHeader),
+      headers: await buildBackendHeaders(request, authHeader),
     });
 
     const data = await response.json();
     return NextResponse.json(data, { status: response.status });
   } catch (error) {
+    if (error instanceof PublicOnlyProxyError)
+      return NextResponse.json({ success: false, error: 'Not found' }, { status: 404 });
     console.error('Get members API error:', error);
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
@@ -52,13 +54,15 @@ export async function POST(
 
     const response = await fetch(`${BACKEND_URL}/api/organizations/${organizationId}/members/invite`, {
       method: 'POST',
-      headers: buildBackendHeaders(authHeader),
+      headers: await buildBackendHeaders(request, authHeader),
       body: JSON.stringify(body),
     });
 
     const data = await response.json();
     return NextResponse.json(data, { status: response.status });
   } catch (error) {
+    if (error instanceof PublicOnlyProxyError)
+      return NextResponse.json({ success: false, error: 'Not found' }, { status: 404 });
     console.error('Invite member API error:', error);
     return NextResponse.json(
       { success: false, error: 'Internal server error' },

@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { extractAuthHeader, buildBackendHeaders, BACKEND_URL } from '@/lib/proxyHelper';
+import { extractAuthHeader, buildBackendHeaders, PublicOnlyProxyError, BACKEND_URL } from '@/lib/proxyHelper';
 
 export async function GET(request: NextRequest) {
   try {
     const authHeader = extractAuthHeader(request);
-    const subdomain = request.headers.get('x-subdomain') || '';
 
     if (!authHeader) {
       return NextResponse.json(
@@ -15,12 +14,14 @@ export async function GET(request: NextRequest) {
 
     const response = await fetch(`${BACKEND_URL}/api/boards/categories`, {
       method: 'GET',
-      headers: buildBackendHeaders(authHeader, { 'x-subdomain': subdomain }),
+      headers: await buildBackendHeaders(request, authHeader),
     });
 
     const data = await response.json();
     return NextResponse.json(data, { status: response.status });
   } catch (error) {
+    if (error instanceof PublicOnlyProxyError)
+      return NextResponse.json({ success: false, error: 'Not found' }, { status: 404 });
     console.error('Board Categories API error:', error);
     return NextResponse.json(
       { success: false, error: 'Internal server error' },

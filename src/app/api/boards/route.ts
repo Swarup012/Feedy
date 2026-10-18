@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { extractAuthHeader, buildBackendHeaders, BACKEND_URL } from '@/lib/proxyHelper';
+import { extractAuthHeader, buildBackendHeaders, PublicOnlyProxyError, BACKEND_URL } from '@/lib/proxyHelper';
 
 export async function GET(request: NextRequest) {
   try {
     const authHeader = extractAuthHeader(request);
-    const subdomain = request.headers.get('x-subdomain') || '';
 
     if (!authHeader) {
       return NextResponse.json(
@@ -19,7 +18,7 @@ export async function GET(request: NextRequest) {
     try {
       const response = await fetch(`${BACKEND_URL}/api/boards`, {
         method: 'GET',
-        headers: buildBackendHeaders(authHeader, { 'x-subdomain': subdomain }),
+        headers: await buildBackendHeaders(request, authHeader),
         signal: controller.signal,
       });
 
@@ -37,6 +36,8 @@ export async function GET(request: NextRequest) {
       throw fetchError;
     }
   } catch (error) {
+    if (error instanceof PublicOnlyProxyError)
+      return NextResponse.json({ success: false, error: 'Not found' }, { status: 404 });
     console.error('Boards GET API error:', error);
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
@@ -48,7 +49,6 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const authHeader = extractAuthHeader(request);
-    const subdomain = request.headers.get('x-subdomain') || '';
 
     if (!authHeader) {
       return NextResponse.json(
@@ -60,13 +60,15 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const response = await fetch(`${BACKEND_URL}/api/boards`, {
       method: 'POST',
-      headers: buildBackendHeaders(authHeader, { 'x-subdomain': subdomain }),
+      headers: await buildBackendHeaders(request, authHeader),
       body: JSON.stringify(body),
     });
 
     const data = await response.json();
     return NextResponse.json(data, { status: response.status });
   } catch (error) {
+    if (error instanceof PublicOnlyProxyError)
+      return NextResponse.json({ success: false, error: 'Not found' }, { status: 404 });
     console.error('Boards POST API error:', error);
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
