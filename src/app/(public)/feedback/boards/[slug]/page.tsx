@@ -28,6 +28,9 @@ import {
 } from "@/components/ui/dialog";
 import { LogIn, UserPlus } from "lucide-react";
 import { saveReturnUrl } from "@/lib/returnUrl";
+import { useIsCustomHost } from "@/context/CustomHostContext";
+
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://faddy.site";
 
 export default function PublicBoardPage() {
   const params = useParams();
@@ -35,6 +38,7 @@ export default function PublicBoardPage() {
   const slug = params.slug as string;
   const { toast } = useToast();
   const { user } = useAuth();
+  const isCustomHost = useIsCustomHost();
 
   // ── SWR data ──
   const { boards: allBoards, isLoading: boardsLoading } = usePublicBoards();
@@ -75,6 +79,12 @@ export default function PublicBoardPage() {
   // ── Check private board access ──
   useEffect(() => {
     if (currentBoard?.is_private && !user) {
+      if (isCustomHost) {
+        // No session (or login page) exists on a custom host — send them to
+        // the main app instead of a /login 404.
+        window.location.href = `${APP_URL}/login`;
+        return;
+      }
       toast({
         title: "Private Board",
         description: "Please login to access this board",
@@ -83,7 +93,7 @@ export default function PublicBoardPage() {
       saveReturnUrl();
       router.push("/login");
     }
-  }, [currentBoard, user, toast, router]);
+  }, [currentBoard, user, toast, router, isCustomHost]);
 
   // ── Sync SWR posts → local filtered state ──
   useEffect(() => {
@@ -214,6 +224,10 @@ export default function PublicBoardPage() {
   // posting on another org's board.
   const handleCreatePost = () => {
     if (!user) {
+      if (isCustomHost) {
+        window.location.href = `${APP_URL}/login`;
+        return;
+      }
       setShowAuthModal(true);
       return;
     }

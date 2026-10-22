@@ -22,6 +22,10 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 // Solution: Keep all browser calls on the same origin (faddy.site / localhost:5173).
 // Next.js Route Handlers extract the cookie and forward it to the backend.
 // On the server (SSR / Route Handlers themselves) we use the absolute API_URL.
+//
+// NO request interceptor: x-subdomain is never set client-side (Stage 3b-2,
+// design table row #1). middleware.ts derives the tenant from Host and
+// proxyHelper.buildBackendHeaders attaches it server-side.
 const isServer = typeof window === "undefined";
 
 const api: AxiosInstance = axios.create({
@@ -32,45 +36,6 @@ const api: AxiosInstance = axios.create({
   timeout: 30000,
   withCredentials: true,
 });
-
-
-// ─── Request interceptor — subdomain header only ─────────────────────────────
-// We no longer attach an Authorization header. The HttpOnly cookie is sent
-// automatically by the browser. We still need the x-subdomain header for
-// multi-tenancy routing on the backend.
-api.interceptors.request.use(
-  (config: InternalAxiosRequestConfig) => {
-    if (config.headers && typeof window !== "undefined") {
-      // Auth is via HttpOnly cookies only — no Authorization header attached.
-      // The browser sends the cookie automatically; the proxy extracts it.
-
-      const hostname = window.location.hostname;
-      const parts = hostname.split(".");
-      let subdomain: string | null = null;
-
-      // Production: acme.faddy.site
-      if (parts.length >= 3 && !hostname.includes("localhost")) {
-        subdomain = parts[0];
-        if (["www", "api", "admin"].includes(subdomain)) subdomain = null;
-      }
-
-      // Development: acme.localhost:5173
-      if (
-        hostname.includes("localhost") &&
-        parts.length > 1 &&
-        parts[0] !== "localhost"
-      ) {
-        subdomain = parts[0];
-      }
-
-      if (subdomain) {
-        config.headers["x-subdomain"] = subdomain;
-      }
-    }
-    return config;
-  },
-  (error: AxiosError) => Promise.reject(error),
-);
 
 // ─── Response interceptor — cookie-based token refresh ───────────────────────
 // When the server returns 401, we attempt a silent token refresh.

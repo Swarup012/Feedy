@@ -18,8 +18,14 @@ const resolveHostMock = vi.mocked(resolveHost);
 const PREV_SECRET = process.env.TENANT_HEADER_SECRET;
 const TEST_SECRET = 'test-secret-abc';
 
-function makeReq(host: string, path = '/', extra: Record<string, string> = {}) {
+function makeReq(
+  host: string,
+  path = '/',
+  extra: Record<string, string> = {},
+  method = 'GET',
+) {
   return new NextRequest(`http://next.test${path}`, {
+    method,
     headers: { host, ...extra },
   });
 }
@@ -80,7 +86,7 @@ describe('custom host: resolve + path allowlist', () => {
       subdomain: 'acme',
       organizationId: 'org-1',
     });
-    const res = await middleware(makeReq('feedback.acm.com', '/board/x', FORGED));
+    const res = await middleware(makeReq('feedback.acm.com', '/feedback', FORGED));
     expect(res.status).toBe(200);
     expect(forwarded(res, 'x-subdomain')).toBe('acme'); // forged 'evil' gone
     expect(forwarded(res, 'x-custom-host')).toBe('1'); // derived, not client's
@@ -140,27 +146,69 @@ describe('custom host: resolve + path allowlist', () => {
       subdomain: 'acme',
       organizationId: 'org-1',
     });
-    const res = await middleware(makeReq('feedback.acm.com', '/videos/landing_page.mp4'));
+    const res = await middleware(makeReq('feedback.acm.com', '/images/icons/discord.svg'));
     expect(res.status).toBe(200);
     expect(forwarded(res, 'x-subdomain')).toBe('acme');
   });
 
-  it('B: custom host "/" (marketing landing) redirects to /feedback after resolve ok', async () => {
+  it('B: custom host "/" passes through (marketing layout 307s downstream)', async () => {
     resolveHostMock.mockResolvedValue({
       status: 'ok',
       subdomain: 'acme',
       organizationId: 'org-1',
     });
     const res = await middleware(makeReq('feedback.acm.com', '/'));
-    expect(res.status).toBe(307);
-    expect(res.headers.get('location')).toBe('http://next.test/feedback');
+    expect(res.status).toBe(200); // NextResponse.next pass-through
+    expect(res.headers.get('location')).toBeNull();
     expect(resolveHostMock).toHaveBeenCalledWith('feedback.acm.com');
+    expect(forwarded(res, 'x-subdomain')).toBe('acme');
   });
 
   it('B: first-party "/" keeps the marketing landing (no redirect)', async () => {
     const res = await middleware(makeReq('acme.faddy.site', '/'));
     expect(res.headers.get('location')).toBeNull();
     expect(res.status).toBe(200); // NextResponse.next pass-through
+    expect(forwarded(res, 'x-subdomain')).toBe('acme');
+  });
+
+  // Stage 3b-2: legacy /board/** is allowlisted on custom hosts so the
+  // redirect route (app/board/[[...slug]]/route.ts) can emit a RELATIVE
+  // Location — middleware itself never redirects (Next 15's middleware
+  // adapter URL-parses Location headers and crashes on relative values).
+  it('custom-host /board/:slug passes through to the redirect route', async () => {
+    resolveHostMock.mockResolvedValue({
+      status: 'ok',
+      subdomain: 'acme',
+      organizationId: 'org-1',
+    });
+    const res = await middleware(makeReq('feedback.acm.com', '/board/x'));
+    expect(res.status).toBe(200);
+    expect(res.headers.get('location')).toBeNull();
+    expect(forwarded(res, 'x-subdomain')).toBe('acme');
+  });
+
+  it('bare /board (no segment) is NOT allowlisted -> 404 before resolve', async () => {
+    const res = await middleware(makeReq('feedback.acm.com', '/board'));
+    expect(res.status).toBe(404);
+    expect(res.headers.get('cache-control')).toBe('no-store');
+    expect(resolveHostMock).not.toHaveBeenCalled();
+  });
+
+  it('/board/a/b/c passes through (route 404s non-legacy depth)', async () => {
+    resolveHostMock.mockResolvedValue({
+      status: 'ok',
+      subdomain: 'acme',
+      organizationId: 'org-1',
+    });
+    const res = await middleware(makeReq('feedback.acm.com', '/board/a/b/c'));
+    expect(res.status).toBe(200);
+    expect(forwarded(res, 'x-subdomain')).toBe('acme');
+  });
+
+  it('first-party /board/** is NOT allowlist-gated (route 404s downstream)', async () => {
+    const res = await middleware(makeReq('acme.faddy.site', '/board/x/y'));
+    expect(res.status).toBe(200);
+    expect(res.headers.get('location')).toBeNull();
     expect(forwarded(res, 'x-subdomain')).toBe('acme');
   });
 });
@@ -243,5 +291,129 @@ describe('config', () => {
       '/((?!_next/static|_next/image|favicon.ico).*)',
       '/api/(.*)',
     ]);
+  });
+});
+
+describe('central CSRF check (3b-2 step 6)', () => {
+  const PREV_MODE = process.env.CSRF_MODE;
+  let logSpy: ReturnType<typeof vi.spyOn>;
+
+  beforeEach(() => {
+    logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    delete process.env.CSRF_MODE; // default = log mode (never blocks)
+  });
+
+  afterEach(() => {
+    logSpy.mockRestore();
+    if (PREV_MODE === undefined) delete process.env.CSRF_MODE;
+    else process.env.CSRF_MODE = PREV_MODE;
+  });
+
+  function csrfChecks(): Array<Record<string, unknown>> {
+    return logSpy.mock.calls
+      .map((c) => c[0])
+      .filter(
+        (c): c is Record<string, unknown> =>
+          !!c && typeof c === 'object' && (c as { evt?: string }).evt === 'csrf_check',
+      );
+  }
+
+  it('same-origin mutating /api request: 200 + verdict logged ok:true', async () => {
+    const res = await middleware(
+      makeReq('faddy.site', '/api/public/posts/1/upvote', {
+        'sec-fetch-site': 'same-origin',
+      }, 'POST'),
+    );
+    expect(res.status).toBe(200);
+    expect(csrfChecks()).toContainEqual({
+      evt: 'csrf_check',
+      method: 'POST',
+      path: '/api/public/posts/1/upvote',
+      ok: true,
+    });
+  });
+
+  it('log mode (default): cross-site POST passes through, verdict ok:false', async () => {
+    const res = await middleware(
+      makeReq('faddy.site', '/api/auth/login', {
+        'sec-fetch-site': 'cross-site',
+      }, 'POST'),
+    );
+    expect(res.status).toBe(200); // never blocks in log mode
+    expect(csrfChecks()[0]).toMatchObject({ path: '/api/auth/login', ok: false });
+  });
+
+  it('enforce mode: cross-site POST -> 403 no-store', async () => {
+    process.env.CSRF_MODE = 'enforce';
+    const res = await middleware(
+      makeReq('faddy.site', '/api/public/posts/1/upvote', {
+        'sec-fetch-site': 'cross-site',
+      }, 'POST'),
+    );
+    expect(res.status).toBe(403);
+    expect(res.headers.get('cache-control')).toBe('no-store');
+  });
+
+  it('enforce mode: no Sec-Fetch-Site and no Origin -> 403 (fail closed)', async () => {
+    process.env.CSRF_MODE = 'enforce';
+    const res = await middleware(
+      makeReq('faddy.site', '/api/auth/login', {}, 'POST'),
+    );
+    expect(res.status).toBe(403);
+  });
+
+  it('enforce mode: same-origin POST still 200', async () => {
+    process.env.CSRF_MODE = 'enforce';
+    const res = await middleware(
+      makeReq('faddy.site', '/api/auth/login', {
+        'sec-fetch-site': 'same-origin',
+      }, 'POST'),
+    );
+    expect(res.status).toBe(200);
+  });
+
+  it('GET requests are not evaluated', async () => {
+    await middleware(
+      makeReq('faddy.site', '/api/public/boards', { 'sec-fetch-site': 'cross-site' }),
+    );
+    expect(csrfChecks()).toEqual([]);
+  });
+
+  it('non-/api POST (OAuth authorize page action, server actions) is out of scope', async () => {
+    const res = await middleware(
+      makeReq('faddy.site', '/oauth/authorize', {
+        'sec-fetch-site': 'cross-site',
+      }, 'POST'),
+    );
+    expect(res.status).toBe(200);
+    expect(csrfChecks()).toEqual([]);
+  });
+
+  it('INTERNAL_HOSTS machine calls are exempt (return before the check)', async () => {
+    process.env.INTERNAL_HOSTS = 'host.docker.internal:5173';
+    const res = await middleware(
+      makeReq('host.docker.internal:5173', '/api/clusters/assign', {
+        'sec-fetch-site': 'cross-site',
+      }, 'POST'),
+    );
+    expect(res.status).toBe(200);
+    expect(csrfChecks()).toEqual([]);
+  });
+
+  it('custom-host same-origin write: checked, passes, still gets tenant headers', async () => {
+    resolveHostMock.mockResolvedValue({
+      status: 'ok',
+      subdomain: 'acme',
+      organizationId: 'org-1',
+    });
+    const res = await middleware(
+      makeReq('feedback.acm.com', '/api/public/posts/1/upvote', {
+        'sec-fetch-site': 'same-origin',
+      }, 'POST'),
+    );
+    expect(res.status).toBe(200);
+    expect(csrfChecks()[0]).toMatchObject({ ok: true });
+    expect(forwarded(res, 'x-subdomain')).toBe('acme');
+    expect(forwarded(res, 'x-custom-host')).toBe('1');
   });
 });

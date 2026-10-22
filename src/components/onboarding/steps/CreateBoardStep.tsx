@@ -109,8 +109,8 @@ export function CreateBoardStep({ data, onUpdate }: CreateBoardStepProps) {
             This will create a URL:{' '}
             <span className="font-mono text-primary">
               {data.firstBoard?.name
-                ? `/board/${data.firstBoard.name.toLowerCase().replace(/\s+/g, '-')}`
-                : '/board/your-board'}
+                ? `/feedback/boards/${data.firstBoard.name.toLowerCase().replace(/\s+/g, '-')}`
+                : '/feedback/boards/your-board'}
             </span>
           </p>
         </div>

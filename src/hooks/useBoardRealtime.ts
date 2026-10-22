@@ -3,6 +3,7 @@
 
 import { useEffect, useCallback } from 'react';
 import { getSocket, joinBoardRoom, leaveBoardRoom } from '@/lib/socket';
+import { useIsCustomHost } from '@/context/CustomHostContext';
 
 interface Post {
   id: string;
@@ -82,7 +83,14 @@ export function useBoardRealtime({
     [onPostUpvoted]
   );
 
+  const isCustomHost = useIsCustomHost();
+
   useEffect(() => {
+    // Custom hosts are read-only by design — never touch the socket there
+    // (no session exists on a customer origin; even a stray connection
+    // must not join board rooms).
+    if (isCustomHost) return;
+
     const socket = getSocket();
     if (!socket || !boardSlug) return;
 
@@ -105,5 +113,5 @@ export function useBoardRealtime({
       socket.off('post:comment_count', handleCommentCountChanged);
       socket.off('post:upvoted', handlePostUpvoted);
     };
-  }, [boardSlug, handlePostCreated, handlePostDeleted, handlePostStatusChanged, handleCommentCountChanged, handlePostUpvoted]);
+  }, [isCustomHost, boardSlug, handlePostCreated, handlePostDeleted, handlePostStatusChanged, handleCommentCountChanged, handlePostUpvoted]);
 }

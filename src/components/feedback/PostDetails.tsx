@@ -55,6 +55,9 @@ import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
 import { usePostRealtime } from "@/hooks/usePostRealtime";
 import api from "@/lib/api";
+import { useIsCustomHost } from "@/context/CustomHostContext";
+
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://faddy.site";
 
 // 🔥 GLOBAL cache for comments (persists across post switches!)
 const commentsCache: Record<string, Comment[]> = {};
@@ -347,6 +350,7 @@ export function PostDetails({
 }: PostDetailsProps) {
   const { toast } = useToast();
   const { user } = useAuth();
+  const isCustomHost = useIsCustomHost();
   const { organization } = useOrganization();
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState("");
@@ -475,9 +479,11 @@ export function PostDetails({
     }
   }, [post?.id]);
 
-  // Fetch merged history when post changes
+  // Fetch merged history when post changes — session-only: folded siblings
+  // come from /api/posts/:id/merged-history, which is not a public endpoint,
+  // so logged-out visitors (all custom-host visitors) never see the section.
   useEffect(() => {
-    if (post) {
+    if (post && user) {
       if (mergedHistoryCache[post.id]) {
         setMergedHistory(mergedHistoryCache[post.id]);
 
@@ -492,7 +498,7 @@ export function PostDetails({
         fetchMergedHistory();
       }
     }
-  }, [post?.id]);
+  }, [post?.id, user]);
 
   // Fetch labels from API when organization is available
   useEffect(() => {
@@ -536,7 +542,7 @@ export function PostDetails({
   };
 
   const fetchMergedHistory = async () => {
-    if (!post) return;
+    if (!post || !user) return;
 
     try {
       setLoadingMergedHistory(true);
@@ -616,6 +622,13 @@ export function PostDetails({
   const handleUpvote = async () => {
     if (!post) return;
 
+    // Custom hosts are read-only by design — no session there; the vote
+    // affordance is a login link on the main app, never a POST.
+    if (isCustomHost) {
+      window.location.href = `${APP_URL}/login`;
+      return;
+    }
+
     // Check if user is authenticated
     if (!user && onAuthRequired) {
       onAuthRequired();
@@ -647,6 +660,11 @@ export function PostDetails({
   // Handle add comment
   const handleAddComment = async () => {
     if (!post || !newComment.trim()) return;
+
+    if (isCustomHost) {
+      window.location.href = `${APP_URL}/login`;
+      return;
+    }
 
     // Check if user is authenticated
     if (!user && onAuthRequired) {
@@ -713,6 +731,11 @@ export function PostDetails({
   const handleToggleCommentLike = async (commentId: string) => {
     if (!post) return;
 
+    if (isCustomHost) {
+      window.location.href = `${APP_URL}/login`;
+      return;
+    }
+
     // Check if user is authenticated
     if (!user && onAuthRequired) {
       onAuthRequired();
@@ -752,6 +775,11 @@ export function PostDetails({
   // Handle reply to comment
   const handleReply = async (parentId: string) => {
     if (!post || !replyContent.trim()) return;
+
+    if (isCustomHost) {
+      window.location.href = `${APP_URL}/login`;
+      return;
+    }
 
     // Check if user is authenticated
     if (!user && onAuthRequired) {
@@ -900,40 +928,14 @@ export function PostDetails({
     if (typeof window === 'undefined') {
       return "";
     }
-    
+
     if (!post) {
       return "";
     }
-    
-    try {
-      // Strategy 1: Use currentBoard.slug with post.id
-      if (currentBoard && currentBoard.slug && post.id) {
-        const link = `${window.location.origin}/board/${currentBoard.slug}/${post.id}`;
-        return link;
-      }
-      
-      // Strategy 2: Find board from boards array using post.board_id
-      if (Array.isArray(boards) && boards.length > 0 && post.board_id && post.id) {
-        const board = boards.find((b: any) => b && b.id === post.board_id);
-        if (board && board.slug) {
-          const link = `${window.location.origin}/board/${board.slug}/${post.id}`;
-          return link;
-        }
-      }
-      
-      // Strategy 3: Extract slug from current URL
-      const pathSegments = window.location.pathname.split('/');
-      const slugIndex = pathSegments.indexOf('boards');
-      if (slugIndex !== -1 && pathSegments[slugIndex + 1] && post.id) {
-        const urlSlug = pathSegments[slugIndex + 1];
-        const link = `${window.location.origin}/board/${urlSlug}/${post.id}`;
-        return link;
-      }
-    } catch (error) {
-      console.error('Error generating public link:', error);
-    }
-    
-    return "";
+
+    // Canonical post URL — the board slug is not part of the path (legacy
+    // /board/<slug>/<postId> links 307 here on custom hosts).
+    return post.id ? `${window.location.origin}/feedback/${post.id}` : "";
   };
 
   // Show skeleton while loading
@@ -1225,7 +1227,7 @@ export function PostDetails({
                 }}
                 onFocus={() => {
                   setComposerFocused(true);
-                  if (!user && onAuthRequired) onAuthRequired();
+                  if (!user && onAuthRequired && !isCustomHost) onAuthRequired();
                 }}
                 onBlur={() => {
                   if (!newComment.trim()) setComposerFocused(false);

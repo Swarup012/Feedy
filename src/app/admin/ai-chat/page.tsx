@@ -63,25 +63,6 @@ function dbToUi(m: DbMessage): UiMessage {
   };
 }
 
-function getAuthHeaders(): Record<string, string> {
-  const headers: Record<string, string> = {};
-  if (typeof window === "undefined") return headers;
-  const tok =
-    localStorage.getItem("access_token") || localStorage.getItem("token");
-  if (tok) headers["Authorization"] = `Bearer ${tok}`;
-  const hostname = window.location.hostname;
-  const parts = hostname.split(".");
-  if (parts.length >= 3 && !hostname.includes("localhost"))
-    headers["x-subdomain"] = parts[0];
-  else if (
-    hostname.includes("localhost") &&
-    parts.length > 1 &&
-    parts[0] !== "localhost"
-  )
-    headers["x-subdomain"] = parts[0];
-  return headers;
-}
-
 // ─── Markdown renderer ────────────────────────────────────────────────────────
 
 function renderMarkdown(text: string) {
@@ -418,7 +399,6 @@ function AiChatContent() {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const rafRef = useRef<number>(0);
   const accumulatedTextRef = useRef("");
-  const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
   // Auto-scroll only if user is near bottom
   const isNearBottom = useCallback(() => {
@@ -559,14 +539,15 @@ function AiChatContent() {
       };
 
       try {
+        // Same-origin through the Feedy org proxy (auth cookie + Host-derived
+        // tenant attached server-side; the stream is piped through).
         const response = await fetch(
-          `${backendUrl}/api/organizations/${orgId}/feedback-chat`,
+          `/api/organizations/${orgId}/feedback-chat`,
           {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
               Accept: "text/event-stream",
-              ...getAuthHeaders(),
             },
             credentials: "include",
             body: JSON.stringify({
@@ -704,7 +685,6 @@ function AiChatContent() {
       orgId,
       activeConvId,
       createConversation,
-      backendUrl,
     ],
   );
 

@@ -96,8 +96,11 @@ export function LeftSidebar({
     icon: 'Lightbulb', // Default to Lucide icon name
   });
 
-  // Pre-load usage data for instant popup
+  // Pre-load usage data for instant popup — signed-in only: guests can't
+  // open the create dialog (role-gated UI), and on custom hosts `user` is
+  // always null, where /api/users/me/** is allowlist-404 anyway.
   useEffect(() => {
+    if (!user) return;
     const loadUsage = async () => {
       try {
         const response = await usageService.canCreateBoard();
@@ -110,7 +113,7 @@ export function LeftSidebar({
       }
     };
     loadUsage();
-  }, [boards.length]); // Re-check when boards change
+  }, [user, boards.length]); // Re-check when boards change
 
   // Show first 5 boards by default, all if "View All" is clicked
   const INITIAL_BOARDS_LIMIT = 2;

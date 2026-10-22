@@ -7,6 +7,7 @@ import {
 } from "@/lib/proxyHelper";
 import { resolveHost } from "@/lib/hostResolver";
 import { isCustomHostPathAllowed } from "@/lib/customHostAllowlist";
+import { verifySameOriginRequest } from "@/lib/csrf";
 
 // Multi-tenancy + Cloudflare-for-SaaS custom hostnames (Stage 3b item 3).
 //
@@ -17,6 +18,8 @@ import { isCustomHostPathAllowed } from "@/lib/customHostAllowlist";
 // key not listed — so the deletions stick.)
 //
 // Custom host (isCustomHost — fail-closed from Host itself):
+//   legacy /board/**     -> 307 to canonical /feedback/** (pure path rewrite,
+//                           no backend lookup; unresolved hosts 404 on target)
 //   path not on allowlist  -> 404 (checked before any backend lookup)
 //   unresolved / unknown   -> 404 (never falls through to any tenant)
 //   backend unavailable    -> 503 (fail closed — never guesses a tenant)
@@ -39,6 +42,7 @@ const TENANT_HEADERS = [
 // the transient case only.
 const REFUSED_404_HEADERS = { "Cache-Control": "no-store" };
 const REFUSED_503_HEADERS = { "Cache-Control": "no-store", "Retry-After": "5" };
+const REFUSED_403_HEADERS = { "Cache-Control": "no-store" };
 
 // Machine-to-machine hosts (Stage 3b item 3 follow-up): docker healthchecks
 // (Host: localhost:5173), the backend's cluster-assign call
@@ -87,7 +91,38 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next({ request: { headers: requestHeaders } });
   }
 
+  // Central CSRF check (3b-2 step 6): every mutating /api request must be
+  // provably same-origin (csrf.ts: Sec-Fetch-Site === 'same-origin', else
+  // exact Origin == Host). Internal machine hosts returned above — no
+  // browser, they authenticate via x-internal-secret — and non-/api POSTs
+  // (server actions) are out of scope. Default CSRF_MODE=log records the
+  // verdict without blocking (rollout telemetry, SameSite=Lax cookies make
+  // real CSRF plausible); CSRF_MODE=enforce refuses with 403. Applies to
+  // first-party AND custom-host requests — custom-host browser writes are
+  // same-origin to the customer hostname.
+  const mutatingApi =
+    ["POST", "PUT", "PATCH", "DELETE"].includes(request.method) &&
+    request.nextUrl.pathname.startsWith("/api");
+  if (mutatingApi) {
+    const sameOrigin = verifySameOriginRequest(request);
+    console.log({
+      evt: "csrf_check",
+      method: request.method,
+      path: request.nextUrl.pathname,
+      ok: sameOrigin,
+    });
+    if (!sameOrigin && process.env.CSRF_MODE === "enforce") {
+      return new NextResponse(null, { status: 403, headers: REFUSED_403_HEADERS });
+    }
+  }
+
   if (isCustomHost(rawHost)) {
+    // NOTE: legacy /board/** -> /feedback/** and "/" -> /feedback are NOT
+    // redirected here — Next 15's middleware adapter URL-parses every
+    // Location header (relative values throw Invalid URL). They live in
+    // app/board/[[...slug]]/route.ts and the (marketing) layout, which
+    // emit relative Locations untouched.
+    //
     // Path allowlist first — no backend lookup for paths that can't be served.
     if (!isCustomHostPathAllowed(request.nextUrl.pathname)) {
       return new NextResponse(null, { status: 404, headers: REFUSED_404_HEADERS });
@@ -98,12 +133,6 @@ export async function middleware(request: NextRequest) {
     }
     if (resolved.status === "unavailable") {
       return new NextResponse(null, { status: 503, headers: REFUSED_503_HEADERS });
-    }
-
-    // "/" is the marketing landing on first-party hosts; a custom host has
-    // no landing to show — start visitors at the public feedback board.
-    if (request.nextUrl.pathname === "/") {
-      return NextResponse.redirect(new URL("/feedback", request.url));
     }
 
     requestHeaders.set("x-subdomain", resolved.subdomain);

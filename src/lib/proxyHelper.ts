@@ -276,6 +276,7 @@ export async function buildBackendHeaders(
 const PUBLIC_PATH_REJECTIONS: readonly [pattern: RegExp, reason: string][] = [
   [/\.\./, '".." path traversal'],
   [/%2e%2e/i, 'encoded ".." traversal'],
+  [/%252e/i, 'double-encoded dot'],
   [/\/\//, 'double slash (protocol-relative / absolute-URL attempt)'],
   [/%2f/i, 'encoded slash'],
   [/%5c/i, 'encoded backslash'],

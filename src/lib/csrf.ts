@@ -5,6 +5,8 @@
  * to prevent Cross-Site Request Forgery attacks during OAuth flows.
  */
 
+import type { NextRequest } from 'next/server';
+
 const STATE_KEY = 'oauth_state';
 const STATE_EXPIRY = 5 * 60 * 1000; // 5 minutes in milliseconds
 
@@ -95,4 +97,41 @@ export function verifyState(providedState: string): boolean {
 export function clearState(): void {
   if (typeof window === 'undefined') return;
   localStorage.removeItem(STATE_KEY);
+}
+
+/**
+ * Verify that a mutating request came from the same origin (Stage 3).
+ *
+ * Requires positive evidence: the Fetch Metadata `Sec-Fetch-Site` header
+ * must be exactly `same-origin`. All other values fail — including `none`
+ * (address-bar navigations and non-browser clients send it; a POST from an
+ * address bar has no place on this API), `same-site` (acme.faddy.site →
+ * faddy.site is exactly the CSRF shape SameSite=Lax does NOT stop), and
+ * `cross-site`. When the header is absent entirely, the `Origin` header
+ * must equal the request Host exactly (host:port, case-insensitive).
+ * Missing Origin, Origin "null", and mismatches are all refused (fail
+ * closed): browsers send one of the two headers on every POST, so absence
+ * means a non-conforming client, which this proxy does not need to serve.
+ *
+ * Args:
+ *   request: The incoming Next.js request.
+ *
+ * Returns:
+ *   true only when the request is provably same-origin; false otherwise.
+ */
+export function verifySameOriginRequest(request: NextRequest): boolean {
+  const secFetchSite = request.headers.get('sec-fetch-site');
+  if (secFetchSite !== null) {
+    return secFetchSite === 'same-origin';
+  }
+
+  const origin = request.headers.get('origin');
+  if (!origin) return false; // fail closed — no evidence of same origin
+  // Exact string comparison (after lowercasing): the Origin's authority
+  // (host[:port], scheme stripped) must equal the Host header verbatim —
+  // no URL-parser normalization that would erase a port difference.
+  const authority = origin.toLowerCase().match(/^[a-z][a-z0-9+.-]*:\/\/(.+)$/)?.[1];
+  if (!authority) return false; // "null", unparseable, or missing scheme — fail closed
+  const requestHost = (request.headers.get('host') ?? '').toLowerCase();
+  return authority === requestHost;
 }

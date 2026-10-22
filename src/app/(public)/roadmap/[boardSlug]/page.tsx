@@ -13,6 +13,9 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { useIsCustomHost } from '@/context/CustomHostContext';
+
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://faddy.site";
 import { LoadingAnimation } from '@/components/LoadingAnimation';
 import {
   ArrowUpCircle,
@@ -29,6 +32,7 @@ export default function RoadmapPage() {
   const params = useParams();
   const { user } = useAuth();
   const { toast } = useToast();
+  const isCustomHost = useIsCustomHost();
   const [items, setItems] = useState<RoadmapItem[]>([]);
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -137,6 +141,11 @@ export default function RoadmapPage() {
 
   const handleVote = async (itemId: string) => {
     if (!user) {
+      if (isCustomHost) {
+        // Read-only custom host: vote needs a main-app session.
+        window.location.href = `${APP_URL}/login`;
+        return;
+      }
       toast({
         title: 'Login Required',
         description: 'Please login to vote on roadmap items',

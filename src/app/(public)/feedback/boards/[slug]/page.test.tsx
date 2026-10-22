@@ -1,4 +1,4 @@
-import { render, waitFor, cleanup } from '@testing-library/react';
+import { render, waitFor, cleanup, fireEvent, screen } from '@testing-library/react';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 // ============================================================
@@ -15,6 +15,12 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 const ctx = vi.hoisted(() => ({
   dialogProps: null as Record<string, unknown> | null,
   canCreatePost: vi.fn(async () => ({ allowed: true })),
+  // Mutable so tests can switch between a signed-in visitor (default — the
+  // existing CreatePostDialog contract tests) and a guest.
+  authUser: { id: 'user-1', email: 'visitor@example.com' } as {
+    id: string;
+    email: string;
+  } | null,
 }));
 
 // Stable references — the page's effects depend on these arrays; fresh
@@ -32,8 +38,8 @@ vi.mock('next/navigation', () => ({
 
 vi.mock('@/hooks/useAuth', () => ({
   useAuth: () => ({
-    user: { id: 'user-1', email: 'visitor@example.com' },
-    isAuthenticated: true,
+    user: ctx.authUser,
+    isAuthenticated: ctx.authUser !== null,
     loading: false,
   }),
 }));
@@ -75,7 +81,11 @@ vi.mock('@/components/feedback/LeftSidebar', () => ({
   LeftSidebar: () => null,
 }));
 vi.mock('@/components/feedback/PostsList', () => ({
-  PostsList: () => null,
+  // Renders the guest-reachable create affordance so tests can drive
+  // onCreatePost (the real component is out of scope for these tests).
+  PostsList: ({ onCreatePost }: { onCreatePost?: () => void }) => (
+    <button onClick={onCreatePost}>Mock Create Post</button>
+  ),
 }));
 vi.mock('@/components/feedback/PostDetails', () => ({
   PostDetails: () => null,
@@ -89,10 +99,12 @@ vi.mock('@/components/feedback/CreatePostDialog', () => ({
 }));
 
 import PublicBoardPage from '@/app/(public)/feedback/boards/[slug]/page';
+import { CustomHostProvider } from '@/context/CustomHostContext';
 
 beforeEach(() => {
   ctx.dialogProps = null;
   ctx.canCreatePost.mockClear();
+  ctx.authUser = { id: 'user-1', email: 'visitor@example.com' };
 });
 
 afterEach(() => cleanup());
@@ -114,5 +126,51 @@ describe('portal board page → CreatePostDialog', () => {
     await waitFor(() => expect(ctx.dialogProps).not.toBeNull());
 
     expect(ctx.canCreatePost).not.toHaveBeenCalled();
+  });
+});
+
+// ============================================================
+// Guest create-post paths (Stage 3b-2 step 2).
+//
+// First-party guest -> auth modal (login/signup in-app).
+// Custom-host guest -> absolute https://faddy.site/login — /login does not
+// exist on a custom hostname (middleware allowlist 404s it).
+// ============================================================
+
+describe('guest create-post (custom host vs first-party)', () => {
+  beforeEach(() => {
+    ctx.authUser = null;
+    Object.defineProperty(window, 'location', {
+      writable: true,
+      configurable: true,
+      value: {
+        hostname: 'feedback.acm.com',
+        href: '',
+        pathname: '/',
+        search: '',
+      },
+    });
+  });
+
+  it('first-party guest: opens the auth modal, no navigation', async () => {
+    render(<PublicBoardPage />);
+
+    fireEvent.click(screen.getByText('Mock Create Post'));
+
+    expect(await screen.findByText('Join the Conversation')).toBeTruthy();
+    expect(window.location.href).toBe('');
+  });
+
+  it('custom-host guest: redirects to https://faddy.site/login, no modal', async () => {
+    render(
+      <CustomHostProvider value={true}>
+        <PublicBoardPage />
+      </CustomHostProvider>,
+    );
+
+    fireEvent.click(screen.getByText('Mock Create Post'));
+
+    expect(window.location.href).toBe('https://faddy.site/login');
+    expect(screen.queryByText('Join the Conversation')).toBeNull();
   });
 });

@@ -1,205 +1,159 @@
-import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import fs from 'node:fs';
-import path from 'node:path';
+import { computeTenantSig } from '@/lib/proxyHelper';
 
 // ── Mocks ───────────────────────────────────────────────────────────────────
 
-const apiGet = vi.hoisted(() => vi.fn());
+const headerStore = new Map<string, string>();
+const fetchOrg = vi.hoisted(() => vi.fn());
 
-vi.mock('@/lib/api', () => ({
-  default: { get: apiGet },
-  isPlanUpgradeRequired: () => false,
-}));
-
-vi.mock('@/hooks/useAuth', () => ({
-  useAuth: () => ({
-    user: null,
-    isAuthenticated: false,
-    loading: false,
-    logout: vi.fn(),
+vi.mock('next/headers', () => ({
+  headers: async () => ({
+    get: (name: string) => headerStore.get(name.toLowerCase()) ?? null,
   }),
 }));
 
-vi.mock('@/components/theme-toggle', () => ({
-  ThemeToggle: () => null,
+vi.mock('@/lib/customHostOrg', () => ({
+  fetchCustomHostOrganization: fetchOrg,
 }));
 
-import { default as AppLayout } from '@/app/(public)/layout';
+vi.mock('./layout-client', () => ({
+  default: (props: {
+    isCustomHost: boolean;
+    initialOrganization: { name: string } | null;
+  }) => null,
+}));
 
-// ── Helpers ─────────────────────────────────────────────────────────────────
+import PublicLayout from './layout';
 
-function setHostname(hostname: string) {
-  Object.defineProperty(window, 'location', {
-    writable: true,
-    configurable: true,
-    value: { hostname, protocol: 'http:', port: '', pathname: '/', search: '' },
-  });
-}
+// Server layout (Stage 3b-2 step 3): org branding is fetched server-side,
+// keyed ONLY on middleware-derived headers — and ONLY after verifying the
+// tenant signature (HMAC over normalizeHost(host)|subdomain) that middleware
+// stamped post-resolution. Forged or missing sig = no fetch, no branding.
 
-function orgResponse(organization: unknown) {
-  return { data: { success: true, data: { organization } } };
-}
-
-const PAID_ORG = {
-  id: 'org-1',
-  name: 'Acme',
-  subdomain: 'acme',
-  logo_url: 'https://x.supabase.co/storage/v1/object/public/user-uploads/org-1/branding/logo.png',
-  branding: { primaryColor: '#ff0000' },
-};
+const ORG = { name: 'Acme' };
+const SECRET = 'layout-test-secret';
 
 beforeEach(() => {
-  apiGet.mockReset();
-  setHostname('acme.localhost');
+  headerStore.clear();
+  fetchOrg.mockReset();
+  fetchOrg.mockResolvedValue(ORG);
+  process.env.TENANT_HEADER_SECRET = SECRET;
 });
 
-afterEach(() => cleanup());
+afterEach(() => {
+  delete process.env.TENANT_HEADER_SECRET;
+});
 
-// ── Brand color vars + logo ─────────────────────────────────────────────────
+async function setCustomHostHeaders(sub: string, host: string, sig?: string) {
+  headerStore.set('x-custom-host', '1');
+  headerStore.set('x-subdomain', sub);
+  headerStore.set('host', host);
+  if (sig !== undefined) headerStore.set('x-tenant-sig', sig);
+}
 
-describe('branding present (Starter/Pro with color + logo)', () => {
-  it('sets --primary / --primary-foreground / --ring inline on the wrapper', async () => {
-    apiGet.mockResolvedValue(orgResponse(PAID_ORG));
-    const { container } = render(<AppLayout>page</AppLayout>);
+describe('(public) server layout — custom-host branding', () => {
+  it('valid tenant sig: fetches branding once with the derived x-subdomain', async () => {
+    const sig = await computeTenantSig('feedback.acm.com', 'acme');
+    await setCustomHostHeaders('acme', 'feedback.acm.com', sig);
 
-    await waitFor(() => expect(apiGet).toHaveBeenCalled());
+    const el = (await PublicLayout({ children: 'kid' })) as React.ReactElement;
 
-    const wrapper = container.firstChild as HTMLElement;
-    expect(wrapper.style.getPropertyValue('--primary')).toBe('0 100% 50%'); // #ff0000
-    expect(wrapper.style.getPropertyValue('--primary-foreground')).toBe('0 0% 100%');
-    expect(wrapper.style.getPropertyValue('--ring')).toBe('0 100% 50%');
+    expect(fetchOrg).toHaveBeenCalledTimes(1);
+    expect(fetchOrg).toHaveBeenCalledWith('acme');
+    expect(el.props.isCustomHost).toBe(true);
+    expect(el.props.initialOrganization).toEqual(ORG);
   });
 
-  it('sets the same vars on document.body (for portaled dialogs/dropdowns) and cleans up on unmount', async () => {
-    apiGet.mockResolvedValue(orgResponse(PAID_ORG));
-    const { unmount } = render(<AppLayout>page</AppLayout>);
-
-    await waitFor(() =>
-      expect(document.body.style.getPropertyValue('--primary')).toBe('0 100% 50%'),
+  it('forged tenant sig: no fetch, no branding', async () => {
+    await setCustomHostHeaders(
+      'acme',
+      'feedback.acm.com',
+      'a'.repeat(63) + 'b', // 64 hex chars, wrong digest
     );
-    expect(document.body.style.getPropertyValue('--primary-foreground')).toBe('0 0% 100%');
-    expect(document.body.style.getPropertyValue('--ring')).toBe('0 100% 50%');
 
-    unmount();
-    // restored (empty string = declaration removed → theme defaults apply)
-    expect(document.body.style.getPropertyValue('--primary')).toBe('');
-    expect(document.body.style.getPropertyValue('--primary-foreground')).toBe('');
-    expect(document.body.style.getPropertyValue('--ring')).toBe('');
+    const el = (await PublicLayout({ children: 'kid' })) as React.ReactElement;
+
+    expect(fetchOrg).not.toHaveBeenCalled();
+    expect(el.props.isCustomHost).toBe(true);
+    expect(el.props.initialOrganization).toBeNull();
   });
 
-  it('renders the logo with alt = org name; hides it on error', async () => {
-    apiGet.mockResolvedValue(orgResponse(PAID_ORG));
-    render(<AppLayout>page</AppLayout>);
+  it('missing tenant sig: no fetch, no branding', async () => {
+    await setCustomHostHeaders('acme', 'feedback.acm.com');
 
-    const img = await screen.findByAltText('Acme');
-    expect(img.getAttribute('src')).toBe(PAID_ORG.logo_url);
-    expect(img.getAttribute('height')).toBe('32');
+    const el = (await PublicLayout({ children: 'kid' })) as React.ReactElement;
 
-    fireEvent.error(img);
-    expect(screen.queryByAltText('Acme')).toBeNull();
+    expect(fetchOrg).not.toHaveBeenCalled();
+    expect(el.props.initialOrganization).toBeNull();
   });
 
-  it('renders the paid footer: org name only, no Faddy wordmark', async () => {
-    apiGet.mockResolvedValue(orgResponse(PAID_ORG));
-    render(<AppLayout>page</AppLayout>);
+  it('sig for a DIFFERENT host/subdomain pair does not validate', async () => {
+    const sig = await computeTenantSig('other.acm.com', 'other');
 
-    // org name appears in header + footer
-    await waitFor(() => expect(screen.getAllByText('Acme').length).toBeGreaterThan(0));
-    expect(screen.queryByText(/Powered by Faddy/)).toBeNull();
-    // header shows the org name, not the Faddy fallback
-    expect(screen.queryByText('Faddy')).toBeNull();
-  });
-});
+    await setCustomHostHeaders('acme', 'feedback.acm.com', sig);
 
-// ── Free plan ───────────────────────────────────────────────────────────────
+    const el = (await PublicLayout({ children: 'kid' })) as React.ReactElement;
 
-describe('Free plan (branding null)', () => {
-  it('renders the small Powered by Faddy footer linking to faddy.site', async () => {
-    apiGet.mockResolvedValue(
-      orgResponse({ id: 'org-1', name: 'FreeCo', subdomain: 'freeco', logo_url: null, branding: null }),
-    );
-    render(<AppLayout>page</AppLayout>);
-
-    const link = await screen.findByText('Powered by Faddy');
-    expect(link.getAttribute('href')).toBe('https://faddy.site');
+    expect(fetchOrg).not.toHaveBeenCalled();
+    expect(el.props.initialOrganization).toBeNull();
   });
 
-  it('no --primary inline vars → current look', async () => {
-    apiGet.mockResolvedValue(
-      orgResponse({ id: 'org-1', name: 'FreeCo', subdomain: 'freeco', logo_url: null, branding: null }),
-    );
-    const { container } = render(<AppLayout>page</AppLayout>);
+  it('forged x-subdomain WITHOUT the middleware verdict fetches nothing', async () => {
+    headerStore.set('x-subdomain', 'forged');
 
-    await waitFor(() => expect(apiGet).toHaveBeenCalled());
-    const wrapper = container.firstChild as HTMLElement;
-    expect(wrapper.style.getPropertyValue('--primary')).toBe('');
+    const el = (await PublicLayout({ children: 'kid' })) as React.ReactElement;
+
+    expect(fetchOrg).not.toHaveBeenCalled();
+    expect(el.props.isCustomHost).toBe(false);
+    expect(el.props.initialOrganization).toBeNull();
   });
-});
 
-// ── Invalid color ───────────────────────────────────────────────────────────
+  it('first-party host: no server-side branding fetch at all', async () => {
+    const el = (await PublicLayout({ children: 'kid' })) as React.ReactElement;
 
-describe('invalid brand color', () => {
-  it('is ignored — no styles set, footer still paid (branding object present)', async () => {
-    apiGet.mockResolvedValue(
-      orgResponse({ id: 'org-1', name: 'Acme', subdomain: 'acme', logo_url: null, branding: { primaryColor: 'red' } }),
-    );
-    const { container } = render(<AppLayout>page</AppLayout>);
-
-    await waitFor(() => expect(screen.getAllByText('Acme').length).toBeGreaterThan(0));
-    const wrapper = container.firstChild as HTMLElement;
-    expect(wrapper.style.getPropertyValue('--primary')).toBe('');
-    expect(wrapper.style.getPropertyValue('--primary-foreground')).toBe('');
-    // body untouched too
-    expect(document.body.style.getPropertyValue('--primary')).toBe('');
-    // still classified as paid — org-name footer, no Faddy flash
-    expect(screen.queryByText(/Powered by Faddy/)).toBeNull();
+    expect(fetchOrg).not.toHaveBeenCalled();
+    expect(el.props.isCustomHost).toBe(false);
+    expect(el.props.initialOrganization).toBeNull();
   });
-});
 
-// ── Loading flash ───────────────────────────────────────────────────────────
+  it('x-custom-host without x-subdomain fetches nothing (no tenant key)', async () => {
+    headerStore.set('x-custom-host', '1');
 
-describe('loading (org fetch pending)', () => {
-  it('renders no footer at all while the subdomain fetch is pending', () => {
-    apiGet.mockReturnValue(new Promise(() => {})); // never resolves
-    render(<AppLayout>page</AppLayout>);
+    const el = (await PublicLayout({ children: 'kid' })) as React.ReactElement;
 
-    expect(screen.queryByText(/Powered by Faddy/)).toBeNull();
-    expect(document.querySelector('footer')).toBeNull();
+    expect(fetchOrg).not.toHaveBeenCalled();
+    expect(el.props.isCustomHost).toBe(true);
+    expect(el.props.initialOrganization).toBeNull();
   });
-});
 
-// ── Main domain ─────────────────────────────────────────────────────────────
+  it('mixed-case host with port validates against a normalized-host sig', async () => {
+    // sig computed for the canonical form; incoming Host arrives as
+    // "Feedback.Acm.com:443" — verifyTenantSig must normalize before HMAC.
+    const sig = await computeTenantSig('feedback.acm.com', 'acme');
+    await setCustomHostHeaders('acme', 'Feedback.Acm.com:443', sig);
 
-describe('main domain (no subdomain)', () => {
-  it('no fetch; Powered by Faddy immediately', async () => {
-    setHostname('faddy.site');
-    render(<AppLayout>page</AppLayout>);
+    const el = (await PublicLayout({ children: 'kid' })) as React.ReactElement;
 
-    expect(apiGet).not.toHaveBeenCalled();
-    expect(screen.getByText('Powered by Faddy')).toBeTruthy();
+    expect(fetchOrg).toHaveBeenCalledTimes(1);
+    expect(el.props.initialOrganization).toEqual(ORG);
   });
-});
 
-// ── Admin unaffected ────────────────────────────────────────────────────────
+  it('malformed sig "abc": no fetch, no branding, no throw', async () => {
+    await setCustomHostHeaders('acme', 'feedback.acm.com', 'abc');
 
-describe('admin isolation', () => {
-  it('no file under src/app/admin imports the branding-color util', () => {
-    const adminDir = path.join(process.cwd(), 'src', 'app', 'admin');
-    const offenders: string[] = [];
+    const el = (await PublicLayout({ children: 'kid' })) as React.ReactElement;
 
-    const walk = (dir: string) => {
-      for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-        const full = path.join(dir, entry.name);
-        if (entry.isDirectory()) walk(full);
-        else if (/\.(ts|tsx)$/.test(entry.name)) {
-          const source = fs.readFileSync(full, 'utf8');
-          if (source.includes('branding-color')) offenders.push(full);
-        }
-      }
-    };
+    expect(fetchOrg).not.toHaveBeenCalled();
+    expect(el.props.initialOrganization).toBeNull();
+  });
 
-    walk(adminDir);
-    expect(offenders).toEqual([]);
+  it('TENANT_HEADER_SECRET unset: fails closed, no fetch even with a well-formed sig', async () => {
+    delete process.env.TENANT_HEADER_SECRET;
+    await setCustomHostHeaders('acme', 'feedback.acm.com', 'a'.repeat(64));
+
+    const el = (await PublicLayout({ children: 'kid' })) as React.ReactElement;
+
+    expect(fetchOrg).not.toHaveBeenCalled();
+    expect(el.props.initialOrganization).toBeNull();
   });
 });

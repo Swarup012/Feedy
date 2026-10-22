@@ -3,6 +3,7 @@
 
 import { useEffect, useCallback } from 'react';
 import { getSocket, joinPostRoom, leavePostRoom } from '@/lib/socket';
+import { useIsCustomHost } from '@/context/CustomHostContext';
 
 interface Comment {
   id: string;
@@ -78,7 +79,13 @@ export function usePostRealtime({
     [onCommentCountChanged]
   );
 
+  const isCustomHost = useIsCustomHost();
+
   useEffect(() => {
+    // Custom hosts are read-only by design — no socket, no rooms (see
+    // useBoardRealtime).
+    if (isCustomHost) return;
+
     const socket = getSocket();
     if (!socket || !postId) return;
 
@@ -106,6 +113,7 @@ export function usePostRealtime({
       socket.off('post:comment_count', handleCommentCount);
     };
   }, [
+    isCustomHost,
     postId,
     handleCommentNew,
     handleCommentDeleted,

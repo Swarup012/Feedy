@@ -182,7 +182,7 @@ export default function CollectFeedbackPage() {
                         </label>
                         <div className="flex items-center gap-2">
                           <span className="text-sm text-slate-500 dark:text-muted-foreground px-3 py-2 bg-slate-50 dark:bg-card rounded-lg border border-slate-200 dark:border-border">
-                            yoursite.com/board/
+                            yoursite.com/feedback/
                           </span>
                           <div className="flex-1 h-10 bg-white dark:bg-background rounded-lg border border-slate-200 dark:border-border px-3 flex items-center">
                             <span className="text-slate-400 dark:text-muted-foreground text-sm">

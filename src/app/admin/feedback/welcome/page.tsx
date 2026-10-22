@@ -244,7 +244,7 @@ export default function FirstBoardWelcomePage() {
                 {/* URL slug feedback */}
                 {slug && (
                   <div className="flex items-center gap-2 text-xs text-muted-foreground/70 -mt-2 px-1">
-                    <span>/board/{slug}</span>
+                    <span>/feedback/boards/{slug}</span>
                     {checkingSlug && <Loader2 className="h-3 w-3 animate-spin" />}
                     {!checkingSlug && slugAvailable === true && <Check className="h-3 w-3 text-green-500" />}
                     {!checkingSlug && slugAvailable === false && <span className="text-destructive">Already taken</span>}
@@ -405,7 +405,7 @@ export default function FirstBoardWelcomePage() {
                 {/* URL slug feedback */}
                 {slug && (
                   <div className="flex items-center gap-2 text-xs text-muted-foreground/70 -mt-2 px-1">
-                    <span>/board/{slug}</span>
+                    <span>/feedback/boards/{slug}</span>
                     {checkingSlug && <Loader2 className="h-3 w-3 animate-spin" />}
                     {!checkingSlug && slugAvailable === true && <Check className="h-3 w-3 text-green-500" />}
                     {!checkingSlug && slugAvailable === false && <span className="text-destructive">Already taken</span>}

@@ -4,7 +4,6 @@ import { useState, useRef } from "react";
 import { X, Upload, Image as ImageIcon, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { TokenManager } from "@/lib/tokenManager";
 
 interface ImageUploadProps {
   images: string[];
@@ -54,22 +53,16 @@ export function ImageUpload({
           continue;
         }
 
-        // Upload to backend
+        // Upload through the same-origin Feedy proxy (auth cookie + tenant
+        // attached server-side; the legacy localhost URL + Bearer header are gone)
         const formData = new FormData();
         formData.append("file", file);
         formData.append("folder", "posts");
 
-        const token = TokenManager.getAccessToken();
-        if (!token) {
-          throw new Error("Not authenticated. Please log in again.");
-        }
-
-        const response = await fetch("http://localhost:3000/api/upload/image", {
+        const response = await fetch("/api/upload/image", {
           method: "POST",
           body: formData,
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          credentials: "include",
         });
 
         if (!response.ok) {
