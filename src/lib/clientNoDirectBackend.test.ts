@@ -46,5 +46,18 @@ describe('no client-side direct backend calls (3b-2 Step 5)', () => {
     // Catches `x-subdomain` as a header key; proxyHelper/middleware/server
     // code is not "use client" and is unaffected.
     expect(clientFilesWith(/["']x-subdomain["']/)).toEqual([]);
+
+    // Documented exception — lib/api.ts: the axios request interceptor sets
+    // x-subdomain for first-party *.faddy.site hosts only (production routes
+    // first-party /api/* straight to Express, bypassing the Next middleware
+    // that would derive it server-side). The carve-out must keep BOTH guards:
+    // the first-party hostname gate and the browser-only check.
+    const api = readFileSync(path.join(SRC, 'lib', 'api.ts'), 'utf8');
+    expect(api, 'lib/api.ts must keep the first-party .faddy.site gate').toContain(
+      '".faddy.site"',
+    );
+    expect(api, 'lib/api.ts interceptor must stay browser-only').toContain(
+      'typeof window !== "undefined"',
+    );
   });
 });

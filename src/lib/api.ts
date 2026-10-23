@@ -22,10 +22,6 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 // Solution: Keep all browser calls on the same origin (faddy.site / localhost:5173).
 // Next.js Route Handlers extract the cookie and forward it to the backend.
 // On the server (SSR / Route Handlers themselves) we use the absolute API_URL.
-//
-// NO request interceptor: x-subdomain is never set client-side (Stage 3b-2,
-// design table row #1). middleware.ts derives the tenant from Host and
-// proxyHelper.buildBackendHeaders attaches it server-side.
 const isServer = typeof window === "undefined";
 
 const api: AxiosInstance = axios.create({
@@ -36,6 +32,46 @@ const api: AxiosInstance = axios.create({
   timeout: 30000,
   withCredentials: true,
 });
+
+
+// ─── Request interceptor — subdomain header only ─────────────────────────────
+// We no longer attach an Authorization header. The HttpOnly cookie is sent
+// automatically by the browser. We still need the x-subdomain header for
+// multi-tenancy routing on the backend — production routes first-party
+// /api/* straight to Express, bypassing the Next server, so nothing
+// server-side (middleware / buildBackendHeaders) ever sees those requests.
+//
+// First-party *.faddy.site ONLY: custom (customer) hostnames get x-subdomain
+// from Next middleware, never from the browser. No-op server-side (SSR uses
+// the absolute API_URL; the server-side Host derivation is authoritative
+// there and a client-supplied header must never be trusted).
+api.interceptors.request.use(
+  (config: InternalAxiosRequestConfig) => {
+    if (config.headers && typeof window !== "undefined") {
+      const hostname = window.location.hostname;
+      const suffix = ".faddy.site";
+      let subdomain: string | null = null;
+
+      // First-party production: acme.faddy.site — exactly one label before
+      // the suffix, same rule as proxyHelper.extractSubdomainFromHost.
+      if (hostname.endsWith(suffix)) {
+        const label = hostname.slice(0, -suffix.length);
+        if (
+          /^[a-z0-9-]{1,63}$/.test(label) &&
+          !["www", "api", "admin"].includes(label)
+        ) {
+          subdomain = label;
+        }
+      }
+
+      if (subdomain) {
+        config.headers["x-subdomain"] = subdomain;
+      }
+    }
+    return config;
+  },
+  (error: AxiosError) => Promise.reject(error),
+);
 
 // ─── Response interceptor — cookie-based token refresh ───────────────────────
 // When the server returns 401, we attempt a silent token refresh.
