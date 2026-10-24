@@ -3,11 +3,22 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
-import { LoadingAnimation } from "@/components/LoadingAnimation";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
   allowedRoles?: string[];
+}
+
+function AuthSpinner() {
+  return (
+    <div
+      className="flex items-center justify-center min-h-screen"
+      role="status"
+      aria-label="Loading"
+    >
+      <div className="h-12 w-12 animate-spin rounded-full border-4 border-muted border-t-primary" />
+    </div>
+  );
 }
 
 export function ProtectedRoute({
@@ -73,20 +84,12 @@ export function ProtectedRoute({
 
   // Show loading spinner while checking auth
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <LoadingAnimation width={48} height={48} />
-      </div>
-    );
+    return <AuthSpinner />;
   }
 
   // Don't render until we've verified access
   if (!shouldRender) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <LoadingAnimation width={48} height={48} />
-      </div>
-    );
+    return <AuthSpinner />;
   }
 
   // All checks passed - render children

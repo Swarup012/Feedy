@@ -108,21 +108,25 @@ export function OrganizationProvider({ children }: { children: React.ReactNode }
       setLoading(true);
       setOrgsFetchStatus('loading');
 
-      // Fetch current organization — api client sends cookies + Authorization header automatically
-      try {
-        const response = await api.get('/api/organizations/me');
-        setOrganization(response.data.data.organization);
-        setOrganizationRole(response.data.data.role);
-      } catch {
+      // Fetch current organization and full org list in parallel.
+      // Each settles independently so one failure doesn't discard the other —
+      // same error handling as the previous sequential version.
+      const [meResult, allResult] = await Promise.allSettled([
+        api.get('/api/organizations/me'),
+        api.get('/api/organizations/me/all'),
+      ]);
+
+      if (meResult.status === 'fulfilled') {
+        setOrganization(meResult.value.data.data.organization);
+        setOrganizationRole(meResult.value.data.data.role);
+      } else {
         setOrganization(null);
         setOrganizationRole(null);
       }
 
-      // Fetch all organizations
-      try {
-        const allOrgsResponse = await api.get('/api/organizations/me/all');
-        setOrganizations(allOrgsResponse.data.data.organizations || []);
-      } catch {
+      if (allResult.status === 'fulfilled') {
+        setOrganizations(allResult.value.data.data.organizations || []);
+      } else {
         setOrganizations([]);
       }
 

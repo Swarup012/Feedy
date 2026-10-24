@@ -8,7 +8,6 @@ import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { useErrorHandler } from "@/hooks/useErrorHandler";
 import { useOrganization } from "@/context/OrganizationContext";
-import { boardService } from "@/services/boardService";
 import api from "@/lib/api";
 
 import { Button } from "@/components/ui/button";
@@ -42,23 +41,25 @@ export default function AdminPage() {
 
   const [loading, setLoading] = useState(true);
 
-  const [stats, setStats] = useState({
-    totalBoards: 0,
-    totalPosts: 0,
-    totalVotes: 0,
-    pendingPosts: 0,
-    newThisWeek: 0,
-    activeUsers: 0,
-    totalComments: 0,
-    statusDistribution: {},
-  });
-
-  const [boards, setBoards] = useState([]);
+  // Only the isEmpty gate is consumed: totalPosts (non-archived posts)
+  // and totalBoards (boards table count), both from dashboard/stats.
+  const [totalPosts, setTotalPosts] = useState<number | null>(null);
+  const [totalBoards, setTotalBoards] = useState<number | null>(null);
 
   const pageRef = useRef(null);
 
+  // Empty only after stats have resolved; gates the skeleton so empty
+  // accounts never flash ExpertView.
+  const dataReady = !loading;
+  const isEmpty =
+    dataReady &&
+    totalPosts !== null &&
+    totalPosts === 0 &&
+    totalBoards !== null &&
+    totalBoards === 0;
+
   /* =======================
-     DATA LOADING (UNCHANGED)
+     DATA LOADING
      ======================= */
 
   useEffect(() => {
@@ -66,7 +67,7 @@ export default function AdminPage() {
   }, []);
 
   useEffect(() => {
-    if (!loading && pageRef.current) {
+    if (dataReady && pageRef.current) {
       gsap.fromTo(
         pageRef.current.children,
         { opacity: 0, y: 10 },
@@ -79,42 +80,24 @@ export default function AdminPage() {
         },
       );
     }
-  }, [loading]);
+  }, [dataReady]);
 
   const loadDashboardData = async () => {
     try {
       setLoading(true);
 
+      // dashboard/stats feeds the isEmpty gate (totalPosts + totalBoards);
+      // ExpertView's expert-stats does not return either.
       const res = await api.get("/api/dashboard/stats");
       const data = res.data?.data || res.data;
-
-      setStats({
-        totalBoards: data.totalBoards || 0,
-        totalPosts: data.totalPosts || 0,
-        totalVotes: data.totalVotes || 0,
-        pendingPosts: data.pendingPosts || 0,
-        newThisWeek: data.newThisWeek || 0,
-        activeUsers: data.activeUsers || 0,
-        totalComments: data.totalComments || 0,
-        statusDistribution: data.statusDistribution || {},
-      });
-
-      // Fetch boards separately for the board list (lightweight)
-      try {
-        const boardsRes = await boardService.getAllBoards();
-        setBoards(boardsRes.data?.boards || []);
-      } catch (boardErr) {
-        console.warn("Board list fetch failed (non-critical):", boardErr);
-      }
+      setTotalPosts(data.totalPosts || 0);
+      setTotalBoards(data.totalBoards || 0);
       setLoading(false);
     } catch (err) {
       handleError(err);
       setLoading(false);
     }
   };
-
-  const isEmpty =
-    !loading && stats.totalPosts === 0 && boards.length === 0;
 
   return (
     <ProtectedRoute allowedRoles={["owner", "admin"]}>
@@ -148,138 +131,7 @@ export default function AdminPage() {
           {/* TRACKED USERS LIMIT WARNING */}
           <TrackedUsersLimitBanner />
 
-          {loading ? (
-            /* ===== LOADING SKELETON ===== */
-            <div className="flex-1 overflow-y-auto min-h-0 pb-4 space-y-4">
-              {/* Stat cards skeleton */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-                {[0, 1, 2, 3].map((i) => (
-                  <div
-                    key={i}
-                    className="rounded-xl border border-border bg-card p-4 flex items-start gap-3"
-                  >
-                    <Skeleton className="mt-0.5 w-9 h-9 rounded-lg flex-shrink-0" />
-                    <div className="min-w-0 space-y-2 flex-1">
-                      <Skeleton className="h-7 w-16" />
-                      <Skeleton className="h-3 w-24" />
-                      <Skeleton className="h-3 w-32" />
-                    </div>
-                  </div>
-                ))}
-              </div>
-              {/* Two-column skeleton */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                <div className="space-y-4">
-                  <div className="rounded-xl border border-border bg-card overflow-hidden">
-                    <div className="px-5 py-4 border-b border-border flex items-center justify-between">
-                      <div className="space-y-1.5">
-                        <Skeleton className="h-4 w-28" />
-                        <Skeleton className="h-3 w-40" />
-                      </div>
-                      <Skeleton className="h-3 w-24" />
-                    </div>
-                    <div className="divide-y divide-border">
-                      {[0, 1, 2, 3, 4].map((i) => (
-                        <div
-                          key={i}
-                          className="px-5 py-3 flex items-center gap-3"
-                        >
-                          <Skeleton className="w-2 h-2 rounded-full flex-shrink-0" />
-                          <Skeleton className="h-3 w-16 flex-shrink-0" />
-                          <Skeleton className="h-4 flex-1" />
-                          <Skeleton className="h-3 w-8 flex-shrink-0" />
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="rounded-xl border border-border bg-card overflow-hidden">
-                    <div className="px-5 py-4 border-b border-border flex items-center justify-between">
-                      <Skeleton className="h-4 w-28" />
-                      <Skeleton className="h-5 w-16 rounded-full" />
-                    </div>
-                    <div className="px-5 py-4 space-y-4">
-                      <div className="flex items-baseline gap-2">
-                        <Skeleton className="h-8 w-16" />
-                        <Skeleton className="h-4 w-20" />
-                      </div>
-                      <Skeleton className="h-2 w-full rounded-full" />
-                      <div className="grid grid-cols-3 gap-2 pt-2 border-t border-border">
-                        {[0, 1, 2].map((i) => (
-                          <div key={i} className="rounded-lg bg-muted/40 py-2 text-center space-y-1">
-                            <Skeleton className="h-3 w-10 mx-auto" />
-                            <Skeleton className="h-4 w-8 mx-auto" />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="space-y-4">
-                  <div className="rounded-xl border border-border bg-card overflow-hidden">
-                    <div className="px-5 py-4 border-b border-border flex items-center justify-between">
-                      <div className="space-y-1.5">
-                        <Skeleton className="h-4 w-24" />
-                        <Skeleton className="h-3 w-20" />
-                      </div>
-                      <Skeleton className="h-3 w-24" />
-                    </div>
-                    <div className="divide-y divide-border">
-                      {[0, 1, 2].map((i) => (
-                        <div
-                          key={i}
-                          className="px-5 py-3 flex items-center justify-between gap-3"
-                        >
-                          <div className="flex items-center gap-2.5">
-                            <Skeleton className="w-2 h-2 rounded-full" />
-                            <Skeleton className="h-4 w-32" />
-                          </div>
-                          <Skeleton className="h-3 w-12" />
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="rounded-xl border border-border bg-card overflow-hidden">
-                    <div className="px-5 py-4 border-b border-border">
-                      <Skeleton className="h-4 w-32" />
-                      <Skeleton className="h-3 w-40 mt-1.5" />
-                    </div>
-                    <div className="px-5 py-4 space-y-3">
-                      {[0, 1, 2, 3].map((i) => (
-                        <div key={i} className="space-y-1.5">
-                          <div className="flex items-center justify-between">
-                            <Skeleton className="h-3 w-20" />
-                            <Skeleton className="h-3 w-12" />
-                          </div>
-                          <Skeleton className="h-1.5 w-full rounded-full" />
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="rounded-xl border border-border bg-card overflow-hidden">
-                    <div className="px-5 py-4 border-b border-border flex items-center justify-between">
-                      <Skeleton className="h-4 w-28" />
-                      <Skeleton className="h-5 w-16 rounded-full" />
-                    </div>
-                    <div className="px-5 py-4 space-y-4">
-                      <div className="flex items-baseline gap-2">
-                        <Skeleton className="h-8 w-16" />
-                        <Skeleton className="h-4 w-20" />
-                      </div>
-                      <Skeleton className="h-2 w-full rounded-full" />
-                      <div className="grid grid-cols-3 gap-2 pt-2 border-t border-border">
-                        {[0, 1, 2].map((i) => (
-                          <div key={i} className="rounded-lg bg-muted/40 py-2 text-center space-y-1">
-                            <Skeleton className="h-3 w-10 mx-auto" />
-                            <Skeleton className="h-4 w-8 mx-auto" />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ) : isEmpty ? (
+          {isEmpty ? (
             /* ===== EMPTY STATE — first-run ===== */
             <div className="flex-1 overflow-y-auto min-h-0 pb-4">
               <div className="rounded-xl border border-border bg-card">
@@ -323,10 +175,147 @@ export default function AdminPage() {
               </div>
             </div>
           ) : (
-            /* ===== EXPERT VIEW ===== */
-            <div className="pb-2">
-              <ExpertView organizationId={organization?.id} />
-            </div>
+            <>
+              {/* Page skeleton while dashboard/stats resolves — ExpertView is
+                  already mounted (hidden) so expert-stats fires in parallel. */}
+              {!dataReady && (
+                <div className="flex-1 overflow-y-auto min-h-0 pb-4 space-y-4">
+                  {/* Stat cards skeleton */}
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                    {[0, 1, 2, 3].map((i) => (
+                      <div
+                        key={i}
+                        className="rounded-xl border border-border bg-card p-4 flex items-start gap-3"
+                      >
+                        <Skeleton className="mt-0.5 w-9 h-9 rounded-lg flex-shrink-0" />
+                        <div className="min-w-0 space-y-2 flex-1">
+                          <Skeleton className="h-7 w-16" />
+                          <Skeleton className="h-3 w-24" />
+                          <Skeleton className="h-3 w-32" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  {/* Two-column skeleton */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <div className="space-y-4">
+                      <div className="rounded-xl border border-border bg-card overflow-hidden">
+                        <div className="px-5 py-4 border-b border-border flex items-center justify-between">
+                          <div className="space-y-1.5">
+                            <Skeleton className="h-4 w-28" />
+                            <Skeleton className="h-3 w-40" />
+                          </div>
+                          <Skeleton className="h-3 w-24" />
+                        </div>
+                        <div className="divide-y divide-border">
+                          {[0, 1, 2, 3, 4].map((i) => (
+                            <div
+                              key={i}
+                              className="px-5 py-3 flex items-center gap-3"
+                            >
+                              <Skeleton className="w-2 h-2 rounded-full flex-shrink-0" />
+                              <Skeleton className="h-3 w-16 flex-shrink-0" />
+                              <Skeleton className="h-4 flex-1" />
+                              <Skeleton className="h-3 w-8 flex-shrink-0" />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="rounded-xl border border-border bg-card overflow-hidden">
+                        <div className="px-5 py-4 border-b border-border flex items-center justify-between">
+                          <Skeleton className="h-4 w-28" />
+                          <Skeleton className="h-5 w-16 rounded-full" />
+                        </div>
+                        <div className="px-5 py-4 space-y-4">
+                          <div className="flex items-baseline gap-2">
+                            <Skeleton className="h-8 w-16" />
+                            <Skeleton className="h-4 w-20" />
+                          </div>
+                          <Skeleton className="h-2 w-full rounded-full" />
+                          <div className="grid grid-cols-3 gap-2 pt-2 border-t border-border">
+                            {[0, 1, 2].map((i) => (
+                              <div key={i} className="rounded-lg bg-muted/40 py-2 text-center space-y-1">
+                                <Skeleton className="h-3 w-10 mx-auto" />
+                                <Skeleton className="h-4 w-8 mx-auto" />
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="space-y-4">
+                      <div className="rounded-xl border border-border bg-card overflow-hidden">
+                        <div className="px-5 py-4 border-b border-border flex items-center justify-between">
+                          <div className="space-y-1.5">
+                            <Skeleton className="h-4 w-24" />
+                            <Skeleton className="h-3 w-20" />
+                          </div>
+                          <Skeleton className="h-3 w-24" />
+                        </div>
+                        <div className="divide-y divide-border">
+                          {[0, 1, 2].map((i) => (
+                            <div
+                              key={i}
+                              className="px-5 py-3 flex items-center justify-between gap-3"
+                            >
+                              <div className="flex items-center gap-2.5">
+                                <Skeleton className="w-2 h-2 rounded-full" />
+                                <Skeleton className="h-4 w-32" />
+                              </div>
+                              <Skeleton className="h-3 w-12" />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="rounded-xl border border-border bg-card overflow-hidden">
+                        <div className="px-5 py-4 border-b border-border">
+                          <Skeleton className="h-4 w-32" />
+                          <Skeleton className="h-3 w-40 mt-1.5" />
+                        </div>
+                        <div className="px-5 py-4 space-y-3">
+                          {[0, 1, 2, 3].map((i) => (
+                            <div key={i} className="space-y-1.5">
+                              <div className="flex items-center justify-between">
+                                <Skeleton className="h-3 w-20" />
+                                <Skeleton className="h-3 w-12" />
+                              </div>
+                              <Skeleton className="h-1.5 w-full rounded-full" />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="rounded-xl border border-border bg-card overflow-hidden">
+                        <div className="px-5 py-4 border-b border-border flex items-center justify-between">
+                          <Skeleton className="h-4 w-28" />
+                          <Skeleton className="h-5 w-16 rounded-full" />
+                        </div>
+                        <div className="px-5 py-4 space-y-4">
+                          <div className="flex items-baseline gap-2">
+                            <Skeleton className="h-8 w-16" />
+                            <Skeleton className="h-4 w-20" />
+                          </div>
+                          <Skeleton className="h-2 w-full rounded-full" />
+                          <div className="grid grid-cols-3 gap-2 pt-2 border-t border-border">
+                            {[0, 1, 2].map((i) => (
+                              <div key={i} className="rounded-lg bg-muted/40 py-2 text-center space-y-1">
+                                <Skeleton className="h-3 w-10 mx-auto" />
+                                <Skeleton className="h-4 w-8 mx-auto" />
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Mounted from first render (hidden while page skeleton shows)
+                  so expert-stats starts without waiting for dashboard/stats. */}
+              <div className={dataReady ? "pb-2" : "hidden"}>
+                <ExpertView organizationId={organization?.id} />
+              </div>
+            </>
           )}
         </div>
       </div>

@@ -54,8 +54,8 @@ import {
   FileText,
   ThumbsUp,
   ArrowLeft,
+  Loader2,
 } from 'lucide-react';
-import { LoadingAnimation } from '@/components/LoadingAnimation';
 import { IconPicker, IconDisplay } from '@/components/ui/icon-picker';
 
 export default function BoardsManagementPage() {
@@ -216,8 +216,12 @@ export default function BoardsManagementPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <LoadingAnimation width={64} height={64} />
+      <div
+        className="flex items-center justify-center h-64"
+        role="status"
+        aria-label="Loading"
+      >
+        <div className="h-16 w-16 animate-spin rounded-full border-4 border-muted border-t-primary" />
       </div>
     );
   }
