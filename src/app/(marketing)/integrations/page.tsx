@@ -89,6 +89,18 @@ const integrations = [
       "Track implementation status",
     ],
   },
+  {
+    name: "Zapier",
+    description:
+      "Send feedback into Faddy from 7,000+ apps, or trigger Zaps when new posts arrive.",
+    icon: <Zap className="h-8 w-8" style={{ color: "#FF4F00" }} />,
+    color: "#FF4F00",
+    features: [
+      "Feed requests in from 7,000+ connected apps",
+      "Trigger a Zap the moment a new post arrives",
+      "One-click OAuth — an API key is created for you",
+    ],
+  },
 ];
 
 export default function IntegrationsPage() {
@@ -143,7 +155,7 @@ export default function IntegrationsPage() {
           className="py-16 px-6 bg-slate-50/50 dark:bg-background/50 border-y border-slate-100 dark:border-border"
         >
           <div className="max-w-6xl mx-auto">
-            <div className="grid md:grid-cols-2 gap-6">
+            <div className="grid md:grid-cols-2 gap-6 md:[&>*:last-child]:col-span-2">
               {integrations.map((integration) => (
                 <Card
                   key={integration.name}

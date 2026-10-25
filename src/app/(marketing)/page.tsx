@@ -1,17 +1,56 @@
 "use client";
 import React, { useEffect, useRef } from "react";
-import { ArrowRight, CheckCircle, Users, Sparkles } from "lucide-react";
+import { ArrowRight, CheckCircle, Users, Sparkles, Zap, Webhook, Braces, Puzzle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
-import { PointerHighlight } from "@/components/ui/pointer-highlight.tsx";
+import { RotatingPhrase, type RotatingPhraseItem } from "@/components/ui/rotating-phrase";
 import { LandingFooter } from "@/components/ui/landing-footer";
 import { FeatureTabSection } from "@/components/FeatureTabSection";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
 }
+
+const icon = (src: string) => (
+  <img
+    src={src}
+    alt=""
+    aria-hidden="true"
+    className="h-[0.95em] w-[0.95em] shrink-0"
+  />
+);
+
+const GITHUB_ICON = (
+  <svg
+    viewBox="0 0 24 24"
+    fill="currentColor"
+    aria-hidden="true"
+    className="h-[0.95em] w-[0.95em] shrink-0"
+  >
+    <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+  </svg>
+);
+
+const INTEGRATIONS: RotatingPhraseItem[] = [
+  { label: "Slack", icon: icon("/images/icons/slack-new.svg") },
+  { label: "Intercom", icon: icon("/images/icons/intercom.svg") },
+  { label: "GitHub", icon: GITHUB_ICON },
+  { label: "Discord", icon: icon("/images/icons/discord.svg") },
+];
+
+const INSIGHTS: RotatingPhraseItem[] = [
+  { label: "what customers want" },
+  { label: "recurring pain points" },
+  { label: "trending requests" },
+];
+
+const PRIORITIES: RotatingPhraseItem[] = [
+  { label: "what to build next" },
+  { label: "the next feature" },
+  { label: "what matters most" },
+];
 
 export default function LandingPage() {
   const router = useRouter();
@@ -25,9 +64,6 @@ export default function LandingPage() {
   const heroRef = useRef(null);
   const featuresRef = useRef(null);
   const benefitsRef = useRef(null);
-
-  // Ref for scroll-triggered video
-  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     // --- ORIGINAL BUSINESS LOGIC (PRESERVED) ---
@@ -148,30 +184,6 @@ export default function LandingPage() {
     }
   }, [loading]);
 
-  // Play video when it enters the viewport, pause when it leaves.
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          video.play().catch(() => {
-            /* autoplay may be blocked */
-          });
-        } else {
-          video.pause();
-        }
-      },
-      { threshold: 0.3 },
-    );
-
-    observer.observe(video);
-    return () => {
-      observer.disconnect();
-    };
-  }, []);
-
   return (
     <div className="min-h-screen bg-white dark:bg-background font-sans text-slate-900 dark:text-foreground antialiased selection:bg-blue-100 dark:selection:bg-primary selection:text-blue-900 dark:selection:text-primary-foreground">
       {/* Visual background texture */}
@@ -193,90 +205,66 @@ export default function LandingPage() {
           ref={heroRef}
           className="relative overflow-hidden pt-20 sm:pt-12 pb-12 sm:pb-10 px-5 sm:px-6"
         >
-          <div className="max-w-7xl mx-auto">
-            <div className="flex flex-col lg:flex-row items-start gap-10 lg:gap-8">
-              {/* Left — Hero Copy */}
-              <div className="w-full lg:w-[46%] flex flex-col items-center lg:items-start text-center lg:text-left space-y-5 sm:space-y-7">
-                {/* Eyebrow badge */}
-                <div className="hero-reveal inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 text-xs sm:text-sm font-semibold">
-                  <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
-                  AI-powered customer feedback platform
-                </div>
-
-                <h1 className="hero-reveal text-3xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-switzer font-medium tracking-tight leading-tight text-slate-900 dark:text-white">
-                  Your users are telling you what to build.
-                  <br />
-                  <span className="inline-block mt-3">
-                    <PointerHighlight>Are you listening?</PointerHighlight>
-                  </span>
-                </h1>
-
-                <p className="hero-reveal text-base sm:text-lg md:text-xl text-slate-500 dark:text-muted-foreground leading-relaxed max-w-lg">
-                  Faddy's AI reads every request across your tools and tells you
-                  exactly what to build next to keep users happy and paying.
-                </p>
-
-                <div className="hero-reveal flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-                  <button
-                    onClick={handleClick}
-                    className="w-full sm:w-auto px-8 py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-switzer font-bold rounded-2xl transition-all flex items-center justify-center gap-2 text-base border border-black"
-                  >
-                    Try for Free
-                  </button>
-                  <a
-                    href="/pricing"
-                    className="w-full sm:w-auto px-8 py-3.5 bg-white dark:bg-card text-slate-900 dark:text-white font-switzer font-bold rounded-2xl border-2 border-slate-200 dark:border-border hover:bg-slate-50 dark:hover:bg-slate-700 transition-all flex items-center justify-center gap-2 text-base"
-                  >
-                    Pricing
-                  </a>
-                </div>
-                <p className="text-sm text-slate-500 dark:text-muted-foreground font-medium">
-                  No credit card required
-                </p>
-
-                {/* Social Proof / Stats */}
-                <div className="hero-stats w-full pt-5 border-t border-slate-100 dark:border-border grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  {[
-                    "Free plan available",
-                    "From $19/mo flat",
-                    "Built for small teams",
-                  ].map((stat, i) => (
-                    <div
-                      key={i}
-                      className="flex items-center justify-center lg:justify-start gap-2"
-                    >
-                      <CheckCircle className="w-4 h-4 text-blue-500 shrink-0" />
-                      <span className="text-sm font-switzer font-medium text-slate-600 dark:text-muted-foreground">
-                        {stat}
-                      </span>
-                    </div>
-                  ))}
-                </div>
+          <div className="max-w-5xl mx-auto">
+            <div className="flex flex-col items-center text-center space-y-5 sm:space-y-7">
+              {/* Eyebrow badge */}
+              <div className="hero-reveal inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 text-xs sm:text-sm font-semibold">
+                <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
+                AI-powered customer feedback platform
               </div>
 
-              {/* Right — Video (54%), hidden on small mobile, shown from md up */}
-              <div className="hidden md:block w-full lg:w-[54%] relative">
-                <div className="relative rounded-2xl overflow-hidden border border-slate-200/80 dark:border-border">
-                  {/* Fake browser chrome */}
-                  <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-card px-4 py-2.5 border-b border-slate-200 dark:border-border">
-                    <span className="w-3 h-3 rounded-full bg-red-400" />
-                    <span className="w-3 h-3 rounded-full bg-yellow-400" />
-                    <span className="w-3 h-3 rounded-full bg-green-400" />
-                    <div className="ml-3 flex-1 bg-white dark:bg-card rounded-md px-3 py-0.5 text-xs text-slate-400 dark:text-muted-foreground font-mono">
-                      faddy.site
-                    </div>
+              <h1 className="hero-reveal font-switzer font-medium tracking-tight leading-[1.25] space-y-2 sm:space-y-3 text-slate-900 dark:text-white text-2xl sm:text-4xl md:text-5xl xl:text-[3.5rem]">
+                <span className="block">
+                  Collect feedback from <RotatingPhrase items={INTEGRATIONS} />
+                </span>
+                <span className="block">
+                  Understand <RotatingPhrase items={INSIGHTS} />
+                </span>
+                <span className="block">
+                  And prioritize <RotatingPhrase items={PRIORITIES} />
+                </span>
+              </h1>
+
+              <p className="hero-reveal text-base sm:text-lg md:text-xl text-slate-500 dark:text-muted-foreground leading-relaxed max-w-2xl">
+                Bring customer feedback together, uncover patterns with AI, and
+                decide what to build next.
+              </p>
+
+              <div className="hero-reveal flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                <button
+                  onClick={handleClick}
+                  className="w-full sm:w-auto px-8 py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-switzer font-bold rounded-2xl transition-all flex items-center justify-center gap-2 text-base border border-black"
+                >
+                  Try for Free
+                </button>
+                <a
+                  href="/pricing"
+                  className="w-full sm:w-auto px-8 py-3.5 bg-white dark:bg-card text-slate-900 dark:text-white font-switzer font-bold rounded-2xl border-2 border-slate-200 dark:border-border hover:bg-slate-50 dark:hover:bg-slate-700 transition-all flex items-center justify-center gap-2 text-base"
+                >
+                  View Pricing
+                </a>
+              </div>
+              <p className="text-sm text-slate-500 dark:text-muted-foreground font-medium">
+                No credit card required
+              </p>
+
+              {/* Social Proof / Stats */}
+              <div className="hero-stats w-full max-w-2xl pt-5 border-t border-slate-100 dark:border-border grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {[
+                  "Free plan available",
+                  "AI-powered insights",
+                  "Built for teams",
+                ].map((stat, i) => (
+                  <div
+                    key={i}
+                    className="flex items-center justify-center gap-2"
+                  >
+                    <CheckCircle className="w-4 h-4 text-blue-500 shrink-0" />
+                    <span className="text-sm font-switzer font-medium text-slate-600 dark:text-muted-foreground">
+                      {stat}
+                    </span>
                   </div>
-                  <video
-                    ref={videoRef}
-                    src="/videos/landing_page.mp4"
-                    autoPlay
-                    muted
-                    loop
-                    playsInline
-                    preload="auto"
-                    className="w-full h-auto object-contain block"
-                  />
-                </div>
+                ))}
               </div>
             </div>
           </div>
@@ -382,7 +370,9 @@ export default function LandingPage() {
               Automate with your favorite apps
             </h2>
             <p className="text-lg text-slate-500 dark:text-muted-foreground mb-12 max-w-xl mx-auto">
-              Connect Faddy to the tools your team already uses. Feedback flows in automatically.
+              Connect Faddy to the tools your team already uses — plus
+              everything else through Zapier, webhooks, and our API. Feedback
+              flows in automatically.
             </p>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
@@ -441,6 +431,45 @@ export default function LandingPage() {
                   description:
                     "Track issues and pull requests as feedback via GitHub App webhooks.",
                 },
+                {
+                  name: "Zapier",
+                  icon: (
+                    <Zap className="h-6 w-6" style={{ color: "#FF4F00" }} />
+                  ),
+                  color: "#FF4F00",
+                  description:
+                    "Trigger Faddy from thousands of other apps — no code required.",
+                },
+                {
+                  name: "Webhooks",
+                  icon: (
+                    <Webhook
+                      className="h-6 w-6"
+                      style={{ color: "#2563EB" }}
+                    />
+                  ),
+                  color: "#2563EB",
+                  description:
+                    "Send new feedback to any URL the moment it lands.",
+                },
+                {
+                  name: "REST API",
+                  icon: (
+                    <Braces className="h-6 w-6" style={{ color: "#334155" }} />
+                  ),
+                  color: "#334155",
+                  description:
+                    "Full read/write API and scoped keys for your own stack.",
+                },
+                {
+                  name: "Any other tool",
+                  icon: (
+                    <Puzzle className="h-6 w-6" style={{ color: "#4F7CFF" }} />
+                  ),
+                  color: "#4F7CFF",
+                  description:
+                    "Missing something? Route it in and out via Zapier, webhooks, or the API.",
+                },
               ].map((integration) => (
                 <div
                   key={integration.name}
@@ -461,6 +490,14 @@ export default function LandingPage() {
                 </div>
               ))}
             </div>
+
+            <a
+              href="/integrations"
+              className="inline-flex items-center gap-2 mt-10 text-blue-600 dark:text-blue-400 font-switzer font-semibold hover:underline"
+            >
+              Browse all integrations
+              <ArrowRight className="w-4 h-4" />
+            </a>
           </div>
         </section>
 
