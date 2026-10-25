@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import gsap from "gsap";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { useRouter } from "next/navigation";
@@ -11,7 +10,6 @@ import { useOrganization } from "@/context/OrganizationContext";
 import api from "@/lib/api";
 
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 
 import {
   Users,
@@ -39,20 +37,13 @@ export default function AdminPage() {
   });
   const { organization, organizationRole } = useOrganization();
 
-  const [loading, setLoading] = useState(true);
-
   // Only the isEmpty gate is consumed: totalPosts (non-archived posts)
   // and totalBoards (boards table count), both from dashboard/stats.
+  // Stays false while stats is loading or failed → ExpertView shows.
   const [totalPosts, setTotalPosts] = useState<number | null>(null);
   const [totalBoards, setTotalBoards] = useState<number | null>(null);
 
-  const pageRef = useRef(null);
-
-  // Empty only after stats have resolved; gates the skeleton so empty
-  // accounts never flash ExpertView.
-  const dataReady = !loading;
   const isEmpty =
-    dataReady &&
     totalPosts !== null &&
     totalPosts === 0 &&
     totalBoards !== null &&
@@ -66,45 +57,22 @@ export default function AdminPage() {
     loadDashboardData();
   }, []);
 
-  useEffect(() => {
-    if (dataReady && pageRef.current) {
-      gsap.fromTo(
-        pageRef.current.children,
-        { opacity: 0, y: 10 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.6,
-          stagger: 0.04,
-          ease: "power2.out",
-        },
-      );
-    }
-  }, [dataReady]);
-
   const loadDashboardData = async () => {
     try {
-      setLoading(true);
-
       // dashboard/stats feeds the isEmpty gate (totalPosts + totalBoards);
       // ExpertView's expert-stats does not return either.
       const res = await api.get("/api/dashboard/stats");
       const data = res.data?.data || res.data;
       setTotalPosts(data.totalPosts || 0);
       setTotalBoards(data.totalBoards || 0);
-      setLoading(false);
     } catch (err) {
       handleError(err);
-      setLoading(false);
     }
   };
 
   return (
     <ProtectedRoute allowedRoles={["owner", "admin"]}>
-      <div
-        ref={pageRef}
-        className="bg-background flex flex-col min-h-full"
-      >
+      <div className="bg-background flex flex-col min-h-full">
         <div className="max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 flex flex-col space-y-4">
           {/* HEADER */}
           <section className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 shrink-0">
@@ -175,147 +143,9 @@ export default function AdminPage() {
               </div>
             </div>
           ) : (
-            <>
-              {/* Page skeleton while dashboard/stats resolves — ExpertView is
-                  already mounted (hidden) so expert-stats fires in parallel. */}
-              {!dataReady && (
-                <div className="flex-1 overflow-y-auto min-h-0 pb-4 space-y-4">
-                  {/* Stat cards skeleton */}
-                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-                    {[0, 1, 2, 3].map((i) => (
-                      <div
-                        key={i}
-                        className="rounded-xl border border-border bg-card p-4 flex items-start gap-3"
-                      >
-                        <Skeleton className="mt-0.5 w-9 h-9 rounded-lg flex-shrink-0" />
-                        <div className="min-w-0 space-y-2 flex-1">
-                          <Skeleton className="h-7 w-16" />
-                          <Skeleton className="h-3 w-24" />
-                          <Skeleton className="h-3 w-32" />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  {/* Two-column skeleton */}
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                    <div className="space-y-4">
-                      <div className="rounded-xl border border-border bg-card overflow-hidden">
-                        <div className="px-5 py-4 border-b border-border flex items-center justify-between">
-                          <div className="space-y-1.5">
-                            <Skeleton className="h-4 w-28" />
-                            <Skeleton className="h-3 w-40" />
-                          </div>
-                          <Skeleton className="h-3 w-24" />
-                        </div>
-                        <div className="divide-y divide-border">
-                          {[0, 1, 2, 3, 4].map((i) => (
-                            <div
-                              key={i}
-                              className="px-5 py-3 flex items-center gap-3"
-                            >
-                              <Skeleton className="w-2 h-2 rounded-full flex-shrink-0" />
-                              <Skeleton className="h-3 w-16 flex-shrink-0" />
-                              <Skeleton className="h-4 flex-1" />
-                              <Skeleton className="h-3 w-8 flex-shrink-0" />
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                      <div className="rounded-xl border border-border bg-card overflow-hidden">
-                        <div className="px-5 py-4 border-b border-border flex items-center justify-between">
-                          <Skeleton className="h-4 w-28" />
-                          <Skeleton className="h-5 w-16 rounded-full" />
-                        </div>
-                        <div className="px-5 py-4 space-y-4">
-                          <div className="flex items-baseline gap-2">
-                            <Skeleton className="h-8 w-16" />
-                            <Skeleton className="h-4 w-20" />
-                          </div>
-                          <Skeleton className="h-2 w-full rounded-full" />
-                          <div className="grid grid-cols-3 gap-2 pt-2 border-t border-border">
-                            {[0, 1, 2].map((i) => (
-                              <div key={i} className="rounded-lg bg-muted/40 py-2 text-center space-y-1">
-                                <Skeleton className="h-3 w-10 mx-auto" />
-                                <Skeleton className="h-4 w-8 mx-auto" />
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="space-y-4">
-                      <div className="rounded-xl border border-border bg-card overflow-hidden">
-                        <div className="px-5 py-4 border-b border-border flex items-center justify-between">
-                          <div className="space-y-1.5">
-                            <Skeleton className="h-4 w-24" />
-                            <Skeleton className="h-3 w-20" />
-                          </div>
-                          <Skeleton className="h-3 w-24" />
-                        </div>
-                        <div className="divide-y divide-border">
-                          {[0, 1, 2].map((i) => (
-                            <div
-                              key={i}
-                              className="px-5 py-3 flex items-center justify-between gap-3"
-                            >
-                              <div className="flex items-center gap-2.5">
-                                <Skeleton className="w-2 h-2 rounded-full" />
-                                <Skeleton className="h-4 w-32" />
-                              </div>
-                              <Skeleton className="h-3 w-12" />
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                      <div className="rounded-xl border border-border bg-card overflow-hidden">
-                        <div className="px-5 py-4 border-b border-border">
-                          <Skeleton className="h-4 w-32" />
-                          <Skeleton className="h-3 w-40 mt-1.5" />
-                        </div>
-                        <div className="px-5 py-4 space-y-3">
-                          {[0, 1, 2, 3].map((i) => (
-                            <div key={i} className="space-y-1.5">
-                              <div className="flex items-center justify-between">
-                                <Skeleton className="h-3 w-20" />
-                                <Skeleton className="h-3 w-12" />
-                              </div>
-                              <Skeleton className="h-1.5 w-full rounded-full" />
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                      <div className="rounded-xl border border-border bg-card overflow-hidden">
-                        <div className="px-5 py-4 border-b border-border flex items-center justify-between">
-                          <Skeleton className="h-4 w-28" />
-                          <Skeleton className="h-5 w-16 rounded-full" />
-                        </div>
-                        <div className="px-5 py-4 space-y-4">
-                          <div className="flex items-baseline gap-2">
-                            <Skeleton className="h-8 w-16" />
-                            <Skeleton className="h-4 w-20" />
-                          </div>
-                          <Skeleton className="h-2 w-full rounded-full" />
-                          <div className="grid grid-cols-3 gap-2 pt-2 border-t border-border">
-                            {[0, 1, 2].map((i) => (
-                              <div key={i} className="rounded-lg bg-muted/40 py-2 text-center space-y-1">
-                                <Skeleton className="h-3 w-10 mx-auto" />
-                                <Skeleton className="h-4 w-8 mx-auto" />
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Mounted from first render (hidden while page skeleton shows)
-                  so expert-stats starts without waiting for dashboard/stats. */}
-              <div className={dataReady ? "pb-2" : "hidden"}>
-                <ExpertView organizationId={organization?.id} />
-              </div>
-            </>
+            <div className="pb-2">
+              <ExpertView organizationId={organization?.id} />
+            </div>
           )}
         </div>
       </div>

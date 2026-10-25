@@ -191,20 +191,22 @@ function ExpertSkeleton() {
         <Skeleton className="h-9 w-40 rounded-lg" />
         <Skeleton className="h-8 w-8 rounded-lg" />
       </div>
+      {/* ponytail: h-32 straddles briefing (~106px) vs no-briefing (~146px);
+          gate on weekly_briefing presence if this ±22px shift ever matters */}
       <Skeleton className="h-32 w-full rounded-xl" />
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <Skeleton className="h-24 rounded-xl" />
-        <Skeleton className="h-24 rounded-xl" />
-        <Skeleton className="h-24 rounded-xl" />
-        <Skeleton className="h-24 rounded-xl" />
+        <Skeleton className="h-[108px] rounded-xl" />
+        <Skeleton className="h-[108px] rounded-xl" />
+        <Skeleton className="h-[108px] rounded-xl" />
+        <Skeleton className="h-[108px] rounded-xl" />
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-4">
-        <Skeleton className="h-56 rounded-xl" />
-        <Skeleton className="h-56 rounded-xl" />
+        <Skeleton className="h-80 rounded-xl" />
+        <Skeleton className="h-80 rounded-xl" />
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.4fr] gap-4">
-        <Skeleton className="h-56 rounded-xl" />
-        <Skeleton className="h-56 rounded-xl" />
+        <Skeleton className="h-80 rounded-xl" />
+        <Skeleton className="h-80 rounded-xl" />
       </div>
     </div>
   );
