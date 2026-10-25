@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/useAuth";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import { RotatingPhrase, type RotatingPhraseItem } from "@/components/ui/rotating-phrase";
+import { HeroBackdrop } from "@/components/ui/hero-backdrop";
 import { LandingFooter } from "@/components/ui/landing-footer";
 import { FeatureTabSection } from "@/components/FeatureTabSection";
 
@@ -205,7 +206,9 @@ export default function LandingPage() {
           ref={heroRef}
           className="relative overflow-hidden pt-20 sm:pt-12 pb-12 sm:pb-10 px-5 sm:px-6"
         >
-          <div className="max-w-5xl mx-auto">
+          {/* Decorative: pixel skyline + floating feedback signals */}
+          <HeroBackdrop />
+          <div className="relative z-10 max-w-5xl mx-auto">
             <div className="flex flex-col items-center text-center space-y-5 sm:space-y-7">
               {/* Eyebrow badge */}
               <div className="hero-reveal inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 text-xs sm:text-sm font-semibold">
@@ -244,12 +247,8 @@ export default function LandingPage() {
                   View Pricing
                 </a>
               </div>
-              <p className="text-sm text-slate-500 dark:text-muted-foreground font-medium">
-                No credit card required
-              </p>
-
               {/* Social Proof / Stats */}
-              <div className="hero-stats w-full max-w-2xl pt-5 border-t border-slate-100 dark:border-border grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="hero-stats w-full max-w-2xl pt-5 grid grid-cols-1 sm:grid-cols-3 gap-3">
                 {[
                   "Free plan available",
                   "AI-powered insights",
@@ -273,7 +272,7 @@ export default function LandingPage() {
         {/* Features Section — Tabbed Showcase */}
         <section
           ref={featuresRef}
-          className="py-12 px-6 bg-slate-50/50 dark:bg-background/50 border-y border-slate-100 dark:border-border"
+          className="py-12 px-6 bg-slate-50/50 dark:bg-background/50 border-y border-border"
         >
           <div className="max-w-6xl mx-auto">
             {/* Section header */}

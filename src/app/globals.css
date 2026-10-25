@@ -264,6 +264,55 @@
 }
 
 /* ---------------------------------------------------------------------------
+   HERO BACKDROP — pixel skyline + floating signals (ui/hero-backdrop.tsx)
+
+   `.hero-skyline` is an element-space top fade: it dissolves the illustration
+   into the page instead of ending it on a rectangle, and — because it is
+   measured against the rendered box rather than the artwork — it also hides
+   the crop line on very wide viewports.
+--------------------------------------------------------------------------- */
+.hero-skyline {
+  -webkit-mask-image: linear-gradient(
+    to top,
+    #000 0%,
+    rgba(0, 0, 0, 0.96) 22%,
+    rgba(0, 0, 0, 0.66) 45%,
+    rgba(0, 0, 0, 0.36) 65%,
+    rgba(0, 0, 0, 0.12) 84%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to top,
+    #000 0%,
+    rgba(0, 0, 0, 0.96) 22%,
+    rgba(0, 0, 0, 0.66) 45%,
+    rgba(0, 0, 0, 0.36) 65%,
+    rgba(0, 0, 0, 0.12) 84%,
+    transparent 100%
+  );
+}
+
+/* Floating feedback signals — decorative only; disabled globally by the
+   reduced-motion rule above. Per-element duration/delay is passed inline and
+   `--signal-*` custom properties carry travel distance and peak opacity. */
+@keyframes heroSignal {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 0, 0);
+  }
+  18% {
+    opacity: var(--signal-op, 0.16);
+  }
+  74% {
+    opacity: var(--signal-op, 0.16);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--signal-dx, 0px), var(--signal-dy, -120px), 0);
+  }
+}
+
+/* ---------------------------------------------------------------------------
    BLOG PROSE — typography for long-form markdown content
    Applied via .prose-blog on the article wrapper
 --------------------------------------------------------------------------- */
