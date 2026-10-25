@@ -46,10 +46,33 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { WIDE_CONTAINER } from '@/lib/layout-constants';
-import { PostDetails } from '@/components/feedback/PostDetails';
 import { Skeleton } from '@/components/ui/skeleton';
 import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
+import dynamic from 'next/dynamic';
+
+// PostDetails (~1.6k lines + roadmap/changelog/realtime deps) is only rendered
+// inside the Sheet once a post is clicked — load it on demand instead of
+// putting it in this route's First Load JS.
+const PostDetails = dynamic(
+  () => import('@/components/feedback/PostDetails').then((m) => m.PostDetails),
+  {
+    ssr: false,
+    // Fixed height matching the sheet body (calc(100vh - 64px)) so the
+    // chunk-loading skeleton occupies the same box as the real component.
+    loading: () => (
+      <div className="h-full bg-gray-50 dark:bg-background p-6 space-y-4">
+        <Skeleton className="h-6 w-64" />
+        <Skeleton className="h-4 w-96 max-w-full" />
+        <div className="space-y-3 pt-2">
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-5/6" />
+          <Skeleton className="h-4 w-4/6" />
+        </div>
+      </div>
+    ),
+  },
+);
 
 const STATUS_COLORS: Record<string, string> = {
   open: 'bg-muted text-muted-foreground',
@@ -171,11 +194,6 @@ export default function UsersPage() {
     loadUsers();
   }, [loadUsers]);
 
-  // Reset to page 1 when search/sort changes
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [search, sortBy, sortOrder]);
-
   // Cleanup debounce timer and abort controllers on unmount
   useEffect(() => {
     return () => {
@@ -250,7 +268,10 @@ export default function UsersPage() {
   const handleSearch = useCallback((value: string) => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
+      // setSearch + setCurrentPage in one batch → one render → loadUsers
+      // changes identity once → exactly one request (page 1, new search).
       setSearch(value);
+      setCurrentPage(1);
     }, 250);
   }, []);
 
@@ -331,7 +352,13 @@ export default function UsersPage() {
                 />
               </div>
               <div className="flex gap-2">
-                <Select value={sortBy} onValueChange={(v) => setSortBy(v)}>
+                <Select
+                  value={sortBy}
+                  onValueChange={(v) => {
+                    setSortBy(v);
+                    setCurrentPage(1);
+                  }}
+                >
                   <SelectTrigger className="flex-1">
                     <SelectValue />
                   </SelectTrigger>
@@ -345,7 +372,10 @@ export default function UsersPage() {
                   variant="outline"
                   size="icon"
                   className="h-9 w-9 flex-shrink-0"
-                  onClick={() => setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc')}
+                  onClick={() => {
+                    setSortOrder((prev) => (prev === 'asc' ? 'desc' : 'asc'));
+                    setCurrentPage(1);
+                  }}
                   title={`Sort ${sortOrder === 'asc' ? 'descending' : 'ascending'}`}
                 >
                   <span className="text-xs font-mono">{sortOrder === 'asc' ? '↑' : '↓'}</span>
@@ -358,7 +388,7 @@ export default function UsersPage() {
               {usersLoading ? (
                 <div className="p-3 space-y-3">
                   {Array.from({ length: 5 }).map((_, i) => (
-                    <Skeleton key={i} className="h-16 w-full" />
+                    <Skeleton key={i} className="h-[60px] w-full" />
                   ))}
                 </div>
               ) : users.length === 0 ? (
@@ -404,34 +434,39 @@ export default function UsersPage() {
               )}
             </div>
 
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="p-3 border-t border-border flex items-center justify-between">
-                <p className="text-xs text-muted-foreground">
-                  {totalUsers} users · Page {currentPage} of {totalPages}
-                </p>
-                <div className="flex gap-1">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                    disabled={currentPage === 1}
-                    className="h-7 text-xs"
-                  >
-                    Prev
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                    disabled={currentPage === totalPages}
-                    className="h-7 text-xs"
-                  >
-                    Next
-                  </Button>
-                </div>
+            {/* Pagination — always rendered so its height is reserved from
+                first paint; `invisible` keeps the box (no shift) when there
+                is a single page or data hasn't loaded yet. */}
+            <div
+              className={cn(
+                'p-3 border-t border-border flex items-center justify-between',
+                totalPages <= 1 && 'invisible',
+              )}
+            >
+              <p className="text-xs text-muted-foreground">
+                {totalUsers} users · Page {currentPage} of {totalPages}
+              </p>
+              <div className="flex gap-1">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className="h-7 text-xs"
+                >
+                  Prev
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                  className="h-7 text-xs"
+                >
+                  Next
+                </Button>
               </div>
-            )}
+            </div>
           </div>
 
           {/* ── MIDDLE COLUMN: Posts by Selected User ─────────────── */}
