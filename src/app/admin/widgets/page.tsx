@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Copy, Plus, Trash2, Edit, Code, Check } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
@@ -41,6 +42,53 @@ interface Board {
   icon: string;
 }
 
+interface WidgetFormState {
+  name: string;
+  default_board_id: string;
+  allowed_domains: string;
+  primaryColor: string;
+  show_voting: boolean;
+  allow_anonymous: boolean;
+  show_roadmap: boolean;
+  require_sdk_identity: boolean;
+}
+
+function WidgetToggles({
+  formData,
+  setFormData,
+}: {
+  formData: WidgetFormState;
+  setFormData: React.Dispatch<React.SetStateAction<WidgetFormState>>;
+}) {
+  const rows: Array<{
+    key: keyof WidgetFormState;
+    title: string;
+    description: string;
+  }> = [
+    { key: "show_voting", title: "Show voting", description: "Allow users to upvote posts" },
+    { key: "allow_anonymous", title: "Allow anonymous", description: "Let users submit without signing in" },
+    { key: "show_roadmap", title: "Show roadmap", description: "Display public roadmap view" },
+    { key: "require_sdk_identity", title: "Require Secure Identity", description: "HMAC signature verification" },
+  ];
+
+  return (
+    <div className="space-y-3">
+      {rows.map((row) => (
+        <div key={row.key} className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-medium">{row.title}</p>
+            <p className="text-xs text-muted-foreground">{row.description}</p>
+          </div>
+          <Switch
+            checked={formData[row.key] as boolean}
+            onCheckedChange={(checked) => setFormData({ ...formData, [row.key]: checked })}
+          />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function WidgetManagementPage() {
   const [widgets, setWidgets] = useState<Widget[]>([]);
   const [boards, setBoards] = useState<Board[]>([]);
@@ -54,7 +102,7 @@ export default function WidgetManagementPage() {
   const { toast } = useToast();
 
   // Form state
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<WidgetFormState>({
     name: "",
     default_board_id: "",
     allowed_domains: "",
@@ -381,9 +429,9 @@ export default function WidgetManagementPage() {
                 Set up a new embeddable feedback widget for your product.
               </p>
             </DialogHeader>
-            <form onSubmit={handleCreateWidget} className="space-y-5 pt-2">
+            <form onSubmit={handleCreateWidget} className="space-y-4 pt-2">
               <div className="space-y-2">
-                <Label htmlFor="name" className="text-sm font-medium">Widget Name <span className="text-red-500">*</span></Label>
+                <Label htmlFor="name" className="text-sm font-medium">Name</Label>
                 <Input
                   id="name"
                   value={formData.name}
@@ -395,25 +443,7 @@ export default function WidgetManagementPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="default_board_id" className="text-sm font-medium">Default Board <span className="text-red-500">*</span></Label>
-                <select
-                  id="default_board_id"
-                  value={formData.default_board_id}
-                  onChange={(e) => setFormData({ ...formData, default_board_id: e.target.value })}
-                  className="w-full h-11 px-3 border border-border rounded-lg bg-background text-sm"
-                  required
-                >
-                  <option value="">Select a board</option>
-                  {boards.map((board) => (
-                    <option key={board.id} value={board.id}>
-                      {board.icon} {board.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="allowed_domains" className="text-sm font-medium">Allowed Domains</Label>
+                <Label htmlFor="allowed_domains" className="text-sm font-medium">Allowed domains</Label>
                 <Input
                   id="allowed_domains"
                   value={formData.allowed_domains}
@@ -421,73 +451,61 @@ export default function WidgetManagementPage() {
                   placeholder="e.g., yourapp.com, app.yourapp.com"
                   className="h-11"
                 />
-                <p className="text-xs text-muted-foreground">
-                  Comma-separated. Leave empty to allow all domains.
-                </p>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="primaryColor" className="text-sm font-medium">Primary Color</Label>
-                <div className="flex gap-2">
-                  <Input
-                    id="primaryColor"
+              <div className="grid grid-cols-2 gap-4">
+                <select
+                  id="default_board_id"
+                  aria-label="Boards"
+                  value={formData.default_board_id}
+                  onChange={(e) => setFormData({ ...formData, default_board_id: e.target.value })}
+                  className="h-11 w-full appearance-none rounded-lg bg-muted px-4 text-sm"
+                  required
+                >
+                  <option value="">Boards</option>
+                  {boards.map((board) => (
+                    <option key={board.id} value={board.id}>
+                      {board.icon} {board.name}
+                    </option>
+                  ))}
+                </select>
+
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      className="h-11 w-full justify-start rounded-lg bg-muted px-4 text-sm font-normal hover:bg-muted/80"
+                    >
+                      Permissions
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent align="start" className="w-72 p-0">
+                    <div className="space-y-3 p-3">
+                      <WidgetToggles formData={formData} setFormData={setFormData} />
+                    </div>
+                  </PopoverContent>
+                </Popover>
+
+                <div className="relative h-11 rounded-lg bg-muted">
+                  <span className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-sm">
+                    Colour
+                  </span>
+                  <input
                     type="color"
+                    aria-label="Colour"
                     value={formData.primaryColor}
                     onChange={(e) => setFormData({ ...formData, primaryColor: e.target.value })}
-                    className="w-12 h-11 p-1 cursor-pointer"
-                  />
-                  <Input
-                    value={formData.primaryColor}
-                    onChange={(e) => setFormData({ ...formData, primaryColor: e.target.value })}
-                    className="flex-1 h-11 font-mono"
+                    className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
                   />
                 </div>
-              </div>
 
-              <div className="space-y-3">
-                <Label className="text-sm font-medium">Settings</Label>
-                <div className="space-y-3 rounded-lg border border-border p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium">Show voting</p>
-                      <p className="text-xs text-muted-foreground">Allow users to upvote posts</p>
-                    </div>
-                    <Switch
-                      checked={formData.show_voting}
-                      onCheckedChange={(checked) => setFormData({ ...formData, show_voting: checked })}
-                    />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium">Allow anonymous</p>
-                      <p className="text-xs text-muted-foreground">Let users submit without signing in</p>
-                    </div>
-                    <Switch
-                      checked={formData.allow_anonymous}
-                      onCheckedChange={(checked) => setFormData({ ...formData, allow_anonymous: checked })}
-                    />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium">Show roadmap</p>
-                      <p className="text-xs text-muted-foreground">Display public roadmap view</p>
-                    </div>
-                    <Switch
-                      checked={formData.show_roadmap}
-                      onCheckedChange={(checked) => setFormData({ ...formData, show_roadmap: checked })}
-                    />
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium">Require Secure Identity</p>
-                      <p className="text-xs text-muted-foreground">HMAC signature verification</p>
-                    </div>
-                    <Switch
-                      checked={formData.require_sdk_identity}
-                      onCheckedChange={(checked) => setFormData({ ...formData, require_sdk_identity: checked })}
-                    />
-                  </div>
-                </div>
+                <Input
+                  aria-label="Color code"
+                  value={formData.primaryColor}
+                  onChange={(e) => setFormData({ ...formData, primaryColor: e.target.value })}
+                  className="h-11 rounded-lg border-transparent bg-muted font-mono"
+                />
               </div>
 
               <div className="flex gap-3 pt-2">
@@ -639,9 +657,9 @@ export default function WidgetManagementPage() {
               Update your widget configuration.
             </p>
           </DialogHeader>
-          <form onSubmit={handleUpdateWidget} className="space-y-5 pt-2">
+          <form onSubmit={handleUpdateWidget} className="space-y-4 pt-2">
             <div className="space-y-2">
-              <Label htmlFor="edit-name" className="text-sm font-medium">Widget Name <span className="text-red-500">*</span></Label>
+              <Label htmlFor="edit-name" className="text-sm font-medium">Name</Label>
               <Input
                 id="edit-name"
                 value={formData.name}
@@ -652,24 +670,7 @@ export default function WidgetManagementPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="edit-default_board_id" className="text-sm font-medium">Default Board <span className="text-red-500">*</span></Label>
-              <select
-                id="edit-default_board_id"
-                value={formData.default_board_id}
-                onChange={(e) => setFormData({ ...formData, default_board_id: e.target.value })}
-                className="w-full h-11 px-3 border border-border rounded-lg bg-background text-sm"
-                required
-              >
-                {boards.map((board) => (
-                  <option key={board.id} value={board.id}>
-                    {board.icon} {board.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="edit-allowed_domains" className="text-sm font-medium">Allowed Domains</Label>
+              <Label htmlFor="edit-allowed_domains" className="text-sm font-medium">Allowed domains</Label>
               <Input
                 id="edit-allowed_domains"
                 value={formData.allowed_domains}
@@ -679,68 +680,59 @@ export default function WidgetManagementPage() {
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="edit-primaryColor" className="text-sm font-medium">Primary Color</Label>
-              <div className="flex gap-2">
-                <Input
-                  id="edit-primaryColor"
-                  type="color"
-                  value={formData.primaryColor}
-                  onChange={(e) => setFormData({ ...formData, primaryColor: e.target.value })}
-                  className="w-12 h-11 p-1 cursor-pointer"
-                />
-                <Input
-                  value={formData.primaryColor}
-                  onChange={(e) => setFormData({ ...formData, primaryColor: e.target.value })}
-                  className="flex-1 h-11 font-mono"
-                />
-              </div>
-            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <select
+                id="edit-default_board_id"
+                aria-label="Boards"
+                value={formData.default_board_id}
+                onChange={(e) => setFormData({ ...formData, default_board_id: e.target.value })}
+                className="h-11 w-full appearance-none rounded-lg bg-muted px-4 text-sm"
+                required
+              >
+                <option value="">Boards</option>
+                {boards.map((board) => (
+                  <option key={board.id} value={board.id}>
+                    {board.icon} {board.name}
+                  </option>
+                ))}
+              </select>
 
-            <div className="space-y-3">
-              <Label className="text-sm font-medium">Settings</Label>
-              <div className="space-y-3 rounded-lg border border-border p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium">Show voting</p>
-                    <p className="text-xs text-muted-foreground">Allow users to upvote posts</p>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="h-11 w-full justify-start rounded-lg bg-muted px-4 text-sm font-normal hover:bg-muted/80"
+                  >
+                    Permissions
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent align="start" className="w-72 p-0">
+                  <div className="space-y-3 p-3">
+                    <WidgetToggles formData={formData} setFormData={setFormData} />
                   </div>
-                  <Switch
-                    checked={formData.show_voting}
-                    onCheckedChange={(checked) => setFormData({ ...formData, show_voting: checked })}
-                  />
-                </div>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium">Allow anonymous</p>
-                    <p className="text-xs text-muted-foreground">Let users submit without signing in</p>
-                  </div>
-                  <Switch
-                    checked={formData.allow_anonymous}
-                    onCheckedChange={(checked) => setFormData({ ...formData, allow_anonymous: checked })}
-                  />
-                </div>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium">Show roadmap</p>
-                    <p className="text-xs text-muted-foreground">Display public roadmap view</p>
-                  </div>
-                  <Switch
-                    checked={formData.show_roadmap}
-                    onCheckedChange={(checked) => setFormData({ ...formData, show_roadmap: checked })}
-                  />
-                </div>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium">Require Secure Identity</p>
-                    <p className="text-xs text-muted-foreground">HMAC signature verification</p>
-                  </div>
-                  <Switch
-                    checked={formData.require_sdk_identity}
-                    onCheckedChange={(checked) => setFormData({ ...formData, require_sdk_identity: checked })}
-                  />
-                </div>
+                </PopoverContent>
+              </Popover>
+
+              <div className="relative h-11 rounded-lg bg-muted">
+                <span className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-sm">
+                  Colour
+                </span>
+                <input
+                  type="color"
+                  aria-label="Colour"
+                  value={formData.primaryColor}
+                  onChange={(e) => setFormData({ ...formData, primaryColor: e.target.value })}
+                  className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+                />
               </div>
+
+              <Input
+                aria-label="Color code"
+                value={formData.primaryColor}
+                onChange={(e) => setFormData({ ...formData, primaryColor: e.target.value })}
+                className="h-11 rounded-lg border-transparent bg-muted font-mono"
+              />
             </div>
 
             <div className="flex gap-3 pt-2">

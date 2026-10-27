@@ -117,7 +117,7 @@ export default function ApiKeysPage() {
               </div>
             </CardContent>
           </Card>
-        ) : keys.length > 0 && (
+        ) : keys.length > 0 ? (
           <Card>
             <CardContent className="p-0">
               <Table>
@@ -180,6 +180,10 @@ export default function ApiKeysPage() {
               </Table>
             </CardContent>
           </Card>
+        ) : (
+          <div className="flex justify-center py-20">
+            <Button onClick={() => setFormOpen(true)}>Create your API key</Button>
+          </div>
         )}
 
         <ApiKeyFormDialog

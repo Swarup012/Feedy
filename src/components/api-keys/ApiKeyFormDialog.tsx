@@ -19,6 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useToast } from '@/hooks/use-toast';
 import { apiKeyService, ApiKeyCreated, ApiKeyScope } from '@/services/apiKeyService';
 import { Copy, Check, AlertTriangle, ChevronDown } from 'lucide-react';
@@ -90,7 +91,6 @@ export function ApiKeyFormDialog({ open, onClose, onCreated, defaultScopes, defa
   const [selectedScopes, setSelectedScopes] = useState<Set<ApiKeyScope>>(new Set());
   const [environment, setEnvironment] = useState<'live' | 'test'>('live');
   const [saving, setSaving] = useState(false);
-  const [permissionsOpen, setPermissionsOpen] = useState(false);
 
   const [createdKey, setCreatedKey] = useState<ApiKeyCreated | null>(null);
   const [copied, setCopied] = useState(false);
@@ -119,7 +119,6 @@ export function ApiKeyFormDialog({ open, onClose, onCreated, defaultScopes, defa
     setEnvironment('live');
     setCreatedKey(null);
     setCopied(false);
-    setPermissionsOpen(false);
   };
 
   const handleClose = () => {
@@ -256,70 +255,70 @@ export function ApiKeyFormDialog({ open, onClose, onCreated, defaultScopes, defa
             />
           </div>
 
-          <div className="space-y-2">
-            <button
-              type="button"
-              onClick={() => setPermissionsOpen((o) => !o)}
-              className="flex items-center gap-1.5 text-sm font-medium text-foreground cursor-pointer select-none w-full"
-            >
-              <ChevronDown
-                className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${
-                  permissionsOpen ? 'rotate-180' : ''
-                }`}
-              />
-              Permissions
-              {scopesArray.length > 0 && (
-                <Badge variant="secondary" className="text-[10px] ml-1">
-                  {scopesArray.length} selected
-                </Badge>
-              )}
-            </button>
-            {permissionsOpen && (
-              <div className="rounded-md border p-3 space-y-3">
-                {RESOURCES.map((res) => (
-                  <div key={res.resource} className="space-y-1.5">
-                    <p className="text-sm font-medium text-muted-foreground">{res.label}</p>
-                    <div className="flex gap-4 pl-1">
-                      {res.actions.map((act) => {
-                        const isChecked = selectedScopes.has(act.scope);
-                        const isImplied =
-                          act.scope === 'posts:read' && selectedScopes.has('posts:write');
-
-                        return (
-                          <label
-                            key={act.scope}
-                            className={`flex items-center gap-1.5 text-sm cursor-pointer ${
-                              isImplied ? 'opacity-60 cursor-not-allowed' : ''
-                            }`}
-                          >
-                            <input
-                              type="checkbox"
-                              checked={isChecked}
-                              disabled={isImplied}
-                              onChange={() => toggleScope(act.scope)}
-                              className="rounded border-input"
-                            />
-                            <span className="capitalize">{act.action}</span>
-                            {isImplied && (
-                              <span className="text-xs text-muted-foreground">(implied)</span>
-                            )}
-                          </label>
-                        );
-                      })}
-                    </div>
-                    {res.note && (
-                      <p className="text-xs text-muted-foreground pl-1 leading-relaxed">{res.note}</p>
+          <div className="grid grid-cols-2 gap-3">
+            {/* Permission — selection popup */}
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  aria-label="Permission"
+                  className="h-9 w-full justify-between gap-1 px-3 font-normal"
+                >
+                  <span className="truncate">
+                    Permission
+                    {scopesArray.length > 0 && (
+                      <span className="text-muted-foreground"> ({scopesArray.length})</span>
                     )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+                  </span>
+                  <ChevronDown className="h-3.5 w-3.5 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent align="start" className="w-80 p-0">
+                <div className="max-h-[320px] overflow-y-auto p-3 space-y-3">
+                  {RESOURCES.map((res) => (
+                    <div key={res.resource} className="space-y-1.5">
+                      <p className="text-sm font-medium text-muted-foreground">{res.label}</p>
+                      <div className="flex gap-4 pl-1">
+                        {res.actions.map((act) => {
+                          const isChecked = selectedScopes.has(act.scope);
+                          const isImplied =
+                            act.scope === 'posts:read' && selectedScopes.has('posts:write');
 
-          <div className="space-y-2">
-            <Label>Environment</Label>
+                          return (
+                            <label
+                              key={act.scope}
+                              className={`flex items-center gap-1.5 text-sm cursor-pointer ${
+                                isImplied ? 'opacity-60 cursor-not-allowed' : ''
+                              }`}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={isChecked}
+                                disabled={isImplied}
+                                onChange={() => toggleScope(act.scope)}
+                                className="rounded border-input"
+                              />
+                              <span className="capitalize">{act.action}</span>
+                              {isImplied && (
+                                <span className="text-xs text-muted-foreground">(implied)</span>
+                              )}
+                            </label>
+                          );
+                        })}
+                      </div>
+                      {res.note && (
+                        <p className="text-xs text-muted-foreground pl-1 leading-relaxed">{res.note}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </PopoverContent>
+            </Popover>
+
+            {/* Environment */}
             <Select value={environment} onValueChange={(v) => setEnvironment(v as any)}>
-              <SelectTrigger>
+              <SelectTrigger aria-label="Environment" className="h-9 w-full">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>

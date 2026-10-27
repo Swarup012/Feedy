@@ -96,6 +96,19 @@ const ZERO_STATS = {
   cached: false,
 };
 
+describe('controlled mode (range owned by the page header)', () => {
+  it('hides the internal pills toolbar so the header owns range selection', async () => {
+    apiGet.mockReset();
+    apiGet.mockResolvedValueOnce({ data: { data: ZERO_STATS } });
+    render(<ExpertView range="7d" onRangeChange={vi.fn()} />);
+
+    await screen.findByText('All clear');
+    expect(screen.queryByRole('button', { name: '7d' })).toBeNull();
+    expect(apiGet).toHaveBeenCalledTimes(1);
+    expect(apiGet.mock.calls[0][1].params.range).toBe('7d');
+  });
+});
+
 describe('stats === null (request failed, nothing loaded)', () => {
   it('shows neutral "Couldn\'t load" states instead of good-news states', async () => {
     apiGet.mockReset();

@@ -20,7 +20,11 @@ import {
 } from "lucide-react";
 
 import { TrackedUsersLimitBanner } from "@/components/TrackedUsersLimitBanner";
-import { ExpertView } from "@/components/admin/ExpertView";
+import {
+  ExpertView,
+  RangePills,
+  type ExpertRange,
+} from "@/components/admin/ExpertView";
 
 /* ======================================================
    MAIN PAGE
@@ -42,6 +46,9 @@ export default function AdminPage() {
   // Stays false while stats is loading or failed → ExpertView shows.
   const [totalPosts, setTotalPosts] = useState<number | null>(null);
   const [totalBoards, setTotalBoards] = useState<number | null>(null);
+
+  // Range lives in the header (see layout), consumed by ExpertView.
+  const [range, setRange] = useState<ExpertRange>("30d");
 
   const isEmpty =
     totalPosts !== null &&
@@ -80,12 +87,9 @@ export default function AdminPage() {
               <h1 className="text-xl sm:text-2xl font-switzer font-medium tracking-tight text-foreground">
                 What needs your attention right now
               </h1>
-              <p className="text-sm text-muted-foreground mt-1">
-                An AI-assisted read on your feedback, so you know where to look
-                first.
-              </p>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex flex-wrap items-center gap-3">
+              {!isEmpty && <RangePills range={range} onChange={setRange} />}
               <Button
                 onClick={() => router.push("/dashboard")}
                 variant="outline"
@@ -144,7 +148,11 @@ export default function AdminPage() {
             </div>
           ) : (
             <div className="pb-2">
-              <ExpertView organizationId={organization?.id} />
+              <ExpertView
+                organizationId={organization?.id}
+                range={range}
+                onRangeChange={setRange}
+              />
             </div>
           )}
         </div>

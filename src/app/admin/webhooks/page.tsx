@@ -474,10 +474,6 @@ export default function WebhooksPage() {
               <WebhookIcon className="h-6 w-6 text-primary" />
               <h1 className="text-lg font-semibold tracking-tight">Webhooks</h1>
             </div>
-            <p className="text-sm text-muted-foreground">
-              Send real-time HTTP notifications to external services when events
-              happen in your organization.
-            </p>
           </div>
           <Button
             onClick={() => {
@@ -489,21 +485,6 @@ export default function WebhooksPage() {
             <Plus className="h-4 w-4" />
             Add Webhook
           </Button>
-        </div>
-
-        {/* Info bar */}
-        <div className="rounded-lg border border-blue-200 bg-blue-50 dark:bg-blue-950/20 dark:border-blue-800 px-4 py-3 text-sm text-blue-700 dark:text-blue-400 flex items-start gap-2">
-          <WebhookIcon className="h-4 w-4 mt-0.5 shrink-0" />
-          <div>
-            <strong>Supported events:</strong> post.created, post.updated,
-            post.status_changed, post.deleted, comment.created, vote.created,
-            board.created, changelog.published. Webhooks are signed with
-            HMAC-SHA256 — verify the{" "}
-            <code className="font-mono text-xs bg-blue-100 dark:bg-blue-900/40 px-1 rounded">
-              X-Faddy-Signature
-            </code>{" "}
-            header.
-          </div>
         </div>
 
         {/* Webhook list */}
@@ -532,27 +513,6 @@ export default function WebhooksPage() {
                 </div>
               </div>
             ))}
-          </div>
-        ) : webhooks.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-border flex flex-col items-center justify-center py-10 gap-4">
-            <WebhookIcon className="h-8 w-8 text-muted-foreground/30" />
-            <div className="text-center">
-              <p className="font-medium text-foreground">No webhooks yet</p>
-              <p className="text-sm text-muted-foreground mt-1">
-                Create your first webhook to start receiving real-time event
-                notifications.
-              </p>
-            </div>
-            <Button
-              onClick={() => {
-                setEditingWebhook(null);
-                setFormOpen(true);
-              }}
-              className="gap-2"
-            >
-              <Plus className="h-4 w-4" />
-              Create your first webhook
-            </Button>
           </div>
         ) : (
           <div className="space-y-3">

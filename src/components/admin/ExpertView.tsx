@@ -14,10 +14,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
-  TrendingUp,
   Bot,
   AlertTriangle,
-  RefreshCw,
   FileText,
   Users,
   CheckCircle2,
@@ -121,13 +119,6 @@ const EMPTY_AUTOPILOT: AutopilotStats = {
    Small helpers
 ====================================================== */
 
-function humanize(key: string) {
-  return (key || '')
-    .split('_')
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(' ');
-}
-
 function getInitials(name: string) {
   const parts = name.trim().split(/\s+/).filter(Boolean);
   if (parts.length === 0) return '?';
@@ -181,30 +172,55 @@ export function approvalRateLabel(rate: number | null): string {
 }
 
 /* ======================================================
+   Range pills — rendered in the page header, shared here
+====================================================== */
+
+export function RangePills({
+  range,
+  onChange,
+}: {
+  range: ExpertRange;
+  onChange: (r: ExpertRange) => void;
+}) {
+  return (
+    <div className="inline-flex items-center gap-1 rounded-lg border border-border bg-muted/50 p-1">
+      {RANGES.map((r) => (
+        <button
+          key={r.value}
+          type="button"
+          aria-pressed={range === r.value}
+          onClick={() => onChange(r.value)}
+          className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+            range === r.value
+              ? 'bg-background text-foreground shadow-sm'
+              : 'text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          {r.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/* ======================================================
    Skeleton
 ====================================================== */
 
 function ExpertSkeleton() {
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-between gap-2 shrink-0">
-        <Skeleton className="h-9 w-40 rounded-lg" />
-        <Skeleton className="h-8 w-8 rounded-lg" />
-      </div>
-      {/* ponytail: h-32 straddles briefing (~106px) vs no-briefing (~146px);
-          gate on weekly_briefing presence if this ±22px shift ever matters */}
-      <Skeleton className="h-32 w-full rounded-xl" />
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <Skeleton className="h-[108px] rounded-xl" />
         <Skeleton className="h-[108px] rounded-xl" />
         <Skeleton className="h-[108px] rounded-xl" />
         <Skeleton className="h-[108px] rounded-xl" />
       </div>
-      <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <Skeleton className="h-80 rounded-xl" />
         <Skeleton className="h-80 rounded-xl" />
       </div>
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.4fr] gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <Skeleton className="h-80 rounded-xl" />
         <Skeleton className="h-80 rounded-xl" />
       </div>
@@ -267,8 +283,8 @@ function BriefingPanel({ summary, briefingRange, generatedAt }: {
 
   if (!summary) {
     return (
-      <Card>
-        <CardContent className="py-8 text-center">
+      <Card className="flex flex-col">
+        <CardContent className="flex flex-1 flex-col justify-center py-8 text-center">
           <FileText className="h-8 w-8 text-muted-foreground/40 mx-auto mb-2" />
           <p className="text-sm font-medium text-foreground">No briefing yet</p>
           <p className="text-xs text-muted-foreground mt-1">
@@ -280,24 +296,20 @@ function BriefingPanel({ summary, briefingRange, generatedAt }: {
   }
 
   return (
-    <Card className="border-primary/20 bg-primary/5">
-      <CardContent className="py-5">
-        <div className="flex items-start gap-3 min-w-0">
-          <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0 mt-0.5">
+    <Card className="flex flex-col border-primary/20 bg-primary/5">
+      <CardContent className="flex flex-1 flex-col py-5">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
             <Sparkles className="h-4 w-4" />
           </div>
-          <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-              <span className="text-xs font-semibold uppercase tracking-wide text-primary">
-                AI Briefing
-              </span>
-              {caption && (
-                <span className="text-xs text-muted-foreground">{caption}</span>
-              )}
-            </div>
-            <p className="text-sm text-foreground leading-relaxed mt-1.5">{summary}</p>
-          </div>
+          <span className="text-xs font-semibold uppercase tracking-wide text-primary">
+            AI Briefing
+          </span>
         </div>
+        <p className="text-sm text-foreground leading-relaxed mt-3">{summary}</p>
+        {caption && (
+          <span className="mt-auto pt-4 text-xs text-muted-foreground">{caption}</span>
+        )}
       </CardContent>
     </Card>
   );
@@ -313,7 +325,7 @@ function LoadFailedNote() {
 }
 
 /* Panel — Needs Attention (high-severity posts) */
-function NeedsAttentionPanel({ posts, rangeDays }: { posts: TopSeverePost[]; rangeDays: number }) {
+function NeedsAttentionPanel({ posts }: { posts: TopSeverePost[] }) {
   const router = useRouter();
 
   if (posts.length === 0) {
@@ -323,10 +335,6 @@ function NeedsAttentionPanel({ posts, rangeDays }: { posts: TopSeverePost[]; ran
           <CheckCircle2 className="h-5 w-5 text-success" />
         </div>
         <p className="text-sm font-semibold text-foreground">All clear</p>
-        <p className="text-xs text-muted-foreground mt-1 max-w-[260px]">
-          No high-severity posts in the last {rangeDays} days. They will show up
-          here as soon as one appears.
-        </p>
       </div>
     );
   }
@@ -356,60 +364,6 @@ function NeedsAttentionPanel({ posts, rangeDays }: { posts: TopSeverePost[]; ran
   );
 }
 
-/* Panel — Trending Themes (classification trends) */
-function TrendingThemesPanel({ trends }: { trends: ClassificationTrend[] }) {
-  if (trends.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center py-10 text-center">
-        <TrendingUp className="h-8 w-8 text-muted-foreground/40 mb-2" />
-        <p className="text-sm font-medium text-foreground">No trends yet</p>
-        <p className="text-xs text-muted-foreground mt-1 max-w-[200px]">
-          Classification trends will appear once posts are categorized.
-        </p>
-      </div>
-    );
-  }
-
-  const maxCount = Math.max(...trends.map((t) => t.thisPeriodCount), 1);
-
-  return (
-    <div className="space-y-3.5">
-      {trends.map((t) => {
-        const chipClass =
-          t.direction === 'up'
-            ? 'bg-success/10 text-success'
-            : t.direction === 'down'
-              ? 'bg-destructive/10 text-destructive'
-              : 'bg-muted text-muted-foreground';
-        const deltaLabel =
-          t.direction === 'up' ? `+${t.delta}` : t.direction === 'down' ? `${t.delta}` : '0';
-
-        return (
-          <div key={t.classification} className="space-y-1.5">
-            <div className="flex items-center gap-2">
-              <span className="flex-1 min-w-0 text-sm font-medium text-foreground truncate">
-                {humanize(t.classification)}
-              </span>
-              <span className="text-sm font-semibold text-foreground w-8 text-right tabular-nums">
-                {t.thisPeriodCount}
-              </span>
-              <span className={`text-[11px] font-semibold px-1.5 py-0.5 rounded-full ${chipClass}`}>
-                {deltaLabel}
-              </span>
-            </div>
-            <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
-              <div
-                className="h-full rounded-full bg-primary"
-                style={{ width: `${Math.max((t.thisPeriodCount / maxCount) * 100, 3)}%` }}
-              />
-            </div>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
 /* Panel — Autopilot Pipeline Health */
 function AutopilotPipelinePanel({
   autopilot,
@@ -420,7 +374,6 @@ function AutopilotPipelinePanel({
 }) {
   const router = useRouter();
 
-  const decided = autopilot.approved + autopilot.pending + autopilot.rejected;
   const tiles = [
     { label: 'Ingested', value: autopilot.ingested, tone: 'text-foreground' },
     { label: 'Pending review', value: autopilot.pending, tone: 'text-warning' },
@@ -429,39 +382,25 @@ function AutopilotPipelinePanel({
   ];
 
   return (
-    <div className="space-y-4">
+    <div className="flex flex-1 flex-col gap-5">
       {loadFailed ? (
         <LoadFailedNote />
       ) : (
-        <>
-          {decided > 0 && (
-            <div
-              className="flex h-2 w-full overflow-hidden rounded-full bg-muted"
-              role="img"
-              aria-label={`Pipeline: ${autopilot.approved} approved, ${autopilot.pending} pending, ${autopilot.rejected} rejected`}
-            >
-              <div className="bg-success" style={{ width: `${(autopilot.approved / decided) * 100}%` }} />
-              <div className="bg-warning" style={{ width: `${(autopilot.pending / decided) * 100}%` }} />
-              <div className="bg-destructive" style={{ width: `${(autopilot.rejected / decided) * 100}%` }} />
+        <div className="grid grid-cols-4 divide-x divide-border">
+          {tiles.map((t) => (
+            <div key={t.label} className="px-2 text-center">
+              <div className={`text-2xl font-bold tabular-nums ${t.tone}`}>{t.value}</div>
+              <div className="mt-1 text-xs font-medium text-muted-foreground">{t.label}</div>
             </div>
-          )}
-          <div className="grid grid-cols-2 gap-3">
-            {tiles.map((t) => (
-              <div key={t.label} className="rounded-lg bg-muted/50 px-3 py-3 text-center">
-                <div className={`text-2xl font-bold ${t.tone}`}>{t.value}</div>
-                <div className="text-[11px] text-muted-foreground mt-0.5">{t.label}</div>
-              </div>
-            ))}
-          </div>
-        </>
+          ))}
+        </div>
       )}
       <Button
         variant="outline"
-        size="sm"
-        className="w-full"
+        className="mt-auto w-full h-9 gap-2 font-medium"
         onClick={() => router.push('/admin/autopilot')}
       >
-        <Bot className="h-3.5 w-3.5 mr-1.5" />
+        <Bot className="h-4 w-4" />
         Review queue
       </Button>
     </div>
@@ -539,20 +478,33 @@ function CustomersToWatchPanel({ customers }: { customers: CustomerToWatch[] }) 
 
 interface ExpertViewProps {
   organizationId?: string;
+  /* Controlled mode: range lives in the page header (RangePills).
+     Omitted props keep the legacy standalone behavior (internal toolbar). */
+  range?: ExpertRange;
+  onRangeChange?: (r: ExpertRange) => void;
 }
 
-export function ExpertView({ organizationId }: ExpertViewProps) {
+export function ExpertView({
+  organizationId,
+  range: rangeProp,
+  onRangeChange,
+}: ExpertViewProps) {
   const { organization } = useOrganization();
   const router = useRouter();
-  const [range, setRange] = useState<ExpertRange>('30d');
+  const [internalRange, setInternalRange] = useState<ExpertRange>('30d');
+  const controlled = rangeProp !== undefined;
+  const range = rangeProp ?? internalRange;
   const [stats, setStats] = useState<ExpertStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [refreshing, setRefreshing] = useState(false);
 
-  const load = async (r: ExpertRange, showRefresh = false) => {
-    if (showRefresh) setRefreshing(true);
-    else setLoading(true);
+  const setRange = (r: ExpertRange) => {
+    if (controlled) onRangeChange?.(r);
+    else setInternalRange(r);
+  };
+
+  const load = async (r: ExpertRange) => {
+    setLoading(true);
     setError(null);
     try {
       const res = await api.get('/api/dashboard/expert-stats', { params: { range: r } });
@@ -561,7 +513,6 @@ export function ExpertView({ organizationId }: ExpertViewProps) {
       setError(err.response?.data?.message || err.message || 'Failed to load expert stats');
     } finally {
       setLoading(false);
-      setRefreshing(false);
     }
   };
 
@@ -582,36 +533,12 @@ export function ExpertView({ organizationId }: ExpertViewProps) {
 
   return (
     <div className="flex flex-col">
-      {/* Range pills + refresh */}
-      <div className="flex items-center justify-between gap-3 mb-4 shrink-0">
-        <div className="inline-flex items-center gap-1 rounded-lg border border-border bg-muted/50 p-1">
-          {RANGES.map((r) => (
-            <button
-              key={r.value}
-              type="button"
-              aria-pressed={range === r.value}
-              onClick={() => setRange(r.value)}
-              className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
-                range === r.value
-                  ? 'bg-background text-foreground shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              {r.label}
-            </button>
-          ))}
+      {/* Range pills — only when the header does not own them */}
+      {!controlled && (
+        <div className="flex items-center justify-between gap-3 mb-4 shrink-0">
+          <RangePills range={range} onChange={setRange} />
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          className="h-8 w-8 p-0 shrink-0"
-          onClick={() => load(range, true)}
-          disabled={refreshing}
-          title="Refresh"
-        >
-          <RefreshCw className={`h-3.5 w-3.5 ${refreshing ? 'animate-spin' : ''}`} />
-        </Button>
-      </div>
+      )}
 
       {error && (
         <div className="rounded-lg border border-red-200 bg-red-50 dark:bg-red-950/30 px-3 py-2 text-xs text-red-700 dark:text-red-300 shrink-0 mb-4">
@@ -620,14 +547,7 @@ export function ExpertView({ organizationId }: ExpertViewProps) {
       )}
 
       <div className="grid gap-4">
-        {/* Row 1: AI Briefing (full-width) */}
-        <BriefingPanel
-          summary={briefing?.summary ?? null}
-          briefingRange={briefing?.range}
-          generatedAt={briefing?.generated_at}
-        />
-
-        {/* Row 2: summary cards */}
+        {/* Row 1: summary cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {loadFailed ? (
             SUMMARY_CARD_LABELS.map((label) => (
@@ -665,8 +585,14 @@ export function ExpertView({ organizationId }: ExpertViewProps) {
           )}
         </div>
 
-        {/* Row 3: Needs attention + Autopilot pipeline */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-4">
+        {/* Row 2: AI Briefing + Needs attention */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <BriefingPanel
+            summary={briefing?.summary ?? null}
+            briefingRange={briefing?.range}
+            generatedAt={briefing?.generated_at}
+          />
+
           <Card className="flex flex-col">
             <CardHeader className="pb-3 shrink-0">
               <PanelHeader
@@ -680,7 +606,7 @@ export function ExpertView({ organizationId }: ExpertViewProps) {
               {loadFailed ? (
                 <LoadFailedNote />
               ) : (
-                <NeedsAttentionPanel posts={stats?.topSeverePosts || []} rangeDays={rangeDays} />
+                <NeedsAttentionPanel posts={stats?.topSeverePosts || []} />
               )}
             </CardContent>
             <div className="px-6 pb-6 shrink-0">
@@ -693,7 +619,10 @@ export function ExpertView({ organizationId }: ExpertViewProps) {
               </Button>
             </div>
           </Card>
+        </div>
 
+        {/* Row 3: Autopilot pipeline + Customers to watch */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <Card className="flex flex-col">
             <CardHeader className="pb-3 shrink-0">
               <PanelHeader
@@ -703,25 +632,8 @@ export function ExpertView({ organizationId }: ExpertViewProps) {
                 iconColor="bg-progress/10 text-progress"
               />
             </CardHeader>
-            <CardContent className="pt-0 flex-1">
+            <CardContent className="pt-0 flex flex-col">
               <AutopilotPipelinePanel autopilot={autopilot} loadFailed={loadFailed} />
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Row 4: Trending themes + Customers to watch */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.4fr] gap-4">
-          <Card className="flex flex-col">
-            <CardHeader className="pb-3 shrink-0">
-              <PanelHeader
-                icon={TrendingUp}
-                title="Trending themes"
-                description="Posts by classification vs previous period"
-                iconColor="bg-primary/10 text-primary"
-              />
-            </CardHeader>
-            <CardContent className="pt-0 flex-1">
-              <TrendingThemesPanel trends={stats?.classificationTrends || []} />
             </CardContent>
           </Card>
 
