@@ -13,12 +13,15 @@ import { Plus, Trash2, Loader2 } from 'lucide-react';
 interface PlanWeightRow {
   plan: string;
   weight: string;
+  price: string;
 }
 
 /**
- * Admin editor for organizations.settings.plan_weight_map.
- * Saves through PUT /api/organizations/:id — the backend merges the
- * settings object (read-merge-write), so sibling settings keys survive.
+ * Admin editor for organizations.settings.plan_weight_map (severity weights)
+ * and plan_prices (optional $/month per plan, MRR fallback when a customer's
+ * mrr field is missing). Saves through PUT /api/organizations/:id — the
+ * backend merges the settings object (read-merge-write), so sibling settings
+ * keys survive.
  */
 export function PlanWeightsSection() {
   const { toast } = useToast();
@@ -29,15 +32,17 @@ export function PlanWeightsSection() {
 
   useEffect(() => {
     const map = organization?.settings?.plan_weight_map || {};
+    const prices = organization?.settings?.plan_prices || {};
     setRows(
       Object.entries(map).map(([plan, weight]) => ({
         plan,
         weight: String(weight),
+        price: plan in prices ? String(prices[plan]) : '',
       }))
     );
   }, [organization?.settings]);
 
-  const addRow = () => setRows((prev) => [...prev, { plan: '', weight: '1' }]);
+  const addRow = () => setRows((prev) => [...prev, { plan: '', weight: '1', price: '' }]);
   const removeRow = (index: number) =>
     setRows((prev) => prev.filter((_, i) => i !== index));
   const updateRow = (index: number, field: keyof PlanWeightRow, value: string) =>
@@ -72,10 +77,32 @@ export function PlanWeightsSection() {
       map[plan] = weight;
     }
 
+    // Optional $/month per plan row → settings.plan_prices (blank = unmapped).
+    // Runs after the weight loop, so non-blank plans are unique and valid.
+    // Replaces plan_prices wholesale, mirroring plan_weight_map's rows-driven
+    // save. Plans priced 0 (free) are kept as known-zero revenue.
+    const prices: Record<string, number> = {};
+    for (const row of rows) {
+      const plan = row.plan.trim();
+      if (!plan) continue;
+      const raw = row.price.trim();
+      if (!raw) continue;
+      const price = Number(raw);
+      if (!Number.isFinite(price) || price < 0) {
+        toast({
+          title: 'Invalid price',
+          description: `$/month for "${plan}" must be a number of 0 or more.`,
+          variant: 'destructive',
+        });
+        return;
+      }
+      prices[plan] = price;
+    }
+
     try {
       setSaving(true);
       await api.put(`/api/organizations/${organization.id}`, {
-        settings: { plan_weight_map: map },
+        settings: { plan_weight_map: map, plan_prices: prices },
       });
       toast({
         title: 'Plan weights saved',
@@ -136,6 +163,21 @@ export function PlanWeightsSection() {
                 step="0.1"
                 value={row.weight}
                 onChange={(e) => updateRow(index, 'weight', e.target.value)}
+                disabled={!isOwner}
+              />
+            </div>
+            <div className="w-28 space-y-1.5">
+              <Label htmlFor={`price-${index}`} className="text-xs">
+                $/month
+              </Label>
+              <Input
+                id={`price-${index}`}
+                type="number"
+                min="0"
+                step="0.01"
+                placeholder="e.g. 49"
+                value={row.price}
+                onChange={(e) => updateRow(index, 'price', e.target.value)}
                 disabled={!isOwner}
               />
             </div>

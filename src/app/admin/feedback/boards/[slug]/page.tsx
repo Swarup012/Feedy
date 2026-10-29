@@ -37,6 +37,8 @@ export default function BoardPage() {
   const [showCreatePost, setShowCreatePost] = useState(false);
   // Track optimistic post IDs that SWR revalidation may not yet include
   const pendingOptimisticIds = useRef(new Set<string>());
+  // Deep link (?post=<id>) is consumed exactly once, after the list settles
+  const deepLinkHandled = useRef(false);
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
   const [selectedBoards, setSelectedBoards] = useState<string[]>([]);
   const [canCreatePost, setCanCreatePost] = useState(true);
@@ -94,6 +96,38 @@ export default function BoardPage() {
       setLoading(false);
     }
   }, [swrPosts, postsLoading, selectedBoards]);
+
+  // ── Deep link: ?post=<id> opens that post once the list has settled ────
+  // Opened from the loaded list when possible; otherwise fetched individually
+  // (org-scoped GET /api/posts/:id). Never re-opens after the user closes it.
+  useEffect(() => {
+    if (deepLinkHandled.current) return;
+    if (loading || postsLoading) return;
+    deepLinkHandled.current = true;
+
+    const postId = new URLSearchParams(window.location.search).get("post");
+    if (!postId) return;
+
+    const fromList = allPosts.find((p) => p.id === postId);
+    if (fromList) {
+      setSelectedPost(fromList);
+      setMobileView("detail");
+      return;
+    }
+
+    // Not in the loaded list (filters, paging, other board) → fetch it alone.
+    postService
+      .getPost(postId)
+      .then(({ data }) => {
+        const post = data?.post;
+        if (!post) return;
+        setSelectedPost(post);
+        setMobileView("detail");
+      })
+      .catch(() => {
+        // Unresolvable → keep the list as-is, silently.
+      });
+  }, [loading, postsLoading, allPosts]);
 
   // ── Expire stale optimistic entries after 30s ──
   useEffect(() => {

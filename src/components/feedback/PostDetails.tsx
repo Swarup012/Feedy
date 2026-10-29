@@ -54,6 +54,7 @@ import { useOrganization } from "@/context/OrganizationContext";
 import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
 import { usePostRealtime } from "@/hooks/usePostRealtime";
+import { PostRevenueLine } from "./PostRevenueLine";
 import api from "@/lib/api";
 import { useIsCustomHost } from "@/context/CustomHostContext";
 
@@ -1395,8 +1396,15 @@ export function PostDetails({
               </div>
             </div>
 
-            {/* User Attributes (Widget SDK Context) */}
-            {(post.org_end_user?.custom_fields || post.external_author?.context) &&
+            {/* Known MRR (Phase 3) — admin-only; the component itself never
+                fires the revenue request for non-admins or Free plans */}
+            {post?.id && <PostRevenueLine postId={post.id} />}
+
+            {/* User Attributes (Widget SDK Context) — owner/admin only; API
+                also strips these fields for other roles (post.service.js
+                sanitizeExternalAuthorEmbeds) */}
+            {(user?.organization_role === "admin" || user?.organization_role === "owner") &&
+              (post.org_end_user?.custom_fields || post.external_author?.context) &&
               Object.keys(post.org_end_user?.custom_fields || post.external_author?.context || {}).length > 0 && (
               <div>
                 <label className="text-sm text-muted-foreground block mb-3">User Attributes</label>

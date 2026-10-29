@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { boardService, Board } from "@/services/boardService";
+import { postService } from "@/services/postService";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { Loader2 } from "lucide-react";
@@ -18,6 +19,21 @@ export default function FeedbackPage() {
   // Fetch boards and redirect
   useEffect(() => {
     let cancelled = false;
+
+    // Deep link: /admin/feedback?post=<id> → resolve the post's board and
+    // carry the param along. Any failure (not found, other org, network)
+    // falls back to the default routing below, silently.
+    const resolveDeepLink = async (): Promise<string | null> => {
+      const postId = new URLSearchParams(window.location.search).get("post");
+      if (!postId) return null;
+      try {
+        const { data } = await postService.getPost(postId);
+        const boardSlug = data?.post?.board?.slug;
+        return boardSlug ? `/admin/feedback/boards/${boardSlug}?post=${encodeURIComponent(postId)}` : null;
+      } catch {
+        return null;
+      }
+    };
 
     const checkBoards = async (retryCount = 0) => {
       try {
@@ -63,7 +79,15 @@ export default function FeedbackPage() {
       }
     };
 
-    checkBoards();
+    (async () => {
+      const deepLinkRoute = await resolveDeepLink();
+      if (cancelled) return;
+      if (deepLinkRoute) {
+        router.replace(deepLinkRoute);
+        return;
+      }
+      await checkBoards();
+    })();
 
     return () => { cancelled = true; };
   }, [router, toast]);

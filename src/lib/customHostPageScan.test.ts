@@ -52,6 +52,8 @@ const EXCEPTIONS: Readonly<Record<string, string>> = {
     'hasUserVoted/voteRoadmapItem behind if (!user); same guest → faddy.site/login redirect (step 2)',
   'components/feedback/PostDetails.tsx':
     'write handlers redirect to faddy.site/login when isCustomHost; reads are session-aware (user ? public fallback) and folded history requires a user (step 2)',
+  'components/feedback/PostRevenueLine.tsx':
+    'revenue fetch gated on admin/owner role + mrr_insights plan inside the effect; user is always null on custom hosts so the request never fires (post-revenue-line.test)',
   'components/feedback/CreatePostDialog.tsx':
     'mounted only as {user && <CreatePostDialog>} — impossible on custom hosts (user always null there)',
   'components/feedback/CreateBoardDialog.tsx':

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useOrganization } from '@/context/OrganizationContext';
 import { resolvePlan } from '@/config/plans';
 import { useAuth } from '@/hooks/useAuth';
+import { useScrollToHash } from '@/hooks/useScrollToHash';
 import api from '@/lib/api';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -69,6 +70,8 @@ import { CancelFlow } from '@/components/billing/CancelFlow';
 import { InvoiceHistory } from '@/components/billing/InvoiceHistory';
 import { CustomDomainSettings } from '@/components/organization/CustomDomainSettings';
 import { PlanWeightsSection } from '@/components/organization/PlanWeightsSection';
+import { RevenueSettingsSection } from '@/components/organization/RevenueSettingsSection';
+import { PaidFeatureGate } from '@/components/PaidFeatureGate';
 import { BrandingSection } from '@/components/organization/BrandingSection';
 import { NotificationsTab } from '@/components/organization/NotificationsTab';
 import { ProFeatureGate } from '@/components/ProFeatureGate';
@@ -166,6 +169,11 @@ export default function OrganizationSettingsPage() {
       }
     }
   }, []);
+
+  // ?tab=general#revenue-data → scroll to the Revenue data card once the tab
+  // is active and the card has mounted (it can mount late behind the plan
+  // gate; on Free it never mounts — the hook gives up silently).
+  useScrollToHash('revenue-data', activeTab === 'general' && !loading);
 
   useEffect(() => {
     // Wait for AuthContext to finish loading before making any redirect decisions.
@@ -593,6 +601,11 @@ export default function OrganizationSettingsPage() {
 
                 {/* Revenue plan weights — severity scoring multiplier */}
                 <PlanWeightsSection />
+
+                {/* Revenue data — MRR field keys + currency (Starter/Pro) */}
+                <PaidFeatureGate feature="mrr_insights" featureName="Revenue insights">
+                  <RevenueSettingsSection />
+                </PaidFeatureGate>
 
                 {/* Logo + brand color (owner, Starter/Pro) */}
                 <BrandingSection />

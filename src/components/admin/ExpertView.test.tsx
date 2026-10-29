@@ -14,6 +14,11 @@ vi.mock('next/navigation', () => ({ useRouter: () => ({ push: vi.fn() }) }));
 vi.mock('@/context/OrganizationContext', () => ({
   useOrganization: () => ({ organization: null }),
 }));
+// The Revenue panel fetches on its own (covered by revenue-panel.test);
+// mocked out here so expert-stats tests see exactly their own calls.
+vi.mock('@/components/admin/RevenuePanel', () => ({
+  RevenuePanel: () => null,
+}));
 
 import { ExpertView } from './ExpertView';
 

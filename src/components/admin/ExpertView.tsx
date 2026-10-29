@@ -23,6 +23,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import api from '@/lib/api';
+import { RevenuePanel } from '@/components/admin/RevenuePanel';
 
 /* ======================================================
    Types
@@ -655,6 +656,10 @@ export function ExpertView({
             </CardContent>
           </Card>
         </div>
+
+        {/* Row 4: Revenue — fetched separately (own effect, post-first-paint)
+            so a slow/failing revenue call never blanks the dashboard */}
+        <RevenuePanel />
       </div>
     </div>
   );
