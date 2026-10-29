@@ -1,176 +1,82 @@
-"use client";
-
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { ArrowRight, CheckCircle2, PlayCircle, Zap } from "lucide-react";
+import { docsMetadata } from "../../docs-nav";
+import { DocsArticle } from "../../components/docs-article";
+import { DocsH2 } from "../../components/docs-headings";
+import { DocsCallout } from "../../components/docs-callout";
+
+export const metadata = docsMetadata("/docs/getting-started/quick-start");
 
 export default function QuickStartPage() {
   return (
-    <div className="prose prose-slate dark:prose-invert max-w-none">
-      {/* Header */}
-      <div className="not-prose mb-8">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-sm font-semibold mb-4">
-          <Zap className="h-3.5 w-3.5" />
-          Getting Started
-        </div>
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">
-          Quick Start Guide
-        </h1>
-        <p className="text-base text-slate-600 dark:text-slate-400">
-          Get up and running with Faddy in under 5 minutes
+    <DocsArticle href="/docs/getting-started/quick-start">
+      <DocsH2>Create Your Account</DocsH2>
+      <p>
+        Sign up for free and create your organization. No credit card required.
+      </p>
+      <p>
+        <Link
+          href="/signup"
+          className="inline-flex items-center rounded-md bg-[var(--docs-accent)] px-4 py-2 text-[13.5px] font-medium text-white transition-colors hover:bg-[var(--docs-accent)]/90 no-underline"
+        >
+          Sign Up Free
+        </Link>
+      </p>
+
+      <DocsH2>Create Your First Board</DocsH2>
+      <p>After logging in, create a feedback board to organize customer requests:</p>
+      <ol>
+        <li>
+          Go to <strong>Admin Dashboard</strong>
+        </li>
+        <li>
+          Click <strong>&quot;Manage Feedback&quot;</strong>
+        </li>
+        <li>
+          Click <strong>&quot;+ New Board&quot;</strong>
+        </li>
+        <li>Give it a name (e.g., &quot;Feature Requests&quot;)</li>
+        <li>
+          Click <strong>&quot;Create&quot;</strong>
+        </li>
+      </ol>
+      <DocsCallout variant="tip" title="Tip">
+        <p>
+          Create separate boards for different types of feedback (Features,
+          Bugs, Improvements).
         </p>
-      </div>
+      </DocsCallout>
 
-      {/* Step-by-step Guide */}
-      <div className="not-prose space-y-5">
-        {/* Step 1 */}
-        <Card className="border-2">
-          <CardContent className="p-6">
-            <div className="flex items-start gap-4">
-              <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-white font-bold text-lg flex-shrink-0">
-                1
-              </div>
-              <div className="flex-1">
-                <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-3">
-                  Create Your Account
-                </h3>
-                <p className="text-slate-600 dark:text-slate-400 mb-4">
-                  Sign up for free and create your organization. No credit card required.
-                </p>
-                <Link href="/signup">
-                  <Button className="bg-gradient-to-r from-blue-600 to-blue-700 gap-2">
-                    Sign Up Free
-                    <ArrowRight className="h-4 w-4" />
-                  </Button>
-                </Link>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Step 2 */}
-        <Card className="border-2">
-          <CardContent className="p-6">
-            <div className="flex items-start gap-4">
-              <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-purple-600 text-white font-bold text-lg flex-shrink-0">
-                2
-              </div>
-              <div className="flex-1">
-                <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-3">
-                  Create Your First Board
-                </h3>
-                <p className="text-slate-600 dark:text-slate-400 mb-4">
-                  After logging in, create a feedback board to organize customer requests:
-                </p>
-                <ol className="list-decimal list-inside space-y-2 text-slate-600 dark:text-slate-400 ml-4">
-                  <li>Go to <strong>Admin Dashboard</strong></li>
-                  <li>Click <strong>"Manage Feedback"</strong></li>
-                  <li>Click <strong>"+ New Board"</strong></li>
-                  <li>Give it a name (e.g., "Feature Requests")</li>
-                  <li>Click <strong>"Create"</strong></li>
-                </ol>
-                <div className="mt-4 p-4 rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800">
-                  <p className="text-sm text-blue-900 dark:text-blue-300 font-medium">
-                    💡 <strong>Tip:</strong> Create separate boards for different types of feedback (Features, Bugs, Improvements)
-                  </p>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Step 3 */}
-        <Card className="border-2">
-          <CardContent className="p-6">
-            <div className="flex items-start gap-4">
-              <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-green-500 to-green-600 text-white font-bold text-lg flex-shrink-0">
-                3
-              </div>
-              <div className="flex-1">
-                <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-3">
-                  Share Your Board
-                </h3>
-                <p className="text-slate-600 dark:text-slate-400 mb-4">
-                  Get the public link and share it with your customers:
-                </p>
-                <ol className="list-decimal list-inside space-y-2 text-slate-600 dark:text-slate-400 ml-4">
-                  <li>Open your board</li>
-                  <li>Click the <strong>"Share"</strong> button</li>
-                  <li>Copy the public link</li>
-                  <li>Share it on your website, email, or social media</li>
-                </ol>
-                <div className="mt-4 p-4 rounded-lg bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800">
-                  <p className="text-sm text-green-900 dark:text-green-300 font-medium">
-                    ✅ <strong>Public boards</strong> allow anyone to view and submit feedback without logging in
-                  </p>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Step 4 */}
-        <Card className="border-2">
-          <CardContent className="p-6">
-            <div className="flex items-start gap-4">
-              <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-amber-500 to-amber-600 text-white font-bold text-lg flex-shrink-0">
-                4
-              </div>
-              <div className="flex-1">
-                <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-3">
-                  Start Collecting Feedback
-                </h3>
-                <p className="text-slate-600 dark:text-slate-400 mb-4">
-                  Your customers can now:
-                </p>
-                <ul className="space-y-2 text-slate-600 dark:text-slate-400">
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-green-600" />
-                    Submit new feedback and feature requests
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-green-600" />
-                    Upvote existing suggestions
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-green-600" />
-                    Comment and discuss ideas
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-green-600" />
-                    Track progress on their requests
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Next Steps */}
-      <div className="not-prose mt-8 p-5 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 border border-slate-300 dark:border-slate-600">
-        <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-4">
-          🎉 You're All Set!
-        </h3>
-        <p className="text-slate-600 dark:text-slate-400 mb-6">
-          Now explore more features to get the most out of Faddy:
+      <DocsH2>Share Your Board</DocsH2>
+      <p>Get the public link and share it with your customers:</p>
+      <ol>
+        <li>Open your board</li>
+        <li>
+          Click the <strong>&quot;Share&quot;</strong> button
+        </li>
+        <li>Copy the public link</li>
+        <li>Share it on your website, email, or social media</li>
+      </ol>
+      <DocsCallout variant="tip" title="Public boards">
+        <p>
+          Anyone can view and submit feedback without logging in.
         </p>
-        <div className="grid sm:grid-cols-2 gap-3">
-          <Link href="/docs/getting-started/invite-team">
-            <Button variant="outline" className="w-full justify-between border-2">
-              Invite Team Members
-              <ArrowRight className="h-4 w-4" />
-            </Button>
-          </Link>
-          <Link href="/docs/features/roadmap">
-            <Button variant="outline" className="w-full justify-between border-2">
-              Create a Roadmap
-              <ArrowRight className="h-4 w-4" />
-            </Button>
-          </Link>
-        </div>
-      </div>
-    </div>
+      </DocsCallout>
+
+      <DocsH2>Start Collecting Feedback</DocsH2>
+      <p>Your customers can now:</p>
+      <ul>
+        <li>Submit new feedback and feature requests</li>
+        <li>Upvote existing suggestions</li>
+        <li>Comment and discuss ideas</li>
+        <li>Track progress on their requests</li>
+      </ul>
+
+      <DocsH2>You&apos;re All Set!</DocsH2>
+      <p>
+        Now explore more features to get the most out of Faddy — invite your
+        team from <Link href="/docs/getting-started/invite-team">Invite Team Members</Link>,
+        then set up your public <Link href="/docs/features/roadmap">Roadmap</Link>.
+      </p>
+    </DocsArticle>
   );
 }

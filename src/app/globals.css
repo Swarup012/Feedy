@@ -457,3 +457,148 @@
   font-style: italic;
 }
 
+
+/* ===========================================================================
+   FADDY DOCS — brand-derived theme (dark-first, from --brand-* tokens)
+   Scoped to --docs-* variables; consumed only by src/app/docs components.
+   ========================================================================= */
+:root {
+  --docs-bg: #ffffff;
+  --docs-surface: #f7f8fa;
+  --docs-raised: #ffffff;
+  --docs-border: #e6e8ee;
+  --docs-ink: #16181d;
+  --docs-muted: #5b6472;
+  --docs-faint: #8b93a1;
+  --docs-accent: #4f7cff;                 /* --brand-accent */
+  --docs-accent-ink: #3d63d8;
+  --docs-accent-soft: rgba(79, 124, 255, 0.08);
+  --docs-code-bg: #f4f6f9;
+  --docs-header: rgba(255, 255, 255, 0.85);
+}
+
+.dark {
+  --docs-bg: #0b0e14;                     /* --brand-bg */
+  --docs-surface: #0e121a;
+  --docs-raised: #131824;
+  --docs-border: rgba(255, 255, 255, 0.08); /* --brand-panel-border */
+  --docs-ink: #e6e8eb;                    /* --brand-ink */
+  --docs-muted: #9aa4b2;                  /* --brand-muted */
+  --docs-faint: #6c7684;
+  --docs-accent: #6f92ff;                 /* lighter tint of --brand-accent for dark surfaces */
+  --docs-accent-ink: #8fabff;
+  --docs-accent-soft: rgba(79, 124, 255, 0.14);
+  --docs-code-bg: rgba(255, 255, 255, 0.04); /* --brand-panel */
+  --docs-header: rgba(11, 14, 20, 0.82);
+}
+
+/* ---------------------------------------------------------------------------
+   DOCS READING TYPOGRAPHY — applied to article body wrapper
+--------------------------------------------------------------------------- */
+.docs-prose {
+  color: var(--docs-muted);
+  font-size: 0.9375rem;
+  line-height: 1.75;
+}
+
+.docs-prose > * + * {
+  margin-top: 1.25rem;
+}
+
+.docs-prose strong {
+  color: var(--docs-ink);
+  font-weight: 600;
+}
+
+.docs-prose a {
+  color: var(--docs-accent-ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: color-mix(in srgb, var(--docs-accent) 40%, transparent);
+}
+
+.docs-prose a:hover {
+  color: var(--docs-accent);
+  text-decoration-color: var(--docs-accent);
+}
+
+.docs-prose ul {
+  list-style: disc;
+  padding-left: 1.375rem;
+}
+
+.docs-prose ol {
+  list-style: decimal;
+  padding-left: 1.375rem;
+}
+
+.docs-prose li {
+  margin-top: 0.5rem;
+}
+
+.docs-prose li::marker {
+  color: var(--docs-faint);
+}
+
+.docs-prose code {
+  font-family: var(--font-mono), 'Source Code Pro', ui-monospace, monospace;
+  font-size: 0.85em;
+  background: var(--docs-code-bg);
+  border: 1px solid var(--docs-border);
+  border-radius: 4px;
+  padding: 0.1em 0.4em;
+  color: var(--docs-ink);
+}
+
+.docs-prose pre code {
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+.docs-prose table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.docs-prose th,
+.docs-prose td {
+  border: 1px solid var(--docs-border);
+  padding: 0.625rem 0.875rem;
+  text-align: left;
+}
+
+.docs-prose th {
+  background: var(--docs-surface);
+  color: var(--docs-ink);
+  font-weight: 600;
+}
+
+.docs-prose hr {
+  border: none;
+  border-top: 1px solid var(--docs-border);
+}
+
+/* Article headings: real anchors with hover link, offset for sticky header */
+.docs-prose h2,
+.docs-prose h3 {
+  scroll-margin-top: 5.5rem;
+  color: var(--docs-ink);
+  font-family: 'Switzer', 'Inter', sans-serif;
+  letter-spacing: -0.01em;
+}
+
+.docs-heading-anchor {
+  margin-left: 0.5rem;
+  color: var(--docs-faint);
+  text-decoration: none;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.docs-prose h2:hover .docs-heading-anchor,
+.docs-prose h3:hover .docs-heading-anchor,
+.docs-heading-anchor:focus-visible {
+  opacity: 1;
+}

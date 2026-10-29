@@ -1,211 +1,135 @@
-"use client";
-
+import type { Metadata } from "next";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { 
-  ArrowRight, 
-  BookOpen, 
-  Rocket, 
-  Zap, 
-  MessageSquare,
-  TrendingUp,
-  Bell,
-  Users,
-  CheckCircle2
-} from "lucide-react";
+import { docsGroups, getArticle, DOCS_SITE_URL } from "./docs-nav";
+import { DocsSearchTrigger } from "./components/docs-search";
+
+export const metadata: Metadata = {
+  title: "Faddy Docs",
+  description:
+    "Everything you need to collect feedback, build roadmaps, and ship better products with Faddy.",
+  alternates: { canonical: "/docs" },
+  openGraph: {
+    title: "Faddy Docs",
+    description:
+      "Everything you need to collect feedback, build roadmaps, and ship better products with Faddy.",
+    url: `${DOCS_SITE_URL}/docs`,
+    type: "website",
+  },
+};
+
+const popularHrefs = [
+  "/docs/getting-started/quick-start",
+  "/docs/features/boards",
+  "/docs/features/autopilot",
+  "/docs/features/slack",
+];
 
 export default function DocsHomePage() {
   return (
-    <div className="space-y-6">
-      {/* Hero Section */}
-      <section className="text-center space-y-4">
-        <div className="inline-flex p-3 rounded-2xl bg-gradient-to-br from-blue-600 to-blue-700 shadow-xl mb-4">
-          <BookOpen className="h-10 w-10 text-white" />
-        </div>
-        
-        <h1 className="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 dark:from-white dark:via-slate-100 dark:to-white bg-clip-text text-transparent tracking-tight">
-          Faddy Documentation
+    <div className="max-w-[880px]">
+      <section className="border-b border-[var(--docs-border)] pb-10">
+        <p className="mb-3 text-[12.5px] font-semibold uppercase tracking-wider text-[var(--docs-accent-ink)]">
+          Documentation
+        </p>
+        <h1 className="font-headline text-[34px] font-semibold leading-tight tracking-tight text-[var(--docs-ink)]">
+          Help &amp; guides for Faddy
         </h1>
-        
-        <p className="text-base text-slate-600 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed">
-          Everything you need to collect feedback, build roadmaps, and ship better products.
+        <p className="mt-3 max-w-[620px] text-[15px] leading-relaxed text-[var(--docs-muted)]">
+          Set up feedback boards, triage incoming requests, publish roadmaps and
+          changelogs, and connect your favorite tools. Use search, or browse the
+          guides below.
         </p>
-
-        <div className="flex flex-col sm:flex-row gap-3 justify-center pt-4">
-          <Link href="/docs/getting-started/quick-start">
-            <Button size="lg" className="bg-gradient-to-r from-blue-600 to-blue-700 shadow-lg gap-2">
-              <Rocket className="h-4 w-4" />
-              Quick Start Guide
-            </Button>
-          </Link>
-          <Link href="/signup">
-            <Button size="lg" variant="outline" className="gap-2 border-2">
-              Get Started Free
-              <ArrowRight className="h-4 w-4" />
-            </Button>
-          </Link>
+        <div className="mt-6 max-w-[360px]">
+          <DocsSearchTrigger
+            className="flex h-9 w-full items-center gap-2 rounded-md border border-[var(--docs-border)] bg-[var(--docs-surface)] px-3 text-[13.5px] text-[var(--docs-faint)] transition-colors hover:border-[var(--docs-accent)]/40"
+          />
         </div>
       </section>
 
-      {/* Quick Links */}
-      <section className="grid md:grid-cols-2 gap-6">
-        <Link href="/docs/getting-started/quick-start">
-          <Card className="group hover:shadow-xl transition-all duration-300 border-2 hover:border-blue-300 dark:hover:border-blue-700 h-full">
-            <CardContent className="p-6">
-              <div className="flex items-start gap-4">
-                <div className="p-3 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg group-hover:scale-110 transition-transform">
-                  <Rocket className="h-6 w-6 text-white" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-bold text-lg mb-2 text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                    Getting Started
-                  </h3>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">
-                    Set up your first feedback board in under 5 minutes
-                  </p>
-                </div>
-                <ArrowRight className="h-5 w-5 text-slate-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" />
-              </div>
-            </CardContent>
-          </Card>
-        </Link>
-
-        <Link href="/docs/features/boards">
-          <Card className="group hover:shadow-xl transition-all duration-300 border-2 hover:border-purple-300 dark:hover:border-purple-700 h-full">
-            <CardContent className="p-6">
-              <div className="flex items-start gap-4">
-                <div className="p-3 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 shadow-lg group-hover:scale-110 transition-transform">
-                  <MessageSquare className="h-6 w-6 text-white" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-bold text-lg mb-2 text-slate-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
-                    Feedback Boards
-                  </h3>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">
-                    Learn how to organize and manage customer feedback
-                  </p>
-                </div>
-                <ArrowRight className="h-5 w-5 text-slate-400 group-hover:text-purple-600 group-hover:translate-x-1 transition-all" />
-              </div>
-            </CardContent>
-          </Card>
-        </Link>
-
-        <Link href="/docs/features/roadmap">
-          <Card className="group hover:shadow-xl transition-all duration-300 border-2 hover:border-green-300 dark:hover:border-green-700 h-full">
-            <CardContent className="p-6">
-              <div className="flex items-start gap-4">
-                <div className="p-3 rounded-xl bg-gradient-to-br from-green-500 to-green-600 shadow-lg group-hover:scale-110 transition-transform">
-                  <TrendingUp className="h-6 w-6 text-white" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-bold text-lg mb-2 text-slate-900 dark:text-white group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">
-                    Roadmap
-                  </h3>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">
-                    Plan and communicate your product direction
-                  </p>
-                </div>
-                <ArrowRight className="h-5 w-5 text-slate-400 group-hover:text-green-600 group-hover:translate-x-1 transition-all" />
-              </div>
-            </CardContent>
-          </Card>
-        </Link>
-
-        <Link href="/docs/features/changelog">
-          <Card className="group hover:shadow-xl transition-all duration-300 border-2 hover:border-amber-300 dark:hover:border-amber-700 h-full">
-            <CardContent className="p-6">
-              <div className="flex items-start gap-4">
-                <div className="p-3 rounded-xl bg-gradient-to-br from-amber-500 to-amber-600 shadow-lg group-hover:scale-110 transition-transform">
-                  <Bell className="h-6 w-6 text-white" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-bold text-lg mb-2 text-slate-900 dark:text-white group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
-                    Changelog
-                  </h3>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">
-                    Keep users informed about product updates
-                  </p>
-                </div>
-                <ArrowRight className="h-5 w-5 text-slate-400 group-hover:text-amber-600 group-hover:translate-x-1 transition-all" />
-              </div>
-            </CardContent>
-          </Card>
-        </Link>
-      </section>
-
-      {/* Features Overview */}
-      <section className="space-y-4">
-        <h2 className="text-xl font-bold text-slate-900 dark:text-white">
-          What You'll Learn
+      <section className="py-10" aria-labelledby="popular-heading">
+        <h2
+          id="popular-heading"
+          className="mb-4 text-[13px] font-semibold uppercase tracking-wider text-[var(--docs-faint)]"
+        >
+          Popular guides
         </h2>
-        
-        <div className="grid gap-4">
-          <div className="flex items-start gap-4 p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-            <CheckCircle2 className="h-6 w-6 text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5" />
-            <div>
-              <h3 className="font-bold text-slate-900 dark:text-white mb-1">
-                Set up feedback collection in minutes
-              </h3>
-              <p className="text-sm text-slate-600 dark:text-slate-400">
-                Create boards, invite your team, and start collecting feedback right away
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-start gap-4 p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-            <CheckCircle2 className="h-6 w-6 text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5" />
-            <div>
-              <h3 className="font-bold text-slate-900 dark:text-white mb-1">
-                Organize with boards and statuses
-              </h3>
-              <p className="text-sm text-slate-600 dark:text-slate-400">
-                Categorize feedback, track progress, and keep everything organized
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-start gap-4 p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-            <CheckCircle2 className="h-6 w-6 text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5" />
-            <div>
-              <h3 className="font-bold text-slate-900 dark:text-white mb-1">
-                Build public roadmaps
-              </h3>
-              <p className="text-sm text-slate-600 dark:text-slate-400">
-                Share your product vision and keep customers in the loop
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-start gap-4 p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
-            <CheckCircle2 className="h-6 w-6 text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5" />
-            <div>
-              <h3 className="font-bold text-slate-900 dark:text-white mb-1">
-                Manage team permissions
-              </h3>
-              <p className="text-sm text-slate-600 dark:text-slate-400">
-                Control who can view, edit, and manage feedback with role-based access
-              </p>
-            </div>
-          </div>
+        <div className="grid gap-2.5 sm:grid-cols-2">
+          {popularHrefs.map((href) => {
+            const article = getArticle(href);
+            return (
+              <Link
+                key={href}
+                href={href}
+                className="group rounded-lg border border-[var(--docs-border)] px-4 py-3.5 transition-colors hover:border-[var(--docs-accent)]/40 hover:bg-[var(--docs-surface)]"
+              >
+                <span className="block text-[14px] font-medium text-[var(--docs-ink)] group-hover:text-[var(--docs-accent-ink)]">
+                  {article.title}
+                </span>
+                <span className="mt-1 block text-[13px] leading-snug text-[var(--docs-muted)]">
+                  {article.description}
+                </span>
+              </Link>
+            );
+          })}
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="p-5 rounded-2xl bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30 border border-blue-200/50 dark:border-blue-800/50 text-center">
-        <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-3">
-          Ready to Get Started?
-        </h3>
-        <p className="text-slate-600 dark:text-slate-400 mb-6 max-w-xl mx-auto">
-          Create your free account and start collecting feedback in minutes
+      <section className="pb-10" aria-labelledby="guides-heading">
+        <h2
+          id="guides-heading"
+          className="mb-6 text-[13px] font-semibold uppercase tracking-wider text-[var(--docs-faint)]"
+        >
+          All guides
+        </h2>
+        <div className="space-y-9">
+          {docsGroups.map((group) => (
+            <div key={group.title}>
+              <h3 className="mb-1 font-headline text-[15px] font-semibold text-[var(--docs-ink)]">
+                {group.title}
+              </h3>
+              <ul className="divide-y divide-[var(--docs-border)] border-t border-[var(--docs-border)]">
+                {group.hrefs.map((href) => {
+                  const article = getArticle(href);
+                  return (
+                    <li key={href}>
+                      <Link
+                        href={href}
+                        className="flex items-baseline justify-between gap-4 py-2.5 transition-colors hover:text-[var(--docs-accent-ink)]"
+                      >
+                        <span className="text-[13.5px] font-medium text-[var(--docs-ink)]">
+                          {article.title}
+                        </span>
+                        <span className="hidden text-[12.5px] text-[var(--docs-faint)] sm:block sm:max-w-[55%] sm:text-right">
+                          {article.description}
+                        </span>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="border-t border-[var(--docs-border)] py-8">
+        <p className="text-[13.5px] text-[var(--docs-muted)]">
+          Can&apos;t find an answer?{" "}
+          <Link
+            href="/contact"
+            className="font-medium text-[var(--docs-accent-ink)] underline underline-offset-2 hover:text-[var(--docs-accent)]"
+          >
+            Contact support
+          </Link>{" "}
+          or{" "}
+          <Link
+            href="/signup"
+            className="font-medium text-[var(--docs-accent-ink)] underline underline-offset-2 hover:text-[var(--docs-accent)]"
+          >
+            create a free account
+          </Link>
+          .
         </p>
-        <Link href="/signup">
-          <Button size="lg" className="bg-gradient-to-r from-blue-600 to-blue-700 gap-2">
-            Start Free Trial
-            <ArrowRight className="h-4 w-4" />
-          </Button>
-        </Link>
       </section>
     </div>
   );

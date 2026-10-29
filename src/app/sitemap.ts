@@ -1,7 +1,10 @@
 import type { MetadataRoute } from "next";
 import { getAllBlogPosts } from "@/lib/blog";
+import { orderedDocsHref } from "./docs/docs-nav";
 
-const SITE_URL = "https://www.usefaddy.com";
+// Canonical first-party domain: faddy.site serves production (nginx/SSL/
+// deploy runbook all target it); www.usefaddy.com does not resolve.
+const SITE_URL = "https://faddy.site";
 const BACKEND_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
@@ -157,12 +160,30 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
+  // ── Documentation pages ─────────────────────────────────────────────────
+  const docsListPage: MetadataRoute.Sitemap = [
+    {
+      url: `${SITE_URL}/docs`,
+      lastModified: new Date(),
+      changeFrequency: "weekly" as const,
+      priority: 0.8,
+    },
+  ];
+  const docsPages: MetadataRoute.Sitemap = orderedDocsHref.map((href) => ({
+    url: `${SITE_URL}${href}`,
+    lastModified: new Date(),
+    changeFrequency: "monthly" as const,
+    priority: 0.6,
+  }));
+
   return [
     ...staticPages,
     ...boardPages,
     ...roadmapPages,
     ...blogListPage,
     ...blogPostPages,
+    ...docsListPage,
+    ...docsPages,
   ];
 }
 
