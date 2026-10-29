@@ -50,6 +50,10 @@ const ALL_EVENTS: { value: WebhookEvent; label: string; category: string }[] = [
 
 const EVENT_CATEGORIES = ['post', 'comment', 'vote', 'board', 'changelog', 'user', 'autopilot'];
 
+// Display names differ from stored event-category values, which are a wire contract
+const CATEGORY_DISPLAY_LABELS: Record<string, string> = { autopilot: 'Smartflow' };
+const categoryLabel = (category: string) => CATEGORY_DISPLAY_LABELS[category] ?? category;
+
 const WEBHOOK_TYPES: { value: WebhookType; label: string }[] = [
   { value: 'custom', label: 'Custom' },
   { value: 'discord', label: 'Discord' },
@@ -278,7 +282,7 @@ export function WebhookFormDialog({ open, onClose, onSaved, existing }: WebhookF
                           <button
                             role="checkbox"
                             aria-checked={allSelected}
-                            aria-label={`Select all ${category} events`}
+                            aria-label={`Select all ${categoryLabel(category)} events`}
                             onClick={() => toggleCategory(category)}
                             className="flex items-center gap-2 mb-1.5 group"
                           >
@@ -292,7 +296,7 @@ export function WebhookFormDialog({ open, onClose, onSaved, existing }: WebhookF
                               {allSelected && <Check className="h-2 w-2 text-white" />}
                               {someSelected && !allSelected && <div className="w-1.5 h-1.5 bg-primary rounded-sm" />}
                             </div>
-                            <span className="text-xs font-medium capitalize text-foreground">{category}</span>
+                            <span className="text-xs font-medium capitalize text-foreground">{categoryLabel(category)}</span>
                           </button>
 
                           {/* Events in this category */}

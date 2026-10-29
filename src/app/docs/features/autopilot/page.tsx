@@ -7,15 +7,15 @@ export const metadata = docsMetadata("/docs/features/autopilot");
 export default function AutopilotDocsPage() {
   return (
     <DocsArticle href="/docs/features/autopilot">
-      <DocsH2>How Autopilot works</DocsH2>
+      <DocsH2>How Smartflow works</DocsH2>
       <p>
-        Autopilot uses AI to analyze text and determine whether it contains
+        Smartflow uses AI to analyze text and determine whether it contains
         product feedback. If it does, it extracts a title, description, and
         category. If the text is noise (off-topic chatter, greetings, etc.), it
         tells you nothing was found.
       </p>
       <p>
-        You can paste text directly into the Autopilot dashboard, or connect
+        You can paste text directly into the Smartflow dashboard, or connect
         integrations (Slack, Discord, Intercom, GitHub) to automatically ingest
         messages.
       </p>
@@ -45,14 +45,14 @@ export default function AutopilotDocsPage() {
       <DocsH2>Pasting text directly</DocsH2>
       <ol>
         <li>
-          Go to <strong>Admin → Autopilot</strong>.
+          Go to <strong>Admin → Smartflow</strong>.
         </li>
         <li>
           Paste raw text into the text area — a support chat, email, app review,
           or any text that might contain feedback.
         </li>
         <li>
-          Click <strong>Run Autopilot</strong>. The word counter shows how much
+          Click <strong>Run Smartflow</strong>. The word counter shows how much
           text you&rsquo;ve pasted.
         </li>
         <li>
@@ -64,7 +64,7 @@ export default function AutopilotDocsPage() {
 
       <DocsH2>Reviewing suggestions</DocsH2>
       <p>
-        The Review queue on the right side of the Autopilot page shows all
+        The Review queue on the right side of the Smartflow page shows all
         suggestions. Use the status filter to switch between Pending, Approved,
         Rejected, or All.
       </p>

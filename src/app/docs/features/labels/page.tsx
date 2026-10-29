@@ -46,7 +46,7 @@ export default function LabelsDocsPage() {
       <p>
         Labels help you filter and segment feedback. On the admin board view,
         use the search input to find posts by category name. In Expert View, the
-        Autopilot Performance panel shows feedback volume by category.
+        Smartflow Performance panel shows feedback volume by category.
       </p>
     </DocsArticle>
   );

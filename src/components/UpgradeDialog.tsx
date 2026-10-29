@@ -31,7 +31,7 @@ const IS_SANDBOX = !PADDLE_CLIENT_TOKEN.startsWith('live_');
 const STARTER_HIGHLIGHTS = [
   '1 Integration',
   'AI chat',
-  'Autopilot',
+  'Smartflow',
   'AI insight dashboard',
 ];
 

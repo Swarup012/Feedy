@@ -54,7 +54,7 @@ export default function CannyAlternativeClient() {
         "Unlimited feedback boards",
         "20 tracked users",
         "3 team members",
-        "Autopilot & 1 integration",
+        "Smartflow & 1 integration",
         "AI chat - 10 credits/month",
         "Advanced analytics",
       ],

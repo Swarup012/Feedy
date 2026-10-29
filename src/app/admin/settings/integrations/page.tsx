@@ -588,7 +588,7 @@ function IntegrationsPageInner() {
     if (intercomResult === 'connected') {
       toast({
         title: 'Intercom connected',
-        description: 'New closed conversations will feed into Autopilot.',
+        description: 'New closed conversations will feed into Smartflow.',
       });
       loadStatus();
     } else if (intercomResult === 'error') {
@@ -630,7 +630,7 @@ function IntegrationsPageInner() {
     if (githubResult === 'connected') {
       toast({
         title: 'GitHub connected',
-        description: 'Issues and pull requests will now feed into Autopilot.',
+        description: 'Issues and pull requests will now feed into Smartflow.',
       });
       loadStatus();
     } else if (githubResult === 'error') {

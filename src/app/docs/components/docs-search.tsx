@@ -164,7 +164,7 @@ function DocsSearchDialog({
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={onKeyDown}
             placeholder="Search docs…"
-            className="h-12 w-full bg-transparent text-[14px] text-[var(--docs-ink)] outline-none placeholder:text-[var(--docs-faint)]"
+            className="h-12 w-full bg-transparent text-[14px] text-[var(--docs-ink)] outline-none placeholder:text-[var(--docs-faint)] focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
             aria-label="Search query"
             role="combobox"
             aria-expanded
@@ -173,7 +173,7 @@ function DocsSearchDialog({
           <Button
             variant="ghost"
             size="sm"
-            className="h-6 shrink-0 px-1.5 text-[10px] text-[var(--docs-faint)]"
+            className="h-6 shrink-0 px-1.5 text-[10px] text-[var(--docs-faint)] focus-visible:ring-1 focus-visible:ring-[var(--docs-accent)] focus-visible:ring-offset-0"
             onClick={() => onOpenChange(false)}
           >
             Esc
@@ -212,7 +212,7 @@ function DocsSearchDialog({
                   aria-selected={i === active}
                   onMouseEnter={() => setActive(i)}
                   onClick={() => goTo(r.href)}
-                  className={`flex w-full items-center justify-between gap-3 rounded-md px-3 py-2 text-left text-[13.5px] transition-colors ${
+                  className={`flex w-full items-center justify-between gap-3 rounded-md px-3 py-2 text-left text-[13.5px] transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--docs-accent)] focus-visible:ring-offset-0 ${
                     i === active
                       ? "bg-[var(--docs-accent-soft)] text-[var(--docs-ink)]"
                       : "text-[var(--docs-muted)]"

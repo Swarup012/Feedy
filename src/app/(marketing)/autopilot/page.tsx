@@ -36,12 +36,12 @@ export default function AutopilotPage() {
                 <h1 className="text-3xl lg:text-4xl xl:text-5xl font-switzer font-medium text-slate-900 dark:text-white mb-6 tracking-tight leading-tight">
                   Feedback is already happening.{" "}
                   <span className="text-blue-600 dark:text-blue-400">
-                    Autopilot makes sure you see it.
+                    Smartflow makes sure you see it.
                   </span>
                 </h1>
 
                 <p className="text-lg lg:text-xl text-slate-600 dark:text-muted-foreground mb-8 max-w-xl mx-auto lg:mx-0 leading-relaxed">
-                  Autopilot reads every conversation across your connected tools
+                  Smartflow reads every conversation across your connected tools
                   and turns real user requests into feedback posts —
                   automatically.
                 </p>
@@ -107,7 +107,7 @@ export default function AutopilotPage() {
           <div className="max-w-5xl mx-auto">
             <div className="text-center mb-14">
               <h2 className="text-2xl lg:text-3xl font-switzer font-bold text-slate-900 dark:text-white mb-4">
-                How Autopilot works
+                How Smartflow works
               </h2>
               <p className="text-lg text-slate-600 dark:text-muted-foreground max-w-2xl mx-auto">
                 Three steps from conversation to actionable feedback.
@@ -190,7 +190,7 @@ export default function AutopilotPage() {
                       2
                     </div>
                     <h3 className="text-xl font-switzer font-bold text-slate-900 dark:text-white">
-                      Autopilot reads
+                      Smartflow reads
                     </h3>
                   </div>
                   <p className="text-lg text-slate-600 dark:text-muted-foreground mb-4">
@@ -202,7 +202,7 @@ export default function AutopilotPage() {
                     {[
                       "Stage 1: Filter out noise, greetings, and off-topic messages",
                       "Stage 2: Extract a clean title + description",
-                      "Tagged with source: 'autopilot' for full traceability",
+                      "Tagged with its source for full traceability",
                     ].map((item, i) => (
                       <li key={i} className="flex items-center gap-3">
                         <CheckCircle2 className="h-4 w-4 text-blue-600 shrink-0" />
@@ -264,17 +264,17 @@ export default function AutopilotPage() {
                         {[
                           {
                             title: "Add dark mode to settings",
-                            tag: "via Autopilot",
+                            tag: "via Smartflow",
                             source: "Slack",
                           },
                           {
                             title: "Export feedback as CSV",
-                            tag: "via Autopilot",
+                            tag: "via Smartflow",
                             source: "Intercom",
                           },
                           {
                             title: "Mobile app push notifications",
-                            tag: "via Autopilot",
+                            tag: "via Smartflow",
                             source: "Slack",
                           },
                         ].map((item, i) => (
@@ -313,7 +313,7 @@ export default function AutopilotPage() {
                   <p className="text-lg text-slate-600 dark:text-muted-foreground mb-4">
                     Choose manual mode (review before it&apos;s posted) or
                     automatic mode (published straight to your board), tagged so
-                    you always know it came from Autopilot.
+                    you always know it came from Smartflow.
                   </p>
                   <ul className="space-y-2">
                     {[
@@ -358,7 +358,7 @@ export default function AutopilotPage() {
                     Manual mode
                   </h3>
                   <p className="text-slate-600 dark:text-muted-foreground leading-relaxed">
-                    Review every suggestion before it goes live. Autopilot
+                    Review every suggestion before it goes live. Smartflow
                     extracts and formats the feedback, but you decide what makes
                     it to the board. Perfect for teams that want a human in the
                     loop.
@@ -376,7 +376,7 @@ export default function AutopilotPage() {
                     Automatic mode
                   </h3>
                   <p className="text-slate-600 dark:text-muted-foreground leading-relaxed">
-                    Flip the switch and let Autopilot publish directly to your
+                    Flip the switch and let Smartflow publish directly to your
                     board. Nothing sits in a queue. Every request is tagged by
                     source so you always know where it came from.
                   </p>
@@ -393,7 +393,7 @@ export default function AutopilotPage() {
               Works where your conversations happen
             </h2>
             <p className="text-lg text-slate-600 dark:text-muted-foreground mb-10 max-w-xl mx-auto">
-              Connect the tools your team already uses. Autopilot reads
+              Connect the tools your team already uses. Smartflow reads
               conversations from each one.
             </p>
 
@@ -461,7 +461,7 @@ export default function AutopilotPage() {
                   icon: <Clock className="w-5 h-5" />,
                   title: "Save hours every week",
                   description:
-                    "Small teams don't have time to manually triage — Autopilot does the first pass for you.",
+                    "Small teams don't have time to manually triage — Smartflow does the first pass for you.",
                 },
                 {
                   icon: <Shield className="w-5 h-5" />,

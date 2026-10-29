@@ -72,7 +72,7 @@ export default function MarketingChrome({
               icon: <Eye className="w-4 h-4" />,
             },
             {
-              name: "Autopilot",
+              name: "Smartflow",
               link: "/autopilot",
               description: "Automated workflows that save you hours",
               icon: <Zap className="w-4 h-4" />,

@@ -15,7 +15,7 @@ export default function IntercomDocsPage() {
         </li>
         <li>AI detects whether the conversation contains product feedback</li>
         <li>
-          Detected feedback becomes a suggestion in Autopilot (manual mode) or a
+          Detected feedback becomes a suggestion in Smartflow (manual mode) or a
           post on your board (automatic mode)
         </li>
       </ul>
@@ -57,7 +57,7 @@ export default function IntercomDocsPage() {
         </li>
       </ol>
 
-      <DocsH2>Configuring Autopilot mode</DocsH2>
+      <DocsH2>Configuring Smartflow mode</DocsH2>
       <p>
         Click <strong>Manage</strong> on the Intercom card to configure:
       </p>

@@ -80,7 +80,7 @@ export default function AdminLayout({
   };
 
   const navItems = [
-    { name: "Autopilot", path: "/admin/autopilot" },
+    { name: "Smartflow", path: "/admin/autopilot" },
     { name: "AI Chat", path: "/admin/ai-chat" },
     { name: "Users", path: "/admin/users" },
     { name: "Feedback", path: feedbackPath },

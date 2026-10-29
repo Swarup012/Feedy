@@ -266,7 +266,7 @@ export function getPlanFeatureDisplay(tier: PlanTier): {
       { text: 'Unlimited boards & posts', included: true, highlight: true },
       { text: 'Public roadmap & changelog', included: true },
       { text: 'Track up to 20 users', included: true },
-      { text: 'Autopilot & 1 integration', included: true },
+      { text: 'Smartflow & 1 integration', included: true },
       { text: 'AI chat - 10 credits/month', included: true },
       { text: 'AI Insights dashboard', included: true, highlight: true },
       { text: 'Up to 3 team members', included: true },

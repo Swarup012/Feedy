@@ -13,7 +13,7 @@ export default function GitHubDocsPage() {
           Issues and pull requests from your GitHub repos are analyzed for feedback
         </li>
         <li>
-          Detected feedback becomes a suggestion in Autopilot (manual mode) or a
+          Detected feedback becomes a suggestion in Smartflow (manual mode) or a
           post on your board (automatic mode)
         </li>
         <li>Choose which repositories to monitor</li>
@@ -61,7 +61,7 @@ export default function GitHubDocsPage() {
         </li>
       </ol>
 
-      <DocsH2>Configuring Autopilot mode</DocsH2>
+      <DocsH2>Configuring Smartflow mode</DocsH2>
       <p>
         Click <strong>Manage</strong> on the GitHub card to configure:
       </p>

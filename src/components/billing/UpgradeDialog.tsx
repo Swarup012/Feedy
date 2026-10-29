@@ -262,7 +262,7 @@ export function UpgradeDialog({ open, onOpenChange, currentPlan, onSuccess = () 
                 {selectedPlan === 'pro' ? (
                   <>
                     <FeatureItem highlight>Unlimited members</FeatureItem>
-                    <FeatureItem highlight>Autopilot Automatic Mode</FeatureItem>
+                    <FeatureItem highlight>Smartflow Automatic Mode</FeatureItem>
                     <FeatureItem highlight>AI-powered severity classification</FeatureItem>
                     <FeatureItem highlight>Custom domain</FeatureItem>
                     <FeatureItem>125+ tracked users with overage billing</FeatureItem>
@@ -275,7 +275,7 @@ export function UpgradeDialog({ open, onOpenChange, currentPlan, onSuccess = () 
                     <FeatureItem>Up to 5 admins</FeatureItem>
                     <FeatureItem>125+ tracked users with overage billing</FeatureItem>
                     <FeatureItem>Slack, Discord and Intercom integrations</FeatureItem>
-                    <FeatureItem>Autopilot manual mode</FeatureItem>
+                    <FeatureItem>Smartflow manual mode</FeatureItem>
                     <FeatureItem>AI Chat</FeatureItem>
                     <FeatureItem>Advanced analytics</FeatureItem>
                     <FeatureItem>Custom branding</FeatureItem>

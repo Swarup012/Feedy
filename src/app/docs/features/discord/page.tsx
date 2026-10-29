@@ -13,10 +13,10 @@ export default function DiscordDocsPage() {
           Messages from a Discord channel are automatically analyzed for feedback
         </li>
         <li>
-          Detected feedback becomes a suggestion in Autopilot (manual mode) or a
+          Detected feedback becomes a suggestion in Smartflow (manual mode) or a
           post on your board (automatic mode)
         </li>
-        <li>Set the monitored channel and Autopilot mode per integration</li>
+        <li>Set the monitored channel and Smartflow mode per integration</li>
       </ul>
 
       <DocsH2>Connecting Discord</DocsH2>
@@ -54,7 +54,7 @@ export default function DiscordDocsPage() {
       <DocsH3>2. Choose Manual or Automatic mode</DocsH3>
       <p>
         <strong>Manual mode (default)</strong> — messages become pending
-        suggestions in Autopilot. You review and approve or reject each one.
+        suggestions in Smartflow. You review and approve or reject each one.
       </p>
       <p>
         <strong>Automatic mode</strong> — feedback is published directly to your

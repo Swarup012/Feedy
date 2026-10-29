@@ -16,7 +16,7 @@ export default function PlansComparisonPage() {
         <li>20 tracked users (hard limit, no overage)</li>
         <li>3 team members, up to 3 admins</li>
         <li>Unlimited roadmap items</li>
-        <li>Autopilot &amp; 1 integration</li>
+        <li>Smartflow &amp; 1 integration</li>
         <li>AI chat - 10 credits/month</li>
         <li>Advanced analytics</li>
         <li>Public roadmap &amp; changelog</li>
@@ -35,7 +35,7 @@ export default function PlansComparisonPage() {
         <li>Overage: $12 per 50 users</li>
         <li>Unlimited team members, 5 admins</li>
         <li>Unlimited roadmap items</li>
-        <li>Autopilot (manual mode)</li>
+        <li>Smartflow (manual mode)</li>
         <li>AI Chat</li>
         <li>Slack, Discord &amp; Intercom integrations</li>
         <li>Custom branding</li>
@@ -51,7 +51,7 @@ export default function PlansComparisonPage() {
         <li>25-user grace buffer (overage starts at 150)</li>
         <li>Overage: $12 per 50 users</li>
         <li>Up to 10 admins</li>
-        <li>Autopilot (automatic mode)</li>
+        <li>Smartflow (automatic mode)</li>
         <li>AI severity classification</li>
         <li>High-severity Slack/Discord alerts</li>
         <li>Instant notifications</li>

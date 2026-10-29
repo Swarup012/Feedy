@@ -723,7 +723,7 @@ export default function PricingPage() {
                     </tr>
                     <tr>
                       <td className="py-4 px-6 text-sm text-gray-900 dark:text-white">
-                        Autopilot
+                        Smartflow
                       </td>
                       <td className="py-4 px-6 text-center">
                         <Check className="w-5 h-5 text-green-500 mx-auto" />

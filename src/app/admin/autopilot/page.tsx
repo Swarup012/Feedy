@@ -316,7 +316,7 @@ function AutopilotPageInner() {
   if (!orgId) {
     return (
       <div className="flex h-full items-center justify-center p-8 text-sm text-muted-foreground">
-        Select an organization to use Autopilot.
+        Select an organization to use Smartflow.
       </div>
     );
   }
@@ -326,12 +326,12 @@ function AutopilotPageInner() {
 
   if (!loadingIntegrations && !hasConnectedIntegrations) {
     return (
-      <PaidFeatureGate featureName="Autopilot" feature="autopilot_manual">
+      <PaidFeatureGate featureName="Smartflow" feature="autopilot_manual">
       <div className={`${WIDE_CONTAINER} h-full flex flex-col py-6 bg-background`}>
         <header className="shrink-0 mb-6">
-          <h1 className="font-switzer text-xl font-semibold tracking-tight">Get Started with Autopilot</h1>
+          <h1 className="font-switzer text-xl font-semibold tracking-tight">Get Started with Smartflow</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Connect your support tools and let Autopilot find feedback for you 🧠.
+            Connect your support tools and let Smartflow find feedback for you 🧠.
           </p>
           <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-lg">
             {INTEGRATION_PROVIDERS.map((provider) => {
@@ -367,13 +367,13 @@ function AutopilotPageInner() {
   const empty = EMPTY_MESSAGES[statusFilter] || EMPTY_MESSAGES.all;
 
   return (
-    <PaidFeatureGate featureName="Autopilot" feature="autopilot_manual">
+    <PaidFeatureGate featureName="Smartflow" feature="autopilot_manual">
     <div className={`${WIDE_CONTAINER} h-full flex flex-col py-6 bg-background`}>
       {/* Header */}
       <header className="shrink-0 mb-6">
         <div className="flex items-start justify-between">
           <div>
-            <h1 className="font-switzer text-lg font-semibold tracking-tight">Autopilot</h1>
+            <h1 className="font-switzer text-lg font-semibold tracking-tight">Smartflow</h1>
             <p className="mt-1 text-sm text-muted-foreground">
               Approve manually or enable automatic review.
             </p>

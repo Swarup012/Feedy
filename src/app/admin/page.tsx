@@ -118,7 +118,7 @@ export default function AdminPage() {
                     No feedback yet
                   </h2>
                   <p className="text-sm text-muted-foreground mt-2 max-w-md">
-                    Create a board, connect Autopilot, and know what your
+                    Create a board, connect Smartflow, and know what your
                     customers want.
                   </p>
                   <Button
@@ -135,7 +135,7 @@ export default function AdminPage() {
                     <ArrowRight className="w-3 h-3 opacity-40" />
                     <span className="flex items-center gap-1.5">
                       <Zap className="w-3.5 h-3.5 text-primary" />
-                      Connect Autopilot
+                      Connect Smartflow
                     </span>
                     <ArrowRight className="w-3 h-3 opacity-40" />
                     <span className="flex items-center gap-1.5">

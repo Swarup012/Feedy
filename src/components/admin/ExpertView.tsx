@@ -92,7 +92,7 @@ const RANGES: { value: ExpertRange; label: string }[] = [
 
 const RANGE_DAYS: Record<ExpertRange, number> = { '7d': 7, '30d': 30, '90d': 90 };
 
-const SUMMARY_CARD_LABELS = ['High-severity posts', 'Pending review', 'Ingested by Autopilot', 'Approval rate'];
+const SUMMARY_CARD_LABELS = ['High-severity posts', 'Pending review', 'Ingested by Smartflow', 'Approval rate'];
 
 const SEVERITY_CONFIG: Record<string, { variant: 'destructive' | 'warning' | 'secondary'; label: string }> = {
   high: { variant: 'destructive', label: 'HIGH' },
@@ -569,7 +569,7 @@ export function ExpertView({
                 subTone={autopilot.pending === 0 ? 'success' : 'muted'}
               />
               <SummaryCard
-                label="Ingested by Autopilot"
+                label="Ingested by Smartflow"
                 value={String(autopilot.ingested)}
                 sub={`In the last ${rangeDays} days`}
               />
@@ -628,7 +628,7 @@ export function ExpertView({
             <CardHeader className="pb-3 shrink-0">
               <PanelHeader
                 icon={Bot}
-                title="Autopilot pipeline"
+                title="Smartflow pipeline"
                 description={`Ingestion and review, last ${rangeDays} days`}
                 iconColor="bg-progress/10 text-progress"
               />

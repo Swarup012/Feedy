@@ -18,7 +18,7 @@ const integrations = [
   {
     name: "Intercom",
     description:
-      "Turn conversations into actionable product feedback. Autopilot reads Intercom messages and creates feedback posts automatically.",
+      "Turn conversations into actionable product feedback. Smartflow reads Intercom messages and creates feedback posts automatically.",
     icon: (
       <img
         src="/images/icons/intercom.svg"

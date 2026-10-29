@@ -163,14 +163,14 @@ const articles: DocsArticleMeta[] = [
     ],
   },
   {
-    title: "Using Autopilot",
+    title: "Using Smartflow",
     href: "/docs/features/autopilot",
     description: "Paste raw text from chats, emails, or reviews and let AI detect feedback and queue a draft for your approval.",
     group: "AI automation",
     plan: "Starter & Pro",
-    keywords: ["autopilot", "ai", "draft", "suggestions", "paste", "automatic mode", "manual mode"],
+    keywords: ["autopilot", "smartflow", "ai", "draft", "suggestions", "paste", "automatic mode", "manual mode"],
     sections: [
-      "How Autopilot works",
+      "How Smartflow works",
       "Manual vs Automatic mode",
       "Manual mode",
       "Automatic mode",
@@ -305,7 +305,7 @@ const articles: DocsArticleMeta[] = [
       "What you get",
       "Connecting Intercom",
       "Setting up the webhook",
-      "Configuring Autopilot mode",
+      "Configuring Smartflow mode",
       "Disconnecting",
     ],
     related: [
@@ -325,7 +325,7 @@ const articles: DocsArticleMeta[] = [
       "What you get",
       "Installing the GitHub App",
       "Setting up webhooks",
-      "Configuring Autopilot mode",
+      "Configuring Smartflow mode",
       "Disconnecting",
     ],
     related: [

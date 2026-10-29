@@ -71,7 +71,7 @@ export function getPostAuthorDisplayName(post: Post): string {
   if (post.org_end_user?.email) return post.org_end_user.email;
   if (post.external_author?.email) return post.external_author.email;
   
-  if (post.source === 'autopilot') return "Autopilot";
+  if (post.source === 'autopilot') return "Smartflow";
   return "Anonymous";
 }
 
