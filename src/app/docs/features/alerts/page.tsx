@@ -17,6 +17,12 @@ export default function AlertsDocsPage() {
         Alerts are batched within a 30-second window — if multiple high-severity
         posts arrive at the same time, they&rsquo;re combined into one message.
       </p>
+      <p>
+        Alert channels are available on <strong>Starter and Pro</strong>. On
+        Starter, severity is assigned by keyword rules (billing, security, data
+        loss). On Pro, an AI model scores each post instead, so alerts can fire
+        on wording the rules would miss.
+      </p>
 
       <DocsH2>Setting up alerts</DocsH2>
       <ol>

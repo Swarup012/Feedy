@@ -566,7 +566,7 @@ export default function PricingPage() {
                         Team Members
                       </td>
                       <td className="py-4 px-6 text-center text-sm text-gray-700 dark:text-muted-foreground">
-                        3 admins
+                        3 total members
                       </td>
                       <td className="py-4 px-6 text-center text-sm font-semibold text-blue-600 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-900/10">
                         Unlimited
@@ -700,11 +700,11 @@ export default function PricingPage() {
                       <td className="py-4 px-6 text-center">
                         <Check className="w-5 h-5 text-green-500 mx-auto" />
                       </td>
-                      <td className="py-4 px-6 text-center bg-blue-50/50 dark:bg-blue-900/10">
-                        <Check className="w-5 h-5 text-green-500 mx-auto" />
+                      <td className="py-4 px-6 text-center text-sm text-gray-700 dark:text-muted-foreground bg-blue-50/50 dark:bg-blue-900/10">
+                        1 active
                       </td>
-                      <td className="py-4 px-6 text-center bg-blue-50/50 dark:bg-blue-900/10">
-                        <Check className="w-5 h-5 text-green-500 mx-auto" />
+                      <td className="py-4 px-6 text-center text-sm font-semibold text-blue-600 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-900/10">
+                        Unlimited
                       </td>
                     </tr>
                     <tr>
@@ -723,7 +723,7 @@ export default function PricingPage() {
                     </tr>
                     <tr>
                       <td className="py-4 px-6 text-sm text-gray-900 dark:text-white">
-                        Smartflow
+                        Smart Flow
                       </td>
                       <td className="py-4 px-6 text-center">
                         <Check className="w-5 h-5 text-green-500 mx-auto" />
@@ -737,7 +737,7 @@ export default function PricingPage() {
                     </tr>
                     <tr>
                       <td className="py-4 px-6 text-sm text-gray-900 dark:text-white">
-                        Webhooks & API
+                        Developer API &amp; Webhook Access
                       </td>
                       <td className="py-4 px-6 text-center">
                         <X className="w-5 h-5 text-gray-300 mx-auto" />
@@ -751,12 +751,26 @@ export default function PricingPage() {
                     </tr>
                     <tr>
                       <td className="py-4 px-6 text-sm text-gray-900 dark:text-white">
-                        Instant Notifications (urgent alerts)
+                        High-Severity Feedback Alerts
                       </td>
                       <td className="py-4 px-6 text-center">
                         <X className="w-5 h-5 text-gray-300 mx-auto" />
                       </td>
+                      <td className="py-4 px-6 text-center bg-blue-50/50 dark:bg-blue-900/10">
+                        <Check className="w-5 h-5 text-green-500 mx-auto" />
+                      </td>
+                      <td className="py-4 px-6 text-center bg-blue-50/50 dark:bg-blue-900/10">
+                        <Check className="w-5 h-5 text-green-500 mx-auto" />
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="py-4 px-6 text-sm text-gray-900 dark:text-white">
+                        Advanced Severity Detection
+                      </td>
                       <td className="py-4 px-6 text-center">
+                        <X className="w-5 h-5 text-gray-300 mx-auto" />
+                      </td>
+                      <td className="py-4 px-6 text-center bg-blue-50/50 dark:bg-blue-900/10">
                         <X className="w-5 h-5 text-gray-300 mx-auto" />
                       </td>
                       <td className="py-4 px-6 text-center bg-blue-50/50 dark:bg-blue-900/10">
@@ -766,6 +780,20 @@ export default function PricingPage() {
                     <tr>
                       <td className="py-4 px-6 text-sm text-gray-900 dark:text-white">
                         Custom Branding
+                      </td>
+                      <td className="py-4 px-6 text-center">
+                        <X className="w-5 h-5 text-gray-300 mx-auto" />
+                      </td>
+                      <td className="py-4 px-6 text-center bg-blue-50/50 dark:bg-blue-900/10">
+                        <Check className="w-5 h-5 text-green-500 mx-auto" />
+                      </td>
+                      <td className="py-4 px-6 text-center bg-blue-50/50 dark:bg-blue-900/10">
+                        <Check className="w-5 h-5 text-green-500 mx-auto" />
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="py-4 px-6 text-sm text-gray-900 dark:text-white">
+                        MRR Insights
                       </td>
                       <td className="py-4 px-6 text-center">
                         <X className="w-5 h-5 text-gray-300 mx-auto" />

@@ -38,6 +38,7 @@ import {
 } from 'lucide-react';
 import { WIDE_CONTAINER } from '@/lib/layout-constants';
 import { INTEGRATION_BRAND_COLORS, type IntegrationProvider } from '@/components/admin/integration-brands';
+import { Skeleton } from '@/components/ui/skeleton';
 
 type StatusFilter = AutopilotSuggestionStatus | 'all';
 
@@ -124,6 +125,60 @@ function formatDate(iso: string) {
   }
 }
 
+// Mirrors the main view's frame (header + queue column + submit card) so the
+// skeleton doesn't shift layout when the real view resolves.
+function SmartflowSkeleton() {
+  return (
+    <div
+      data-testid="smartflow-loading"
+      className={`${WIDE_CONTAINER} h-full flex flex-col py-6 bg-background`}
+    >
+      <header className="shrink-0 mb-6">
+        <div className="flex items-start justify-between">
+          <div>
+            <Skeleton className="h-6 w-40" />
+            <Skeleton className="mt-2 h-4 w-64" />
+          </div>
+          <Skeleton className="h-8 w-32 rounded-md" />
+        </div>
+      </header>
+      <div className="flex-1 min-h-0 grid grid-cols-[1.5fr_1fr] gap-6 items-start overflow-hidden">
+        <section className="max-h-[calc(100vh-10rem)]">
+          <div className="flex items-center gap-4 border-b border-border pb-2">
+            <Skeleton className="h-5 w-20" />
+            <Skeleton className="h-5 w-24" />
+            <Skeleton className="h-5 w-24" />
+          </div>
+          <div className="mt-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="flex items-start gap-3 py-4">
+                <Skeleton className="mt-1.5 h-[7px] w-[7px] shrink-0 rounded-full" />
+                <div className="flex-1">
+                  <Skeleton className="h-3 w-16" />
+                  <Skeleton className="mt-2 h-4 w-3/4" />
+                  <Skeleton className="mt-2 h-3 w-1/2" />
+                  <Skeleton className="mt-3 h-8 w-[200px] rounded-lg" />
+                </div>
+                <Skeleton className="h-4 w-16 shrink-0" />
+              </div>
+            ))}
+          </div>
+        </section>
+        <section className="flex flex-col gap-4 rounded-xl border bg-card p-5">
+          <Skeleton className="h-4 w-32" />
+          <Skeleton className="h-3 w-48" />
+          <Skeleton className="h-[120px] w-full rounded-lg" />
+          <div className="flex gap-2">
+            <Skeleton className="h-9 flex-1 rounded-lg" />
+            <Skeleton className="h-9 flex-1 rounded-lg" />
+          </div>
+          <Skeleton className="h-8 w-full rounded-md" />
+        </section>
+      </div>
+    </div>
+  );
+}
+
 function AutopilotPageInner() {
   const { organization, loading: orgLoading } = useOrganization();
   const { toast } = useToast();
@@ -131,13 +186,14 @@ function AutopilotPageInner() {
 
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('pending');
   const [suggestions, setSuggestions] = useState<AutopilotSuggestion[]>([]);
-  const [loadingList, setLoadingList] = useState(false);
+  const [loadingList, setLoadingList] = useState(true);
 
   const [boards, setBoards] = useState<Board[]>([]);
   const [approveBoardById, setApproveBoardById] = useState<Record<string, string>>({});
   const [actionId, setActionId] = useState<string | null>(null);
   const [connectedProviders, setConnectedProviders] = useState<Set<IntegrationProvider>>(new Set());
   const [loadingIntegrations, setLoadingIntegrations] = useState(true);
+  const [integrationsError, setIntegrationsError] = useState<string | null>(null);
 
   const currentPlan = resolvePlan(organization);
 
@@ -185,30 +241,38 @@ function AutopilotPageInner() {
     })();
   }, []);
 
-  useEffect(() => {
+  const checkIntegrations = useCallback(async () => {
     if (!orgId) return;
-    (async () => {
-      setLoadingIntegrations(true);
-      try {
-        const [intercomRes, discordRes, slackRes, githubRes] = await Promise.all([
-          intercomService.getStatus(orgId).catch(() => null),
-          discordService.getStatus(orgId).catch(() => null),
-          slackService.getStatus(orgId).catch(() => null),
-          githubService.getStatus(orgId).catch(() => null),
-        ]);
-        const connected = new Set<IntegrationProvider>();
-        if (intercomRes?.data?.status === 'active') connected.add('intercom');
-        if (discordRes?.data?.status === 'active') connected.add('discord');
-        if (slackRes?.data?.status === 'active') connected.add('slack');
-        if (githubRes?.data?.status === 'active') connected.add('github');
-        setConnectedProviders(connected);
-      } catch {
-        // Non-fatal — worst case we show the empty state
-      } finally {
-        setLoadingIntegrations(false);
+    setLoadingIntegrations(true);
+    setIntegrationsError(null);
+    try {
+      const [intercomRes, discordRes, slackRes, githubRes] = await Promise.all([
+        intercomService.getStatus(orgId).catch(() => null),
+        discordService.getStatus(orgId).catch(() => null),
+        slackService.getStatus(orgId).catch(() => null),
+        githubService.getStatus(orgId).catch(() => null),
+      ]);
+      if (!intercomRes && !discordRes && !slackRes && !githubRes) {
+        // Every request failed — that is an outage, not "nothing connected"
+        setIntegrationsError("Couldn't check your connected integrations. Please try again.");
+        return;
       }
-    })();
+      const connected = new Set<IntegrationProvider>();
+      if (intercomRes?.data?.status === 'active') connected.add('intercom');
+      if (discordRes?.data?.status === 'active') connected.add('discord');
+      if (slackRes?.data?.status === 'active') connected.add('slack');
+      if (githubRes?.data?.status === 'active') connected.add('github');
+      setConnectedProviders(connected);
+    } catch {
+      setIntegrationsError("Couldn't check your connected integrations. Please try again.");
+    } finally {
+      setLoadingIntegrations(false);
+    }
   }, [orgId]);
+
+  useEffect(() => {
+    checkIntegrations();
+  }, [checkIntegrations]);
 
   // Fetch tracked users for the username dropdown
   useEffect(() => {
@@ -317,6 +381,26 @@ function AutopilotPageInner() {
     return (
       <div className="flex h-full items-center justify-center p-8 text-sm text-muted-foreground">
         Select an organization to use Smartflow.
+      </div>
+    );
+  }
+
+  // Connection check unresolved — decide the view only after it resolves,
+  // so users never flash the wrong screen.
+  if (loadingIntegrations) {
+    return <SmartflowSkeleton />;
+  }
+
+  if (integrationsError) {
+    return (
+      <div className={`${WIDE_CONTAINER} h-full flex items-center justify-center py-6 bg-background`}>
+        <div className="flex max-w-sm flex-col items-center gap-3 text-center">
+          <p className="text-sm font-semibold">Couldn&rsquo;t load Smartflow</p>
+          <p className="text-sm text-muted-foreground">{integrationsError}</p>
+          <Button variant="outline" size="sm" onClick={checkIntegrations}>
+            Retry
+          </Button>
+        </div>
       </div>
     );
   }

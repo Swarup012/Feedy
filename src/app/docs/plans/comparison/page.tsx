@@ -16,8 +16,8 @@ export default function PlansComparisonPage() {
         <li>20 tracked users (hard limit, no overage)</li>
         <li>3 team members, up to 3 admins</li>
         <li>Unlimited roadmap items</li>
-        <li>Smartflow &amp; 1 integration</li>
-        <li>AI chat - 10 credits/month</li>
+        <li>Smart Flow (1 integration)</li>
+        <li>10 AI chat credits/month</li>
         <li>Advanced analytics</li>
         <li>Public roadmap &amp; changelog</li>
         <li>Feedback widget</li>
@@ -35,10 +35,12 @@ export default function PlansComparisonPage() {
         <li>Overage: $12 per 50 users</li>
         <li>Unlimited team members, 5 admins</li>
         <li>Unlimited roadmap items</li>
-        <li>Smartflow (manual mode)</li>
+        <li>Smart Flow</li>
         <li>AI Chat</li>
-        <li>Slack, Discord &amp; Intercom integrations</li>
+        <li>1 active integration (Slack, Discord or Intercom)</li>
         <li>Custom branding</li>
+        <li>MRR insights</li>
+        <li>High-Severity Feedback Alerts</li>
       </ul>
 
       <DocsH2>Pro</DocsH2>
@@ -51,14 +53,12 @@ export default function PlansComparisonPage() {
         <li>25-user grace buffer (overage starts at 150)</li>
         <li>Overage: $12 per 50 users</li>
         <li>Up to 10 admins</li>
-        <li>Smartflow (automatic mode)</li>
-        <li>AI severity classification</li>
-        <li>High-severity Slack/Discord alerts</li>
-        <li>Instant notifications</li>
+        <li>Smart Flow with advanced automation</li>
+        <li>Advanced Severity Detection</li>
         <li>1 custom domain</li>
         <li>Priority support</li>
         <li>Advanced security</li>
-        <li>Webhooks &amp; API access</li>
+        <li>Developer API &amp; Webhook Access</li>
       </ul>
 
       <DocsH2>Tracked Users &amp; Overage</DocsH2>

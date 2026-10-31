@@ -5,17 +5,34 @@ import { Lock, Sparkles } from 'lucide-react';
 import { useState } from 'react';
 import { UpgradeDialog } from '@/components/UpgradeDialog';
 import { Button } from '@/components/ui/button';
+import { planAllowsFeature, resolvePlan, type PlanFeatures, type PlanTier } from '@/config/plans';
 
 interface ProFeatureGateProps {
   children: React.ReactNode;
   featureName?: string;
+  /**
+   * Plan feature key from PLANS config. When set, access is derived from the
+   * config instead of a hardcoded plan name, so the gate follows pricing.
+   * When omitted, the gate stays Pro-only.
+   */
+  feature?: keyof PlanFeatures;
 }
 
-export function ProFeatureGate({ children, featureName = 'this feature' }: ProFeatureGateProps) {
+const PLAN_ORDER: PlanTier[] = ['free', 'starter', 'pro'];
+
+function cheapestPlanFor(feature: keyof PlanFeatures): PlanTier {
+  return PLAN_ORDER.find((tier) => planAllowsFeature(tier, feature)) ?? 'pro';
+}
+
+export function ProFeatureGate({ children, featureName = 'this feature', feature }: ProFeatureGateProps) {
   const { organization, loading } = useOrganization();
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  const showGate = !organization || organization.subscription_plan !== 'pro';
+  const plan = resolvePlan(organization);
+  const hasAccess = feature ? planAllowsFeature(plan, feature) : plan === 'pro';
+  const upgradeTarget = feature ? cheapestPlanFor(feature) : 'pro';
+
+  const showGate = !organization || !hasAccess;
 
   if (loading) return <>{children}</>;
   if (!showGate) return <>{children}</>;
@@ -37,7 +54,7 @@ export function ProFeatureGate({ children, featureName = 'this feature' }: ProFe
             <div>
               <p className="text-sm font-semibold text-foreground">{featureName}</p>
               <p className="text-xs text-muted-foreground mt-0.5">
-                Upgrade to Pro to use this feature.
+                Upgrade to {upgradeTarget === 'starter' ? 'Starter' : 'Pro'} to use this feature.
               </p>
             </div>
             <Button size="sm" className="gap-1.5" onClick={() => setDialogOpen(true)}>

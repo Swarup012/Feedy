@@ -81,7 +81,7 @@ export const PLANS: Record<PlanTier, PlanConfig> = {
       autopilot_auto: true,
       severity_rules: true,
       severity_ai: false,
-      notifications: false,
+      notifications: false,      // Free: No alert channels (Starter+)
       api_access: false,
       mrr_insights: false,
     },
@@ -114,7 +114,7 @@ export const PLANS: Record<PlanTier, PlanConfig> = {
       autopilot_auto: true,
       severity_rules: true,
       severity_ai: false,
-      notifications: false,
+      notifications: true,
       api_access: false,
       mrr_insights: true,
     },
@@ -263,35 +263,33 @@ export function getPlanFeatureDisplay(tier: PlanTier): {
 
   if (tier === 'free') {
     features.push(
-      { text: 'Unlimited boards & posts', included: true, highlight: true },
-      { text: 'Public roadmap & changelog', included: true },
-      { text: 'Track up to 20 users', included: true },
-      { text: 'Smartflow & 1 integration', included: true },
-      { text: 'AI chat - 10 credits/month', included: true },
-      { text: 'AI Insights dashboard', included: true, highlight: true },
-      { text: 'Up to 3 team members', included: true },
+      { text: '20 tracked users', included: true },
       { text: '3 admins', included: true },
+      { text: '10 AI chat credits/month', included: true },
+      { text: 'Smart Flow (1 integration)', included: true },
+      { text: 'Feedback boards, widget, roadmap and changelog', included: true, highlight: true },
     );
   } else if (tier === 'starter') {
     features.push(
       { text: 'Everything in Free, plus:', bold: true, included: true },
-      { text: '125+ tracked users with overage', included: true, highlight: true },
+      { text: '125+ tracked users', included: true, highlight: true },
       { text: 'AI chat - 50 credits/month', included: true },
-      { text: 'Unlimited team members', included: true },
       { text: '5 admins', included: true },
+      { text: 'Smart Flow (multiple integrations)', included: true },
+      { text: 'Custom branding and MRR insights', included: true },
+      { text: 'High-Severity Feedback Alerts', included: true, highlight: true },
     );
   } else {
     features.push(
       { text: 'Everything in Starter, plus:', bold: true, included: true },
-      { text: 'Automatic feedback triage', included: true, highlight: true },
-      { text: 'Urgent-issue flagging', included: true, highlight: true },
-      { text: 'Instant alerts', included: true, highlight: true },
       { text: '125+ tracked users', included: true },
       { text: '10 admins', included: true },
-      { text: 'All integrations', included: true },
-      { text: 'AI chat - unlimited', included: true },
-      { text: 'Custom domain', included: true, highlight: true },
-      { text: 'API & webhooks', included: true, highlight: true },
+      { text: 'AI chat', included: true },
+      { text: 'Advanced Severity Detection', included: true, highlight: true },
+      { text: 'Smart Flow with advanced automation', included: true },
+      { text: 'Developer API & Webhook Access', included: true, highlight: true },
+      { text: 'Custom Domain', included: true, highlight: true },
+      { text: 'Priority support', included: true },
     );
   }
 

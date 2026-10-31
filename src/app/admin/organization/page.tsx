@@ -805,9 +805,9 @@ export default function OrganizationSettingsPage() {
               <IntegrationsPage />
             </TabsContent>
 
-            {/* Notifications Tab */}
+            {/* Notifications Tab — Starter+ (plan feature `notifications`) */}
             <TabsContent value="notifications">
-              <ProFeatureGate featureName="Notifications">
+              <ProFeatureGate featureName="Notifications" feature="notifications">
                 <NotificationsTab />
               </ProFeatureGate>
             </TabsContent>

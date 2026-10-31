@@ -33,14 +33,16 @@ const STARTER_HIGHLIGHTS = [
   'AI chat',
   'Smartflow',
   'AI insight dashboard',
+  'Slack & Discord severity alerts (keyword-based)',
 ];
 
 const PRO_HIGHLIGHTS = [
   'Everything in Starter, plus:',
   'All Integrations',
-  'Insert Alert',
+  'AI severity scoring',
   'Unlimited AI chat',
   'Custom domain',
+  'API access & webhooks',
 ];
 
 export function UpgradeDialog({
