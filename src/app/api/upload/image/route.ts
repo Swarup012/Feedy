@@ -151,3 +151,51 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const authHeader = extractAuthHeader(request);
+    if (!authHeader) {
+      return NextResponse.json(
+        { success: false, error: 'Not authenticated', message: 'Not authenticated' },
+        { status: 401 }
+      );
+    }
+
+    const contentType = request.headers.get('content-type') ?? 'application/json';
+    const body = await request.text();
+    const headers = await buildBackendHeaders(request, authHeader, {
+      'Content-Type': contentType,
+    });
+
+    let res: Response;
+    try {
+      res = await fetch(`${BACKEND_URL}/api/upload/image`, {
+        method: 'DELETE',
+        headers,
+        body: body.length > 0 ? body : undefined,
+        signal: request.signal,
+      });
+    } catch {
+      return NextResponse.json(
+        { success: false, error: 'backend unavailable' },
+        { status: 502 }
+      );
+    }
+
+    const data = await res.json().catch(() => null);
+    return NextResponse.json(data ?? { success: false, error: 'bad backend response' }, {
+      status: res.status,
+      headers: { 'Cache-Control': 'no-store' },
+    });
+  } catch (error) {
+    if (error instanceof PublicOnlyProxyError) {
+      return NextResponse.json({ success: false, error: 'Not found' }, { status: 404 });
+    }
+    console.error('Delete image proxy error:', error);
+    return NextResponse.json(
+      { success: false, error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}

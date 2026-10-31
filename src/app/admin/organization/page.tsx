@@ -354,34 +354,19 @@ export default function OrganizationSettingsPage() {
     }
 
     try {
-      const response = await fetch(`/api/organizations/${organization.id}/members/${memberId}`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ role: newRole }),
+      await api.put(`/api/organizations/${organization.id}/members/${memberId}`, {
+        role: newRole,
       });
 
-      const data = await response.json();
-
-      if (response.ok) {
-        toast({
-          title: 'Success',
-          description: 'Member role updated successfully.',
-        });
-        await fetchMembers(); // Refresh the members list
-      } else {
-        toast({
-          title: 'Error',
-          description: data.error || 'Failed to update member role.',
-          variant: 'destructive',
-        });
-      }
-    } catch (error) {
+      toast({
+        title: 'Success',
+        description: 'Member role updated successfully.',
+      });
+      await fetchMembers(); // Refresh the members list
+    } catch (error: any) {
       toast({
         title: 'Error',
-        description: 'An unexpected error occurred.',
+        description: error?.response?.data?.error || 'Failed to update member role.',
         variant: 'destructive',
       });
     }

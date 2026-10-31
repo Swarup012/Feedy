@@ -156,6 +156,7 @@ export default function UsersPage() {
 
   // Detail panel loading state
   const [detailLoading, setDetailLoading] = useState(false);
+  const [detailError, setDetailError] = useState(false);
 
   // Delete user state
   const [deleteTarget, setDeleteTarget] = useState<OrgEndUser | null>(null);
@@ -231,14 +232,18 @@ export default function UsersPage() {
     const controller = new AbortController();
     detailAbortRef.current = controller;
     setDetailLoading(true);
+    setDetailError(false);
     try {
       const response = await orgEndUsersService.getById(orgId, userId, controller.signal);
-      if (response.success) {
+      if (response.success && response.data?.user) {
         setSelectedUser(response.data.user);
+      } else {
+        setDetailError(true);
       }
     } catch (error: any) {
       if (error?.name === 'CanceledError' || error?.code === 'ERR_CANCELED') return;
-      // Non-critical — list data is sufficient
+      // Non-critical — list data is sufficient, but the stats panel shows an error + retry.
+      setDetailError(true);
     } finally {
       if (!controller.signal.aborted) setDetailLoading(false);
     }
@@ -251,6 +256,7 @@ export default function UsersPage() {
     setSelectedUserPosts([]);
     setPostsPage(1);
     setPostsTotal(0);
+    setDetailError(false);
     loadUserPosts(user.id, 1);
     loadUserDetail(user.id);
   }, [loadUserPosts, loadUserDetail]);
@@ -487,9 +493,13 @@ export default function UsersPage() {
                     <h3 className="font-semibold text-sm">
                       Posts by {selectedUser.name || 'Anonymous'}
                     </h3>
-                    <p className="text-xs text-muted-foreground">
-                      {postsLoading ? 'Loading...' : `${postsTotal} post${postsTotal !== 1 ? 's' : ''}`}
-                    </p>
+                    {postsLoading ? (
+                      <p className="text-xs text-muted-foreground">Loading...</p>
+                    ) : typeof postsTotal === 'number' ? (
+                      <p className="text-xs text-muted-foreground">
+                        {`${postsTotal} post${postsTotal !== 1 ? 's' : ''}`}
+                      </p>
+                    ) : null}
                   </div>
                 </div>
 
@@ -626,7 +636,9 @@ export default function UsersPage() {
                   ).map((stat) => (
                     <div key={stat.label} className="text-center">
                       <p className="text-lg font-bold leading-tight">
-                        {detailLoading && stat.value === undefined ? (
+                        {detailError ? (
+                          '-'
+                        ) : detailLoading && stat.value === undefined ? (
                           <Skeleton className="h-6 w-8 mx-auto" />
                         ) : (
                           stat.value ?? 0
@@ -636,6 +648,19 @@ export default function UsersPage() {
                     </div>
                   ))}
                 </div>
+
+                {detailError && (
+                  <div className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
+                    <span>Couldn&apos;t load stats</span>
+                    <button
+                      type="button"
+                      className="underline underline-offset-2 hover:text-foreground"
+                      onClick={() => loadUserDetail(selectedUser.id)}
+                    >
+                      Retry
+                    </button>
+                  </div>
+                )}
 
                 {/* Info rows */}
                 <div className="space-y-3 border-t border-border pt-4">

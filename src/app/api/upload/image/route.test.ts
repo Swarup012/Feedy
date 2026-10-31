@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { NextRequest } from 'next/server';
-import { POST } from '@/app/api/upload/image/route';
+import { POST, DELETE } from '@/app/api/upload/image/route';
 import { BACKEND_URL } from '@/lib/proxyHelper';
 
 // Step 4 — upload proxy: multipart passthrough (Content-Type forwarded
@@ -137,5 +137,50 @@ describe('upload image proxy', () => {
     const body = await res.json();
     expect(body.message).toContain('Invalid file type');
     expect(res.headers.get('cache-control')).toBe('no-store');
+  });
+});
+
+describe('delete image proxy', () => {
+  function makeDeleteReq(body: string, cookie = 'access_token=tok123') {
+    return new NextRequest('http://localhost:3000/api/upload/image', {
+      method: 'DELETE',
+      headers: {
+        host: 'acme.faddy.site',
+        cookie,
+        'content-type': 'application/json',
+      },
+      body,
+    });
+  }
+
+  it('forwards the JSON url body + auth and returns the backend status/body', async () => {
+    fetchMock.mockResolvedValue(
+      new Response(JSON.stringify({ success: true, message: 'Image deleted successfully' }), {
+        status: 200,
+        headers: { 'content-type': 'application/json' },
+      })
+    );
+
+    const body = JSON.stringify({ url: 'org-1/posts/old.png' });
+    const res = await DELETE(makeDeleteReq(body));
+
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({
+      success: true,
+      message: 'Image deleted successfully',
+    });
+    expect(res.headers.get('cache-control')).toBe('no-store');
+
+    const [url, init] = fetchMock.mock.calls[0];
+    expect(String(url)).toBe(`${new URL(BACKEND_URL).origin}/api/upload/image`);
+    expect(init.method).toBe('DELETE');
+    expect(init.headers['Authorization']).toBe('Bearer tok123');
+    expect(init.body).toBe(body);
+  });
+
+  it('no access_token -> 401, no backend call', async () => {
+    const res = await DELETE(makeDeleteReq('{}', ''));
+    expect(res.status).toBe(401);
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 });
