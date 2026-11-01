@@ -336,24 +336,19 @@ export default function UsersPage() {
 
   return (
     <ProtectedRoute>
-      <div className={`${WIDE_CONTAINER} py-5`}>
-        {/* Header */}
-        <div className="mb-5">
-          <h1 className="text-xl font-bold">Manage your valuable customers</h1>
-        </div>
-
+      <div className={`${WIDE_CONTAINER} h-full`}>
         {/* 3-column layout */}
-        <div className="flex gap-0 border border-border rounded-lg overflow-hidden" style={{ height: 'calc(100vh - 160px)' }}>
+        <div className="flex h-full min-h-0 overflow-hidden">
 
           {/* ── LEFT COLUMN: Users List ──────────────────────────── */}
-          <div className="w-[320px] min-w-[320px] border-r border-border flex flex-col bg-background">
+          <div className="w-[320px] min-w-[320px] min-h-0 border-r border-border flex flex-col bg-background">
             {/* Search + Sort */}
-            <div className="p-3 border-b border-border space-y-2">
+            <div className="p-3 pb-4 space-y-2">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder="Search users..."
-                  className="pl-10"
+                  className="pl-10 border-0 bg-muted/50"
                   onChange={(e) => handleSearch(e.target.value)}
                 />
               </div>
@@ -365,7 +360,7 @@ export default function UsersPage() {
                     setCurrentPage(1);
                   }}
                 >
-                  <SelectTrigger className="flex-1">
+                  <SelectTrigger className="flex-1 border-0 bg-muted/50 focus:ring-1 focus:ring-ring">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -377,7 +372,7 @@ export default function UsersPage() {
                 <Button
                   variant="outline"
                   size="icon"
-                  className="h-9 w-9 flex-shrink-0"
+                  className="h-9 w-9 flex-shrink-0 border-0 bg-muted/50"
                   onClick={() => {
                     setSortOrder((prev) => (prev === 'asc' ? 'desc' : 'asc'));
                     setCurrentPage(1);
@@ -392,7 +387,7 @@ export default function UsersPage() {
             {/* Users list */}
             <div className="flex-1 overflow-y-auto">
               {usersLoading ? (
-                <div className="p-3 space-y-3">
+                <div className="px-2 py-2 space-y-1">
                   {Array.from({ length: 5 }).map((_, i) => (
                     <Skeleton key={i} className="h-[60px] w-full" />
                   ))}
@@ -405,14 +400,14 @@ export default function UsersPage() {
                   </p>
                 </div>
               ) : (
-                <div className="divide-y divide-border">
+                <div className="px-2 py-2 space-y-1">
                   {users.map((user) => (
                     <button
                       key={user.id}
                       onClick={() => handleUserSelect(user)}
                       className={cn(
-                        'w-full text-left p-3 hover:bg-muted/50 transition-colors',
-                        selectedUser?.id === user.id && 'bg-primary/10'
+                        'w-full text-left p-3 rounded-lg hover:bg-muted/50 transition-colors',
+                        selectedUser?.id === user.id && 'bg-muted hover:bg-muted'
                       )}
                     >
                       <div className="flex items-center gap-2.5">
@@ -429,7 +424,7 @@ export default function UsersPage() {
                         </div>
                         <Badge
                           variant="outline"
-                          className={cn('text-[10px] flex-shrink-0', IDENTITY_BADGES[user.identity_type]?.className)}
+                          className={cn('text-[10px] flex-shrink-0 border-0', IDENTITY_BADGES[user.identity_type]?.className)}
                         >
                           {IDENTITY_BADGES[user.identity_type]?.label || user.identity_type}
                         </Badge>
@@ -445,7 +440,7 @@ export default function UsersPage() {
                 is a single page or data hasn't loaded yet. */}
             <div
               className={cn(
-                'p-3 border-t border-border flex items-center justify-between',
+                'p-3 pt-4 flex items-center justify-between',
                 totalPages <= 1 && 'invisible',
               )}
             >
@@ -476,7 +471,7 @@ export default function UsersPage() {
           </div>
 
           {/* ── MIDDLE COLUMN: Posts by Selected User ─────────────── */}
-          <div className="flex-1 min-w-0 flex flex-col bg-background">
+          <div className="flex-1 min-w-0 min-h-0 flex flex-col bg-background">
             {!selectedUser ? (
               <div className="flex-1 flex flex-col items-center justify-center text-center p-6">
                 <Users className="h-12 w-12 text-muted-foreground/30 mb-4" />
@@ -488,7 +483,7 @@ export default function UsersPage() {
             ) : (
               <>
                 {/* Posts header */}
-                <div className="p-3 border-b border-border flex items-center justify-between">
+                <div className="p-3 pb-4 bg-background flex items-center justify-between">
                   <div>
                     <h3 className="font-semibold text-sm">
                       Posts by {selectedUser.name || 'Anonymous'}
@@ -506,7 +501,7 @@ export default function UsersPage() {
                 {/* Posts list */}
                 <div className="flex-1 overflow-y-auto">
                   {postsLoading ? (
-                    <div className="p-3 space-y-3">
+                    <div className="px-2 py-2 space-y-1">
                       {Array.from({ length: 3 }).map((_, i) => (
                         <Skeleton key={i} className="h-24 w-full" />
                       ))}
@@ -517,13 +512,13 @@ export default function UsersPage() {
                       <p className="text-sm text-muted-foreground">No posts from this user</p>
                     </div>
                   ) : (
-                    <div className="divide-y divide-border">
+                    <div className="px-2 py-2 space-y-1">
                       {selectedUserPosts.map((post) => (
                         <button
                           key={post.id}
                           onClick={() => handlePostClick(post)}
                           className={cn(
-                            'w-full text-left p-4 hover:bg-muted/50 transition-colors',
+                            'w-full text-left p-4 rounded-lg hover:bg-muted/50 transition-colors',
                             sheetPost?.id === post.id && sheetOpen && 'bg-primary/10'
                           )}
                         >
@@ -569,7 +564,7 @@ export default function UsersPage() {
 
                 {/* Posts pagination */}
                 {postsTotalPages > 1 && (
-                  <div className="p-3 border-t border-border flex items-center justify-between">
+                  <div className="p-3 pt-4 flex items-center justify-between">
                     <p className="text-xs text-muted-foreground">
                       Page {postsPage} of {postsTotalPages}
                     </p>
@@ -600,7 +595,7 @@ export default function UsersPage() {
           </div>
 
           {/* ── RIGHT COLUMN: User Detail Panel ──────────────────── */}
-          <div className="w-[300px] min-w-[300px] border-l border-border flex flex-col bg-background">
+          <div className="w-[300px] min-w-[300px] min-h-0 border-l border-border flex flex-col bg-background">
             {!selectedUser ? (
               <div className="flex-1 flex flex-col items-center justify-center text-center p-6">
                 <User className="h-10 w-10 text-muted-foreground/30 mb-3" />
@@ -619,14 +614,14 @@ export default function UsersPage() {
                   )}
                   <Badge
                     variant="outline"
-                    className={cn('mt-2 text-xs', IDENTITY_BADGES[selectedUser.identity_type]?.className)}
+                    className={cn('mt-2 text-xs border-0', IDENTITY_BADGES[selectedUser.identity_type]?.className)}
                   >
                     {IDENTITY_BADGES[selectedUser.identity_type]?.label || selectedUser.identity_type}
                   </Badge>
                 </div>
 
                 {/* Lifetime activity counts */}
-                <div className="grid grid-cols-3 gap-2 border-t border-border pt-4">
+                <div className="grid grid-cols-3 gap-2 pt-4">
                   {(
                     [
                       { label: 'Posts', value: selectedUser.posts_count },
@@ -663,7 +658,7 @@ export default function UsersPage() {
                 )}
 
                 {/* Info rows */}
-                <div className="space-y-3 border-t border-border pt-4">
+                <div className="space-y-3 pt-4">
                   {selectedUser.external_user_id && (
                     <div className="flex items-start gap-2.5">
                       <ExternalLink className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
@@ -713,7 +708,7 @@ export default function UsersPage() {
 
                 {/* Custom fields */}
                 {selectedUser.custom_fields && Object.keys(selectedUser.custom_fields).length > 0 && (
-                  <div className="border-t border-border pt-4">
+                  <div className="pt-4">
                     <p className="text-xs text-muted-foreground mb-2">Custom Fields</p>
                     <div className="space-y-1.5">
                       {Object.entries(selectedUser.custom_fields).map(([key, value]) => (
@@ -727,7 +722,7 @@ export default function UsersPage() {
                 )}
 
                 {/* Delete user */}
-                <div className="border-t border-border pt-4">
+                <div className="pt-4">
                   <Button
                     variant="outline"
                     size="sm"
