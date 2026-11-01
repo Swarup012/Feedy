@@ -1,45 +1,29 @@
-"use client";
-
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import {
-  ArrowRight,
-  CheckCircle2,
-  Code,
-  Key,
-  Plug,
-  Database,
-  RefreshCw,
-  Shield,
-  Zap,
-} from "lucide-react";
 import Link from "next/link";
 import { LandingFooter } from "@/components/ui/landing-footer";
+import "./developer-api.css";
+
+export const metadata = {
+  title: "Developer API | Faddy",
+  description:
+    "Full API access, webhooks, and SDKs for Faddy. Embed feedback collection into your app and build custom workflows.",
+};
 
 const features = [
   {
     title: "RESTful API",
-    description:
-      "Full-featured API with comprehensive documentation. Manage boards, posts, users, and more programmatically.",
-    icon: <Code className="w-6 h-6" />,
+    description: "Manage boards, posts, and users programmatically.",
   },
   {
     title: "Webhooks",
-    description:
-      "Real-time notifications when feedback is submitted, upvoted, or status changes. Build custom integrations effortlessly.",
-    icon: <RefreshCw className="w-6 h-6" />,
+    description: "Real-time notifications on submit, upvote, or status change.",
   },
   {
     title: "API Keys",
-    description:
-      "Generate scoped API keys for secure access. Rotate, revoke, and manage permissions per key.",
-    icon: <Key className="w-6 h-6" />,
+    description: "Scoped keys you can rotate and revoke.",
   },
   {
     title: "Data Sync",
-    description:
-      "Sync feedback with your CRM, support tools, and databases. Keep customer data consistent across all systems.",
-    icon: <Database className="w-6 h-6" />,
+    description: "Keep data consistent across your CRM and tools.",
   },
 ];
 
@@ -102,182 +86,130 @@ console.log(data.posts);`,
   },
 ];
 
+const trust = [
+  {
+    title: "Secure by Default",
+    description:
+      "API keys are encrypted at rest. Rate limiting and audit logs included.",
+  },
+  {
+    title: "99.9% Uptime",
+    description: "Enterprise-grade infrastructure with automatic failover.",
+  },
+  {
+    title: "Generous Limits",
+    description: "10,000 requests/month on free tier. No surprise bills.",
+  },
+];
+
 export default function DeveloperApiPage() {
   return (
     <>
-      <div className="min-h-screen bg-white dark:bg-background">
-        {/* Hero Section */}
-        <section className="relative py-16 lg:py-20 overflow-hidden bg-white dark:bg-background">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
-              {/* Left — Copy */}
-              <div className="flex-1 text-center lg:text-left">
-                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 text-xs sm:text-sm font-semibold mb-6">
-                  <Code className="w-4 h-4" />
-                  Developer Tools
-                </div>
-
-                <h1 className="text-3xl lg:text-4xl xl:text-5xl font-switzer font-medium text-slate-900 dark:text-white mb-6 tracking-tight leading-tight">
-                  Build with Faddy.{" "}
-                  <span className="text-blue-600 dark:text-blue-400">
-                    Your way.
+      <div className="da-root">
+        {/* Hero — Settled */}
+        <section className="da-hero">
+          <div className="da-container da-hero__grid">
+            <div className="da-hero__text">
+              <h1>
+                Build with Faddy.
+                <br />
+                Your way.
+              </h1>
+              <p className="da-lead">
+                Full API access, webhooks, and SDKs, with your brand front and
+                center.
+              </p>
+              <div className="da-hero__actions">
+                <Link href="/signup" className="da-key da-key--primary">
+                  Get API Key
+                </Link>
+                <a href="#features" className="da-key">
+                  View Documentation
+                </a>
+              </div>
+              <p className="da-small">Free tier: 10,000 requests a month.</p>
+            </div>
+            <div className="da-hero__code">
+              <pre className="da-code">
+                <code>
+                  <span className="c">
+                    {"# Get your API key from the dashboard"}
                   </span>
-                </h1>
-
-                <p className="text-lg lg:text-xl text-slate-600 dark:text-muted-foreground mb-8 max-w-xl mx-auto lg:mx-0 leading-relaxed">
-                  Full API access, webhooks, and SDKs. Embed feedback collection
-                  into your app, sync customer data, and build custom workflows
-                  — all with your brand front and center.
-                </p>
-
-                <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
-                  <Link href="/signup">
-                    <Button
-                      size="lg"
-                      className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg w-full sm:w-auto"
-                    >
-                      Get API Key
-                      <ArrowRight className="ml-2 h-5 w-5" />
-                    </Button>
-                  </Link>
-                  <a
-                    href="#features"
-                    className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white dark:bg-card text-slate-900 dark:text-white font-switzer font-semibold rounded-md border border-slate-200 dark:border-border hover:bg-slate-50 dark:hover:bg-slate-700 transition-all text-sm"
-                  >
-                    View Documentation
-                  </a>
-                </div>
-              </div>
-
-              {/* Right — Code Preview */}
-              <div className="flex-1 w-full max-w-lg lg:max-w-none">
-                <div className="relative rounded-2xl overflow-hidden border border-slate-200/80 dark:border-border bg-background">
-                  {/* Terminal chrome */}
-                  <div className="flex items-center gap-1.5 bg-card px-4 py-2.5 border-b border-slate-700">
-                    <span className="w-3 h-3 rounded-full bg-red-400" />
-                    <span className="w-3 h-3 rounded-full bg-yellow-400" />
-                    <span className="w-3 h-3 rounded-full bg-green-400" />
-                    <div className="ml-3 flex items-center gap-2 text-xs text-slate-400 font-mono">
-                      terminal
-                    </div>
-                  </div>
-
-                  {/* Code Content */}
-                  <div className="p-6 font-mono text-sm">
-                    <div className="text-slate-500 mb-2"># Get your API key from the dashboard</div>
-                    <div className="text-slate-500 mb-2"># Then make your first request</div>
-                    <div className="text-slate-300 mb-1">
-                      <span className="text-purple-400">curl</span>{" "}
-                      <span className="text-emerald-400">-H</span>{" "}
-                      <span className="text-amber-300">"Authorization: Bearer fdy_live_YOUR_KEY"</span> \
-                    </div>
-                    <div className="text-slate-300 mb-4 pl-4">
-                      https://api.faddy.site/api/v1/posts
-                    </div>
-
-                    <div className="text-slate-500 mb-2"># Or use Node.js / fetch</div>
-                    <div className="text-slate-300 mb-1">
-                      <span className="text-purple-400">const</span>{" "}
-                      <span className="text-blue-400">res</span>{" "}
-                      <span className="text-slate-500">=</span>{" "}
-                      <span className="text-purple-400">await</span>{" "}
-                      <span className="text-emerald-400">fetch</span>(
-                    </div>
-                    <div className="text-slate-300 pl-4 mb-1">
-                      <span className="text-amber-300">'https://api.faddy.site/api/v1/boards'</span>,
-                    </div>
-                    <div className="text-slate-300 pl-4 mb-1">
-                      {"{"} headers: {"{"} 'Authorization': <span className="text-amber-300">'Bearer fdy_live_YOUR_KEY'</span> {"}"} {"}"}
-                    </div>
-                    <div className="text-slate-300 mb-4">);</div>
-
-                    <div className="text-slate-500 mb-2"># Response</div>
-                    <div className="text-slate-300 mb-1">{"{"}</div>
-                    <div className="text-slate-300 pl-4 mb-1">
-                      <span className="text-emerald-400">"success"</span>: <span className="text-amber-300">true</span>,
-                    </div>
-                    <div className="text-slate-300 pl-4 mb-1">
-                      <span className="text-emerald-400">"data"</span>: {"{"}
-                    </div>
-                    <div className="text-slate-300 pl-8 mb-1">
-                      <span className="text-emerald-400">"boards"</span>: [ {"{"} "name": <span className="text-amber-300">"Feature Requests"</span> {"}"} ]
-                    </div>
-                    <div className="text-slate-300 pl-4">{"}"}</div>
-                    <div className="text-slate-300">{"}"}</div>
-                  </div>
-                </div>
-              </div>
+                  {"\n"}
+                  <span className="c">{"# Then make your first request"}</span>
+                  {"\n"}
+                  <span className="k">curl</span> <span className="k">-H</span>{" "}
+                  <span className="k">
+                    &quot;Authorization: Bearer fdy_live_YOUR_KEY&quot;
+                  </span>{" "}
+                  \{"\n"}
+                  {"   https://api.faddy.site/api/v1/posts"}
+                  {"\n\n"}
+                  <span className="c">{"# Or use Node.js / fetch"}</span>
+                  {"\n"}
+                  <span className="k">const</span> res{" "}
+                  <span className="k">=</span>{" "}
+                  <span className="k">await</span>{" "}
+                  <span className="k">fetch</span>(
+                  {"\n"}
+                  {"   "}
+                  <span className="k">
+                    &apos;https://api.faddy.site/api/v1/boards&apos;
+                  </span>
+                  ,{"\n"}
+                  {"   { headers: { "}
+                  <span className="k">&apos;Authorization&apos;</span>
+                  {": "}
+                  <span className="k">
+                    &apos;Bearer fdy_live_YOUR_KEY&apos;
+                  </span>
+                  {" } }"}
+                  {"\n"}
+                  );
+                  {"\n\n"}
+                  <span className="c">{"# Response"}</span>
+                  {"\n"}
+                  {"{"}
+                  {"\n"}
+                  {"   "}
+                  <span className="k">&quot;success&quot;</span>: true,{"\n"}
+                  {"   "}
+                  <span className="k">&quot;data&quot;</span>: {"{"}
+                  {"\n"}
+                  {"      "}
+                  <span className="k">&quot;boards&quot;</span>: [ {"{"}{" "}
+                  <span className="k">&quot;name&quot;</span>:{" "}
+                  <span className="k">&quot;Feature Requests&quot;</span>{" "}
+                  {"}"} ]{"\n"}
+                  {"   }"}
+                  {"\n"}
+                  {"}"}
+                </code>
+              </pre>
             </div>
           </div>
         </section>
 
-        {/* Features */}
-        <section
-          id="features"
-          className="py-16 px-6 bg-slate-50/50 dark:bg-background/50 border-y border-slate-100 dark:border-border"
-        >
-          <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-12">
-              <h2 className="text-2xl md:text-3xl font-switzer font-bold tracking-tight text-slate-900 dark:text-white mb-4">
-                Everything developers need
-              </h2>
-              <p className="text-lg text-slate-500 dark:text-muted-foreground max-w-xl mx-auto">
-                Powerful API, great docs, and tools that just work.
+        {/* Worked examples — the real calls, in hairline rows */}
+        <section className="da-section da-section--flush">
+          <div className="da-container">
+            <div className="da-head">
+              <h2>Build anything you imagine</h2>
+              <p className="da-lead">
+                From simple widgets to complex workflows — it&rsquo;s all
+                possible.
               </p>
             </div>
-
-            <div className="grid md:grid-cols-2 gap-6">
-              {features.map((feature) => (
-                <Card
-                  key={feature.title}
-                  className="bg-white dark:bg-background border-slate-200 dark:border-border hover:shadow-lg transition-all"
-                >
-                  <CardContent className="p-6">
-                    <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 mb-4">
-                      {feature.icon}
-                    </div>
-                    <h3 className="text-lg font-switzer font-bold text-slate-900 dark:text-white mb-2">
-                      {feature.title}
-                    </h3>
-                    <p className="text-slate-600 dark:text-muted-foreground leading-relaxed">
-                      {feature.description}
-                    </p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Use Cases with Code */}
-        <section className="py-16 px-6 bg-white dark:bg-background">
-          <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-12">
-              <h2 className="text-2xl md:text-3xl font-switzer font-bold tracking-tight text-slate-900 dark:text-white mb-4">
-                Build anything you imagine
-              </h2>
-              <p className="text-lg text-slate-500 dark:text-muted-foreground max-w-xl mx-auto">
-                From simple widgets to complex workflows — it&apos;s all possible.
-              </p>
-            </div>
-
-            <div className="space-y-8">
+            <div className="da-rows">
               {useCases.map((useCase) => (
-                <div
-                  key={useCase.title}
-                  className="grid md:grid-cols-2 gap-6 items-center"
-                >
-                  <div>
-                    <h3 className="text-xl font-switzer font-bold text-slate-900 dark:text-white mb-3">
-                      {useCase.title}
-                    </h3>
-                    <p className="text-slate-600 dark:text-muted-foreground leading-relaxed">
-                      {useCase.description}
-                    </p>
+                <div className="da-row" key={useCase.title}>
+                  <div className="da-row__copy">
+                    <h3>{useCase.title}</h3>
+                    <p>{useCase.description}</p>
                   </div>
-                  <div className="bg-background rounded-xl p-4 overflow-x-auto">
-                    <pre className="font-mono text-sm text-slate-300 whitespace-pre">
-                      {useCase.code}
+                  <div className="da-row__code">
+                    <pre className="da-code">
+                      <code>{useCase.code}</code>
                     </pre>
                   </div>
                 </div>
@@ -286,69 +218,56 @@ export default function DeveloperApiPage() {
           </div>
         </section>
 
-        {/* Security */}
-        <section className="py-16 px-6 bg-slate-50/50 dark:bg-background/50 border-y border-slate-100 dark:border-border">
-          <div className="max-w-5xl mx-auto">
-            <div className="grid md:grid-cols-3 gap-8">
-              {[
-                {
-                  title: "Secure by Default",
-                  description:
-                    "API keys are encrypted at rest. Rate limiting, IP whitelisting, and audit logs included.",
-                  icon: <Shield className="w-6 h-6" />,
-                },
-                {
-                  title: "99.9% Uptime",
-                  description:
-                    "Enterprise-grade infrastructure with automatic failover. Your integrations never sleep.",
-                  icon: <Zap className="w-6 h-6" />,
-                },
-                {
-                  title: "Generous Limits",
-                  description:
-                    "10,000 requests/month on free tier. Scale up as you grow — no surprise bills.",
-                  icon: <Key className="w-6 h-6" />,
-                },
-              ].map((item) => (
-                <div key={item.title} className="text-center">
-                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 mb-4">
-                    {item.icon}
-                  </div>
-                  <h3 className="text-lg font-switzer font-bold text-slate-900 dark:text-white mb-2">
-                    {item.title}
-                  </h3>
-                  <p className="text-slate-600 dark:text-muted-foreground">
-                    {item.description}
-                  </p>
+        {/* Feature index — four ruled rows, no tiles */}
+        <section id="features" className="da-section da-section--tight">
+          <div className="da-container">
+            <div className="da-head">
+              <h2>Everything developers need</h2>
+              <p className="da-lead">
+                Powerful API, great docs, and tools that just work.
+              </p>
+            </div>
+            <div className="da-index">
+              {features.map((feature) => (
+                <div className="da-index__row" key={feature.title}>
+                  <h3>{feature.title}</h3>
+                  <p>{feature.description}</p>
                 </div>
               ))}
             </div>
           </div>
         </section>
 
-        {/* CTA Section */}
-        <section className="py-16 px-6">
-          <div className="max-w-5xl mx-auto rounded-3xl bg-background dark:bg-card p-8 md:p-12 overflow-hidden relative text-center">
-            <div className="relative z-10">
-              <h2 className="text-xl md:text-3xl font-switzer font-bold text-white mb-8 tracking-tighter leading-tight">
-                Start building with Faddy today
-              </h2>
-              <p className="text-lg text-slate-400 mb-12 max-w-2xl mx-auto leading-relaxed">
-                Get your API key in seconds. Free tier includes 10,000 requests
-                per month.
-              </p>
-              <a
-                href="/signup"
-                className="inline-flex items-center gap-3 px-6 py-4 bg-white dark:bg-card text-slate-900 dark:text-white font-switzer font-black rounded-2xl hover:scale-105 transition-all text-base"
-              >
-                Get API Key Free
-                <ArrowRight className="w-5 h-5" />
-              </a>
+        {/* Trust band — a change of paper */}
+        <section className="da-band">
+          <div className="da-container">
+            <div className="da-band__grid">
+              {trust.map((cell) => (
+                <div className="da-band__cell" key={cell.title}>
+                  <h3>{cell.title}</h3>
+                  <p>{cell.description}</p>
+                </div>
+              ))}
             </div>
           </div>
         </section>
-      </div>
 
+        {/* Close band — the ink plate, the action once more */}
+        <section className="da-close">
+          <div className="da-container da-close__inner">
+            <div>
+              <h2>Start building with Faddy today</h2>
+              <p>
+                Get your API key in seconds, then create posts and wire up
+                webhooks.
+              </p>
+            </div>
+            <Link href="/signup" className="da-key da-key--primary">
+              Get API Key Free
+            </Link>
+          </div>
+        </section>
+      </div>
       <LandingFooter showCTA={true} />
     </>
   );

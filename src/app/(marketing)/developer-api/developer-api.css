@@ -1,0 +1,286 @@
+/* Hallmark · shape: worked-index · genre: modern-minimal · theme: brand (Cobalt material) · redesign: full
+ * paper: oklch(98.6% 0.005 250) · accent: oklch(56% 0.206 263) (Faddy --primary) · display: Switzer · body: Inter · hero: Settled · nav: floating pill (kept) · footer: kept (LandingFooter) · signature: the real GET /api/v1/posts call and its response, on a graphite panel
+ * axes: cool-paper/grotesk/brand-blue · posture: Restrained · modes: light+dark · draw: 7c0b65 (Index-First swapped) · contrast: pass · fold: pass · v2.0.0 */
+/* Hallmark · pre-emit critique: P4 H4 E5 S4 R4 V5 · weakest: S, the hero curl could sit on any API page; grounded it in the boards payload and the fdy_live key rather than a petstore sample */
+/* Hallmark · waive 49b · guard: a real phrase, "Terms and Conditions", two lines at 320 · the footer is kept as-found */
+/* Hallmark · waive 39b · guard: control height 40px · the offender is the kept navbar's Login/Sign Up (marketing-chrome.tsx), out of this redesign's scope per the brief (nav + LandingFooter untouched) */
+/* Hallmark · dismissed F19 · checked computed font-weights inside .da-root: only 400 and 600 (body and display); the 500 and 700 the render tier counts both live in the kept navbar (font-medium/font-bold) and kept LandingFooter (font-bold), which the brief keeps untouched */
+/* Hallmark · swapped "Index-First" for "worked-index" · the material refuses an index-first shape: this page's job is three worked code examples plus a sign-up, so it runs hero → worked examples (hairline rows) → feature index → trust band → ink close */
+@import "./tokens.css";
+
+html, body { overflow-x: clip; }
+html { scrollbar-color: var(--color-muted) var(--color-paper); }
+::selection { background: color-mix(in oklab, var(--color-accent) 22%, transparent); color: var(--color-ink); }
+
+.da-root {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  font-size: var(--text-md);
+  line-height: 1.55;
+}
+
+.da-container {
+  width: 100%;
+  max-width: var(--container);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+.da-root h1, .da-root h2, .da-root h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  color: var(--color-ink);
+  letter-spacing: var(--tracking-display);
+  overflow-wrap: break-word;
+  min-width: 0;
+  text-wrap: balance;
+}
+.da-root h1 { max-width: 18ch; font-size: var(--text-display); font-weight: var(--display-weight); line-height: 1.04; }
+.da-root h2 { max-width: 30ch; font-size: var(--text-section); font-weight: var(--display-weight); line-height: 1.06; }
+.da-root h3 { max-width: 40ch; font-size: var(--text-title); font-weight: var(--display-weight); line-height: 1.2; letter-spacing: -0.015em; }
+.da-root p { margin: 0; text-wrap: pretty; }
+
+.da-root :focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.da-lead {
+  font-size: var(--text-lead);
+  line-height: 1.45;
+  max-width: 46ch;
+  color: var(--color-ink-2);
+}
+
+.da-small {
+  font-size: var(--text-sm);
+  color: var(--color-muted);
+}
+
+.da-eyebrowless { margin: 0; }
+
+/* Keys — the one control shape (craft.md 9, theme Controls) */
+.da-key {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  min-height: 48px;
+  padding: 0 var(--space-lg);
+  border: var(--rule-hair) solid var(--color-rule-2);
+  border-radius: var(--radius-input);
+  background: var(--color-key-face);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  font-size: var(--text-md);
+  font-weight: 400;
+  line-height: 1;
+  white-space: nowrap;
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow: var(--shadow-key);
+  transition: transform var(--dur-micro) var(--ease-out);
+}
+.da-key:hover { transform: translateY(-1px); }
+.da-key:active { transform: translateY(3px); box-shadow: var(--shadow-key-press); }
+.da-key:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+  box-shadow: var(--shadow-key);
+}
+.da-key--primary {
+  border-color: var(--color-accent-edge);
+  background: var(--color-accent);
+  color: var(--color-accent-ink);
+  box-shadow: var(--shadow-key-accent);
+}
+.da-key--primary:active { box-shadow: var(--shadow-key-press); }
+.da-key--primary:focus-visible { box-shadow: var(--shadow-key-accent); }
+@media (prefers-reduced-motion: reduce) {
+  .da-key { transition: none; }
+  .da-key:hover, .da-key:active { transform: none; }
+}
+
+/* Cut panels — two opposite corners (theme Surfaces) */
+.da-cut {
+  border: var(--rule-hair) solid var(--color-rule);
+  border-radius: var(--radius-card);
+  background: var(--color-paper);
+}
+@supports (corner-shape: bevel) {
+  .da-cut {
+    border-radius: var(--cut-l) 4px var(--cut-l) 4px;
+    corner-shape: bevel round bevel round;
+  }
+}
+
+/* Graphite code panels — the page's material */
+.da-code {
+  margin: 0;
+  padding: var(--space-xl);
+  overflow-x: auto;
+  background: var(--color-graphite);
+  color: var(--color-graphite-ink);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  font-family: var(--font-outlier);
+  font-size: var(--text-sm);
+  line-height: 1.75;
+  tab-size: 2;
+}
+@supports (corner-shape: bevel) {
+  .da-code {
+    border-radius: var(--cut-l) 4px var(--cut-l) 4px;
+    corner-shape: bevel round bevel round;
+  }
+}
+.da-code .c { color: var(--color-graphite-muted); }
+.da-code .k { color: var(--color-accent-2); }
+.da-code .w { color: var(--color-graphite-ink); }
+
+/* Hero — Settled: text six columns, the request panel six, centred in its screen */
+.da-hero {
+  position: relative;
+  min-height: calc(100svh - 9rem);
+  display: grid;
+  align-items: center;
+  padding-block: var(--space-3xl);
+}
+.da-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle at center, var(--color-glyph-2) 1.2px, transparent 1.6px);
+  background-size: var(--cell-w) var(--cell-h);
+  -webkit-mask-image: linear-gradient(102deg, transparent 34%, var(--color-ink) 72%);
+  mask-image: linear-gradient(102deg, transparent 34%, var(--color-ink) 72%);
+  pointer-events: none;
+}
+.da-hero > .da-container { position: relative; }
+.da-hero__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 6fr) minmax(0, 6fr);
+  gap: var(--space-2xl);
+  align-items: center;
+}
+.da-hero__text { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-lg); }
+.da-hero__actions { display: flex; flex-wrap: wrap; gap: var(--space-sm); }
+.da-hero__code { min-width: 0; }
+.da-hero__code .da-code { max-height: none; }
+
+/* Sections */
+.da-section { padding-block: var(--section-gap); }
+.da-section--tight { padding-block: var(--section-gap-s); }
+.da-section--flush { padding-block: var(--space-lg); }
+.da-head { display: flex; flex-direction: column; gap: var(--space-md); margin-bottom: var(--space-2xl); max-width: 640px; }
+
+/* Worked examples — hairline rows: title and line on four columns, the call on eight */
+.da-rows { border-top: var(--rule-hair) solid var(--color-rule); }
+.da-row {
+  display: grid;
+  grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+  gap: var(--gap-columns);
+  align-items: start;
+  padding-block: var(--space-2xl);
+  border-bottom: var(--rule-hair) solid var(--color-rule);
+}
+.da-row__copy { display: flex; flex-direction: column; gap: var(--space-sm); padding-top: var(--space-xs); }
+.da-row__copy p { color: var(--color-ink-2); max-width: 52ch; }
+.da-row h3 { font-size: var(--text-title); }
+.da-row__code { min-width: 0; }
+.da-row__code .da-code { max-height: none; }
+
+/* Feature index — four ruled rows, no tiles */
+.da-index {
+  border-top: var(--rule-hair) solid var(--color-rule);
+  border-bottom: var(--rule-hair) solid var(--color-rule);
+}
+.da-index__row {
+  display: grid;
+  grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+  gap: var(--gap-columns);
+  align-items: baseline;
+  padding-block: var(--space-lg);
+  border-bottom: var(--rule-hair) solid var(--color-rule);
+}
+.da-index__row p { color: var(--color-ink-2); }
+.da-index__row h3 { font-size: var(--text-lg); max-width: none; }
+
+/* Trust band — a change of paper, three cells on hairlines */
+.da-band {
+  background: var(--color-paper-2);
+  color: var(--color-ink);
+  padding-block: var(--section-gap-s);
+  border-block: var(--rule-hair) solid var(--color-rule);
+}
+.da-band__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0;
+}
+.da-band__cell {
+  padding-inline: var(--space-xl);
+  border-left: var(--rule-hair) solid var(--color-rule);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+.da-band__cell:first-child { padding-left: 0; border-left: 0; }
+.da-band__cell p { color: var(--color-ink-2); max-width: 52ch; }
+.da-band__cell h3 { font-size: var(--text-md); font-weight: 600; letter-spacing: -0.01em; }
+.da-band__cell .figure {
+  font-family: var(--font-display);
+  font-weight: var(--display-weight);
+  font-size: var(--text-display-s);
+  line-height: 1;
+  letter-spacing: var(--tracking-display);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-ink);
+}
+
+/* Close band — the ink plate, the action once more */
+.da-close {
+  background: var(--color-ink);
+  color: var(--color-paper);
+  padding-block: var(--section-gap-s);
+}
+.da-close__inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-xl);
+}
+.da-close h2, .da-close p { color: var(--color-paper); }
+.da-close p { max-width: 52ch; opacity: 0.86; }
+
+/* Under 1440 the long header line needs a smaller cell and less padding */
+@media (max-width: 89.99rem) {
+  .da-code { padding: var(--space-lg); font-size: var(--text-xs); }
+}
+
+/* Under 60rem everything stacks in reading order */
+@media (max-width: 60rem) {
+  :root { --gutter: 24px; --section-gap-s: 80px; --section-gap: 90px; --section-gap-l: 120px; }
+  .da-hero {
+    min-height: 0;
+    padding-block: var(--space-2xl) var(--section-gap-s);
+  }
+  .da-hero__grid {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: var(--space-xl);
+  }
+  .da-hero h1 { max-width: 14ch; }
+  .da-row, .da-index__row { grid-template-columns: minmax(0, 1fr); gap: var(--space-md); }
+  .da-band__grid { grid-template-columns: minmax(0, 1fr); }
+  .da-band__cell { padding: var(--space-lg) 0; border-left: 0; border-top: var(--rule-hair) solid var(--color-rule); }
+  .da-band__cell:first-child { border-top: 0; padding-top: 0; }
+  .da-close__inner { flex-direction: column; align-items: flex-start; }
+}
+@media (max-width: 40rem) {
+  :root { --gutter: 16px; --section-gap-s: 56px; --section-gap: 64px; --section-gap-l: 80px; --gap-columns: 16px; }
+  .da-code { padding: var(--space-md); font-size: var(--text-xs); }
+  .da-hero__actions { width: 100%; }
+  .da-hero__actions .da-key { flex: 1 1 auto; }
+}
