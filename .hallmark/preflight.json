@@ -1,0 +1,12 @@
+{
+  "scanned": "2026-11-02",
+  "findings": {
+    "fonts": "Switzer display + Inter body (self-hosted @font-face and Google Fonts link in layout.tsx); IBM Plex Sans/Mono as Tailwind --font-sans/--font-mono, Source Code Pro on code",
+    "palette": "OKLCH custom properties in app/globals.css :root; Faddy cobalt --primary oklch(56% 0.206 263)",
+    "motion": "CSS transitions via Tailwind only; no animation library (no framer-motion/gsap in package.json)",
+    "spacing": "Tailwind 3.4 default 4pt scale (tailwind extend defaults, globals.css)",
+    "framework": "Next.js 15.3 app router + React 19, Tailwind CSS 3, Radix UI primitives, Lucide icons"
+  },
+  "preserve": ["font stack", "palette", "spacing scale"],
+  "introduce": ["shape", "theme", "gates", "hero discipline", "slots"]
+}

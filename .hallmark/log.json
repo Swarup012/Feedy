@@ -101,5 +101,43 @@
    "src/components/admin/RevenuePanel.tsx"
   ],
   "date": "2026-11-01"
+ },
+ {
+  "shape": "price sheet",
+  "theme": "brand",
+  "axes": "cool-paper/grotesk/brand-blue",
+  "hero": "Banner (head + billing switch; price sheet shows above the fold)",
+  "nav": "kept floating pill (marketing layout)",
+  "footer": "kept (LandingFooter)",
+  "imagery": "none (type-led price sheet; the sheet is the visual)",
+  "photos": [],
+  "entry": "pricing",
+  "fingerprint": "banner head+seg switch -> hairline price sheet (Pro word + one filled button) -> estimator split -> compare table -> overage zones+invoice -> FAQ rows -> ink close",
+  "sections": [
+   "banner-hero+seg",
+   "price-sheet",
+   "estimator",
+   "compare-table",
+   "overage-zones+invoice",
+   "faq-rows",
+   "ink-close"
+  ],
+  "signature": "three prices at display scale in one hairline sheet; Pro marked by its word and the page's one filled button",
+  "waived": [
+   "39b",
+   "49b"
+  ],
+  "mode": "redesign",
+  "depth": "full",
+  "scope": "page",
+  "prompt": "redesign /pricing: smooth and good-looking, Faddy brand kept, no logic changes",
+  "files": [
+   "src/app/(marketing)/pricing/page.tsx",
+   "src/app/(marketing)/pricing/pricing.css",
+   "src/app/(marketing)/pricing/tokens.css",
+   "src/app/(marketing)/pricing/base.css",
+   "src/components/pricing/TrackedUsersExplainer.tsx"
+  ],
+  "date": "2026-11-02"
  }
 ]
