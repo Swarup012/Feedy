@@ -49,42 +49,34 @@ export function TrackedUsersLimitBanner() {
   let Icon = Info;
   let title = "";
   let message = "";
-  let bgColor = "bg-blue-50 dark:bg-blue-950";
-  let borderColor = "border-blue-200 dark:border-blue-800";
-  let textColor = "text-blue-900 dark:text-blue-100";
+  let tone = "usage-banner--info";
 
   if (isAtLimit) {
     variant = "destructive";
     Icon = AlertCircle;
     title = "Tracked Users Limit Reached";
     message = `You've reached your limit of ${usage.limit.toLocaleString()} tracked users for ${usage.current_period}. New users won't be tracked until next month or you upgrade your plan.`;
-    bgColor = "bg-red-50 dark:bg-red-950";
-    borderColor = "border-red-200 dark:border-red-800";
-    textColor = "text-red-900 dark:text-red-100";
+    tone = "usage-banner--danger";
   } else if (isNearLimit) {
     Icon = AlertTriangle;
     title = "Approaching Tracked Users Limit";
     message = `You're at ${percent.toFixed(0)}% of your ${usage.limit.toLocaleString()} tracked users limit (${usage.count.toLocaleString()} tracked). Consider upgrading to avoid tracking interruptions.`;
-    bgColor = "bg-yellow-50 dark:bg-yellow-950";
-    borderColor = "border-yellow-200 dark:border-yellow-800";
-    textColor = "text-yellow-900 dark:text-yellow-100";
+    tone = "usage-banner--warn";
   } else if (isApproaching) {
     Icon = Info;
     title = "Tracked Users Usage Notice";
     message = `You've used ${percent.toFixed(0)}% of your ${usage.limit.toLocaleString()} tracked users limit (${usage.count.toLocaleString()} tracked this month).`;
-    bgColor = "bg-blue-50 dark:bg-blue-950";
-    borderColor = "border-blue-200 dark:border-blue-800";
-    textColor = "text-blue-900 dark:text-blue-100";
+    tone = "usage-banner--info";
   }
 
   return (
     <Alert
-      className={`relative ${bgColor} ${borderColor} border-2 mb-6`}
+      className={`usage-banner relative mb-4 ${tone}`}
       variant={variant}
     >
       <Icon className="h-5 w-5" />
       <AlertTitle className="mb-2 pr-8 font-semibold">{title}</AlertTitle>
-      <AlertDescription className={`${textColor} space-y-3`}>
+      <AlertDescription className="space-y-3">
         <p>{message}</p>
         
         <div className="flex flex-wrap gap-2 mt-3">

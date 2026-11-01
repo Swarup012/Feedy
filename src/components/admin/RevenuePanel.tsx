@@ -2,13 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -18,7 +11,6 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import {
-  DollarSign,
   Info,
   Lock,
   Sparkles,
@@ -27,6 +19,7 @@ import {
 import api from '@/lib/api';
 import { formatMrr } from '@/lib/format-mrr';
 import { UpgradeDialog } from '@/components/UpgradeDialog';
+import '@/app/admin/admin.css';
 
 /* ======================================================
    Types
@@ -55,20 +48,17 @@ export interface RevenueOverview {
 
 /** Coverage tile sentence: "38 of 120". */
 export function coverageLabel(coverage?: { customersWithMrr: number; customersTotal: number }): string {
-  if (!coverage) return '—';
+  if (!coverage) return 'n/a';
   return `${coverage.customersWithMrr} of ${coverage.customersTotal}`;
 }
 
-/** Top-post row sub-line: "$1,200/mo · 2 of 5 customers". */
+/** Top-post row sub-line: "$1,200/mo (2 of 5 customers)". */
 export function topPostMeta(
   p: { mrr: number; customerCount: number; customersWithMrr: number },
   currency: string
 ): string {
-  return `${formatMrr(p.mrr, currency)}/mo · ${p.customersWithMrr} of ${p.customerCount} customers`;
+  return `${formatMrr(p.mrr, currency)}/mo (${p.customersWithMrr} of ${p.customerCount} customers)`;
 }
-
-/** Token-colored bar palette (theme tokens, light/dark safe). */
-const BAR_COLORS = ['bg-primary', 'bg-progress', 'bg-warning', 'bg-success', 'bg-muted-foreground/50'];
 
 /* ======================================================
    Panel
@@ -116,49 +106,87 @@ export function RevenuePanel() {
     coverage && coverage.customersTotal > 0
       ? Math.round((coverage.customersWithMrr / coverage.customersTotal) * 100)
       : 0;
-  const byPlan = Object.entries(data?.byPlan || {});
-  const maxPlanMrr = Math.max(1, ...byPlan.map(([, v]) => v));
+  const byPlan = Object.entries(data?.byPlan || {}).sort((a, b) => b[1] - a[1]);
   const topPosts = data?.topPostsByMrr || [];
+  const showHero = !loading && !failed && !locked && hasRevenueData;
+  const planTone = (i: number) => (i < 7 ? `rev__seg-${i + 1}` : 'rev__seg-more');
 
   return (
-    <Card className="flex flex-col">
-      <CardHeader className="pb-3 shrink-0">
-        <div className="flex items-start gap-3 min-w-0">
-          <div className="w-8 h-8 rounded-full flex items-center justify-center mt-0.5 shrink-0 bg-primary/10 text-primary">
-            <DollarSign className="h-4 w-4" />
-          </div>
-          <div className="min-w-0">
-            <CardTitle className="text-[15px] font-medium tracking-tight text-foreground">
-              Revenue
-            </CardTitle>
-            <CardDescription className="text-[13px] mt-0.5 text-muted-foreground">
-              Known MRR across customers, plans and top posts
-            </CardDescription>
-          </div>
+    <section className="panel" aria-labelledby="revenue-title">
+      <div className="panel__head">
+        <div>
+          <h2 className="panel__title" id="revenue-title">Revenue</h2>
+          <p className="panel__desc">Known MRR across customers, plans and top posts</p>
         </div>
-      </CardHeader>
-      <CardContent className="pt-0 flex-1">
+        {loading && (
+          <div className="rev__hero" aria-hidden="true">
+            <Skeleton className="h-3 w-20 rounded" />
+            <Skeleton className="h-7 w-28 rounded" />
+          </div>
+        )}
+        {showHero && (
+          <div className="rev__hero">
+            <TooltipProvider delayDuration={200}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span
+                    tabIndex={0}
+                    className="rev__hero-label"
+                  >
+                    Known MRR
+                    <Info className="h-3 w-3" aria-hidden="true" />
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent className="max-w-[220px] text-xs">
+                  Only customers with revenue data. Anonymous voters are not included.
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            <span className="rev__hero-value num">
+              {formatMrr(data?.totalMrr ?? 0, currency)}
+            </span>
+          </div>
+        )}
+      </div>
+      <div className="panel__body">
         {loading ? (
-          <div className="flex flex-col gap-3">
-            <Skeleton className="h-28 rounded-xl" />
-            <Skeleton className="h-16 rounded-xl" />
-            <Skeleton className="h-40 rounded-xl" />
+          <div className="rev" aria-hidden="true">
+            <div className="rev__ledger-row">
+              <Skeleton className="h-4 w-56 rounded" />
+              <Skeleton className="h-5 w-20 rounded" />
+            </div>
+            <div className="rev__facts">
+              <div className="rev__fact">
+                <Skeleton className="h-3 w-8 rounded" />
+                <Skeleton className="h-6 w-24 rounded" />
+              </div>
+              <div className="rev__fact">
+                <Skeleton className="h-3 w-16 rounded" />
+                <Skeleton className="h-6 w-16 rounded" />
+              </div>
+            </div>
+            <div className="rev__mix">
+              <Skeleton className="h-3 w-24 rounded" />
+              <Skeleton className="h-3 w-full rounded" />
+              <Skeleton className="h-3 w-44 rounded" />
+            </div>
+            <Skeleton className="h-24 rounded" />
           </div>
         ) : failed ? (
-          <div className="flex flex-col items-center justify-center py-10 text-center">
-            <p className="text-sm font-medium text-muted-foreground">Couldn&apos;t load</p>
+          <div className="state-empty">
+            <p className="state-empty__title">Couldn&apos;t load</p>
           </div>
         ) : locked ? (
-          <div className="flex flex-col items-center justify-center py-8 text-center">
-            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mb-2.5">
-              <Lock className="w-5 h-5 text-primary" />
+          <div className="state-empty">
+            <div className="flex items-center gap-2 mb-1">
+              <Lock className="w-4 h-4 text-muted-foreground" aria-hidden="true" />
+              <p className="state-empty__title">Revenue insights</p>
             </div>
-            <p className="text-sm font-semibold text-foreground">Revenue insights</p>
-            <p className="text-xs text-muted-foreground mt-0.5">
+            <p className="state-empty__note">
               Upgrade to Starter or Pro to use this feature.
             </p>
             <Button size="sm" className="gap-1.5 mt-3" onClick={() => setDialogOpen(true)}>
-              <Sparkles className="w-3.5 h-3.5" />
+              <Sparkles className="w-3.5 h-3.5" aria-hidden="true" />
               Upgrade
             </Button>
             <UpgradeDialog
@@ -168,10 +196,9 @@ export function RevenuePanel() {
             />
           </div>
         ) : !hasRevenueData ? (
-          <div className="flex flex-col items-center justify-center py-10 text-center">
-            <DollarSign className="h-8 w-8 text-muted-foreground/40 mb-2" />
-            <p className="text-sm font-medium text-foreground">No revenue data yet</p>
-            <p className="text-xs text-muted-foreground mt-1 max-w-xs">
+          <div className="state-empty">
+            <p className="state-empty__title">No revenue data yet</p>
+            <p className="state-empty__note">
               Send an MRR field with identify() so customers with revenue can
               be counted. Pick the field keys in Revenue data settings.
             </p>
@@ -185,116 +212,103 @@ export function RevenuePanel() {
             </Button>
           </div>
         ) : (
-          <div className="flex flex-col gap-5">
-            {/* Stat tiles */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-              <div className="rounded-xl border border-border bg-card p-4">
-                <TooltipProvider delayDuration={200}>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <span
-                        tabIndex={0}
-                        className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground cursor-default"
-                      >
-                        Known MRR
-                        <Info className="h-3 w-3" aria-hidden="true" />
-                      </span>
-                    </TooltipTrigger>
-                    <TooltipContent className="max-w-[220px] text-xs">
-                      Only customers with revenue data. Anonymous voters are not included.
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-                <p className="text-2xl font-bold text-foreground tabular-nums mt-1">
-                  {formatMrr(data?.totalMrr ?? 0, currency)}
-                </p>
-              </div>
-              <div className="rounded-xl border border-border bg-card p-4">
-                <p className="text-xs font-medium text-muted-foreground">ARR</p>
-                <p className="text-2xl font-bold text-foreground tabular-nums mt-1">
+          <div className="rev">
+            {/* Money at risk — the number that follows the hero */}
+            <div className="rev__ledger-row">
+              <span className="rev__ledger-label">
+                MRR with open high-severity feedback
+              </span>
+              <span className="rev__ledger-value num">
+                {formatMrr(data?.mrrWithHighSeverity ?? 0, currency)}
+              </span>
+            </div>
+
+            {/* Supporting facts */}
+            <div className="rev__facts">
+              <div className="rev__fact">
+                <span className="figure-cell__label">ARR</span>
+                <span className="figure-cell__value num">
                   {formatMrr((data?.totalMrr ?? 0) * 12, currency)}
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">Known MRR × 12</p>
+                </span>
+                <span className="figure-cell__meta">Known MRR × 12</span>
               </div>
-              <div className="rounded-xl border border-border bg-card p-4">
-                <p className="text-xs font-medium text-muted-foreground">
-                  MRR with open high-severity feedback
-                </p>
-                <p className="text-2xl font-bold text-foreground tabular-nums mt-1">
-                  {formatMrr(data?.mrrWithHighSeverity ?? 0, currency)}
-                </p>
-              </div>
-              <div className="rounded-xl border border-border bg-card p-4">
-                <p className="text-xs font-medium text-muted-foreground">Coverage</p>
-                <p className="text-2xl font-bold text-foreground tabular-nums mt-1">
+              <div className="rev__fact">
+                <span className="figure-cell__label">Coverage</span>
+                <span className="figure-cell__value num">
                   {coverageLabel(coverage)}
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  customers have revenue data
-                </p>
+                </span>
+                <span className="figure-cell__meta">
+                  {coveragePct}% of customers have revenue data
+                </span>
               </div>
             </div>
 
-            {/* MRR by plan — simple token-colored bars */}
+            {/* Plan mix — one parts-of-whole bar, legend carries the values */}
             {byPlan.length > 0 && (
-              <div className="space-y-2">
-                <p className="text-xs font-medium text-muted-foreground">MRR by plan</p>
-                {byPlan.map(([plan, value], i) => (
-                  <div key={plan} className="flex items-center gap-3">
-                    <span className="w-24 shrink-0 text-xs font-medium text-foreground truncate">
-                      {plan}
-                    </span>
-                    <div className="flex-1 h-2 rounded-full bg-muted overflow-hidden">
-                      <div
-                        className={`h-full rounded-full ${BAR_COLORS[i % BAR_COLORS.length]}`}
-                        style={{ width: `${Math.max(2, Math.round((value / maxPlanMrr) * 100))}%` }}
-                      />
-                    </div>
-                    <span className="w-20 shrink-0 text-right text-xs tabular-nums text-muted-foreground">
-                      {formatMrr(value, currency)}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Top 5 posts by MRR */}
-            {topPosts.length > 0 && (
-              <div className="space-y-2">
-                <p className="text-xs font-medium text-muted-foreground">Top posts by MRR</p>
-                <div className="space-y-1">
-                  {topPosts.map((p) => (
-                    <button
-                      key={p.postId}
-                      onClick={() => router.push(`/admin/feedback?post=${p.postId}`)}
-                      className="w-full flex items-center gap-2.5 rounded-lg border border-border bg-background px-3 py-2.5 text-left hover:bg-accent/60 transition-colors"
-                    >
-                      <span className="flex-1 min-w-0">
-                        <span className="block text-sm font-medium text-foreground truncate">
-                          {p.title}
-                        </span>
-                        <span className="block text-xs text-muted-foreground tabular-nums">
-                          {topPostMeta(p, currency)}
-                        </span>
-                      </span>
-                      <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/50 shrink-0" />
-                    </button>
+              <div className="rev__mix">
+                <p className="text-sm font-medium text-muted-foreground">MRR by plan</p>
+                <div className="rev__stack" aria-hidden="true">
+                  {byPlan.map(([plan, value], i) => (
+                    <span
+                      key={plan}
+                      className={`rev__seg ${planTone(i)}`}
+                      style={{ flexGrow: Math.max(value, 0), flexBasis: 0 }}
+                    />
                   ))}
                 </div>
+                <ul className="rev__legend">
+                  {byPlan.map(([plan, value], i) => (
+                    <li key={plan}>
+                      <span
+                        className={`rev__swatch ${planTone(i)}`}
+                        aria-hidden="true"
+                      />
+                      <span className="rev__legend-name">{plan}</span>
+                      <span className="rev__legend-value num">
+                        {formatMrr(value, currency)}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
               </div>
             )}
 
-            {/* Single action */}
+            {/* Top posts by MRR */}
+            {topPosts.length > 0 && (
+              <div className="flex flex-col gap-1">
+                <p className="text-sm font-medium text-muted-foreground mb-1">Top posts by MRR</p>
+                <ul className="queue">
+                  {topPosts.map((p) => (
+                    <li key={p.postId}>
+                      <button
+                        type="button"
+                        onClick={() => router.push(`/admin/feedback?post=${p.postId}`)}
+                        className="queue__row"
+                      >
+                        <span className="queue__title flex-1">
+                          {p.title}
+                          <span className="block text-sm text-muted-foreground font-normal">
+                            {topPostMeta(p, currency)}
+                          </span>
+                        </span>
+                        <ChevronRight className="queue__go h-3.5 w-3.5" aria-hidden="true" />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
             <Button
               variant="outline"
-              className="w-full h-9 gap-2 font-medium"
+              className="h-9 gap-2 font-medium self-start"
               onClick={() => router.push('/admin/feedback')}
             >
               View feedback
             </Button>
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </section>
   );
 }

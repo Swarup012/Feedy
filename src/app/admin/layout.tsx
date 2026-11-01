@@ -11,13 +11,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { OrganizationSwitcher } from "@/components/organization/OrganizationSwitcher";
 import { ChangelogPopover } from "@/components/changelog/ChangelogPopover";
-import { LayoutDashboard, Sun, Moon, CreditCard, BotMessageSquare } from "lucide-react";
-import {useState,useEffect} from "react"
+import { Sun, Moon, Menu, X } from "lucide-react";
+import { useState, useEffect } from "react";
 import { useTheme } from "@/components/theme-provider";
+import "./admin.css";
 
 export default function AdminLayout({
   children,
@@ -28,36 +28,35 @@ export default function AdminLayout({
 
   const { resolvedTheme, setTheme } = useTheme();
   const [viewMode, setViewMode] = useState<"admin" | "public">("admin");
-  const [feedbackPath, setFeedbackPath] = useState('/admin/feedback'); // Default to redirect page (handles board routing)
+  const [feedbackPath, setFeedbackPath] = useState("/admin/feedback");
   const [boardsLoaded, setBoardsLoaded] = useState(false);
+  const [navOpen, setNavOpen] = useState(false);
 
   useEffect(() => {
-    // Validate and set feedback path
     const validateFeedbackPath = async () => {
       try {
-        const { boardService } = await import('@/services/boardService');
+        const { boardService } = await import("@/services/boardService");
         const response = await boardService.getAllBoards();
         const fetchedBoards = response.data.boards;
 
         if (fetchedBoards.length > 0) {
-          const lastBoard = localStorage.getItem('lastVisitedBoard');
-          const lastBoardExists = lastBoard && fetchedBoards.some(b => b.slug === lastBoard);
+          const lastBoard = localStorage.getItem("lastVisitedBoard");
+          const lastBoardExists =
+            lastBoard && fetchedBoards.some((b) => b.slug === lastBoard);
 
           if (lastBoardExists) {
             setFeedbackPath(`/admin/feedback/boards/${lastBoard}`);
           } else {
-            // Use first board and update localStorage
-            localStorage.setItem('lastVisitedBoard', fetchedBoards[0].slug);
+            localStorage.setItem("lastVisitedBoard", fetchedBoards[0].slug);
             setFeedbackPath(`/admin/feedback/boards/${fetchedBoards[0].slug}`);
           }
         } else {
-          // No boards exist, use welcome page
-          setFeedbackPath('/admin/feedback/welcome');
-          localStorage.removeItem('lastVisitedBoard');
+          setFeedbackPath("/admin/feedback/welcome");
+          localStorage.removeItem("lastVisitedBoard");
         }
       } catch (error) {
-        console.error('Error validating feedback path:', error);
-        setFeedbackPath('/admin/feedback/welcome');
+        console.error("Error validating feedback path:", error);
+        setFeedbackPath("/admin/feedback/welcome");
       } finally {
         setBoardsLoaded(true);
       }
@@ -72,10 +71,10 @@ export default function AdminLayout({
   const handleToggle = () => {
     if (viewMode === "admin") {
       setViewMode("public");
-      router.push("/feedback"); // 👉 navigate to public view
+      router.push("/feedback");
     } else {
       setViewMode("admin");
-      router.push("/admin"); // 👉 navigate back to admin view
+      router.push("/admin");
     }
   };
 
@@ -88,90 +87,94 @@ export default function AdminLayout({
     { name: "Changelog", path: "/admin/changelog" },
   ];
 
+  const isCurrent = (itemPath: string) => {
+    if (
+      itemPath === "/admin/autopilot" ||
+      itemPath === "/admin/ai-chat" ||
+      itemPath === feedbackPath
+    ) {
+      return pathname?.startsWith(itemPath);
+    }
+    return pathname === itemPath;
+  };
+
   return (
     <div className="h-screen flex flex-col bg-background overflow-hidden">
-      {/* 🔹 Navbar */}
-
-
-<nav className="sticky top-0 z-50 bg-primary backdrop-blur-xl border-b border-primary shadow-sm flex-shrink-0">
-        <div className="max-w-[1600px] mx-auto flex items-center justify-between px-4 sm:px-6 lg:px-8 py-2.5">
-          {/* Left side - Brand + Org Switcher + Nav */}
-          <div className="flex items-center gap-2 sm:gap-4">
-            <Link 
-              href="/admin" 
-              className="flex items-center group"
-            >
-              <span className="text-base font-switzer font-semibold tracking-tight text-white">
-                Dashboard
-              </span>
+      <header className="topbar">
+        <div className="topbar__inner">
+          <div className="topbar__left">
+            <Link href="/admin" className="topbar__brand" aria-label="Dashboard home">
+              Dashboard
             </Link>
 
-            {/* Organization Switcher */}
-            <div className="border-l border-white/20 pl-2 sm:pl-4">
-              <OrganizationSwitcher />
-            </div>
+            <div className="topbar__divider" aria-hidden="true" />
+            <OrganizationSwitcher />
 
-            <div className="hidden lg:flex items-center gap-1 ml-2">
+            <nav className="topbar__nav" aria-label="Admin">
               {navItems.map((item) => (
                 <Link
                   key={item.path}
                   href={item.path}
-                  className={cn(
-                    "relative px-3 py-1.5 text-sm font-switzer font-semibold transition-all rounded-lg",
-                    (item.path === "/admin/autopilot" || item.path === "/admin/ai-chat" || item.path === feedbackPath
-                      ? pathname?.startsWith(item.path)
-                      : pathname === item.path)
-                      ? "text-white bg-white/20"
-                      : "text-white/70 hover:text-white hover:bg-white/10"
-                  )}
+                  className="topbar__link"
+                  aria-current={isCurrent(item.path) ? "page" : undefined}
                 >
                   {item.name}
-                  {(item.path === "/admin/autopilot" || item.path === "/admin/ai-chat" || item.path === feedbackPath
-                    ? pathname?.startsWith(item.path)
-                    : pathname === item.path) && (
-                    <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1/2 h-0.5 bg-white rounded-full" />
-                  )}
                 </Link>
               ))}
-            </div>
+            </nav>
           </div>
 
-          {/* Right side - Actions & User Menu */}
-          <div className="flex items-center gap-1.5">
-            {/* Changelog Bell */}
+          <div className="topbar__right">
             <ChangelogPopover />
-            
-            {/* Theme Toggle */}
+
             <button
+              type="button"
               onClick={toggleTheme}
-              className="p-2 rounded-lg bg-white/20 hover:bg-white/30 hover:scale-105 transition-all duration-300"
+              className="icon-btn"
               aria-label={`Switch to ${resolvedTheme === "light" ? "dark" : "light"} mode`}
             >
               {resolvedTheme === "light" ? (
-                <Moon className="h-4 w-4 text-white" />
+                <Moon className="h-4 w-4" aria-hidden="true" />
               ) : (
-                <Sun className="h-4 w-4 text-white" />
+                <Sun className="h-4 w-4" aria-hidden="true" />
               )}
             </button>
 
-            {/* User Menu */}
+            <button
+              type="button"
+              className="icon-btn topbar__nav-toggle"
+              onClick={() => setNavOpen((v) => !v)}
+              aria-expanded={navOpen}
+              aria-controls="admin-mobile-nav"
+              aria-label={navOpen ? "Close menu" : "Open menu"}
+            >
+              {navOpen ? (
+                <X className="h-4 w-4" aria-hidden="true" />
+              ) : (
+                <Menu className="h-4 w-4" aria-hidden="true" />
+              )}
+            </button>
+
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="flex items-center gap-2 focus:outline-none hover:opacity-80 transition-opacity">
-                  <Avatar className="h-8 w-8 border-2 border-white/30 shadow-md">
-                    <AvatarImage src={user?.avatar_url || undefined} alt={user?.name || "User"} />
-                    <AvatarFallback className="bg-white/20 text-white font-semibold">
+                <button type="button" className="user-chip">
+                  <Avatar className="h-7 w-7 border border-[color-mix(in_oklab,var(--color-accent-ink)_35%,transparent)]">
+                    <AvatarImage
+                      src={user?.avatar_url || undefined}
+                      alt={user?.name || "User"}
+                    />
+                    <AvatarFallback className="text-xs font-semibold" style={{ background: "color-mix(in oklab, var(--color-accent-ink) 20%, transparent)", color: "var(--color-accent-ink)" }}>
                       {user?.name?.[0]?.toUpperCase() || "U"}
                     </AvatarFallback>
                   </Avatar>
-                  <span className="hidden sm:inline text-sm font-switzer font-semibold text-white">
-                    {user?.name || "User"}
-                  </span>
+                  <span className="user-chip__name">{user?.name || "User"}</span>
                 </button>
               </DropdownMenuTrigger>
 
               <DropdownMenuContent align="end" className="w-56 p-2">
-                <DropdownMenuLabel className="font-switzer font-bold text-base">My Account</DropdownMenuLabel>
+                <DropdownMenuLabel className="font-medium text-base">
+                  My Account
+                </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={() => router.push("/admin/organization?tab=profile")}
@@ -186,7 +189,6 @@ export default function AdminLayout({
                   Organization Settings
                 </DropdownMenuItem>
 
-
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={() => router.push("/contact")}
@@ -196,7 +198,7 @@ export default function AdminLayout({
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
-                  className="text-red-600 dark:text-red-400 cursor-pointer rounded-lg py-2.5 font-bold"
+                  className="cursor-pointer rounded-lg py-2.5 font-medium" style={{ color: "hsl(var(--destructive))" }}
                   onClick={logout}
                 >
                   Logout
@@ -205,9 +207,26 @@ export default function AdminLayout({
             </DropdownMenu>
           </div>
         </div>
-      </nav>
 
-      {/* 🔹 Main Content */}
+        <nav
+          id="admin-mobile-nav"
+          className={cn("topbar__drawer", navOpen && "is-open")}
+          aria-label="Admin menu"
+        >
+          {navItems.map((item) => (
+            <Link
+              key={item.path}
+              href={item.path}
+              className="topbar__link"
+              aria-current={isCurrent(item.path) ? "page" : undefined}
+              onClick={() => setNavOpen(false)}
+            >
+              {item.name}
+            </Link>
+          ))}
+        </nav>
+      </header>
+
       <main className="flex-1 overflow-y-auto">{children}</main>
     </div>
   );

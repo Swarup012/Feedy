@@ -1,0 +1,74 @@
+/* Hallmark tokens · theme: brand (Faddy cobalt) · scope: app · v2.0.0
+ * Mapped onto the project's existing brand + shadcn variables (globals.css).
+ * App scale: type ratio 1.125, controls 32–40px. */
+:root {
+  /* Space (shared Hallmark scale) */
+  --space-3xs: 2px; --space-2xs: 4px; --space-xs: 8px; --space-sm: 12px;
+  --space-md: 16px; --space-lg: 24px; --space-xl: 40px; --space-2xl: 64px;
+  --space-3xl: 96px; --space-4xl: 144px;
+
+  /* App type scale — fixed 1.125 from 14px label, no fluid heads */
+  --text-xs: 0.75rem; --text-sm: 0.8125rem; --text-md: 0.875rem;
+  --text-lg: 1rem; --text-xl: 1.125rem; --text-2xl: 1.266rem; --text-3xl: 1.424rem;
+  --text-4xl: 1.602rem;
+  --text-display-s: 1.266rem; --text-display: 1.424rem;
+  --text-section: 1.125rem; --text-title: 1rem; --text-lead: 1rem;
+  --tracking-display: -0.02em;
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-micro: 120ms; --dur-short: 220ms; --dur-long: 420ms;
+
+  /* Layers */
+  --z-base: 1; --z-raised: 10; --z-dropdown: 100; --z-sticky: 200;
+  --z-sticky-nav: 300; --z-modal: 400; --z-toast: 500; --z-tooltip: 600;
+
+  /* Shape */
+  --radius-card: var(--radius, 0.5rem);
+  --radius-pill: 999px;
+  --rule-hair: 1px;
+  --shadow-card: 0 1px 2px color-mix(in oklab, var(--color-ink) 4%, transparent);
+
+  /* Container — one recipe for the screen */
+  --container: 1280px;
+  --gutter: 32px;
+  --gap-columns: 16px;
+  --section-gap-s: 40px; --section-gap: 48px; --section-gap-l: 64px;
+
+  /* Colour — brand (Faddy) + shadcn roles already declared in globals.css.
+     Hallmark role names resolve through the project's tokens; no parallel palette. */
+  --color-paper: hsl(var(--background));
+  --color-paper-2: hsl(var(--card));
+  --color-paper-3: hsl(var(--muted));
+  --color-ink: hsl(var(--foreground));
+  --color-ink-2: hsl(var(--muted-foreground));
+  --color-muted: hsl(var(--muted-foreground));
+  --color-rule: hsl(var(--border));
+  --color-accent: hsl(var(--primary));
+  --color-accent-ink: hsl(var(--primary-foreground));
+  --color-focus: hsl(var(--ring));
+  --color-error: hsl(var(--destructive));
+  --color-success: hsl(var(--success));
+  --color-warn: hsl(var(--warning));
+  /* Status text on paper: darker steps for 4.5:1; fills keep the vivid hue */
+  --color-ok-ink: color-mix(in oklab, hsl(var(--success)) 78%, black);
+  --color-warn-ink: color-mix(in oklab, hsl(var(--warning)) 72%, black);
+  --color-err-ink: color-mix(in oklab, hsl(var(--destructive)) 80%, black);
+  /* Plan-mix ramp — one accent hue, lightness steps, fixed order (data-viz) */
+  --seg-1: var(--color-accent);
+  --seg-2: color-mix(in oklab, var(--color-accent) 72%, var(--color-paper));
+  --seg-3: color-mix(in oklab, var(--color-accent) 48%, var(--color-paper));
+  --seg-4: color-mix(in oklab, var(--color-accent) 34%, var(--color-paper));
+  --seg-5: color-mix(in oklab, var(--color-accent) 22%, var(--color-paper));
+  --seg-6: color-mix(in oklab, var(--color-accent) 14%, var(--color-paper));
+  --seg-7: color-mix(in oklab, var(--color-accent) 8%, var(--color-paper));
+  --seg-more: color-mix(in oklab, var(--color-ink) 35%, var(--color-paper));
+
+  /* Faces — project brand */
+  --font-display: "Switzer", "Inter", system-ui, sans-serif;
+  --font-body: "Switzer", "Inter", system-ui, sans-serif;
+  --font-outlier: var(--font-body);
+  --display-weight: 600;
+}

@@ -16,7 +16,6 @@ import {
   ThumbsUp,
   Zap,
   LayoutGrid,
-  ArrowRight,
 } from "lucide-react";
 
 import { TrackedUsersLimitBanner } from "@/components/TrackedUsersLimitBanner";
@@ -25,6 +24,8 @@ import {
   RangePills,
   type ExpertRange,
 } from "@/components/admin/ExpertView";
+
+import "./admin.css";
 
 /* ======================================================
    MAIN PAGE
@@ -41,13 +42,9 @@ export default function AdminPage() {
   });
   const { organization, organizationRole } = useOrganization();
 
-  // Only the isEmpty gate is consumed: totalPosts (non-archived posts)
-  // and totalBoards (boards table count), both from dashboard/stats.
-  // Stays false while stats is loading or failed → ExpertView shows.
   const [totalPosts, setTotalPosts] = useState<number | null>(null);
   const [totalBoards, setTotalBoards] = useState<number | null>(null);
 
-  // Range lives in the header (see layout), consumed by ExpertView.
   const [range, setRange] = useState<ExpertRange>("30d");
 
   const isEmpty =
@@ -66,8 +63,6 @@ export default function AdminPage() {
 
   const loadDashboardData = async () => {
     try {
-      // dashboard/stats feeds the isEmpty gate (totalPosts + totalBoards);
-      // ExpertView's expert-stats does not return either.
       const res = await api.get("/api/dashboard/stats");
       const data = res.data?.data || res.data;
       setTotalPosts(data.totalPosts || 0);
@@ -80,69 +75,57 @@ export default function AdminPage() {
   return (
     <ProtectedRoute allowedRoles={["owner", "admin"]}>
       <div className="bg-background flex flex-col min-h-full">
-        <div className="max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 flex flex-col space-y-4">
-          {/* HEADER */}
-          <section className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 shrink-0">
-            <div>
-              <h1 className="text-xl sm:text-2xl font-switzer font-medium tracking-tight text-foreground">
-                What needs your attention right now
-              </h1>
-            </div>
-            <div className="flex flex-wrap items-center gap-3">
+        <div className="dash" style={{ maxWidth: "var(--container)", marginInline: "auto", paddingInline: "var(--gutter)" }}>
+          <section className="dash__head">
+            <h1 className="dash__title">
+              What needs your attention right now
+            </h1>
+            <div className="dash__actions">
               {!isEmpty && <RangePills range={range} onChange={setRange} />}
               <Button
                 onClick={() => router.push("/dashboard")}
                 variant="outline"
                 className="gap-2 h-9 px-4 text-sm font-medium"
               >
-                <Users className="h-4 w-4" />
+                <Users className="h-4 w-4" aria-hidden="true" />
                 Member view
               </Button>
             </div>
           </section>
-          {/* TRACKED USERS LIMIT WARNING */}
+
           <TrackedUsersLimitBanner />
 
           {isEmpty ? (
-            /* ===== EMPTY STATE — first-run ===== */
             <div className="flex-1 overflow-y-auto min-h-0 pb-4">
-              <div className="rounded-xl border border-border bg-card">
-                <div className="flex flex-col items-center text-center px-6 py-12 sm:py-16">
-                  <img
-                    src="/images/dashboard/undraw_generating-response_y0h5.svg"
-                    alt=""
-                    aria-hidden="true"
-                    className="w-[260px] sm:w-[320px] h-auto mb-8 select-none"
-                  />
-                  <h2 className="text-xl font-switzer font-semibold text-foreground">
+              <div className="panel">
+                <div className="flex flex-col items-start px-6 py-12 sm:py-16 max-w-lg">
+                  <h2 className="text-xl font-semibold text-foreground">
                     No feedback yet
                   </h2>
-                  <p className="text-sm text-muted-foreground mt-2 max-w-md">
+                  <p className="text-sm text-muted-foreground mt-2">
                     Create a board, connect Smartflow, and know what your
                     customers want.
                   </p>
+                  <ol className="mt-8 pt-6 border-t border-border w-full flex flex-col gap-3 text-sm text-muted-foreground">
+                    <li className="flex items-center gap-3">
+                      <LayoutGrid className="w-4 h-4 text-primary shrink-0" aria-hidden="true" />
+                      Create board
+                    </li>
+                    <li className="flex items-center gap-3">
+                      <Zap className="w-4 h-4 text-primary shrink-0" aria-hidden="true" />
+                      Connect Smartflow
+                    </li>
+                    <li className="flex items-center gap-3">
+                      <ThumbsUp className="w-4 h-4 text-primary shrink-0" aria-hidden="true" />
+                      Know your customers
+                    </li>
+                  </ol>
                   <Button
                     onClick={() => router.push("/admin/feedback/welcome")}
-                    className="h-11 px-6 gap-2 mt-6 font-switzer font-semibold"
+                    className="h-11 px-6 gap-2 mt-8 font-semibold"
                   >
                     Create board
                   </Button>
-                  <div className="flex items-center gap-3 sm:gap-4 mt-10 pt-8 border-t border-border w-full max-w-md justify-center text-xs text-muted-foreground">
-                    <span className="flex items-center gap-1.5">
-                      <LayoutGrid className="w-3.5 h-3.5 text-primary" />
-                      Create board
-                    </span>
-                    <ArrowRight className="w-3 h-3 opacity-40" />
-                    <span className="flex items-center gap-1.5">
-                      <Zap className="w-3.5 h-3.5 text-primary" />
-                      Connect Smartflow
-                    </span>
-                    <ArrowRight className="w-3 h-3 opacity-40" />
-                    <span className="flex items-center gap-1.5">
-                      <ThumbsUp className="w-3.5 h-3.5 text-primary" />
-                      Know your customers
-                    </span>
-                  </div>
                 </div>
               </div>
             </div>

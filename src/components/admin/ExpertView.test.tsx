@@ -36,7 +36,7 @@ describe('highSeverityCountLabel', () => {
 
 describe('approvalRateLabel', () => {
   it('renders an em dash when there are no decisions yet', () => {
-    expect(approvalRateLabel(null)).toBe('—');
+    expect(approvalRateLabel(null)).toBe('n/a');
   });
 
   it('renders the percentage otherwise', () => {
@@ -60,7 +60,7 @@ describe('formatGeneratedAt', () => {
 describe('buildBriefingCaption', () => {
   it('joins range and generated parts', () => {
     expect(buildBriefingCaption('7d', '2026-10-14T09:00:00.000Z')).toBe(
-      'Last 7 days · updated daily · Generated Oct 14, 09:00 UTC'
+      'Last 7 days, updated daily, Generated Oct 14, 09:00 UTC'
     );
   });
 
@@ -74,8 +74,8 @@ describe('buildBriefingCaption', () => {
   });
 
   it('omits the generated part when generated_at is missing', () => {
-    expect(buildBriefingCaption('7d', undefined)).toBe('Last 7 days · updated daily');
-    expect(buildBriefingCaption('7d', null)).toBe('Last 7 days · updated daily');
+    expect(buildBriefingCaption('7d', undefined)).toBe('Last 7 days, updated daily');
+    expect(buildBriefingCaption('7d', null)).toBe('Last 7 days, updated daily');
   });
 
   it('returns an empty caption when both parts are missing', () => {
@@ -120,10 +120,10 @@ describe('stats === null (request failed, nothing loaded)', () => {
     apiGet.mockRejectedValueOnce(new Error('network down'));
     render(<ExpertView />);
 
-    await screen.findByText(/showing last known data/);
+    await screen.findByText(/Stats failed to refresh/);
 
     // 4 summary cards: "—" value + "Couldn't load" sub
-    expect(screen.getAllByText('—')).toHaveLength(4);
+    expect(screen.getAllByText('n/a')).toHaveLength(4);
     expect(screen.getAllByText("Couldn't load")).toHaveLength(4);
     // 3 panels (Needs attention, Autopilot pipeline, Customers to watch)
     expect(screen.getAllByText("Couldn't load data")).toHaveLength(3);
@@ -143,6 +143,6 @@ describe('stats === null (request failed, nothing loaded)', () => {
     expect(screen.getByText('No customers to watch')).toBeTruthy();
     expect(screen.queryByText("Couldn't load")).toBeNull();
     expect(screen.queryByText("Couldn't load data")).toBeNull();
-    expect(screen.queryByText(/showing last known data/)).toBeNull();
+    expect(screen.queryByText(/Showing the last known data/)).toBeNull();
   });
 });

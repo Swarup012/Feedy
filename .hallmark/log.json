@@ -1,0 +1,105 @@
+[
+ {
+  "shape": "app screen",
+  "theme": "brand",
+  "axes": "mid/grotesk-sans/cool",
+  "hero": "none (app screen)",
+  "nav": "kept top bar, brand cobalt",
+  "footer": "none (app screen)",
+  "imagery": "none (app screen, product UI only)",
+  "photos": [],
+  "entry": "admin-dashboard-cards",
+  "fingerprint": "kpi-band → ledger|rail → customers|revenue lower grid",
+  "sections": [
+   "kpi-band",
+   "work-queue+rail",
+   "customers+revenue"
+  ],
+  "signature": "needs-attention ledger",
+  "waived": [],
+  "mode": "redesign",
+  "depth": "full",
+  "scope": "app",
+  "prompt": "make dashboard cards organized properly like professional; brand kept; no logic changes",
+  "files": [
+   "src/app/admin/admin.css",
+   "src/app/admin/tokens.css",
+   "src/app/admin/base.css",
+   "src/app/admin/page.tsx",
+   "src/app/admin/layout.tsx",
+   "src/components/admin/ExpertView.tsx",
+   "src/components/admin/RevenuePanel.tsx"
+  ],
+  "date": "2026-11-01"
+ },
+ {
+  "shape": "app screen",
+  "theme": "brand",
+  "axes": "mid/grotesk-sans/cool",
+  "hero": "none (app screen)",
+  "nav": "kept top bar, paper chrome with cobalt signal",
+  "footer": "none (app screen)",
+  "imagery": "none (app screen, product UI only)",
+  "photos": [],
+  "entry": "admin-dashboard",
+  "fingerprint": "metrics-band + signature-queue-left / rail-right + full-width table",
+  "sections": [
+   "header",
+   "metrics",
+   "work-queue+rail",
+   "customers-table",
+   "revenue"
+  ],
+  "signature": "needs-attention ledger",
+  "waived": [],
+  "mode": "redesign",
+  "depth": "full",
+  "scope": "app",
+  "prompt": "professional dashboard redesign; brand kept; no logic changes; prior pass looked non-designer",
+  "files": [
+   "src/app/admin/page.tsx",
+   "src/app/admin/layout.tsx",
+   "src/app/admin/admin.css",
+   "src/app/admin/tokens.css",
+   "src/app/admin/base.css",
+   "src/components/admin/ExpertView.tsx",
+   "src/components/admin/RevenuePanel.tsx"
+  ],
+  "date": "2026-11-01"
+ },
+ {
+  "shape": "app screen",
+  "theme": "brand",
+  "axes": "mid/grotesk-sans/cool",
+  "hero": "none (app screen)",
+  "nav": "kept top bar, densified (transition-colors only, focus-visible, mobile drawer)",
+  "footer": "none (app screen)",
+  "imagery": "none (app screen, product UI only)",
+  "photos": [],
+  "entry": "admin-dashboard",
+  "fingerprint": "figures-strip + signature-queue-left / rail-right + full-width table",
+  "sections": [
+   "header",
+   "figure-strip",
+   "work-queue+rail",
+   "customers-table",
+   "revenue"
+  ],
+  "signature": "needs-attention ledger",
+  "waived": [],
+  "mode": "redesign",
+  "depth": "full",
+  "scope": "app",
+  "prompt": "admin dashboard looks like a couple of AI boxes; brand stays; no logic changes",
+  "files": [
+   "src/app/admin/page.tsx",
+   "src/app/admin/layout.tsx",
+   "src/app/admin/admin.css",
+   "src/app/admin/tokens.css",
+   "src/app/admin/base.css",
+   "src/components/admin/ExpertView.tsx",
+   "src/components/admin/RevenuePanel.tsx"
+  ],
+  "date": "2026-11-01"
+ }
+]

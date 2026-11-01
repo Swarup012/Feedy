@@ -41,14 +41,14 @@ export function OrganizationSwitcher() {
     return (
       <Button
         variant="outline"
-        className="min-w-[200px] justify-between"
+        className="min-w-0 max-w-[12rem] sm:min-w-[10rem] sm:max-w-[14rem] justify-between"
         disabled
         aria-hidden="true"
         tabIndex={-1}
       >
         <div className="flex items-center gap-2">
           <Building2 className="h-4 w-4" />
-          <div className="h-4 w-24 animate-pulse rounded bg-muted" />
+          <div className="h-4 w-24 animate-pulse motion-reduce:animate-none rounded bg-muted" />
         </div>
         <ChevronDown className="h-4 w-4 opacity-50" />
       </Button>
@@ -64,7 +64,7 @@ export function OrganizationSwitcher() {
       <DropdownMenuTrigger asChild>
         <Button
           variant="outline"
-          className="flex items-center gap-2 min-w-[200px] justify-between"
+          className="flex items-center gap-2 min-w-0 max-w-[12rem] sm:min-w-[10rem] sm:max-w-[14rem] justify-between"
           disabled={switching}
         >
           <div className="flex items-center gap-2">

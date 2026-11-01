@@ -123,7 +123,7 @@ describe('RevenuePanel', () => {
     expect(screen.getByText('silver')).toBeTruthy();
     // Top post row + meta
     expect(screen.getByText('Checkout breaks on Safari')).toBeTruthy();
-    expect(screen.getByText('€7,007/mo · 1 of 1 customers')).toBeTruthy();
+    expect(screen.getByText('€7,007/mo (1 of 1 customers)')).toBeTruthy();
 
     // Exactly one primary action
     const actions = screen.getAllByRole('button').filter((b) => b.textContent?.includes('View feedback'));
@@ -149,12 +149,12 @@ describe('RevenuePanel', () => {
 describe('RevenuePanel helpers', () => {
   it('coverageLabel', () => {
     expect(coverageLabel({ customersWithMrr: 38, customersTotal: 120 })).toBe('38 of 120');
-    expect(coverageLabel(undefined)).toBe('—');
+    expect(coverageLabel(undefined)).toBe('n/a');
   });
 
-  it('topPostMeta formats "$X/mo · n of m customers"', () => {
+  it('topPostMeta formats "$X/mo (n of m customers)"', () => {
     expect(
       topPostMeta({ mrr: 4200, customerCount: 7, customersWithMrr: 3 }, 'USD')
-    ).toBe('$4,200/mo · 3 of 7 customers');
+    ).toBe('$4,200/mo (3 of 7 customers)');
   });
 });
