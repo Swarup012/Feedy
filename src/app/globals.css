@@ -110,38 +110,36 @@
      DARK MODE — PRIMARY PRODUCT EXPERIENCE
   ------------------------------------------------------------------------- */
 .dark {
-    /* Base Colors - Rich, modern dark theme */
-    --background: 0 0% 7.1%;            /* #121212 */
-    --foreground: 210 40% 98%;           /* #f8fafc - Soft white, easier on eyes */
-    
+    /* Brand-derived dark (tokens.css html.dark, Faddy cobalt family) */
+    --background: 214 34.5% 4.7%;        /* #080b10 - brand paper (oklch 15% 0.012 255) */
+    --foreground: 211 23.9% 92.5%;       /* #e7ecf0 - brand ink */
+
     /* Card & Surface Colors */
-    --card: 0 0% 11.8%;                  /* #1e1e1e */
-    --card-foreground: 210 40% 98%;      /* #f8fafc - Consistent text */
-    
-    /* Popover */
-    --popover: 0 0% 11.8%;               /* #1e1e1e */
-    --popover-foreground: 210 40% 98%;   /* #f8fafc - Clear text */
-    
-    /* Primary - Modern blue accent */
-    --primary: 217 91% 60%;              /* #3b82f6 - Vibrant blue */
-    --primary-foreground: 0 0% 100%;     /* Pure white for contrast */
-    
-    /* Secondary - Subtle contrast */
-    --secondary: 215 25% 27%;            /* #2d3748 - Muted slate */
-    --secondary-foreground: 210 40% 98%; /* #f8fafc - Consistent text */
-    
+    --card: 214 23.4% 8.1%;              /* #10141a - brand paper-2 */
+    --card-foreground: 211 23.9% 92.5%;
+    --popover: 214 23.4% 8.1%;           /* #10141a - brand paper-2 */
+    --popover-foreground: 211 23.9% 92.5%;
+
+    /* Primary - brand cobalt, dark re-derivation */
+    --primary: 221 66.3% 59.7%;          /* #547fdc - oklch(61% 0.15 264) */
+    --primary-foreground: 214 34.5% 4.7%;/* dark ink on accent, as tokens.css defines */
+
+    /* Secondary - subtle contrast surface */
+    --secondary: 214 17.1% 12.7%;        /* #1b2026 - brand paper-3 */
+    --secondary-foreground: 211 23.9% 92.5%;
+
     /* Muted - Background variations */
-    --muted: 215 25% 27%;                /* #2d3748 - Subtle backgrounds */
-    --muted-foreground: 217 10% 64%;     /* #94a3b8 - De-emphasized text */
-    
+    --muted: 214 17.1% 12.7%;            /* #1b2026 - brand paper-3 */
+    --muted-foreground: 214 7.6% 58%;    /* #8c939c - brand dark muted */
+
     /* Accent - Highlight color */
-    --accent: 217 33% 17%;               /* #1a2332 - Elevated accent */
-    --accent-foreground: 217 91% 60%;    /* #3b82f6 - Blue accent text */
-    
+    --accent: 215 12.4% 18.5%;           /* #292e35 - brand rule */
+    --accent-foreground: 211 23.9% 92.5%;
+
     /* Destructive - Error states */
     --destructive: 0 84% 60%;            /* #ef4444 - Modern red */
     --destructive-foreground: 0 0% 100%; /* Pure white */
-    
+
     /* Semantic: Success & Warning */
     --success: 142 76% 40%;
     --success-foreground: 0 0% 100%;
@@ -151,12 +149,12 @@
     /* Semantic: In-progress status (lighter violet for dark surfaces) */
     --progress: 262 80% 64%;
     --progress-foreground: 0 0% 12%;
-    
+
     /* Borders & Inputs */
-    --border: 215 20% 35%;               /* #3f4a5c - Subtle separation */
-    --input: 215 25% 27%;                /* #2d3748 - Input background */
-    --ring: 217 91% 60%;                 /* #3b82f6 - Focus ring */
-    
+    --border: 215 9.1% 26.6%;            /* #3e434a - brand rule-2 */
+    --input: 215 9.1% 26.6%;             /* #3e434a - brand rule-2 */
+    --ring: 221 66.3% 59.7%;             /* #547fdc - brand cobalt dark */
+
     /* Additional utility colors */
     --radius: 0.5rem;                    /* Consistent border radius */
 }
