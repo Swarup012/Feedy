@@ -15,7 +15,7 @@ const randomDelay = () =>
 
 /**
  * Inline headline phrase that automatically rotates through its items with a
- * subtle fade + vertical slide. No interaction required.
+ * subtle fade + vertical slide. It pauses while hovered or focused.
  *
  * Each instance owns its own self-rescheduling timeout: the first tick and
  * every following one are drawn independently from [MIN_DELAY_MS, MAX_DELAY_MS],
@@ -24,8 +24,8 @@ const randomDelay = () =>
  * always items[0], so server and client agree.
  *
  * Every item stays mounted (only the active one sits in flow, the rest are
- * absolutely positioned) so the container width can be measured and animated
- * to hug the active phrase — no layout jumps.
+ * absolutely positioned) so the container width can be measured to hug the
+ * active phrase — the box never animates its own layout.
  */
 export function RotatingPhrase({
   items,
@@ -35,11 +35,13 @@ export function RotatingPhrase({
   className?: string;
 }) {
   const [index, setIndex] = useState(0);
+  const [paused, setPaused] = useState(false);
   const [width, setWidth] = useState<number | undefined>(undefined);
   const itemRefs = useRef<Array<HTMLSpanElement | null>>([]);
 
   useEffect(() => {
     if (items.length < 2) return;
+    if (paused) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     let timeoutId: number | undefined;
@@ -54,7 +56,7 @@ export function RotatingPhrase({
     return () => {
       if (timeoutId !== undefined) window.clearTimeout(timeoutId);
     };
-  }, [items.length]);
+  }, [items.length, paused]);
 
   useLayoutEffect(() => {
     const measure = () => {
@@ -70,9 +72,12 @@ export function RotatingPhrase({
 
   return (
     <span
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      onFocusCapture={() => setPaused(true)}
+      onBlurCapture={() => setPaused(false)}
       className={cn(
         "relative inline-block whitespace-nowrap align-baseline",
-        "transition-[width] duration-500 delay-150 ease-out motion-reduce:transition-none",
         className,
       )}
       style={width ? { width } : undefined}
@@ -90,7 +95,7 @@ export function RotatingPhrase({
             "transition-[opacity,transform] ease-out motion-reduce:transition-none",
             i === index
               ? "opacity-100 translate-y-0 duration-500 delay-150"
-              : "absolute left-0 top-0 opacity-0 -translate-y-1.5 duration-200",
+              : "pointer-events-none absolute left-0 top-0 opacity-0 -translate-y-1.5 duration-200",
           )}
         >
           {item.icon}

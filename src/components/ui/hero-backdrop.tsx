@@ -434,13 +434,13 @@ export function HeroBackdrop() {
       aria-hidden="true"
       className="pointer-events-none absolute inset-0 select-none"
     >
-      {/* Pixel-art skyline. Proportional scaling keeps it short on mobile;
-          `preserveAspectRatio` + `max-h` crop only the already-faded top on
-          very wide screens, so the skyline never outgrows the hero. */}
+      {/* Pixel-art skyline. Proportional scaling keeps it short on mobile and
+          lets the whole silhouette stand at any width: nothing is cropped, so
+          the buildings are read in full inside the first screen. */}
       <svg
         viewBox={`0 0 ${SKYLINE_W} ${SKYLINE_H}`}
-        preserveAspectRatio="xMidYMax slice"
-        className="hero-skyline absolute inset-x-0 bottom-0 h-auto max-h-[160px] w-full"
+        preserveAspectRatio="xMidYMax meet"
+        className="hero-skyline absolute inset-x-0 bottom-0 h-auto w-full"
         aria-hidden="true"
         focusable="false"
       >

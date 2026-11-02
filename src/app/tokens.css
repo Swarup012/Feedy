@@ -24,6 +24,8 @@
   --color-graphite-ink: oklch(93% 0.010 250);
   --color-graphite-muted: oklch(69% 0.022 256);
   --color-accent: oklch(56% 0.206 263);
+  --color-band-field: var(--color-accent);
+  --color-band-ink: var(--color-paper);
   --color-accent-deep: oklch(50% 0.20 263);
   --color-accent-ink: oklch(98.6% 0.005 250);
   --color-accent-wash: oklch(95% 0.028 256);

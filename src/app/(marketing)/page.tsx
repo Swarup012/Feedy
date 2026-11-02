@@ -1,25 +1,23 @@
 "use client";
-import React, { useEffect, useRef } from "react";
-import { ArrowRight, CheckCircle, Users, Sparkles, Zap, Webhook, Braces, Puzzle } from "lucide-react";
+import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
-import { RotatingPhrase, type RotatingPhraseItem } from "@/components/ui/rotating-phrase";
-import { HeroBackdrop } from "@/components/ui/hero-backdrop";
 import { LandingFooter } from "@/components/ui/landing-footer";
 import { FeatureTabSection } from "@/components/FeatureTabSection";
-
-if (typeof window !== "undefined") {
-  gsap.registerPlugin(ScrollTrigger);
-}
+import { HeroBackdrop } from "@/components/ui/hero-backdrop";
+import {
+  RotatingPhrase,
+  type RotatingPhraseItem,
+} from "@/components/ui/rotating-phrase";
+import { Zap, Webhook, Braces, Puzzle, CheckCircle } from "lucide-react";
+import "./landing.css";
 
 const icon = (src: string) => (
   <img
     src={src}
     alt=""
     aria-hidden="true"
-    className="h-[0.95em] w-[0.95em] shrink-0"
+    className="lp-hero__phrase-icon"
   />
 );
 
@@ -28,7 +26,7 @@ const GITHUB_ICON = (
     viewBox="0 0 24 24"
     fill="currentColor"
     aria-hidden="true"
-    className="h-[0.95em] w-[0.95em] shrink-0"
+    className="lp-hero__phrase-icon"
   >
     <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
   </svg>
@@ -53,6 +51,12 @@ const PRIORITIES: RotatingPhraseItem[] = [
   { label: "what matters most" },
 ];
 
+const HERO_STATS = [
+  "Free plan available",
+  "AI-powered insights",
+  "Built for teams",
+];
+
 export default function LandingPage() {
   const router = useRouter();
   const { user, loading } = useAuth();
@@ -60,11 +64,6 @@ export default function LandingPage() {
   const handleClick = () => {
     router.push("/signup");
   };
-
-  // Refs for GSAP
-  const heroRef = useRef(null);
-  const featuresRef = useRef(null);
-  const benefitsRef = useRef(null);
 
   useEffect(() => {
     // --- ORIGINAL BUSINESS LOGIC (PRESERVED) ---
@@ -118,412 +117,246 @@ export default function LandingPage() {
     redirectLogic();
   }, [user, loading, router]);
 
-  // --- GSAP ANIMATION ENGINE ---
-  useEffect(() => {
-    if (!loading) {
-      const ctx = gsap.context(() => {
-        // Hero Animation
-        const tl = gsap.timeline();
-        tl.from(".hero-reveal", {
-          y: 60,
-          opacity: 0,
-          duration: 1,
-          stagger: 0.2,
-          ease: "expo.out",
-        }).from(
-          ".hero-stats",
-          {
-            opacity: 0,
-            y: 20,
-            duration: 0.8,
-            ease: "power2.out",
-          },
-          "-=0.5",
-        );
-
-        // Scroll Trigger: Features
-        gsap.from(".feature-card", {
-          scrollTrigger: {
-            trigger: featuresRef.current,
-            start: "top 80%",
-            once: true,
-          },
-          y: 40,
-          opacity: 0,
-          duration: 0.8,
-          stagger: 0.15,
-          ease: "power3.out",
-          immediateRender: false,
-        });
-
-        // Scroll Trigger: Benefits Left
-        gsap.from(".benefit-content", {
-          scrollTrigger: {
-            trigger: benefitsRef.current,
-            start: "top 70%",
-          },
-          x: -50,
-          opacity: 0,
-          duration: 1,
-          ease: "power2.out",
-        });
-
-        // Scroll Trigger: Benefits Cards Right
-        gsap.from(".benefit-stat-card", {
-          scrollTrigger: {
-            trigger: benefitsRef.current,
-            start: "top 70%",
-          },
-          x: 50,
-          opacity: 0,
-          duration: 1,
-          stagger: 0.2,
-          ease: "power2.out",
-        });
-      });
-      return () => ctx.revert();
-    }
-  }, [loading]);
-
   return (
-    <div className="min-h-screen bg-white dark:bg-background font-sans text-slate-900 dark:text-foreground antialiased selection:bg-blue-100 dark:selection:bg-primary selection:text-blue-900 dark:selection:text-primary-foreground">
-      {/* Visual background texture */}
-      <div className="fixed inset-0 z-0 opacity-[0.03] pointer-events-none">
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage: `radial-gradient(currentColor 1px, transparent 1px)`,
-            backgroundSize: "40px 40px",
-          }}
-        ></div>
-      </div>
+    <div className="lp-root">
+      <a className="lp-skip" href="#main">
+        Skip to content
+      </a>
 
-      {/* Resizable Navbar */}
-
-      <main className="relative z-10">
-        {/* Hero Section */}
-        <section
-          ref={heroRef}
-          className="relative overflow-hidden pt-20 sm:pt-12 pb-12 sm:pb-10 px-5 sm:px-6"
-        >
-          {/* Decorative: pixel skyline + floating feedback signals */}
+      <main id="main">
+        {/* Hero · the owner's rotating statement over the drifting-signal backdrop, kept */}
+        <section className="lp-hero">
           <HeroBackdrop />
-          <div className="relative z-10 max-w-5xl mx-auto">
-            <div className="flex flex-col items-center text-center space-y-5 sm:space-y-7">
-              {/* Eyebrow badge */}
-              <div className="hero-reveal inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 text-xs sm:text-sm font-semibold">
-                <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
-                AI-powered customer feedback platform
-              </div>
-
-              <h1 className="hero-reveal font-switzer font-medium tracking-tight leading-[1.25] space-y-2 sm:space-y-3 text-slate-900 dark:text-white text-2xl sm:text-4xl md:text-5xl xl:text-[3.5rem]">
-                <span className="block">
-                  Collect feedback from <RotatingPhrase items={INTEGRATIONS} />
-                </span>
-                <span className="block">
-                  Understand <RotatingPhrase items={INSIGHTS} />
-                </span>
-                <span className="block">
-                  And prioritize <RotatingPhrase items={PRIORITIES} />
-                </span>
-              </h1>
-
-              <p className="hero-reveal text-base sm:text-lg md:text-xl text-slate-500 dark:text-muted-foreground leading-relaxed max-w-2xl">
-                Bring customer feedback together, uncover patterns with AI, and
-                decide what to build next.
-              </p>
-
-              <div className="hero-reveal flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-                <button
-                  onClick={handleClick}
-                  className="w-full sm:w-auto px-8 py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-switzer font-bold rounded-2xl transition-all flex items-center justify-center gap-2 text-base border border-black"
-                >
-                  Try for Free
-                </button>
-                <a
-                  href="/pricing"
-                  className="w-full sm:w-auto px-8 py-3.5 bg-white dark:bg-card text-slate-900 dark:text-white font-switzer font-bold rounded-2xl border-2 border-slate-200 dark:border-border hover:bg-slate-50 dark:hover:bg-slate-700 transition-all flex items-center justify-center gap-2 text-base"
-                >
-                  View Pricing
-                </a>
-              </div>
-              {/* Social Proof / Stats */}
-              <div className="hero-stats w-full max-w-2xl pt-5 grid grid-cols-1 sm:grid-cols-3 gap-3">
-                {[
-                  "Free plan available",
-                  "AI-powered insights",
-                  "Built for teams",
-                ].map((stat, i) => (
-                  <div
-                    key={i}
-                    className="flex items-center justify-center gap-2"
-                  >
-                    <CheckCircle className="w-4 h-4 text-blue-500 shrink-0" />
-                    <span className="text-sm font-switzer font-medium text-slate-600 dark:text-muted-foreground">
-                      {stat}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Features Section — Tabbed Showcase */}
-        <section
-          ref={featuresRef}
-          className="py-12 px-6 bg-slate-50/50 dark:bg-background/50 border-y border-border"
-        >
-          <div className="max-w-6xl mx-auto">
-            {/* Section header */}
-            <div className="text-center mb-14">
-              <h2 className="text-xl md:text-2xl font-switzer font-medium tracking-tight text-slate-900 dark:text-white mb-4">
-                Everything you need to manage product feedback
-              </h2>
-              <p className="text-lg text-slate-500 dark:text-muted-foreground max-w-xl mx-auto">
-                From collecting ideas to shipping features — Faddy handles the
-                full loop.
-              </p>
-            </div>
-
-            {/* Tab bar */}
-            <FeatureTabSection />
-          </div>
-        </section>
-
-        {/* Benefits Section */}
-        <section
-          ref={benefitsRef}
-          className="py-16 px-6 bg-blue-600 overflow-hidden relative"
-        >
-          <div className="max-w-7xl mx-auto relative z-10">
-            <div className="grid md:grid-cols-2 gap-10 items-center">
-              <div className="benefit-content text-white">
-                <h2 className="text-xl md:text-3xl font-switzer font-bold tracking-tight mb-8">
-                  Stop building <br />
-                  in the dark.
-                </h2>
-                <div className="space-y-5">
-                  {[
-                    "Know exactly what your users want before you write a single line of code",
-                    "Public roadmap builds trust and reduces repetitive support questions",
-                    "Changelog keeps users excited about every update you ship",
-                    "Flat pricing that scales with your product, not your user count",
-                  ].map((text, i) => (
-                    <div key={i} className="flex items-start gap-4">
-                      <div className="mt-1 w-6 h-6 rounded-full bg-white/20 flex items-center justify-center shrink-0">
-                        <CheckCircle className="w-4 h-4 text-white" />
-                      </div>
-                      <span className="text-lg font-medium text-blue-50 leading-tight">
-                        {text}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="grid gap-6">
-                {[
-                  {
-                    label: "Built for",
-                    value: "Startups & Indie Hackers",
-                    subtext:
-                      "Not enterprise. No complexity. No per-user pricing traps.",
-                    icon: <Users />,
-                  },
-                  {
-                    label: "Pricing starts at",
-                    value: "Free",
-                    subtext:
-                      "Upgrade to $19/mo when you're ready. No credit card to start.",
-                    icon: <Sparkles />,
-                  },
-                ].map((stat, i) => (
-                  <div
-                    key={i}
-                    className="benefit-stat-card p-6 bg-white/10 rounded-2xl border border-white/20"
-                  >
-                    <div className="flex items-center gap-4 mb-6 text-white/80">
-                      {stat.icon}
-                      <span className="font-bold uppercase tracking-widest text-sm">
-                        {stat.label}
-                      </span>
-                    </div>
-                    <div className="text-2xl font-switzer font-black text-white leading-tight">
-                      {stat.value}
-                    </div>
-                    <p className="text-blue-100 mt-4 font-medium leading-relaxed text-sm">
-                      {stat.subtext}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Automate with Apps Section */}
-        <section className="py-20 px-6">
-          <div className="max-w-5xl mx-auto text-center">
-            <h2 className="text-2xl md:text-3xl font-switzer font-bold tracking-tight text-slate-900 dark:text-white mb-4">
-              Automate with your favorite apps
-            </h2>
-            <p className="text-lg text-slate-500 dark:text-muted-foreground mb-12 max-w-xl mx-auto">
-              Connect Faddy to the tools your team already uses — plus
-              everything else through Zapier, webhooks, and our API. Feedback
-              flows in automatically.
+          <div className="lp-hero__inner lp-wrap">
+            <span className="lp-hero__note">Up and running in minutes</span>
+            <h1 className="lp-hero__title">
+              <span className="lp-hero__line">
+                Collect feedback from <RotatingPhrase items={INTEGRATIONS} />
+              </span>
+              <span className="lp-hero__line">
+                Understand <RotatingPhrase items={INSIGHTS} />
+              </span>
+              <span className="lp-hero__line">
+                And prioritize <RotatingPhrase items={PRIORITIES} />
+              </span>
+            </h1>
+            <p className="lp-hero__lead">
+              Bring customer feedback together, uncover patterns with AI, and
+              decide what to build next.
             </p>
-
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              {[
-                {
-                  name: "Intercom",
-                  icon: (
-                    <img
-                      src="/images/icons/intercom.svg"
-                      alt="Intercom"
-                      className="h-6 w-6"
-                    />
-                  ),
-                  color: "#1F8DED",
-                  description:
-                    "Turn conversations into actionable product feedback.",
-                },
-                {
-                  name: "Slack",
-                  icon: (
-                    <img
-                      src="/images/icons/slack-new.svg"
-                      alt="Slack"
-                      className="h-6 w-6"
-                    />
-                  ),
-                  color: "#E01E5A",
-                  description:
-                    "Monitor a Slack channel and convert messages into actionable feedback.",
-                },
-                {
-                  name: "Discord",
-                  icon: (
-                    <img
-                      src="/images/icons/discord.svg"
-                      alt="Discord"
-                      className="h-6 w-6"
-                    />
-                  ),
-                  color: "#5865F2",
-                  description:
-                    "Capture community conversations as structured feedback.",
-                },
-                {
-                  name: "GitHub",
-                  icon: (
-                    <svg
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                      className="h-6 w-6"
-                    >
-                      <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
-                    </svg>
-                  ),
-                  color: "#24292F",
-                  description:
-                    "Track issues and pull requests as feedback via GitHub App webhooks.",
-                },
-                {
-                  name: "Zapier",
-                  icon: (
-                    <Zap className="h-6 w-6" style={{ color: "#FF4F00" }} />
-                  ),
-                  color: "#FF4F00",
-                  description:
-                    "Trigger Faddy from thousands of other apps — no code required.",
-                },
-                {
-                  name: "Webhooks",
-                  icon: (
-                    <Webhook
-                      className="h-6 w-6"
-                      style={{ color: "#2563EB" }}
-                    />
-                  ),
-                  color: "#2563EB",
-                  description:
-                    "Send new feedback to any URL the moment it lands.",
-                },
-                {
-                  name: "REST API",
-                  icon: (
-                    <Braces className="h-6 w-6" style={{ color: "#334155" }} />
-                  ),
-                  color: "#334155",
-                  description:
-                    "Full read/write API and scoped keys for your own stack.",
-                },
-                {
-                  name: "Any other tool",
-                  icon: (
-                    <Puzzle className="h-6 w-6" style={{ color: "#4F7CFF" }} />
-                  ),
-                  color: "#4F7CFF",
-                  description:
-                    "Missing something? Route it in and out via Zapier, webhooks, or the API.",
-                },
-              ].map((integration) => (
-                <div
-                  key={integration.name}
-                  className="flex flex-col items-center p-6 rounded-2xl bg-slate-50 dark:bg-background border border-slate-100 dark:border-border hover:shadow-lg transition-all group"
-                >
-                  <div
-                    className="h-12 w-12 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform"
-                    style={{ backgroundColor: `${integration.color}15` }}
-                  >
-                    {integration.icon}
-                  </div>
-                  <h3 className="font-switzer font-bold text-slate-900 dark:text-white mb-2">
-                    {integration.name}
-                  </h3>
-                  <p className="text-sm text-slate-500 dark:text-muted-foreground leading-relaxed">
-                    {integration.description}
-                  </p>
-                </div>
-              ))}
-            </div>
-
-            <a
-              href="/integrations"
-              className="inline-flex items-center gap-2 mt-10 text-blue-600 dark:text-blue-400 font-switzer font-semibold hover:underline"
-            >
-              Browse all integrations
-              <ArrowRight className="w-4 h-4" />
-            </a>
-          </div>
-        </section>
-
-        {/* CTA Section */}
-        <section className="py-16 px-6">
-          <div className="max-w-5xl mx-auto rounded-3xl bg-background dark:bg-card p-8 md:p-12 overflow-hidden relative text-center">
-            <div className="relative z-10">
-              <h2 className="text-xl md:text-3xl font-switzer font-bold text-white mb-8 tracking-tighter leading-tight">
-                Your users are waiting to tell you what to build.
-              </h2>
-              <p className="text-lg text-slate-400 mb-12 max-w-2xl mx-auto leading-relaxed">
-                Start collecting feedback in minutes. Free plan available — no
-                credit card required.
-              </p>
-              <a
-                href="/signup"
-                className="inline-flex items-center gap-3 px-6 py-4 bg-white dark:bg-card text-slate-900 dark:text-white font-switzer font-black rounded-2xl hover:scale-105 transition-all text-base"
-              >
-                Start Free Today
-                <ArrowRight className="w-5 h-5" />
+            <div className="lp-hero__actions">
+              <button type="button" onClick={handleClick} className="lp-btn">
+                Try for Free
+              </button>
+              <a href="/pricing" className="lp-btn lp-btn--quiet">
+                View Pricing
               </a>
             </div>
+            <ul className="lp-hero__stats">
+              {HERO_STATS.map((stat) => (
+                <li key={stat} className="lp-hero__stat">
+                  <CheckCircle size={16} aria-hidden="true" />
+                  {stat}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+
+        {/* Tabs · Switcher: the full loop in four panels */}
+        <section className="lp-tabs lp-wrap">
+          <div className="lp-tabs__head">
+            <h2>Collect, understand, prioritize</h2>
+            <p className="lead">
+              The full loop, from first idea to shipped changelog.
+            </p>
+          </div>
+          <FeatureTabSection />
+        </section>
+
+        {/* Integrations · Rows: eight ways feedback arrives */}
+        <section className="lp-integrations lp-wrap">
+          <div className="lp-head">
+            <h2>Automate with your favorite apps</h2>
+            <p className="lead">
+              Connect Faddy to the tools your team already uses, plus
+              everything else through Zapier, webhooks and our API. Feedback
+              flows in automatically.
+            </p>
+          </div>
+          <div className="lp-rows">
+            <div className="lp-row">
+              <span className="lp-row__icon">
+                <img
+                  src="/images/icons/intercom.svg"
+                  alt=""
+                  width={24}
+                  height={24}
+                />
+              </span>
+              <div>
+                <h3>Intercom</h3>
+                <p>Turn conversations into actionable product feedback.</p>
+              </div>
+            </div>
+            <div className="lp-row">
+              <span className="lp-row__icon">
+                <img
+                  src="/images/icons/slack-new.svg"
+                  alt=""
+                  width={24}
+                  height={24}
+                />
+              </span>
+              <div>
+                <h3>Slack</h3>
+                <p>
+                  Monitor a Slack channel and convert messages into actionable
+                  feedback.
+                </p>
+              </div>
+            </div>
+            <div className="lp-row">
+              <span className="lp-row__icon">
+                <img
+                  src="/images/icons/discord.svg"
+                  alt=""
+                  width={24}
+                  height={24}
+                />
+              </span>
+              <div>
+                <h3>Discord</h3>
+                <p>Capture community conversations as structured feedback.</p>
+              </div>
+            </div>
+            <div className="lp-row">
+              <span className="lp-row__icon">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  width={24}
+                  height={24}
+                  aria-hidden="true"
+                >
+                  <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+                </svg>
+              </span>
+              <div>
+                <h3>GitHub</h3>
+                <p>
+                  Track issues and pull requests as feedback via GitHub App
+                  webhooks.
+                </p>
+              </div>
+            </div>
+            <div className="lp-row">
+              <span className="lp-row__icon">
+                <Zap size={24} strokeWidth={1.5} aria-hidden="true" />
+              </span>
+              <div>
+                <h3>Zapier</h3>
+                <p>
+                  Trigger Faddy from thousands of other apps, no code
+                  required.
+                </p>
+              </div>
+            </div>
+            <div className="lp-row">
+              <span className="lp-row__icon">
+                <Webhook size={24} strokeWidth={1.5} aria-hidden="true" />
+              </span>
+              <div>
+                <h3>Webhooks</h3>
+                <p>Send new feedback to any URL the moment it lands.</p>
+              </div>
+            </div>
+            <div className="lp-row">
+              <span className="lp-row__icon">
+                <Braces size={24} strokeWidth={1.5} aria-hidden="true" />
+              </span>
+              <div>
+                <h3>REST API</h3>
+                <p>Full read/write API and scoped keys for your own stack.</p>
+              </div>
+            </div>
+            <div className="lp-row">
+              <span className="lp-row__icon">
+                <Puzzle size={24} strokeWidth={1.5} aria-hidden="true" />
+              </span>
+              <div>
+                <h3>Any other tool</h3>
+                <p>
+                  Missing something? Route it in and out via Zapier, webhooks
+                  or the API.
+                </p>
+              </div>
+            </div>
+          </div>
+          <a href="/integrations" className="lp-more">
+            Browse all integrations
+          </a>
+        </section>
+
+        {/* Statement band · Committed field: the position, and the two facts */}
+        <section className="lp-band">
+          <div className="lp-wrap">
+            <div className="lp-band__grid">
+              <div className="lp-band__left">
+                <h2>Stop building in the dark.</h2>
+                <dl className="lp-band__facts">
+                  <div>
+                    <dt>Built for</dt>
+                    <dd>
+                      Startups and indie hackers. Not enterprise. No
+                      complexity. No per-user pricing traps.
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Pricing starts at</dt>
+                    <dd>
+                      Free. Upgrade to $19/mo when you&apos;re ready. No
+                      credit card to start.
+                    </dd>
+                  </div>
+                </dl>
+              </div>
+              <ul className="lp-band__claims">
+                <li>
+                  Know exactly what your users want before you write a single
+                  line of code
+                </li>
+                <li>
+                  Public roadmap builds trust and reduces repetitive support
+                  questions
+                </li>
+                <li>Changelog keeps users excited about every update you ship</li>
+                <li>
+                  Flat pricing that scales with your product, not your user
+                  count
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        {/* Closing band: the one action, restated */}
+        <section className="lp-cta lp-wrap">
+          <div className="lp-cta__inner">
+            <div className="lp-cta__text">
+              <h2>Your users are waiting to tell you what to build</h2>
+              <p>
+                Start collecting feedback in minutes. Free plan available, no
+                credit card required.
+              </p>
+            </div>
+            <a href="/signup" className="lp-btn">
+              Start Free Today
+            </a>
           </div>
         </section>
       </main>
 
-      {/* Footer */}
       <LandingFooter showCTA={true} />
     </div>
   );

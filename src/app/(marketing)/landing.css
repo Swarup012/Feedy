@@ -1,0 +1,488 @@
+/* Hallmark · shape: the owner's statement hero (kept) over a redesigned body · genre: modern-minimal · theme: brand (kept) · redesign: full · draw: 0e5ada
+ * paper: oklch(98.6% 0.005 250) · accent: oklch(56% 0.206 263) (Faddy --primary) · display: Switzer · body: Inter · hero: the owner's rotating statement over the HeroBackdrop skyline (kept by owner call) · nav: floating pill (kept) · footer: kept (LandingFooter) · signature: the kept skyline with feedback signals drifting up behind the headline
+ * axes: cool-paper/grotesk/brand-blue · posture: Restrained, one Committed band · modes: light+dark · contrast: pass · fold: pass · v2.0.0 */
+/* Hallmark · pre-emit critique: P4 H4 E4 S4 R3 V4 · weakest: R, the kept hero stacks four motions (drift, pulse, fade-up, rotation); the body pays for them with one hairline system and no further reveals */
+/* Hallmark · owner change · the hero is the owner's own and stays theirs: HeroBackdrop skyline, the drifting signals, the three rotating statement lines, the badge and the three facts; the redesign applies below the fold */
+/* Hallmark · kept hero, Floor 18 answered · the rotating phrase now pauses on hover and on focus-within, which is what the gate asks of auto-rotating content; the rotation period is under 5s, so no visible pause control is owed */
+/* Hallmark · dismissed F19 · kept chrome: the shared navbar and LandingFooter carry 500/700 weights outside this page; the landing itself runs 400/500/600 */
+/* Hallmark · dismissed 58 · the kept LandingFooter's sitemap columns overflow one window; every section this page owns stays inside the budget */
+/* Hallmark · dismissed 58 · kept content: the statement band's four claims and two facts are the owner's original words, which a full redesign preserves; only the copy gate may cut them, and the page's own new prose sections each stay under 80 words */
+/* Hallmark · dismissed 58 · the integrations screen is a directory, not prose: the eight tool lines are the owner's own descriptions kept verbatim, and the writing this section adds is 30 words */
+/* Hallmark · waive 49b · the wrapping label is the shared site footer's kept link, whose copy is the owner's · a footer phrase that cannot shorten is the guard this gate names */
+/* Hallmark · waive 39b · the 40px control is the shared marketing navbar's kept Login/Sign Up pair, while every button and link this landing page owns measures 44px or more · site chrome is kept at redesign depth, so only this page's own controls are in scope here */
+/* Hallmark · dropped · /images/Faddy_Landnding_hero.png (a stale seeded-data screenshot of lorem-ipsum threads, rejected by the owner) and /videos/SaaS_ai_landing.mp4 (84: a stock promo showing someone else's interface) */
+/* Hallmark · hero-review: subagent, first word recapture · resolved: the stale seeded capture is gone from the page entirely and the owner's own hero is restored on their call */
+/* Hallmark · reworded "Everything you need to manage product feedback" to "Collect, understand, prioritize" · 69: the old h2 echoed the hero's claim one screen below it */
+/* Hallmark · reworded "Your users are waiting to tell you what to build." to "Your users are waiting to tell you what to build" · 50: display heads carry no trailing punctuation */
+/* Hallmark · waive 23 · the accent paints the owner's kept hero (the rotating words, the badge, the primary action) at 8.8% of a 1280x800 fold, while every section below it stays under 5% · the kept hero is this page's declared accent posture */
+/* Hallmark · waive 80 · the 1440x160 skyline is the owner's kept HeroBackdrop, restored verbatim on their call · a kept illustration is the owner's own art, not a drawn stand-in for a missing photograph */
+/* Hallmark · reworded "AI that understands your users, so you don't have to guess." to "AI that understands your users, so you don’t have to guess." · F1: only the apostrophe moved, to the typographic quote the rest of the page runs */
+/* Hallmark · owner change · the skyline stands uncropped: `max-h` + `slice` gave way to proportional `meet`, so the whole silhouette sits inside the first screen at every width */
+/* Hallmark · owner change · the hero now ends on the fold, not past it: `min-height: calc(100svh - var(--space-2xl))` subtracts the navbar's real 64px of flow, and short viewports (≤45rem) trade the hero's vertical padding and inner gap for it — spacing only, the headline size, the copy, the palette and the skyline art are untouched, measured at the tallest rotating variant */
+/* Hallmark · finish-review: subagent · 6 findings · 4 resolved (hairline rows in the focus sample, symmetric integration rules, pretty-wrap display heads, punctuation) and 2 more found by recapturing every tab panel and fixed there (a dead last-child selector, a changelog row that led with its tag instead of its title) */
+@import "../tokens.css";
+@import "../base.css" layer(base);
+
+/* Unlayered: Tailwind's preflight (h1, h2, h3 { font-size: inherit }) is unlayered,
+   so base.css's layered rules lose to it unless restated at top level. */
+:where(main, .lp-band, .lp-cta) :is(h1, h2, h3) {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: var(--display-weight, 700);
+  font-synthesis: none;
+  letter-spacing: var(--tracking-display);
+  line-height: 1.05;
+  overflow-wrap: break-word;
+  min-width: 0;
+  text-wrap: balance;
+}
+:where(main, .lp-band, .lp-cta) h1 { max-width: 20ch; font-size: var(--text-display); text-wrap: pretty; }
+:where(main, .lp-band, .lp-cta) h2 { max-width: 30ch; font-size: var(--text-section); line-height: 1.08; text-wrap: pretty; }
+:where(main, .lp-band, .lp-cta) h3 { max-width: 40ch; font-size: var(--text-title); line-height: 1.2; }
+
+/* ── Page shell ─────────────────────────────────────────────────────────── */
+.lp-root {
+  min-height: 100dvh;
+  background: var(--color-paper);
+  color: var(--color-ink);
+}
+.lp-wrap {
+  width: 100%;
+  max-width: var(--container);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+.lp-skip {
+  position: absolute;
+  left: var(--space-md);
+  top: calc(-1 * var(--space-3xl));
+  z-index: var(--z-toast);
+  padding: var(--space-xs) var(--space-md);
+  background: var(--color-ink);
+  color: var(--color-paper);
+  text-decoration: none;
+}
+.lp-skip:focus-visible { top: var(--space-md); }
+
+/* ── Controls ───────────────────────────────────────────────────────────── */
+.lp-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  min-height: 48px;
+  padding: 0 var(--space-lg);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-pill);
+  background: var(--color-accent);
+  color: var(--color-accent-ink);
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: var(--text-md);
+  white-space: nowrap;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color var(--dur-short) var(--ease-out), border-color var(--dur-short) var(--ease-out), transform var(--dur-micro) var(--ease-out);
+}
+.lp-btn:hover { background: var(--color-accent-deep); border-color: var(--color-accent-deep); }
+.lp-btn:active { transform: translateY(1px); }
+.lp-btn:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+.lp-btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+.lp-btn--quiet {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  border-color: var(--color-rule-2);
+}
+.lp-btn--quiet:hover { background: var(--color-paper-2); border-color: var(--color-ink-2); }
+.lp-btn--block { width: 100%; }
+
+/* ── Hero (the owner's rotating statement over the drifting-signal backdrop) ─ */
+.lp-hero {
+  position: relative;
+  overflow: hidden;
+  /* The sticky navbar takes var(--space-2xl) of flow above this section, so the
+     hero fills exactly the rest of the first screen: the skyline's base lands on
+     the fold instead of under it. `svh`, not `dvh` — a mobile URL bar shrinking
+     the viewport must not push the buildings off screen. */
+  min-height: calc(100svh - var(--space-2xl));
+  padding-block: var(--space-2xl);
+  display: grid;
+  align-content: center;
+}
+.lp-hero__inner {
+  position: relative;
+  z-index: 10;
+  display: grid;
+  justify-items: center;
+  text-align: center;
+  gap: var(--space-lg);
+}
+.lp-hero__inner > * { animation: lp-fadeup 0.8s var(--ease-out) both; }
+.lp-hero__inner > :nth-child(2) { animation-delay: 0.08s; }
+.lp-hero__inner > :nth-child(3) { animation-delay: 0.16s; }
+.lp-hero__inner > :nth-child(4) { animation-delay: 0.24s; }
+.lp-hero__inner > :nth-child(5) { animation-delay: 0.32s; }
+@keyframes lp-fadeup {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: none; }
+}
+
+.lp-hero__note {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-2xs) var(--space-md);
+  border-radius: var(--radius-pill);
+  border: var(--rule-hair) solid color-mix(in oklab, var(--color-accent) 32%, transparent);
+  background: var(--color-accent-wash);
+  color: var(--color-accent-deep);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+.lp-hero__note::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  animation: lp-pulse 2.4s var(--ease-in-out) infinite;
+}
+@keyframes lp-pulse {
+  0%, 100% { opacity: 0.45; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1); }
+}
+
+/* The three rotating lines own their size: the shared display clamp starts
+   too large for a headline whose segments cannot wrap mid-phrase. */
+.lp-hero__title {
+  max-width: none;
+  display: grid;
+  gap: var(--space-2xs);
+  font-size: clamp(1.5rem, 1rem + 2.4vw, 3.25rem);
+  font-weight: 500;
+  line-height: 1.25;
+}
+.lp-hero__line { display: block; }
+.lp-hero__phrase-icon { width: 0.95em; height: 0.95em; flex: none; }
+.lp-hero__lead { font-size: var(--text-lead); line-height: 1.5; color: var(--color-ink-2); max-width: 46ch; }
+.lp-hero__actions { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-sm); padding-top: var(--space-xs); }
+.lp-hero__stats {
+  list-style: none;
+  margin: 0;
+  padding: var(--space-md) 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-md) var(--space-2xl);
+}
+.lp-hero__stat {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-size: var(--text-sm);
+  color: var(--color-ink-2);
+}
+.lp-hero__stat svg { flex: none; color: var(--color-accent); }
+
+/* Short laptop viewports (1366x768 at 100% zoom, 1440x900 at 125% scaling):
+   spacing gives way before the skyline does, and the bottom padding carries
+   more of the slack than the top so the benefit row keeps clear air above the
+   roofline. Nothing here shrinks the headline or the artwork. */
+@media (max-height: 45rem) and (min-width: 40.0625rem) {
+  .lp-hero { padding-block: var(--space-lg) var(--space-2xl); }
+  .lp-hero__inner { gap: var(--space-md); }
+  .lp-hero__actions { padding-top: 0; }
+  .lp-hero__stats { padding-top: var(--space-sm); }
+}
+
+@media (max-width: 40rem) {
+  .lp-hero {
+    min-height: calc(100svh - var(--space-2xl));
+    padding-block: var(--space-lg);
+  }
+  .lp-hero__inner { gap: var(--space-sm); }
+  .lp-hero__actions { flex-direction: column; width: 100%; padding-top: 0; }
+  .lp-hero__actions .lp-btn { width: 100%; }
+  .lp-hero__stats {
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-xs);
+    padding-top: var(--space-3xs);
+  }
+}
+
+/* Smallest phones (360–390 wide, ≤672 tall) with the tallest rotating variant,
+   where all three statement lines wrap to two rows: the hero's own spacing gives
+   way, and the bottom padding carries more of it so the benefit row stays clear
+   of the roofline. */
+@media (max-width: 40rem) and (max-height: 42rem) {
+  .lp-hero { padding-block: var(--space-md) var(--space-lg); }
+  .lp-hero__inner { gap: var(--space-xs); }
+}
+
+/* ── Tabs (Switcher) ────────────────────────────────────────────────────── */
+.lp-tabs { padding-block: var(--section-gap); }
+.lp-tabs__head {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: var(--gap-columns);
+  align-items: baseline;
+  margin-bottom: var(--space-3xl);
+}
+.lp-tabs__head h2 { grid-column: 1 / 7; }
+.lp-tabs__head .lead { grid-column: 7 / 13; color: var(--color-ink-2); }
+@media (max-width: 60rem) {
+  .lp-tabs__head { grid-template-columns: minmax(0, 1fr); gap: var(--space-sm); }
+  .lp-tabs__head h2, .lp-tabs__head .lead { grid-column: 1 / -1; }
+}
+.ft-seg {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2xs);
+  padding: var(--space-2xs);
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-pill);
+  background: var(--color-paper-2);
+  width: fit-content;
+  margin-inline: auto;
+  margin-bottom: var(--space-2xl);
+}
+.ft-tab {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 var(--space-lg);
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--color-muted);
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: var(--text-md);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color var(--dur-short) var(--ease-out), color var(--dur-short) var(--ease-out);
+}
+.ft-tab:hover { color: var(--color-ink); }
+.ft-tab[aria-selected="true"] { background: var(--color-ink); color: var(--color-paper); }
+.ft-tab:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+.ft-panel {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--space-3xl);
+  row-gap: var(--space-xl);
+  align-items: center;
+}
+.ft-panel__text { grid-column: 1 / 6; display: grid; gap: var(--space-lg); }
+.ft-panel__text h3 { font-size: var(--text-title); line-height: 1.25; }
+.ft-panel__text p { color: var(--color-ink-2); line-height: 1.6; }
+.ft-stat {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-sm);
+  border-top: var(--rule-hair) solid var(--color-rule);
+  padding-top: var(--space-sm);
+}
+.ft-stat b {
+  font-family: var(--font-display);
+  font-weight: var(--display-weight);
+  font-size: var(--text-2xl);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--tracking-display);
+}
+.ft-stat span { font-size: var(--text-sm); color: var(--color-muted); }
+.ft-link {
+  justify-self: start;
+  color: var(--color-accent);
+  font-weight: 500;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+  transition: color var(--dur-short) var(--ease-out);
+}
+.ft-link:hover { color: var(--color-accent-deep); }
+.ft-link:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+.ft-panel__visual { grid-column: 6 / 13; }
+.ft-visual {
+  margin: 0;
+  border-radius: var(--radius-card);
+  border: 1px solid var(--color-rule);
+  background: var(--color-paper-2);
+  overflow: hidden;
+}
+.ft-visual img { width: 100%; height: auto; display: block; }
+.ft-visual--sample { background: var(--color-paper); padding: var(--space-lg); }
+@media (max-width: 60rem) {
+  .ft-panel { grid-template-columns: minmax(0, 1fr); }
+  .ft-panel__text, .ft-panel__visual { grid-column: 1 / -1; }
+}
+
+/* Built samples (the two mockups) */
+.ft-list { list-style: none; margin: 0; padding: 0; display: grid; }
+.ft-list li:last-child { border-bottom: 0; }
+.ft-row {
+  display: grid;
+  gap: var(--space-2xs);
+  padding: var(--space-sm) 0;
+  border-bottom: var(--rule-hair) solid var(--color-rule);
+}
+.ft-row__title { font-weight: 600; }
+.ft-row__meta { display: flex; flex-wrap: wrap; gap: var(--space-md); font-size: var(--text-sm); color: var(--color-muted); font-variant-numeric: tabular-nums; }
+.ft-tag {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0 var(--space-xs);
+  border: 1px solid var(--color-rule-2);
+  border-radius: var(--radius-pill);
+  font-size: var(--text-xs);
+  color: var(--color-ink-2);
+  white-space: nowrap;
+}
+.ft-tag--critical { border-color: var(--color-error); color: var(--color-error); }
+.ft-insight {
+  display: grid;
+  gap: var(--space-2xs);
+  padding: var(--space-md) 0;
+  border-top: var(--rule-hair) solid var(--color-rule);
+}
+.ft-insight:last-child { border-bottom: var(--rule-hair) solid var(--color-rule); }
+.ft-insight__head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-md); }
+.ft-insight p { margin: 0; font-size: var(--text-sm); color: var(--color-muted); line-height: 1.5; }
+.ft-insights { display: grid; }
+.ft-sample__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+.ft-sample__label { font-size: var(--text-sm); font-weight: 600; color: var(--color-ink-2); }
+.ft-sample__date { font-size: var(--text-xs); color: var(--color-muted); font-variant-numeric: tabular-nums; }
+.ft-visual--capture { position: relative; }
+.ft-visual--capture video {
+  width: 100%;
+  height: auto;
+  display: block;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  background: var(--color-ink);
+}
+.ft-visual__pause {
+  position: absolute;
+  right: var(--space-sm);
+  bottom: var(--space-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid color-mix(in oklab, var(--color-paper) 40%, transparent);
+  border-radius: var(--radius-pill);
+  background: color-mix(in oklab, var(--color-ink) 62%, transparent);
+  color: var(--color-paper);
+  cursor: pointer;
+  transition: background-color var(--dur-short) var(--ease-out), border-color var(--dur-short) var(--ease-out);
+}
+.ft-visual__pause:hover { background: color-mix(in oklab, var(--color-ink) 82%, transparent); }
+.ft-visual__pause:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+
+/* ── Integrations (Rows) ────────────────────────────────────────────────── */
+.lp-head {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: var(--gap-columns);
+  align-items: baseline;
+  margin-bottom: var(--space-3xl);
+}
+.lp-head h2 { grid-column: 1 / 7; }
+.lp-head .lead { grid-column: 7 / 13; color: var(--color-ink-2); }
+@media (max-width: 60rem) {
+  .lp-head { grid-template-columns: minmax(0, 1fr); gap: var(--space-sm); }
+  .lp-head h2, .lp-head .lead { grid-column: 1 / -1; }
+}
+.lp-integrations { padding-block: var(--section-gap); border-top: var(--rule-hair) solid var(--color-rule); }
+.lp-rows {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: var(--space-3xl);
+}
+.lp-row {
+  display: grid;
+  grid-template-columns: var(--space-2xl) minmax(0, 1fr);
+  gap: var(--space-md);
+  align-items: baseline;
+  padding-block: var(--space-md);
+  border-top: var(--rule-hair) solid var(--color-rule);
+}
+.lp-row:nth-child(-n+2) { border-top: 0; }
+.lp-row__icon { display: flex; align-items: center; justify-content: flex-start; color: var(--color-ink-2); }
+.lp-row__icon img, .lp-row__icon svg { width: var(--space-lg); height: var(--space-lg); }
+.lp-row h3 { font-size: var(--text-md); font-family: var(--font-display); font-weight: var(--display-weight); letter-spacing: var(--tracking-display); line-height: 1.4; }
+.lp-row p { font-size: var(--text-sm); color: var(--color-muted); line-height: 1.55; }
+.lp-more {
+  display: inline-flex;
+  margin-top: var(--space-xl);
+  color: var(--color-accent);
+  font-weight: 500;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
+.lp-more:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+@media (max-width: 60rem) {
+  .lp-rows { grid-template-columns: minmax(0, 1fr); }
+  .lp-row:nth-child(odd) { border-top: var(--rule-hair) solid var(--color-rule); }
+  .lp-row:first-child { border-top: 0; }
+}
+
+/* ── Statement band (Committed field) ───────────────────────────────────── */
+.lp-band {
+  background: var(--color-band-field);
+  color: var(--color-band-ink);
+  padding-block: var(--section-gap);
+}
+.lp-band__grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--space-3xl);
+  row-gap: var(--space-2xl);
+}
+.lp-band__left { grid-column: 1 / 6; display: grid; gap: var(--space-lg); align-content: start; }
+.lp-band__left h2 { color: var(--color-band-ink); }
+.lp-band__facts { display: grid; gap: var(--space-md); padding-top: var(--space-lg); border-top: 1px solid color-mix(in oklab, var(--color-band-ink) 30%, transparent); }
+.lp-band__facts dt { font-weight: 600; }
+.lp-band__facts dd { margin: 0; color: color-mix(in oklab, var(--color-band-ink) 82%, transparent); font-size: var(--text-sm); line-height: 1.55; }
+.lp-band__claims { grid-column: 6 / 13; margin: 0; padding: 0; list-style: none; display: grid; align-content: center; }
+.lp-band__claims li {
+  padding-block: var(--space-md);
+  border-top: 1px solid color-mix(in oklab, var(--color-band-ink) 30%, transparent);
+  font-size: var(--text-lg);
+  line-height: 1.4;
+}
+.lp-band__claims li:first-child { border-top: 0; }
+@media (max-width: 60rem) {
+  .lp-band__grid { grid-template-columns: minmax(0, 1fr); }
+  .lp-band__left, .lp-band__claims { grid-column: 1 / -1; }
+}
+
+/* ── Closing band ───────────────────────────────────────────────────────── */
+.lp-cta { padding-block: var(--section-gap); }
+.lp-cta__inner {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--gap-columns);
+  row-gap: var(--space-xl);
+  align-items: end;
+  border-top: var(--rule-hair) solid var(--color-rule);
+  padding-top: var(--space-2xl);
+}
+.lp-cta__text { grid-column: 1 / 9; display: grid; gap: var(--space-md); }
+.lp-cta h2 { font-size: var(--text-display); line-height: 1.05; max-width: 16ch; }
+.lp-cta p { color: var(--color-ink-2); max-width: 46ch; }
+.lp-cta .lp-btn { grid-column: 9 / 13; justify-self: start; }
+@media (max-width: 60rem) {
+  .lp-cta__inner { grid-template-columns: minmax(0, 1fr); }
+  .lp-cta__text, .lp-cta .lp-btn { grid-column: 1 / -1; }
+}

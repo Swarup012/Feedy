@@ -6,8 +6,8 @@
 /* Hallmark · dismissed F19 · kept chrome: navbar (500/700) and LandingFooter (700) sit outside this redesign; this page runs 400/500/600 */
 /* Hallmark · waive 39b · the 40px pill is the shared marketing navbar, while every control this pricing page owns measures 44px or more · site chrome is kept at redesign depth, so only this page's own controls are in scope here */
 /* Hallmark · waive 49b · the wrapping labels sit in the shared site footer, whose copy and line breaks are the owner's kept content on this pricing page · a footer phrase that cannot shorten is the guard this gate already names */
-@import "./tokens.css";
-@import "./base.css" layer(base);
+@import "../../tokens.css";
+@import "../../base.css" layer(base);
 
 /* Unlayered: Tailwind's preflight (h1, h2, h3 { font-size: inherit }) is unlayered,
    so these layered base.css rules lose to it unless restated at top level. */
