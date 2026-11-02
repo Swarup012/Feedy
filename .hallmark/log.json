@@ -1,5 +1,25 @@
 [
  {
+  "mode": "redesign",
+  "depth": "full",
+  "scope": "app",
+  "shape": "Workbench (user rail → posts ledger → dossier) + two-zone document (thread / field-ledger rail)",
+  "genre": "modern-minimal",
+  "theme": "brand (Faddy cobalt)",
+  "axes": "paper hsl(background) · one cobalt accent · Switzer · hairline regions · 1.125 app scale",
+  "entry": "src/app/admin/users/page.tsx + src/components/feedback/PostDetails.tsx",
+  "fingerprint": "rail → ledger → dossier; thread reads as one document, edits live in the rail",
+  "sections": "User rail (search, sort, rows, pagination) · Posts ledger (signature) · User dossier (rule-free figure band, fact rows) · Post thread (vote, title, body, attachments, merged fold, comments, pinned composer) · Field-ledger rail (link, status, category, revenue, attributes) · Sheet skeleton",
+  "signature": "the posts ledger — per-user posts as a continuous ruled list with status pills and count stats",
+  "imagery": "none (admin workbench)",
+  "photos": [],
+  "waived": "74 (planned pill keeps project --progress status hue)",
+  "prompt": "redesign src/app/admin/users/ — maintain the brand; fix the bad post details design",
+  "render": "login wall — Supabase auth, credentials declined; render tier unverifiable",
+  "finish_review": "subagent · first word fix · 8 findings · 8 resolved · sloplint static 0 FAIL 0 WARN 2 dismissed · tests 8/8",
+  "date": "2026-11-02"
+ },
+ {
   "shape": "app screen",
   "theme": "brand",
   "axes": "mid/grotesk-sans/cool",

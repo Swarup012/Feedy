@@ -8,7 +8,6 @@ import { Post } from '@/services/postService';
 import { Board } from '@/services/boardService';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import {
   Select,
@@ -24,11 +23,10 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet';
 import {
-  Users,
   Search,
   ArrowUp,
+  ArrowDown,
   MessageSquare,
-  User,
   ExternalLink,
   Shield,
   Calendar,
@@ -50,6 +48,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
 import dynamic from 'next/dynamic';
+import './users.css';
 
 // PostDetails (~1.6k lines + roadmap/changelog/realtime deps) is only rendered
 // inside the Sheet once a post is clicked — load it on demand instead of
@@ -61,27 +60,16 @@ const PostDetails = dynamic(
     // Fixed height matching the sheet body (calc(100vh - 64px)) so the
     // chunk-loading skeleton occupies the same box as the real component.
     loading: () => (
-      <div className="h-full bg-gray-50 dark:bg-background p-6 space-y-4">
+      <div className="u-sheetloading">
         <Skeleton className="h-6 w-64" />
         <Skeleton className="h-4 w-96 max-w-full" />
-        <div className="space-y-3 pt-2">
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-4 w-5/6" />
-          <Skeleton className="h-4 w-4/6" />
-        </div>
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-5/6" />
+        <Skeleton className="h-4 w-4/6" />
       </div>
     ),
   },
 );
-
-const STATUS_COLORS: Record<string, string> = {
-  open: 'bg-muted text-muted-foreground',
-  'under-review': 'bg-primary/10 text-primary',
-  planned: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400',
-  'in-progress': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400',
-  completed: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
-  closed: 'bg-destructive/10 text-destructive',
-};
 
 const STATUS_LABELS: Record<string, string> = {
   open: 'Open',
@@ -92,11 +80,20 @@ const STATUS_LABELS: Record<string, string> = {
   closed: 'Closed',
 };
 
-const IDENTITY_BADGES: Record<string, { label: string; className: string }> = {
-  verified: { label: 'Verified', className: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' },
-  unverified: { label: 'Unverified', className: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400' },
-  email_only: { label: 'Email Only', className: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400' },
-  anonymous: { label: 'Anonymous', className: 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400' },
+const STATUS_PILLS: Record<string, string> = {
+  open: 'spill--open',
+  'under-review': 'spill--review',
+  planned: 'spill--planned',
+  'in-progress': 'spill--progress',
+  completed: 'spill--done',
+  closed: 'spill--closed',
+};
+
+const IDENTITY_PILLS: Record<string, { label: string; pill: string }> = {
+  verified: { label: 'Verified', pill: 'spill--verified' },
+  unverified: { label: 'Unverified', pill: 'spill--progress' },
+  email_only: { label: 'Email Only', pill: 'spill--email' },
+  anonymous: { label: 'Anonymous', pill: 'spill--anon' },
 };
 
 function getInitials(name: string | null | undefined): string {
@@ -106,15 +103,13 @@ function getInitials(name: string | null | undefined): string {
   return parts[0].substring(0, 2).toUpperCase();
 }
 
-function getAvatarColor(name: string | null | undefined): string {
-  if (!name) return 'bg-gray-400';
-  const colors = [
-    'bg-blue-500', 'bg-emerald-500', 'bg-violet-500', 'bg-amber-500',
-    'bg-rose-500', 'bg-cyan-500', 'bg-indigo-500', 'bg-pink-500',
-  ];
+// Four lightness steps of one brand hue, picked by name hash.
+function getAvatarTint(name: string | null | undefined): string {
+  if (!name) return 'uavatar';
   let hash = 0;
   for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  return colors[Math.abs(hash) % colors.length];
+  const tier = (Math.abs(hash) % 4) + 1;
+  return cn('uavatar', tier > 1 && `uavatar--t${tier}`);
 }
 
 export default function UsersPage() {
@@ -337,22 +332,20 @@ export default function UsersPage() {
   return (
     <ProtectedRoute>
       <div className={`${WIDE_CONTAINER} h-full`}>
-        {/* 3-column layout */}
-        <div className="flex h-full min-h-0 overflow-hidden">
+        <div className="uwork">
 
-          {/* ── LEFT COLUMN: Users List ──────────────────────────── */}
-          <div className="w-[320px] min-w-[320px] min-h-0 border-r border-border flex flex-col bg-background">
-            {/* Search + Sort */}
-            <div className="p-3 pb-4 space-y-2">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          {/* ── User rail ──────────────────────────────────────────── */}
+          <aside className="urail" aria-label="End users">
+            <div className="urail__tools">
+              <div className="urail__search">
+                <Search aria-hidden="true" />
                 <Input
-                  placeholder="Search users..."
-                  className="pl-10 border-0 bg-muted/50"
+                  aria-label="Search users"
+                  placeholder="Search users…"
                   onChange={(e) => handleSearch(e.target.value)}
                 />
               </div>
-              <div className="flex gap-2">
+              <div className="urail__sort">
                 <Select
                   value={sortBy}
                   onValueChange={(v) => {
@@ -360,7 +353,7 @@ export default function UsersPage() {
                     setCurrentPage(1);
                   }}
                 >
-                  <SelectTrigger className="flex-1 border-0 bg-muted/50 focus:ring-1 focus:ring-ring">
+                  <SelectTrigger className="urail__sort-select" aria-label="Sort users by">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -369,69 +362,62 @@ export default function UsersPage() {
                     <SelectItem value="name">Name</SelectItem>
                   </SelectContent>
                 </Select>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-9 w-9 flex-shrink-0 border-0 bg-muted/50"
+                <button
+                  type="button"
+                  className="urail__order"
                   onClick={() => {
                     setSortOrder((prev) => (prev === 'asc' ? 'desc' : 'asc'));
                     setCurrentPage(1);
                   }}
                   title={`Sort ${sortOrder === 'asc' ? 'descending' : 'ascending'}`}
+                  aria-label={`Sort ${sortOrder === 'asc' ? 'descending' : 'ascending'}`}
                 >
-                  <span className="text-xs font-mono">{sortOrder === 'asc' ? '↑' : '↓'}</span>
-                </Button>
+                  {sortOrder === 'asc' ? <ArrowUp aria-hidden="true" /> : <ArrowDown aria-hidden="true" />}
+                </button>
               </div>
             </div>
 
-            {/* Users list */}
-            <div className="flex-1 overflow-y-auto">
+            <div className="urail__list">
               {usersLoading ? (
-                <div className="px-2 py-2 space-y-1">
+                <div className="u-skeletons">
                   {Array.from({ length: 5 }).map((_, i) => (
-                    <Skeleton key={i} className="h-[60px] w-full" />
+                    <Skeleton key={i} className="h-[56px] w-full" />
                   ))}
                 </div>
               ) : users.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-full text-center p-6">
-                  <Users className="h-10 w-10 text-muted-foreground/40 mb-3" />
-                  <p className="text-sm text-muted-foreground">
+                <div className="u-empty">
+                  <p className="u-empty__title">
                     {search ? 'No users match your search' : 'No end users yet'}
+                  </p>
+                  <p className="u-empty__note">
+                    {search
+                      ? 'Try a shorter name or email fragment.'
+                      : 'End users appear here once they sign in to the feedback board.'}
                   </p>
                 </div>
               ) : (
-                <div className="px-2 py-2 space-y-1">
-                  {users.map((user) => (
-                    <button
-                      key={user.id}
-                      onClick={() => handleUserSelect(user)}
-                      className={cn(
-                        'w-full text-left p-3 rounded-lg hover:bg-muted/50 transition-colors',
-                        selectedUser?.id === user.id && 'bg-muted hover:bg-muted'
-                      )}
+                users.map((user) => (
+                  <button
+                    key={user.id}
+                    type="button"
+                    onClick={() => handleUserSelect(user)}
+                    aria-pressed={selectedUser?.id === user.id}
+                    className={cn('lrow', selectedUser?.id === user.id && 'is-selected')}
+                  >
+                    <span className={getAvatarTint(user.name)} aria-hidden="true">
+                      {getInitials(user.name)}
+                    </span>
+                    <span className="lrow__body">
+                      <span className="lrow__name">{user.name || 'Anonymous'}</span>
+                      <span className="lrow__mail">{user.email || user.external_user_id || '—'}</span>
+                    </span>
+                    <span
+                      className={cn('spill', IDENTITY_PILLS[user.identity_type]?.pill)}
                     >
-                      <div className="flex items-center gap-2.5">
-                        <div className={`flex-shrink-0 w-8 h-8 rounded-full ${getAvatarColor(user.name)} flex items-center justify-center`}>
-                          <span className="text-[10px] font-semibold text-white">{getInitials(user.name)}</span>
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <div className="font-medium text-sm truncate">
-                            {user.name || 'Anonymous'}
-                          </div>
-                          <div className="text-xs text-muted-foreground truncate">
-                            {user.email || user.external_user_id || '—'}
-                          </div>
-                        </div>
-                        <Badge
-                          variant="outline"
-                          className={cn('text-[10px] flex-shrink-0 border-0', IDENTITY_BADGES[user.identity_type]?.className)}
-                        >
-                          {IDENTITY_BADGES[user.identity_type]?.label || user.identity_type}
-                        </Badge>
-                      </div>
-                    </button>
-                  ))}
-                </div>
+                      {IDENTITY_PILLS[user.identity_type]?.label || user.identity_type}
+                    </span>
+                  </button>
+                ))
               )}
             </div>
 
@@ -440,14 +426,15 @@ export default function UsersPage() {
                 is a single page or data hasn't loaded yet. */}
             <div
               className={cn(
-                'p-3 pt-4 flex items-center justify-between',
+                'urail__foot',
                 totalPages <= 1 && 'invisible',
               )}
             >
-              <p className="text-xs text-muted-foreground">
-                {totalUsers} users · Page {currentPage} of {totalPages}
+              <p className="urail__count">
+                <span>{totalUsers} users</span>
+                <span>Page {currentPage} of {totalPages}</span>
               </p>
-              <div className="flex gap-1">
+              <div className="ustack">
                 <Button
                   variant="outline"
                   size="sm"
@@ -468,107 +455,91 @@ export default function UsersPage() {
                 </Button>
               </div>
             </div>
-          </div>
+          </aside>
 
-          {/* ── MIDDLE COLUMN: Posts by Selected User ─────────────── */}
-          <div className="flex-1 min-w-0 min-h-0 flex flex-col bg-background">
+          {/* ── Posts ledger ───────────────────────────────────────── */}
+          <section className="uposts" aria-label="User posts">
             {!selectedUser ? (
-              <div className="flex-1 flex flex-col items-center justify-center text-center p-6">
-                <Users className="h-12 w-12 text-muted-foreground/30 mb-4" />
-                <h3 className="font-semibold text-lg text-foreground mb-1">Select a user</h3>
-                <p className="text-sm text-muted-foreground max-w-xs">
+              <div className="u-empty">
+                <p className="u-empty__title">Select a user</p>
+                <p className="u-empty__note">
                   Choose a user from the list to view their posts and activity.
                 </p>
               </div>
             ) : (
               <>
-                {/* Posts header */}
-                <div className="p-3 pb-4 bg-background flex items-center justify-between">
-                  <div>
-                    <h3 className="font-semibold text-sm">
-                      Posts by {selectedUser.name || 'Anonymous'}
-                    </h3>
-                    {postsLoading ? (
-                      <p className="text-xs text-muted-foreground">Loading...</p>
-                    ) : typeof postsTotal === 'number' ? (
-                      <p className="text-xs text-muted-foreground">
-                        {`${postsTotal} post${postsTotal !== 1 ? 's' : ''}`}
-                      </p>
-                    ) : null}
-                  </div>
+                <div className="uposts__head">
+                  <h3 className="uposts__title">
+                    Posts by {selectedUser.name || 'Anonymous'}
+                  </h3>
+                  <p className="uposts__count">
+                    {postsLoading
+                      ? 'Loading…'
+                      : typeof postsTotal === 'number'
+                        ? `${postsTotal} post${postsTotal !== 1 ? 's' : ''}`
+                        : null}
+                  </p>
                 </div>
 
-                {/* Posts list */}
-                <div className="flex-1 overflow-y-auto">
+                <div className="uposts__list">
                   {postsLoading ? (
-                    <div className="px-2 py-2 space-y-1">
+                    <div className="u-skeletons">
                       {Array.from({ length: 3 }).map((_, i) => (
                         <Skeleton key={i} className="h-24 w-full" />
                       ))}
                     </div>
                   ) : selectedUserPosts.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center h-full text-center p-6">
-                      <MessageSquare className="h-10 w-10 text-muted-foreground/40 mb-3" />
-                      <p className="text-sm text-muted-foreground">No posts from this user</p>
+                    <div className="u-empty">
+                      <p className="u-empty__title">No posts from this user</p>
+                      <p className="u-empty__note">
+                        Posts this user creates on the board will be listed here.
+                      </p>
                     </div>
                   ) : (
-                    <div className="px-2 py-2 space-y-1">
-                      {selectedUserPosts.map((post) => (
-                        <button
-                          key={post.id}
-                          onClick={() => handlePostClick(post)}
-                          className={cn(
-                            'w-full text-left p-4 rounded-lg hover:bg-muted/50 transition-colors',
-                            sheetPost?.id === post.id && sheetOpen && 'bg-primary/10'
+                    selectedUserPosts.map((post) => (
+                      <button
+                        key={post.id}
+                        type="button"
+                        onClick={() => handlePostClick(post)}
+                        className={cn(
+                          'prow',
+                          sheetPost?.id === post.id && sheetOpen && 'is-open'
+                        )}
+                      >
+                        <span className="prow__title">{post.title}</span>
+                        {post.description && (
+                          <span className="prow__excerpt">{post.description}</span>
+                        )}
+                        <span className="prow__meta">
+                          <span className={cn('spill', STATUS_PILLS[post.status])}>
+                            {STATUS_LABELS[post.status]}
+                          </span>
+                          {post.board && (
+                            <span className="prow__board">{post.board.name}</span>
                           )}
-                        >
-                          <div className="space-y-2">
-                            <h4 className="font-semibold text-sm line-clamp-2 text-foreground">
-                              {post.title}
-                            </h4>
-                            {post.description && (
-                              <p className="text-xs text-muted-foreground line-clamp-2">
-                                {post.description}
-                              </p>
-                            )}
-                            <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                              <Badge
-                                variant="secondary"
-                                className={cn('text-xs', STATUS_COLORS[post.status])}
-                              >
-                                {STATUS_LABELS[post.status]}
-                              </Badge>
-                              {post.board && (
-                                <span className="text-xs text-muted-foreground">
-                                  {post.board.name}
-                                </span>
-                              )}
-                              <div className="flex items-center gap-1">
-                                <ArrowUp className="h-3 w-3" />
-                                <span>{post.upvotes}</span>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <MessageSquare className="h-3 w-3" />
-                                <span>{post.comment_count}</span>
-                              </div>
-                              <span>
-                                {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
-                              </span>
-                            </div>
-                          </div>
-                        </button>
-                      ))}
-                    </div>
+                          <span className="prow__stat">
+                            <ArrowUp aria-hidden="true" />
+                            {post.upvotes}
+                          </span>
+                          <span className="prow__stat">
+                            <MessageSquare aria-hidden="true" />
+                            {post.comment_count}
+                          </span>
+                          <span className="prow__time">
+                            {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
+                          </span>
+                        </span>
+                      </button>
+                    ))
                   )}
                 </div>
 
-                {/* Posts pagination */}
                 {postsTotalPages > 1 && (
-                  <div className="p-3 pt-4 flex items-center justify-between">
-                    <p className="text-xs text-muted-foreground">
-                      Page {postsPage} of {postsTotalPages}
+                  <div className="urail__foot">
+                    <p className="urail__count">
+                      <span>Page {postsPage} of {postsTotalPages}</span>
                     </p>
-                    <div className="flex gap-1">
+                    <div className="ustack">
                       <Button
                         variant="outline"
                         size="sm"
@@ -592,36 +563,32 @@ export default function UsersPage() {
                 )}
               </>
             )}
-          </div>
+          </section>
 
-          {/* ── RIGHT COLUMN: User Detail Panel ──────────────────── */}
-          <div className="w-[300px] min-w-[300px] min-h-0 border-l border-border flex flex-col bg-background">
+          {/* ── User dossier ───────────────────────────────────────── */}
+          <aside className="udos" aria-label="User details">
             {!selectedUser ? (
-              <div className="flex-1 flex flex-col items-center justify-center text-center p-6">
-                <User className="h-10 w-10 text-muted-foreground/30 mb-3" />
-                <p className="text-sm text-muted-foreground">Select a user to view details</p>
+              <div className="u-empty">
+                <p className="u-empty__title">Select a user to view details</p>
               </div>
             ) : (
-              <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                {/* Avatar + Name */}
-                <div className="flex flex-col items-center text-center">
-                  <div className={`w-14 h-14 rounded-full ${getAvatarColor(selectedUser.name)} flex items-center justify-center mb-3`}>
-                    <span className="text-lg font-semibold text-white">{getInitials(selectedUser.name)}</span>
-                  </div>
-                  <h3 className="font-bold text-base">{selectedUser.name || 'Anonymous'}</h3>
+              <div className="udos__inner">
+                <div className="udos__profile">
+                  <span className={cn(getAvatarTint(selectedUser.name), 'uavatar--lg')} aria-hidden="true">
+                    {getInitials(selectedUser.name)}
+                  </span>
+                  <h3 className="udos__name">{selectedUser.name || 'Anonymous'}</h3>
                   {selectedUser.email && (
-                    <p className="text-sm text-muted-foreground mt-0.5">{selectedUser.email}</p>
+                    <p className="udos__mail">{selectedUser.email}</p>
                   )}
-                  <Badge
-                    variant="outline"
-                    className={cn('mt-2 text-xs border-0', IDENTITY_BADGES[selectedUser.identity_type]?.className)}
+                  <span
+                    className={cn('spill', 'udos__identity', IDENTITY_PILLS[selectedUser.identity_type]?.pill)}
                   >
-                    {IDENTITY_BADGES[selectedUser.identity_type]?.label || selectedUser.identity_type}
-                  </Badge>
+                    {IDENTITY_PILLS[selectedUser.identity_type]?.label || selectedUser.identity_type}
+                  </span>
                 </div>
 
-                {/* Lifetime activity counts */}
-                <div className="grid grid-cols-3 gap-2 pt-4">
+                <div className="udos__figures">
                   {(
                     [
                       { label: 'Posts', value: selectedUser.posts_count },
@@ -629,113 +596,109 @@ export default function UsersPage() {
                       { label: 'Comments', value: selectedUser.comments_count },
                     ] as const
                   ).map((stat) => (
-                    <div key={stat.label} className="text-center">
-                      <p className="text-lg font-bold leading-tight">
+                    <div key={stat.label} className="udos__fig">
+                      <div className="udos__fig-value">
                         {detailError ? (
                           '-'
                         ) : detailLoading && stat.value === undefined ? (
-                          <Skeleton className="h-6 w-8 mx-auto" />
+                          <Skeleton className="h-6 w-8" />
                         ) : (
                           stat.value ?? 0
                         )}
-                      </p>
-                      <p className="text-xs text-muted-foreground">{stat.label}</p>
+                      </div>
+                      <p className="udos__fig-label">{stat.label}</p>
                     </div>
                   ))}
                 </div>
 
                 {detailError && (
-                  <div className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
+                  <p className="udos__error">
                     <span>Couldn&apos;t load stats</span>
                     <button
                       type="button"
-                      className="underline underline-offset-2 hover:text-foreground"
                       onClick={() => loadUserDetail(selectedUser.id)}
                     >
                       Retry
                     </button>
-                  </div>
+                  </p>
                 )}
 
-                {/* Info rows */}
-                <div className="space-y-3 pt-4">
+                <div className="udos__facts">
                   {selectedUser.external_user_id && (
-                    <div className="flex items-start gap-2.5">
-                      <ExternalLink className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
-                      <div>
-                        <p className="text-xs text-muted-foreground">External ID</p>
-                        <p className="text-sm font-mono truncate">{selectedUser.external_user_id}</p>
+                    <div className="udos__fact">
+                      <ExternalLink aria-hidden="true" />
+                      <div className="udos__fact-body">
+                        <p className="udos__fact-label">External ID</p>
+                        <p className="udos__fact-value is-mono">{selectedUser.external_user_id}</p>
                       </div>
                     </div>
                   )}
-                  <div className="flex items-start gap-2.5">
-                    <Calendar className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
-                    <div>
-                      <p className="text-xs text-muted-foreground">First Seen</p>
-                      <p className="text-sm">{formatDate(selectedUser.created_at)}</p>
+                  <div className="udos__fact">
+                    <Calendar aria-hidden="true" />
+                    <div className="udos__fact-body">
+                      <p className="udos__fact-label">First Seen</p>
+                      <p className="udos__fact-value">{formatDate(selectedUser.created_at)}</p>
                     </div>
                   </div>
-                  <div className="flex items-start gap-2.5">
-                    <Clock className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
-                    <div>
-                      <p className="text-xs text-muted-foreground">Last Seen</p>
+                  <div className="udos__fact">
+                    <Clock aria-hidden="true" />
+                    <div className="udos__fact-body">
+                      <p className="udos__fact-label">Last Seen</p>
                       {detailLoading && !selectedUser.last_seen_at ? (
-                        <Skeleton className="h-4 w-20 mt-0.5" />
+                        <Skeleton className="h-4 w-20" />
                       ) : (
-                        <p className="text-sm">{formatDate(selectedUser.last_seen_at)}</p>
+                        <p className="udos__fact-value">{formatDate(selectedUser.last_seen_at)}</p>
                       )}
                     </div>
                   </div>
                   {detailLoading && !selectedUser.verified_at && (
-                    <div className="flex items-start gap-2.5">
-                      <Shield className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
-                      <div>
-                        <p className="text-xs text-muted-foreground">Verified At</p>
-                        <Skeleton className="h-4 w-24 mt-0.5" />
+                    <div className="udos__fact">
+                      <Shield aria-hidden="true" />
+                      <div className="udos__fact-body">
+                        <p className="udos__fact-label">Verified At</p>
+                        <Skeleton className="h-4 w-24" />
                       </div>
                     </div>
                   )}
                   {!detailLoading && selectedUser.verified_at && (
-                    <div className="flex items-start gap-2.5">
-                      <Shield className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
-                      <div>
-                        <p className="text-xs text-muted-foreground">Verified At</p>
-                        <p className="text-sm">{formatDate(selectedUser.verified_at)}</p>
+                    <div className="udos__fact">
+                      <Shield aria-hidden="true" />
+                      <div className="udos__fact-body">
+                        <p className="udos__fact-label">Verified At</p>
+                        <p className="udos__fact-value">{formatDate(selectedUser.verified_at)}</p>
                       </div>
                     </div>
                   )}
                 </div>
 
-                {/* Custom fields */}
                 {selectedUser.custom_fields && Object.keys(selectedUser.custom_fields).length > 0 && (
-                  <div className="pt-4">
-                    <p className="text-xs text-muted-foreground mb-2">Custom Fields</p>
-                    <div className="space-y-1.5">
+                  <>
+                    <p className="udos__section">Custom Fields</p>
+                    <div className="udos__fields">
                       {Object.entries(selectedUser.custom_fields).map(([key, value]) => (
-                        <div key={key} className="flex justify-between text-sm">
-                          <span className="text-muted-foreground truncate mr-2">{key}</span>
-                          <span className="font-medium truncate">{String(value)}</span>
+                        <div key={key} className="udos__field">
+                          <span className="udos__field-key">{key}</span>
+                          <span className="udos__field-val">{String(value)}</span>
                         </div>
                       ))}
                     </div>
-                  </div>
+                  </>
                 )}
 
-                {/* Delete user */}
-                <div className="pt-4">
+                <div className="udos__danger">
                   <Button
                     variant="outline"
                     size="sm"
-                    className="w-full text-destructive hover:text-destructive hover:bg-destructive/10"
+                    className="btn--danger-quiet w-full"
                     onClick={() => setDeleteTarget(selectedUser)}
                   >
-                    <Trash2 className="h-4 w-4 mr-1.5" />
+                    <Trash2 aria-hidden="true" />
                     Delete User
                   </Button>
                 </div>
               </div>
             )}
-          </div>
+          </aside>
         </div>
 
         {/* ── Post Detail Sheet ──────────────────────────────────── */}
@@ -744,7 +707,7 @@ export default function UsersPage() {
             <SheetHeader className="px-6 pt-5 pb-3 border-b border-border">
               <SheetTitle>Post Details</SheetTitle>
             </SheetHeader>
-            <div className="overflow-y-auto" style={{ height: 'calc(100vh - 64px)' }}>
+            <div className="u-sheetbody">
               {sheetPost && (
                 <PostDetails
                   post={sheetPost}
@@ -752,7 +715,7 @@ export default function UsersPage() {
                   onPostUpdated={handlePostUpdated}
                   onPostDeleted={handlePostDeleted}
                   onBack={() => setSheetOpen(false)}
-                  className="flex-1 bg-gray-50 dark:bg-background flex overflow-hidden"
+                  className="pd pd--sheet"
                 />
               )}
             </div>

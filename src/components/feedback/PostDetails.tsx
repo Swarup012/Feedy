@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PostDetailsSkeleton } from "./PostsListSkeleton";
@@ -57,6 +56,7 @@ import { usePostRealtime } from "@/hooks/usePostRealtime";
 import { PostRevenueLine } from "./PostRevenueLine";
 import api from "@/lib/api";
 import { useIsCustomHost } from "@/context/CustomHostContext";
+import "./post-details.css";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://faddy.site";
 
@@ -99,36 +99,12 @@ interface PostDetailsProps {
 }
 
 const STATUS_OPTIONS = [
-  {
-    value: "open",
-    label: "Open",
-    color: "bg-muted text-muted-foreground",
-  },
-  {
-    value: "planned",
-    label: "Planned",
-    color: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400",
-  },
-  {
-    value: "in-progress",
-    label: "In Progress",
-    color: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
-  },
-  {
-    value: "under-review",
-    label: "Under Review",
-    color: "bg-primary/10 text-primary",
-  },
-  {
-    value: "completed",
-    label: "Completed",
-    color: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
-  },
-  {
-    value: "closed",
-    label: "Closed",
-    color: "bg-destructive/10 text-destructive",
-  },
+  { value: "open", label: "Open" },
+  { value: "planned", label: "Planned" },
+  { value: "in-progress", label: "In Progress" },
+  { value: "under-review", label: "Under Review" },
+  { value: "completed", label: "Completed" },
+  { value: "closed", label: "Closed" },
 ];
 
 // Recursive CommentItem component
@@ -160,107 +136,72 @@ function CommentItem({
   handleReply,
 }: CommentItemProps) {
   const [showReplies, setShowReplies] = useState(true);
-  const maxDepth = 5; // Maximum nesting level for visual indentation
-  const indentClass = depth > 0 ? `ml-${Math.min(depth * 8, maxDepth * 8)}` : "";
   const hasReplies = comment.replies && comment.replies.length > 0;
 
   return (
-    <div className={depth > 0 ? "ml-8 mt-2" : ""}>
-      <div
-        className={cn(
-          "flex gap-3 py-3.5 -mx-1 px-1 rounded-lg hover:bg-muted/40 dark:hover:bg-muted/20 transition-colors",
-          comment.is_admin && "bg-blue-50/40 dark:bg-blue-900/10",
-        )}
-      >
+    <div>
+      <div className={cn("pd__cmt", comment.is_admin && "pd__cmt--admin")}>
         {/* Avatar */}
-        <Avatar className="h-9 w-9 flex-shrink-0 mt-0.5">
+        <Avatar className="h-8 w-8 flex-shrink-0">
           <AvatarImage src={comment.author?.avatar_url || undefined} alt={comment.author?.name || "User"} />
           <AvatarFallback className="text-xs">
             {comment.author?.name?.charAt(0)?.toUpperCase() || "U"}
           </AvatarFallback>
         </Avatar>
 
-        {/* Comment Content */}
-        <div className="flex-1 min-w-0">
-          {/* Header: Name, Badge, Time, Delete */}
-          <div className="flex items-center gap-2 mb-1 flex-wrap">
-            <span className="font-semibold text-sm text-foreground">
-              {comment.author?.name}
-            </span>
-            {comment.is_admin && (
-              <Badge variant="secondary" className="text-xs px-1.5 py-0 h-4 bg-primary/10 text-primary">
-                Admin
-              </Badge>
-            )}
-            <span className="text-xs text-muted-foreground">
+        {/* Comment content */}
+        <div className="pd__cmt-body">
+          <div className="pd__cmt-head">
+            <span className="pd__cmt-name">{comment.author?.name}</span>
+            {comment.is_admin && <span className="pd__tag">Admin</span>}
+            <span className="pd__cmt-when">
               {formatDistanceToNow(new Date(comment.created_at), {
                 addSuffix: true,
               })}
             </span>
-            <div className="ml-auto">
-              {(user?.id === comment.author_id ||
-                user?.organization_role === "admin" ||
-                user?.organization_role === "owner") && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleDeleteComment(comment.id)}
-                  className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive dark:hover:text-destructive"
-                  aria-label="Delete comment"
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </Button>
-              )}
-            </div>
+            {(user?.id === comment.author_id ||
+              user?.organization_role === "admin" ||
+              user?.organization_role === "owner") && (
+              <button
+                type="button"
+                className="pd__icon-btn pd__icon-btn--danger pd__cmt-del"
+                onClick={() => handleDeleteComment(comment.id)}
+                aria-label="Delete comment"
+              >
+                <Trash2 aria-hidden="true" />
+              </button>
+            )}
           </div>
 
-          {/* Comment Text */}
-          <p className="text-sm text-foreground whitespace-pre-wrap mb-2 leading-relaxed">
-            {comment.content}
-          </p>
+          <p className="pd__cmt-text">{comment.content}</p>
 
-          {/* Actions: Like, Reply, Show Replies */}
-          <div className="flex items-center gap-1">
-            <Button
-              variant="ghost"
-              size="sm"
+          <div className="pd__cmt-actions">
+            <button
+              type="button"
               onClick={() => handleToggleCommentLike(comment.id)}
-              className={cn(
-                "h-7 px-2 gap-1.5 hover:bg-red-50 dark:hover:bg-red-900/20",
-                comment.user_has_liked && "text-red-500 hover:text-red-600"
-              )}
+              className={cn("pd__act pd__act--like", comment.user_has_liked && "is-liked")}
+              aria-label={comment.user_has_liked ? "Remove like" : "Like comment"}
             >
-              <Heart 
-                className={cn(
-                  "h-3.5 w-3.5",
-                  comment.user_has_liked && "fill-current"
-                )}
-              />
-              <span className="text-xs font-medium">
-                {comment.like_count || 0}
-              </span>
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
+              <Heart aria-hidden="true" />
+              <span>{comment.like_count || 0}</span>
+            </button>
+            <button
+              type="button"
               onClick={() => setReplyingTo(comment.id)}
-              className="h-7 px-2 gap-1.5 hover:bg-primary/10 hover:text-primary"
+              className="pd__act"
             >
-              <Reply className="h-3.5 w-3.5" />
-              <span className="text-xs font-medium">Reply</span>
-            </Button>
+              <Reply aria-hidden="true" />
+              Reply
+            </button>
             {hasReplies && (
-              <Button
-                variant="ghost"
-                size="sm"
+              <button
+                type="button"
                 onClick={() => setShowReplies(!showReplies)}
-                className="h-7 px-2 gap-1.5 text-primary hover:bg-primary/10"
+                className="pd__act"
               >
-                <MessageSquare className="h-3.5 w-3.5" />
-                <span className="text-xs font-medium">
-                  {showReplies ? 'Hide' : 'Show'} {comment.replies!.length} {comment.replies!.length === 1 ? 'reply' : 'replies'}
-                </span>
-              </Button>
+                <MessageSquare aria-hidden="true" />
+                {showReplies ? 'Hide' : 'Show'} {comment.replies!.length} {comment.replies!.length === 1 ? 'reply' : 'replies'}
+              </button>
             )}
           </div>
         </div>
@@ -268,17 +209,18 @@ function CommentItem({
 
       {/* Reply input */}
       {replyingTo === comment.id && (
-        <div className="ml-8 mt-2 mb-2">
-          <div className="rounded-xl border border-border bg-muted/30 dark:bg-muted/20 focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/15 focus-within:bg-background transition-shadow">
+        <div className="pd__replybox">
+          <div className="pd__replybox-field">
             <Textarea
               placeholder="Write a reply…"
               value={replyContent}
               onChange={(e) => setReplyContent(e.target.value)}
               rows={2}
               autoFocus
-              className="resize-none border-0 bg-transparent shadow-none focus-visible:ring-0 dark:bg-transparent dark:text-white text-sm px-3.5 pt-3 pb-1"
+              aria-label="Write a reply"
+              className="resize-none border-0 bg-transparent shadow-none focus-visible:ring-0 text-sm px-3.5 pt-3 pb-1"
             />
-            <div className="flex items-center justify-end gap-2 px-3 pb-2.5 pt-1">
+            <div className="pd__replybox-actions">
               <Button
                 variant="ghost"
                 onClick={() => {
@@ -294,16 +236,16 @@ function CommentItem({
                 onClick={() => handleReply(comment.id)}
                 disabled={!replyContent.trim() || submittingComment}
                 size="sm"
-                className="h-8 gap-1.5 rounded-lg"
+                className="h-8 gap-1.5"
               >
                 {submittingComment ? (
                   <>
-                    <Loader2 className="h-3 w-3 animate-spin" />
+                    <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" />
                     Replying…
                   </>
                 ) : (
                   <>
-                    <Send className="h-3 w-3" />
+                    <Send className="h-3 w-3" aria-hidden="true" />
                     Reply
                   </>
                 )}
@@ -315,7 +257,7 @@ function CommentItem({
 
       {/* Render nested replies recursively (only if showReplies is true) */}
       {hasReplies && showReplies && (
-        <div className="mt-2 space-y-2">
+        <div className="pd__replies">
           {comment.replies!.map((reply) => (
             <CommentItem
               key={reply.id}
@@ -372,7 +314,6 @@ export function PostDetails({
   const [replyContent, setReplyContent] = useState("");
   const [showChangelogDialog, setShowChangelogDialog] = useState(false);
   const [pendingStatus, setPendingStatus] = useState<string | null>(null);
-  const [composerFocused, setComposerFocused] = useState(false);
   const [editingCategory, setEditingCategory] = useState(false);
   const [categoryValue, setCategoryValue] = useState("");
   const [labels, setLabels] = useState<{ id: string; name: string }[]>([]);
@@ -677,7 +618,6 @@ export function PostDetails({
       setSubmittingComment(true);
       await postService.addComment(post.id, newComment);
       setNewComment("");
-      setComposerFocused(false);
       if (commentTextareaRef.current) {
         commentTextareaRef.current.style.height = "auto";
       }
@@ -942,8 +882,8 @@ export function PostDetails({
   // Show skeleton while loading
   if (loadingPost && post) {
     return (
-      <div className="flex-1 border-l border-gray-200 dark:border-border bg-gray-50 dark:bg-background flex">
-        <div className="flex-1 bg-white dark:bg-background">
+      <div className={cn("pd", className)}>
+        <div className="pd__thread">
           <PostDetailsSkeleton />
         </div>
       </div>
@@ -952,11 +892,8 @@ export function PostDetails({
 
   if (!post) {
     return (
-      <div className="flex-1 border-l border-gray-200 dark:border-border bg-gray-50 dark:bg-background flex items-center justify-center">
-        <div className="text-center text-muted-foreground">
-          <MessageSquare className="h-12 w-12 mx-auto mb-3 text-muted-foreground/50" />
-          <p>Select a post to view details</p>
-        </div>
+      <div className={cn("pd", className)}>
+        <p className="pd__notsel">Select a post to view details</p>
       </div>
     );
   }
@@ -968,183 +905,156 @@ export function PostDetails({
     "U";
 
   return (
-    <div className={className || "flex-1 border-l border-gray-200 dark:border-border bg-gray-50 dark:bg-background flex overflow-hidden max-md:border-l-0"} style={className ? undefined : { height: 'calc(100vh - 64px)' }}>
-      {/* Main Content - Left Side: post + comments as one continuous thread */}
-      <div className="flex-1 flex flex-col overflow-hidden bg-white dark:bg-background" style={{ height: '100%' }}>
-        {/* Unified scroll: post content flows directly into comments */}
-        <div className="flex-1 overflow-y-auto min-h-0">
+    <div className={cn("pd", className)}>
+      {/* Thread: post, folded reports and comments as one continuous document */}
+      <div className="pd__thread">
+        <div className="pd__scroll">
           {/* Mobile back button */}
           {isMobile && (
-            <div className="px-4 pt-3 pb-0 md:hidden">
+            <div className="pd__back md:hidden">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={onBack}
-                className="gap-1.5 text-muted-foreground hover:text-foreground"
+                className="gap-1.5"
                 aria-label="Back to posts list"
               >
-                <ArrowLeft className="h-4 w-4" />
+                <ArrowLeft className="h-4 w-4" aria-hidden="true" />
                 Back
               </Button>
             </div>
           )}
-          {/* Post Header with Upvote */}
-          <div className="px-6 pt-6 pb-5 max-md:px-4 max-md:pt-4">
-            <div className="flex gap-4">
-              {/* Upvote Button - Left Side */}
-              <div className="flex flex-col items-center gap-1">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleUpvote}
-                  disabled={upvoting}
-                  className={cn(
-                    "h-8 w-8 p-0 rounded-md",
-                    upvoted ? "text-primary bg-primary/10 dark:bg-primary/20" : "text-muted-foreground hover:bg-muted dark:hover:bg-muted/50"
-                  )}
-                  aria-label={upvoted ? "Remove upvote" : "Upvote post"}
-                >
-                  <ArrowUp className="h-4 w-4" />
-                </Button>
-                <span className="text-sm font-medium text-foreground">{post.upvotes}</span>
-              </div>
+          <div className="pd__head">
+            {/* Upvote */}
+            <div className="pd__vote">
+              <button
+                type="button"
+                onClick={handleUpvote}
+                disabled={upvoting}
+                className={cn("pd__vote-btn", upvoted && "is-upvoted")}
+                aria-label={upvoted ? "Remove upvote" : "Upvote post"}
+              >
+                <ArrowUp aria-hidden="true" />
+              </button>
+              <span className="pd__vote-count">{post.upvotes}</span>
+            </div>
 
-              {/* Post Title and Info */}
-              <div className="flex-1 space-y-2">
-                <div className="flex items-start justify-between gap-2">
-                  <h1 className="text-lg font-semibold text-foreground">{post.title}</h1>
-                  {(user?.organization_role === "admin" || user?.organization_role === "owner" || post.author?.id === user?.id) && (
-                    <div className="flex gap-1">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={openEditDialog}
-                        className="h-8 w-8 p-0 text-muted-foreground hover:text-primary dark:hover:text-primary hover:bg-primary/10 dark:hover:bg-primary/20"
-                        aria-label="Edit post"
-                      >
-                        <Edit2 className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={handleDeletePost}
-                        className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive dark:hover:text-destructive hover:bg-destructive/10 dark:hover:bg-destructive/20"
-                        aria-label="Delete post"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  )}
-                </div>
-
-                {/* Author and time — widget posts use external_author or org_end_user;
-                    Posts with source_platform show the original submitter + platform badge */}
-                <div className="flex items-center gap-2 text-sm text-muted-foreground flex-wrap">
-                  {(isAutopilotPost(post) || post.source_platform) ? (
-                    <>
-                      <Avatar className="h-6 w-6">
-                        <AvatarFallback>
-                          <BotMessageSquare className="h-4 w-4" />
-                        </AvatarFallback>
-                      </Avatar>
-                      <span className="font-medium text-blue-600 dark:text-blue-400">
-                        {getPostAuthorDisplayName(post)}
-                      </span>
-                      {post.source_platform && (
-                        <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-medium ${getSourcePlatformBadgeStyle(post.source_platform)}`}>
-                          {post.source_platform}
-                        </span>
-                      )}
-                    </>
-                  ) : (
-                    <>
-                      <Avatar className="h-6 w-6">
-                        <AvatarImage src={(post.author as { avatar_url?: string })?.avatar_url || undefined} />
-                        <AvatarFallback>
-                          {getPostAuthorDisplayName(post)[0]?.toUpperCase() || "A"}
-                        </AvatarFallback>
-                      </Avatar>
-                      <span className="font-medium text-blue-600 dark:text-blue-400">
-                        {getPostAuthorDisplayName(post)}
-                      </span>
-                      {(post.external_author || post.org_end_user) && (
-                        <span className="inline-flex items-center rounded-full bg-violet-100 px-1.5 py-0.5 text-[10px] font-medium text-violet-700 dark:bg-violet-900/40 dark:text-violet-300">
-                          via Widget
-                        </span>
-                      )}
-                    </>
-                  )}
-                  <span>·</span>
-                  <span>{formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}</span>
-                </div>
-
-                {/* Description */}
-                {post.description && (
-                  <p className="text-foreground/80 dark:text-foreground/70 leading-relaxed whitespace-pre-wrap mt-3">
-                    {post.description}
-                  </p>
-                )}
-
-                {/* Images Gallery */}
-                {post.images && post.images.length > 0 && (
-                  <div className="mt-4 space-y-2">
-                    <p className="text-sm font-medium text-muted-foreground">
-                      Attachments ({post.images.length})
-                    </p>
-                    <div className={cn(
-                      "grid gap-3",
-                      post.images.length === 1 && "grid-cols-1 max-w-md",
-                      post.images.length === 2 && "grid-cols-2",
-                      post.images.length >= 3 && "grid-cols-3"
-                    )}>
-                      {post.images.map((url, index) => (
-                        <div
-                          key={index}
-                          className="relative group aspect-video rounded-lg overflow-hidden border border-border bg-muted cursor-pointer hover:opacity-90 transition-opacity"
-                          onClick={() => window.open(url, '_blank')}
-                        >
-                          <img
-                            src={url}
-                            alt={`Attachment ${index + 1}`}
-                            className="w-full h-full object-cover"
-                          />
-                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
-                            <Eye className="h-6 w-6 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+            <div className="pd__head-body">
+              <div className="pd__title-row">
+                <h1 className="pd__title">{post.title}</h1>
+                {(user?.organization_role === "admin" || user?.organization_role === "owner" || post.author?.id === user?.id) && (
+                  <div className="pd__tools">
+                    <button
+                      type="button"
+                      className="pd__icon-btn"
+                      onClick={openEditDialog}
+                      aria-label="Edit post"
+                    >
+                      <Edit2 aria-hidden="true" />
+                    </button>
+                    <button
+                      type="button"
+                      className="pd__icon-btn pd__icon-btn--danger"
+                      onClick={handleDeletePost}
+                      aria-label="Delete post"
+                    >
+                      <Trash2 aria-hidden="true" />
+                    </button>
                   </div>
                 )}
               </div>
+
+              {/* Author and time — widget posts use external_author or org_end_user;
+                  Posts with source_platform show the original submitter + platform badge */}
+              <div className="pd__byline">
+                {(isAutopilotPost(post) || post.source_platform) ? (
+                  <>
+                    <Avatar className="h-6 w-6">
+                      <AvatarFallback>
+                        <BotMessageSquare className="h-3.5 w-3.5" aria-hidden="true" />
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="pd__author-name">{getPostAuthorDisplayName(post)}</span>
+                    {post.source_platform && (
+                      <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-xs font-medium ${getSourcePlatformBadgeStyle(post.source_platform)}`}>
+                        {post.source_platform}
+                      </span>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <Avatar className="h-6 w-6">
+                      <AvatarImage src={(post.author as { avatar_url?: string })?.avatar_url || undefined} />
+                      <AvatarFallback>
+                        {getPostAuthorDisplayName(post)[0]?.toUpperCase() || "A"}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="pd__author-name">{getPostAuthorDisplayName(post)}</span>
+                    {(post.external_author || post.org_end_user) && (
+                      <span className="pd__tag">via Widget</span>
+                    )}
+                  </>
+                )}
+                <span aria-hidden="true">·</span>
+                <span className="pd__when">{formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}</span>
+              </div>
+
+              {post.description && (
+                <p className="pd__desc">{post.description}</p>
+              )}
+
+              {/* Attachments */}
+              {post.images && post.images.length > 0 && (
+                <div className="pd__attach">
+                  <p className="pd__attach-caption">Attachments ({post.images.length})</p>
+                  <div className={cn(
+                    "pd__attach-grid",
+                    post.images.length === 1 && "pd__attach-grid--1",
+                    post.images.length === 2 && "pd__attach-grid--2",
+                  )}>
+                    {post.images.map((url, index) => (
+                      <button
+                        key={index}
+                        type="button"
+                        className="pd__attach-item"
+                        onClick={() => window.open(url, '_blank')}
+                        aria-label={`Open attachment ${index + 1} in new tab`}
+                      >
+                        <img
+                          src={url}
+                          alt={`Attachment ${index + 1}`}
+                        />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
           {/* Merged history — reports folded into this post (read-only) */}
           {mergedHistory.length > 0 && (
-            <div className="px-6 pb-4">
+            <div className="pd__fold">
               <Collapsible defaultOpen={false}>
-                <CollapsibleTrigger className="flex w-full items-center gap-2 mb-1 pt-1 text-left">
-                  <GitMerge className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm font-medium text-muted-foreground">
+                <CollapsibleTrigger className="pd__fold-trigger">
+                  <GitMerge aria-hidden="true" />
+                  <span>
                     {mergedHistory.length} similar report
                     {mergedHistory.length === 1 ? "" : "s"} merged into this
                   </span>
                 </CollapsibleTrigger>
                 <CollapsibleContent>
-                  <div className="space-y-3 pt-1">
+                  <div className="pd__fold-body">
                     {mergedHistory.map((item) => {
                       const SourceIcon = SOURCE_PLATFORM_ICONS[item.source_platform ?? ""];
                       return (
-                        <div key={item.id} className="flex gap-2">
-                          <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center">
+                        <div key={item.id} className="pd__merged-item">
+                          <span className="pd__merged-icon">
                             {SourceIcon && <SourceIcon className="h-4 w-4" />}
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <p className="text-sm text-foreground/80 dark:text-foreground/70 leading-relaxed whitespace-pre-wrap">
-                              {item.description}
-                            </p>
-                            <span className="text-xs text-muted-foreground">
+                          </span>
+                          <div className="pd__cmt-body">
+                            <p className="pd__merged-text">{item.description}</p>
+                            <span className="pd__merged-when">
                               {formatDistanceToNow(new Date(item.created_at), {
                                 addSuffix: true,
                               })}
@@ -1159,33 +1069,31 @@ export function PostDetails({
             </div>
           )}
 
-          {/* Comments — continuous with post, no Activity Feed barrier */}
-          <div className="px-6 pb-4">
-            <div className="flex items-center gap-2 mb-1 pt-1">
-              <MessageSquare className="h-4 w-4 text-muted-foreground" />
-              <h3 className="text-sm font-medium text-muted-foreground">
+          {/* Comments — continuous with the post, no barrier between them */}
+          <div className="pd__comments">
+            <div className="pd__comments-head">
+              <MessageSquare aria-hidden="true" />
+              <h2>
                 {commentCount === 0
                   ? "Comments"
                   : `${commentCount} ${commentCount === 1 ? "comment" : "comments"}`}
-              </h3>
+              </h2>
             </div>
 
             {loadingComments ? (
-              <div className="flex justify-center py-10">
-                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              <div className="pd__loading">
+                <Loader2 aria-hidden="true" />
+                <span className="sr-only">Loading comments</span>
               </div>
             ) : comments.length === 0 ? (
-              <div className="py-10 text-center">
-                <div className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-muted/60">
-                  <MessageSquare className="h-5 w-5 text-muted-foreground" />
-                </div>
-                <p className="text-sm font-medium text-foreground">No comments yet</p>
-                <p className="mt-1 text-sm text-muted-foreground">
+              <div className="pd__empty">
+                <p className="pd__empty-title">No comments yet</p>
+                <p className="pd__empty-note">
                   Start the conversation with the team or customer.
                 </p>
               </div>
             ) : (
-              <div className="divide-y divide-border/60">
+              <div className="pd__thread-list">
                 {organizedComments.map((comment) => (
                   <CommentItem
                     key={comment.id}
@@ -1207,17 +1115,17 @@ export function PostDetails({
           </div>
         </div>
 
-        {/* Comment composer — Twitter-style */}
-        <div className="flex-shrink-0 border-t border-border bg-white dark:bg-background px-4 py-3 sm:px-5">
-          <div className="flex gap-3">
-            <Avatar className="h-10 w-10 flex-shrink-0 mt-0.5">
+        {/* Comment composer — pinned under the thread */}
+        <div className="pd__composer">
+          <div className="pd__composer-row">
+            <Avatar className="h-9 w-9 flex-shrink-0 mt-1">
               <AvatarImage src={user?.avatar_url || undefined} alt={user?.name || "You"} />
-              <AvatarFallback className="text-sm bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 font-semibold">
+              <AvatarFallback className="text-sm font-semibold">
                 {userInitial}
               </AvatarFallback>
             </Avatar>
 
-            <div className="flex-1 min-w-0">
+            <div className="pd__composer-col">
               <textarea
                 ref={commentTextareaRef}
                 placeholder={user ? "Post your reply" : "Sign in to leave a comment"}
@@ -1227,11 +1135,7 @@ export function PostDetails({
                   autoResizeComment();
                 }}
                 onFocus={() => {
-                  setComposerFocused(true);
                   if (!user && onAuthRequired && !isCustomHost) onAuthRequired();
-                }}
-                onBlur={() => {
-                  if (!newComment.trim()) setComposerFocused(false);
                 }}
                 onKeyDown={(e) => {
                   if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
@@ -1242,28 +1146,15 @@ export function PostDetails({
                 rows={1}
                 disabled={!user && !onAuthRequired}
                 aria-label="Write a comment"
-                className={cn(
-                  "w-full resize-none bg-transparent border-0 outline-none shadow-none focus-visible:ring-0",
-                  "text-[17px] leading-6 text-foreground placeholder:text-muted-foreground/70",
-                  "py-2 min-h-[40px] max-h-[200px] overflow-y-auto",
-                  "disabled:cursor-not-allowed disabled:opacity-60"
-                )}
+                className="pd__composer-input"
               />
 
-              {/* Action bar — expands when focused or has text (Twitter pattern) */}
-              <div
-                className={cn(
-                  "flex items-center justify-end gap-3 transition-all duration-200",
-                  composerFocused || newComment.trim()
-                    ? "opacity-100 max-h-12 pt-2 mt-1 border-t border-border"
-                    : "opacity-100 max-h-12 pt-1"
-                )}
-              >
+              <div className="pd__composer-bar">
                 {newComment.length > 0 && (
                   <span
                     className={cn(
-                      "text-xs tabular-nums",
-                      newComment.length > 480 ? "text-amber-500" : "text-muted-foreground"
+                      "pd__count",
+                      newComment.length > 480 && "pd__count--warn"
                     )}
                   >
                     {newComment.length}
@@ -1273,14 +1164,10 @@ export function PostDetails({
                   onClick={handleAddComment}
                   disabled={!newComment.trim() || submittingComment}
                   size="sm"
-                  className={cn(
-                    "rounded-full h-9 px-4 font-bold text-[15px] shadow-none",
-                    "bg-primary hover:bg-primary/90 text-primary-foreground",
-                    "disabled:bg-primary/50 disabled:text-primary-foreground/80 disabled:opacity-100"
-                  )}
+                  className="h-9 px-4 font-semibold"
                 >
                   {submittingComment ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
                   ) : (
                     "Reply"
                   )}
@@ -1292,276 +1179,268 @@ export function PostDetails({
       </div>
       {/* End of Main Content */}
 
-      {/* Details Sidebar - Right Side (hidden on mobile) */}
-      <div className="w-80 bg-white dark:bg-card border-l border-gray-200 dark:border-border flex-shrink-0 overflow-y-auto min-h-screen max-md:hidden">
-        <div className="p-6 space-y-6">
-          <h3 className="font-semibold text-lg text-foreground">Details</h3>
+      {/* Rail — field ledger (hidden on mobile) */}
+      <aside className="pd__rail">
+        <div className="pd__rail-inner">
+          <h3 className="pd__rail-title">Details</h3>
 
-          <div className="space-y-4">
-            {/* Public Link */}
-            <div>
-              <label htmlFor="public-link" className="text-sm font-bold text-foreground block mb-3">
-                Public link
-              </label>
-              <div className="flex gap-2">
-                <input
-                  id="public-link"
-                  type="text"
-                  value={getPublicLink()}
-                  readOnly
-                  placeholder="Loading link..."
-                  className="flex-1 text-sm bg-gray-100 dark:bg-muted border-2 border-gray-300 dark:border-border rounded-lg px-4 py-3 truncate text-primary font-medium"
-                />
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => {
-                    navigator.clipboard.writeText(getPublicLink());
-                    toast({
-                      title: "Copied!",
-                      description: "Link copied to clipboard",
-                    });
-                  }}
-                  className="flex-shrink-0"
-                  aria-label="Copy public link"
-                >
-                  <ExternalLink className="h-4 w-4" />
-                </Button>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => window.open(getPublicLink())}
-                  className="flex-shrink-0"
-                  aria-label="Open public link in new tab"
-                >
-                  <Eye className="h-4 w-4" />
-                </Button>
-              </div>
+          {/* Public Link */}
+          <div className="pd__field">
+            <label htmlFor="public-link" className="pd__field-label">
+              Public link
+            </label>
+            <div className="pd__link-row">
+              <input
+                id="public-link"
+                type="text"
+                value={getPublicLink()}
+                readOnly
+                placeholder="Loading link…"
+                className="pd__link"
+              />
+              <button
+                type="button"
+                className="pd__link-btn"
+                onClick={() => {
+                  navigator.clipboard.writeText(getPublicLink());
+                  toast({
+                    title: "Copied!",
+                    description: "Link copied to clipboard",
+                  });
+                }}
+                aria-label="Copy public link"
+              >
+                <ExternalLink aria-hidden="true" />
+              </button>
+              <button
+                type="button"
+                className="pd__link-btn"
+                onClick={() => window.open(getPublicLink())}
+                aria-label="Open public link in new tab"
+              >
+                <Eye aria-hidden="true" />
+              </button>
             </div>
+          </div>
 
-            {/* Board */}
-            <div>
-              <label className="text-sm text-muted-foreground block mb-2">Board</label>
-              <div className="text-sm font-medium text-foreground">
-                {currentBoard?.name || post.board?.name || "—"}
-              </div>
-            </div>
+          {/* Board */}
+          <div className="pd__field">
+            <span className="pd__field-label">Board</span>
+            <span className="pd__field-value">
+              {currentBoard?.name || post.board?.name || "—"}
+            </span>
+          </div>
 
-            {/* Status */}
-            <div>
-              <label htmlFor="post-status" className="text-sm text-muted-foreground block mb-2">Status</label>
-              {(user?.organization_role === "admin" || user?.organization_role === "owner") ? (
-                <Select value={post.status} onValueChange={handleStatusChange}>
-                  <SelectTrigger id="post-status" className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {STATUS_OPTIONS.map((status) => (
-                      <SelectItem key={status.value} value={status.value}>
-                        {status.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+          {/* Status */}
+          <div className="pd__field">
+            <label htmlFor="post-status" className="pd__field-label">Status</label>
+            {(user?.organization_role === "admin" || user?.organization_role === "owner") ? (
+              <Select value={post.status} onValueChange={handleStatusChange}>
+                <SelectTrigger id="post-status" className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {STATUS_OPTIONS.map((status) => (
+                    <SelectItem key={status.value} value={status.value}>
+                      {status.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            ) : (
+              <span className="pd__field-value">
+                {STATUS_OPTIONS.find(s => s.value === post.status)?.label || post.status}
+              </span>
+            )}
+          </div>
+
+          {/* Owner */}
+          <div className="pd__field">
+            <span className="pd__field-label">Owner</span>
+            <div className="pd__byline">
+              {(isAutopilotPost(post) || post.source_platform) ? (
+                <>
+                  <span className="pd__field-value pd__field-value--quiet">{getPostAuthorDisplayName(post)}</span>
+                  {post.source_platform && (
+                    <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-xs font-medium ${getSourcePlatformBadgeStyle(post.source_platform)}`}>
+                      {post.source_platform}
+                    </span>
+                  )}
+                </>
               ) : (
-                <div className="text-sm font-medium text-foreground">
-                  {STATUS_OPTIONS.find(s => s.value === post.status)?.label || post.status}
-                </div>
+                <>
+                  <span className="pd__field-value pd__field-value--quiet">{getPostAuthorDisplayName(post)}</span>
+                  {(post.external_author || post.org_end_user) && (
+                    <span className="pd__tag">via Widget</span>
+                  )}
+                </>
               )}
             </div>
+          </div>
 
-            {/* Owner - Placeholder */}
-            <div>
-              <label className="text-sm text-muted-foreground block mb-2">Owner</label>
-              <div className="text-sm text-muted-foreground">
-                {(isAutopilotPost(post) || post.source_platform) ? (
-                  <>
-                    <span>{getPostAuthorDisplayName(post)}</span>
-                    {post.source_platform && (
-                      <span className={`ml-2 inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-medium ${getSourcePlatformBadgeStyle(post.source_platform)}`}>
-                        {post.source_platform}
-                      </span>
-                    )}
-                  </>
-                ) : (
-                  <>
-                    {getPostAuthorDisplayName(post)}
-                    {(post.external_author || post.org_end_user) && (
-                        <span className="ml-2 inline-flex items-center rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary dark:bg-primary/20 dark:text-primary">
-                        via Widget
-                      </span>
-                    )}
-                  </>
-                )}
+          {/* Known MRR (Phase 3) — admin-only; the component itself never
+              fires the revenue request for non-admins or Free plans */}
+          {post?.id && <PostRevenueLine postId={post.id} />}
+
+          {/* User Attributes (Widget SDK Context) — owner/admin only; API
+              also strips these fields for other roles (post.service.js
+              sanitizeExternalAuthorEmbeds) */}
+          {(user?.organization_role === "admin" || user?.organization_role === "owner") &&
+            (post.org_end_user?.custom_fields || post.external_author?.context) &&
+            Object.keys(post.org_end_user?.custom_fields || post.external_author?.context || {}).length > 0 && (
+            <div className="pd__field">
+              <span className="pd__field-label">User Attributes</span>
+              <div className="pd__attrs">
+                {Object.entries(post.org_end_user?.custom_fields || post.external_author?.context || {}).map(([key, val]) => (
+                  <div key={key} className="pd__attr">
+                    <span className="pd__attr-key">{key}</span>
+                    <span className="pd__attr-val">
+                      {typeof val === 'object' ? JSON.stringify(val) : String(val)}
+                    </span>
+                  </div>
+                ))}
               </div>
             </div>
+          )}
 
-            {/* Known MRR (Phase 3) — admin-only; the component itself never
-                fires the revenue request for non-admins or Free plans */}
-            {post?.id && <PostRevenueLine postId={post.id} />}
+          {/* Estimated — placeholder, stated as a fact, not a fake control */}
+          <div className="pd__field">
+            <span className="pd__field-label">Estimated completion</span>
+            <p className="pd__soon">Coming soon</p>
+          </div>
 
-            {/* User Attributes (Widget SDK Context) — owner/admin only; API
-                also strips these fields for other roles (post.service.js
-                sanitizeExternalAuthorEmbeds) */}
-            {(user?.organization_role === "admin" || user?.organization_role === "owner") &&
-              (post.org_end_user?.custom_fields || post.external_author?.context) &&
-              Object.keys(post.org_end_user?.custom_fields || post.external_author?.context || {}).length > 0 && (
-              <div>
-                <label className="text-sm text-muted-foreground block mb-3">User Attributes</label>
-                <div className="flex flex-col gap-2">
-                  {Object.entries(post.org_end_user?.custom_fields || post.external_author?.context || {}).map(([key, val]) => (
-                    <div key={key} className="flex flex-col bg-gray-50 dark:bg-muted/50 rounded-md p-2 border border-gray-100 dark:border-border">
-                      <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1">{key}</span>
-                      <span className="text-sm font-medium text-foreground break-words font-mono text-[13px]">
-                        {typeof val === 'object' ? JSON.stringify(val) : String(val)}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Estimated - Placeholder */}
-            <div>
-              <label className="text-sm text-muted-foreground block mb-2">Estimated completion</label>
-              <div className="text-sm text-muted-foreground">Coming soon</div>
-            </div>
-
-            {/* Category — editable */}
-            <div>
-              <label htmlFor="post-category" className="text-sm text-muted-foreground block mb-2">Category</label>
-              {(user?.organization_role === "admin" || user?.organization_role === "owner") ? (
-                editingCategory ? (
-                  <div className="space-y-2">
-                    <Select
-                      value={showCustomCategory ? "custom" : categoryValue}
-                      onValueChange={handleCategorySelectChange}
-                    >
-                      <SelectTrigger id="post-category" className="w-full">
-                        <SelectValue placeholder="Select a category" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none">No Category</SelectItem>
-                        {predefinedCategories.map((cat) => (
-                          <SelectItem key={cat.id} value={cat.name}>
-                            {cat.name}
-                          </SelectItem>
-                        ))}
-                        <SelectItem value="custom">Custom Category</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    {showCustomCategory && (
-                      <div className="flex gap-2">
-                        <Input
-                          id="custom-category-input"
-                          placeholder="Enter custom category"
-                          value={customCategory}
-                          onChange={(e) => setCustomCategory(e.target.value)}
-                          maxLength={100}
-                          className="text-sm"
-                          autoFocus
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") handleCustomCategorySave();
-                            if (e.key === "Escape") {
-                              setEditingCategory(false);
-                              setShowCustomCategory(false);
-                              setCustomCategory("");
-                            }
-                          }}
-                        />
-                        <Button
-                          size="sm"
-                          onClick={handleCustomCategorySave}
-                          disabled={!customCategory.trim()}
-                          className="flex-shrink-0"
-                        >
-                          Save
-                        </Button>
-                      </div>
-                    )}
-                    <div className="flex gap-2">
-                      {!showCustomCategory && (
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => {
+          {/* Category — editable */}
+          <div className="pd__field">
+            <label htmlFor="post-category" className="pd__field-label">Category</label>
+            {(user?.organization_role === "admin" || user?.organization_role === "owner") ? (
+              editingCategory ? (
+                <div className="pd__field pd__field--tight">
+                  <Select
+                    value={showCustomCategory ? "custom" : categoryValue}
+                    onValueChange={handleCategorySelectChange}
+                  >
+                    <SelectTrigger id="post-category" className="w-full">
+                      <SelectValue placeholder="Select a category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">No Category</SelectItem>
+                      {predefinedCategories.map((cat) => (
+                        <SelectItem key={cat.id} value={cat.name}>
+                          {cat.name}
+                        </SelectItem>
+                      ))}
+                      <SelectItem value="custom">Custom Category</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {showCustomCategory && (
+                    <div className="pd__link-row">
+                      <Input
+                        id="custom-category-input"
+                        placeholder="Enter custom category"
+                        value={customCategory}
+                        onChange={(e) => setCustomCategory(e.target.value)}
+                        maxLength={100}
+                        className="text-sm flex-1 min-w-0"
+                        autoFocus
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") handleCustomCategorySave();
+                          if (e.key === "Escape") {
                             setEditingCategory(false);
                             setShowCustomCategory(false);
                             setCustomCategory("");
-                          }}
-                          className="text-xs"
-                        >
-                          Cancel
-                        </Button>
-                      )}
+                          }
+                        }}
+                      />
+                      <Button
+                        size="sm"
+                        onClick={handleCustomCategorySave}
+                        disabled={!customCategory.trim()}
+                        className="flex-shrink-0"
+                      >
+                        Save
+                      </Button>
                     </div>
-                  </div>
-                ) : (
-                  <button
-                    onClick={() => {
-                      setEditingCategory(true);
-                      setCategoryValue(post.category || "");
-                    }}
-                    className="text-sm font-medium text-foreground hover:text-primary dark:hover:text-primary transition-colors text-left w-full"
-                    aria-label="Edit category"
-                  >
-                    {post.category || currentBoard?.category || (
-                      <span className="text-muted-foreground italic">Add category</span>
-                    )}
-                  </button>
-                )
-              ) : (
-                <div className="text-sm font-medium text-foreground">
-                  {post.category || currentBoard?.category || "No category"}
+                  )}
+                  {!showCustomCategory && (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => {
+                        setEditingCategory(false);
+                        setShowCustomCategory(false);
+                        setCustomCategory("");
+                      }}
+                      className="self-start px-0 text-sm"
+                    >
+                      Cancel
+                    </Button>
+                  )}
                 </div>
-              )}
-            </div>
-
-            {/* Add to Roadmap Button */}
-            {(user?.organization_role === "admin" || user?.organization_role === "owner") && (
-              <div>
-                <label className="text-sm text-muted-foreground block mb-2">Roadmap</label>
-                <Button
-                  onClick={() => setShowRoadmapModal(true)}
-                  variant="outline"
-                  className="w-full justify-start gap-2 dark:border-border dark:hover:bg-muted"
-                  size="sm"
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEditingCategory(true);
+                    setCategoryValue(post.category || "");
+                  }}
+                  className="pd__edit-value"
+                  aria-label="Edit category"
                 >
-                  <svg
-                    className="h-4 w-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
-                    />
-                  </svg>
-                  Add to Roadmap
-                </Button>
-              </div>
+                  {post.category || currentBoard?.category || (
+                    <span className="pd__field-value--quiet">Add category</span>
+                  )}
+                </button>
+              )
+            ) : (
+              <span className="pd__field-value">
+                {post.category || currentBoard?.category || "No category"}
+              </span>
             )}
           </div>
 
-          {/* Tags Section */}
-          <div>
-            <label className="text-sm text-muted-foreground block mb-2">Tags</label>
-            <button className="text-sm text-muted-foreground hover:text-foreground transition-colors" disabled>Coming soon</button>
+          {/* Add to Roadmap */}
+          {(user?.organization_role === "admin" || user?.organization_role === "owner") && (
+            <div className="pd__field">
+              <span className="pd__field-label">Roadmap</span>
+              <Button
+                onClick={() => setShowRoadmapModal(true)}
+                variant="outline"
+                size="sm"
+                className="pd__roadmap-btn h-9"
+              >
+                <svg
+                  aria-hidden="true"
+                  className="h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
+                  />
+                </svg>
+                Add to Roadmap
+              </Button>
+            </div>
+          )}
+
+          {/* Facts the product does not have yet — quiet text, never buttons */}
+          <div className="pd__field">
+            <span className="pd__field-label">Tags</span>
+            <p className="pd__soon">Coming soon</p>
           </div>
 
-          {/* Voter Section */}
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <label className="text-sm text-muted-foreground">{post.upvotes} Upvote{post.upvotes !== 1 ? 's' : ''}</label>
-            <button className="text-sm text-muted-foreground hover:text-foreground transition-colors" disabled>Coming soon</button>
-            </div>
+          <div className="pd__field">
+            <span className="pd__field-label">
+              {post.upvotes} Upvote{post.upvotes !== 1 ? 's' : ''}
+            </span>
+            <p className="pd__soon">Coming soon</p>
           </div>
         </div>
-      </div>
-      {/* End of Details Sidebar */}
+      </aside>
 
       {/* Edit Post Dialog */}
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
