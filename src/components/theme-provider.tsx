@@ -56,7 +56,13 @@ export function ThemeProvider({
     const media = window.matchMedia("(prefers-color-scheme: dark)")
 
     const apply = () => {
-      const resolved = resolveTheme(theme, media.matches)
+      // Read storage directly: on mount the theme state still holds the
+      // default until the sync effect lands, and applying that stale value
+      // would overwrite the class the pre-paint script already set (light flash).
+      const stored =
+        window.localStorage.getItem(storageKey) ??
+        window.localStorage.getItem(LEGACY_STORAGE_KEY)
+      const resolved = resolveTheme(stored ?? theme, media.matches)
       setResolvedTheme(resolved)
       root.classList.remove("light", "dark")
       root.classList.add(resolved)

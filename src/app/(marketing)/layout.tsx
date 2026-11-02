@@ -14,5 +14,15 @@ export default async function MarketingLayout({
   const h = await headers();
   if (h.get("x-custom-host") === "1") redirect("/feedback");
 
-  return <MarketingChrome>{children}</MarketingChrome>;
+  return (
+    <MarketingChrome>
+      {children}
+      <script
+        dangerouslySetInnerHTML={{
+          __html:
+            'window.hallmarkSlots = (m) => { for (const [k, v] of Object.entries(m)) { const s = document.querySelector(`[data-slot="${k}"]`); if (!s) continue; const im = new Image(); im.src = typeof v === "string" ? v : v.src; im.alt = (typeof v === "object" && v.alt) || s.dataset.alt || ""; s.querySelectorAll(":scope > img").forEach((o) => o.remove()); s.prepend(im); } }; document.querySelectorAll("[data-slot] img").forEach((i) => { if (i.complete && !i.naturalWidth) i.remove(); else i.addEventListener("error", () => i.remove(), { once: true }); });',
+        }}
+      />
+    </MarketingChrome>
+  );
 }

@@ -5,6 +5,7 @@ import { ClientToaster } from "@/components/client-toaster";
 import { AuthProvider } from "@/context/AuthContext";
 import { OrganizationProvider } from "@/context/OrganizationContext";
 import "./globals.css";
+import "./tokens.css";
 
 export const metadata: Metadata = {
   title: "Faddy",

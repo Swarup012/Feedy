@@ -1,354 +1,204 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import {
-  ArrowRight,
-  CheckCircle2,
-  Eye,
-  TrendingUp,
-  AlertTriangle,
-  Focus,
-  BarChart3,
-  Zap,
-  Target,
-  Lightbulb,
-} from "lucide-react";
 import Link from "next/link";
 import { LandingFooter } from "@/components/ui/landing-footer";
+import "./expert-view.css";
 
-const insights = [
+const STATS = [
+  { label: "Urgent", count: "12", note: "Critical issues, immediate attention" },
+  { label: "Trending", count: "28", note: "Gaining momentum this week" },
+  { label: "Focus", count: "8", note: "High-impact, on your roadmap" },
+  { label: "Opportunities", count: "15", note: "Underserved needs with room to grow" },
+];
+
+const PRIORITY = [
+  { name: "Dark Mode Support", votes: "47", trend: "+12%", status: "Urgent" },
+  { name: "API Access", votes: "31", trend: "+8%", status: "Trending" },
+  { name: "Mobile App", votes: "24", trend: "+5%", status: "Focus" },
+];
+
+const FEATURES = [
   {
-    label: "Urgent",
-    count: "12",
-    description: "Critical issues requiring immediate attention",
-    color: "red",
-    icon: <AlertTriangle className="w-5 h-5" />,
+    title: "Source tracking",
+    body: "See exactly where feedback comes from: Intercom, Slack, Discord, GitHub, or direct submissions. Understand which channels drive the most valuable insights.",
   },
   {
-    label: "Trending",
-    count: "28",
-    description: "Features gaining momentum this week",
-    color: "blue",
-    icon: <TrendingUp className="w-5 h-5" />,
+    title: "Priority matrix",
+    body: "A visual grid of urgency against impact. Instantly spot what to build next based on user demand and business value.",
   },
   {
-    label: "Focus",
-    count: "8",
-    description: "High-impact items aligned with your roadmap",
-    color: "purple",
-    icon: <Focus className="w-5 h-5" />,
+    title: "Trend detection",
+    body: "AI identifies rising and falling topics. Catch feature requests before they become churn risks.",
   },
   {
-    label: "Opportunities",
-    count: "15",
-    description: "Underserved needs with growth potential",
-    color: "green",
-    icon: <Lightbulb className="w-5 h-5" />,
+    title: "Feature impact score",
+    body: "Quantify how much each feature contributes to retention, satisfaction and revenue. Know what is actually working.",
   },
 ];
 
-const features = [
+const HELPS = [
   {
-    title: "Source Tracking",
-    description:
-      "See exactly where feedback comes from — Intercom, Slack, Discord, GitHub, or direct submissions. Understand which channels drive the most valuable insights.",
-    icon: <Eye className="w-6 h-6" />,
+    title: "Identify what's working",
+    body: "See which features drive engagement and retention. Double down on what matters.",
   },
   {
-    title: "Priority Matrix",
-    description:
-      "Visual grid showing urgency vs impact. Instantly spot what to build next based on user demand and business value.",
-    icon: <Target className="w-6 h-6" />,
+    title: "Spot problems early",
+    body: "Catch declining trends before they become churn. React to user needs proactively.",
   },
   {
-    title: "Trend Detection",
-    description:
-      "AI identifies rising and falling topics. Catch feature requests before they become churn risks.",
-    icon: <TrendingUp className="w-6 h-6" />,
-  },
-  {
-    title: "Feature Impact Score",
-    description:
-      "Quantify how much each feature contributes to retention, satisfaction, and revenue. Know what's真正 working.",
-    icon: <BarChart3 className="w-6 h-6" />,
+    title: "Align your team",
+    body: "Share insights with stakeholders. Everyone sees the same data and the same priorities.",
   },
 ];
 
 export default function ExpertViewPage() {
   return (
     <>
-      <div className="min-h-screen bg-white dark:bg-background">
-        {/* Hero Section */}
-        <section className="relative py-16 lg:py-20 overflow-hidden bg-white dark:bg-background">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
-              {/* Left — Copy */}
-              <div className="flex-1 text-center lg:text-left">
-                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 text-xs sm:text-sm font-semibold mb-6">
-                  <Eye className="w-4 h-4" />
-                  Expert Dashboard
-                </div>
-
-                <h1 className="text-3xl lg:text-4xl xl:text-5xl font-switzer font-medium text-slate-900 dark:text-white mb-6 tracking-tight leading-tight">
-                  See what your users really want.{" "}
-                  <span className="text-blue-600 dark:text-blue-400">
-                    Make decisions with confidence.
-                  </span>
-                </h1>
-
-                <p className="text-lg lg:text-xl text-slate-600 dark:text-muted-foreground mb-8 max-w-xl mx-auto lg:mx-0 leading-relaxed">
-                  The Expert View gives you a bird&apos;s-eye view of all
-                  feedback. Spot trends, prioritize by impact, and understand
-                  which features actually drive your product forward.
-                </p>
-
-                <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
-                  <Link href="/signup">
-                    <Button
-                      size="lg"
-                      className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg w-full sm:w-auto"
-                    >
-                      Try for Free
-                      <ArrowRight className="ml-2 h-5 w-5" />
-                    </Button>
-                  </Link>
-                  <a
-                    href="#features"
-                    className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white dark:bg-card text-slate-900 dark:text-white font-switzer font-semibold rounded-md border border-slate-200 dark:border-border hover:bg-slate-50 dark:hover:bg-slate-700 transition-all text-sm"
-                  >
-                    Explore Features
-                  </a>
-                </div>
-              </div>
-
-              {/* Right — Dashboard Preview */}
-              <div className="flex-1 w-full max-w-lg lg:max-w-none">
-                <div className="relative rounded-2xl overflow-hidden border border-slate-200/80 dark:border-border bg-slate-50 dark:bg-background">
-                  {/* Browser chrome */}
-                  <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-card px-4 py-2.5 border-b border-slate-200 dark:border-border">
-                    <span className="w-3 h-3 rounded-full bg-red-400" />
-                    <span className="w-3 h-3 rounded-full bg-yellow-400" />
-                    <span className="w-3 h-3 rounded-full bg-green-400" />
-                    <div className="ml-3 flex-1 bg-white dark:bg-card rounded-md px-3 py-0.5 text-xs text-slate-400 dark:text-muted-foreground font-mono">
-                      faddy.site/admin/expert-view
-                    </div>
-                  </div>
-
-                  {/* Dashboard Content */}
-                  <div className="p-6">
-                    {/* Stats Grid */}
-                    <div className="grid grid-cols-2 gap-3 mb-4">
-                      {insights.map((item) => (
-                        <div
-                          key={item.label}
-                          className={`p-3 rounded-xl border ${
-                            item.color === "red"
-                              ? "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800"
-                              : item.color === "blue"
-                              ? "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800"
-                              : item.color === "purple"
-                              ? "bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800"
-                              : "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800"
-                          }`}
-                        >
-                          <div className="flex items-center gap-2 mb-1">
-                            <span
-                              className={`${
-                                item.color === "red"
-                                  ? "text-red-500"
-                                  : item.color === "blue"
-                                  ? "text-blue-500"
-                                  : item.color === "purple"
-                                  ? "text-purple-500"
-                                  : "text-green-500"
-                              }`}
-                            >
-                              {item.icon}
-                            </span>
-                            <span className="text-xs font-medium text-slate-600 dark:text-muted-foreground">
-                              {item.label}
-                            </span>
-                          </div>
-                          <div className="text-2xl font-bold text-slate-900 dark:text-white">
-                            {item.count}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Priority List */}
-                    <div className="bg-white dark:bg-card rounded-xl border border-slate-200 dark:border-border p-4">
-                      <div className="text-xs font-semibold text-slate-500 dark:text-muted-foreground uppercase tracking-wider mb-3">
-                        Top Priority This Week
-                      </div>
-                      <div className="space-y-2">
-                        {[
-                          {
-                            name: "Dark Mode Support",
-                            votes: 47,
-                            trend: "+12%",
-                            status: "urgent",
-                          },
-                          {
-                            name: "API Access",
-                            votes: 31,
-                            trend: "+8%",
-                            status: "trending",
-                          },
-                          {
-                            name: "Mobile App",
-                            votes: 24,
-                            trend: "+5%",
-                            status: "focus",
-                          },
-                        ].map((item) => (
-                          <div
-                            key={item.name}
-                            className="flex items-center justify-between p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50"
-                          >
-                            <div className="flex items-center gap-3">
-                              <div
-                                className={`w-2 h-2 rounded-full ${
-                                  item.status === "urgent"
-                                    ? "bg-red-500"
-                                    : item.status === "trending"
-                                    ? "bg-blue-500"
-                                    : "bg-purple-500"
-                                }`}
-                              />
-                              <span className="text-sm font-medium text-slate-700 dark:text-muted-foreground">
-                                {item.name}
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-3 text-xs">
-                              <span className="text-slate-500 dark:text-muted-foreground">
-                                {item.votes} votes
-                              </span>
-                              <span className="text-blue-500 font-medium">
-                                {item.trend}
-                              </span>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
+      <main className="ev-wrap" id="main">
+        <section className="ev-hero">
+          <div className="container ev-hero__inner">
+            <div className="ev-hero__text">
+              <h1>See what your users really want.</h1>
+              <p className="lead">
+                Every signal in one view. Spot trends, prioritize by impact,
+                decide.
+              </p>
+              <div className="ev-hero__actions">
+                <Link href="/signup" className="ev-btn">
+                  Try for Free
+                </Link>
+                <a href="#features" className="ev-btn ev-btn--quiet">
+                  Explore features
+                </a>
               </div>
             </div>
-          </div>
-        </section>
-
-        {/* Features */}
-        <section
-          id="features"
-          className="py-16 px-6 bg-slate-50/50 dark:bg-background/50 border-y border-slate-100 dark:border-border"
-        >
-          <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-12">
-              <h2 className="text-2xl md:text-3xl font-switzer font-bold tracking-tight text-slate-900 dark:text-white mb-4">
-                Everything you need to see the full picture
-              </h2>
-              <p className="text-lg text-slate-500 dark:text-muted-foreground max-w-xl mx-auto">
-                From raw feedback to actionable insights — all in one view.
-              </p>
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-6">
-              {features.map((feature) => (
-                <Card
-                  key={feature.title}
-                  className="bg-white dark:bg-background border-slate-200 dark:border-border hover:shadow-lg transition-all"
-                >
-                  <CardContent className="p-6">
-                    <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 mb-4">
-                      {feature.icon}
+            <figure
+              className="ev-dash"
+              data-slot="expert-dashboard"
+              data-alt="The Expert View dashboard built live: insight counts and this week's top priorities, from the page's own sample data"
+            >
+              <div className="ev-dash__bar">
+                <span className="ev-dash__mark" aria-hidden="true">
+                  EV
+                </span>
+                Expert View
+                <span className="ev-dash__ctx">admin/expert-view, sample data</span>
+              </div>
+              <div className="ev-dash__body">
+                <dl className="ev-dash__stats">
+                  {STATS.map((s) => (
+                    <div className="ev-stat" key={s.label}>
+                      <dt>{s.label}</dt>
+                      <dd className="num">{s.count}</dd>
                     </div>
-                    <h3 className="text-lg font-switzer font-bold text-slate-900 dark:text-white mb-2">
-                      {feature.title}
-                    </h3>
-                    <p className="text-slate-600 dark:text-muted-foreground leading-relaxed">
-                      {feature.description}
-                    </p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                  ))}
+                </dl>
+                <div className="ev-dash__prio">
+                  <div className="ev-dash__priohead">Top priority this week</div>
+                  <ul className="ev-dash__list">
+                    {PRIORITY.map((p) => (
+                      <li className="ev-prio" key={p.name}>
+                        <span className="ev-prio__name">{p.name}</span>
+                        <span className="ev-prio__status">{p.status}</span>
+                        <span className="ev-prio__votes num">{p.votes} votes</span>
+                        <span className="ev-prio__trend num">{p.trend}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </figure>
           </div>
         </section>
 
-        {/* How It Helps */}
-        <section className="py-16 px-6 bg-white dark:bg-background">
-          <div className="max-w-5xl mx-auto">
-            <div className="text-center mb-12">
-              <h2 className="text-2xl md:text-3xl font-switzer font-bold tracking-tight text-slate-900 dark:text-white mb-4">
-                Make better product decisions
-              </h2>
-              <p className="text-lg text-slate-500 dark:text-muted-foreground max-w-xl mx-auto">
-                Stop guessing. Start knowing what your users actually need.
+        <section className="ev-features" id="features">
+          <div className="container">
+            <div className="ev-features__head">
+              <h2>One view of every signal you collect</h2>
+              <p className="lead">
+                From raw feedback to actionable insights, all in one view.
               </p>
             </div>
-
-            <div className="grid md:grid-cols-3 gap-8">
-              {[
-                {
-                  title: "Identify What's Working",
-                  description:
-                    "See which features drive engagement and retention. Double down on what matters.",
-                  icon: <CheckCircle2 className="w-6 h-6" />,
-                },
-                {
-                  title: "Spot Problems Early",
-                  description:
-                    "Catch declining trends before they become churn. React to user needs proactively.",
-                  icon: <AlertTriangle className="w-6 h-6" />,
-                },
-                {
-                  title: "Align Your Team",
-                  description:
-                    "Share insights with stakeholders. Everyone sees the same data and priorities.",
-                  icon: <Zap className="w-6 h-6" />,
-                },
-              ].map((item) => (
-                <div key={item.title} className="text-center">
-                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 mb-4">
-                    {item.icon}
-                  </div>
-                  <h3 className="text-lg font-switzer font-bold text-slate-900 dark:text-white mb-2">
-                    {item.title}
-                  </h3>
-                  <p className="text-slate-600 dark:text-muted-foreground">
-                    {item.description}
-                  </p>
+            <dl className="ev-features__rows">
+              {FEATURES.map((f) => (
+                <div className="ev-feature" key={f.title}>
+                  <dt>{f.title}</dt>
+                  <dd>{f.body}</dd>
                 </div>
               ))}
-            </div>
+            </dl>
           </div>
         </section>
 
-        {/* CTA Section */}
-        <section className="py-16 px-6">
-          <div className="max-w-5xl mx-auto rounded-3xl bg-background dark:bg-card p-8 md:p-12 overflow-hidden relative text-center">
-            <div className="relative z-10">
-              <h2 className="text-xl md:text-3xl font-switzer font-bold text-white mb-8 tracking-tighter leading-tight">
-                Ready to see the full picture?
-              </h2>
-              <p className="text-lg text-slate-400 mb-12 max-w-2xl mx-auto leading-relaxed">
-                Start with the Expert View free for 14 days. No credit card
-                required.
+        <section className="ev-matrix">
+          <div className="container">
+            <div className="ev-matrix__head">
+              <h2>Urgency against impact</h2>
+              <p className="lead">
+                The priority matrix plots every item so the next build is
+                obvious, not argued.
               </p>
-              <a
-                href="/signup"
-                className="inline-flex items-center gap-3 px-6 py-4 bg-white dark:bg-card text-slate-900 dark:text-white font-switzer font-black rounded-2xl hover:scale-105 transition-all text-base"
-              >
-                Start Free Today
-                <ArrowRight className="w-5 h-5" />
-              </a>
             </div>
+            <figure
+              className="ev-grid"
+              data-slot="priority-matrix"
+              data-alt="Illustrative priority matrix plotting the dashboard's sample items by urgency and impact"
+            >
+              <span className="ev-grid__y" aria-hidden="true">Urgency</span>
+              <div className="ev-grid__cell ev-grid__q1">
+                <span className="ev-grid__item ev-grid__item--on">Dark Mode Support</span>
+              </div>
+              <div className="ev-grid__cell ev-grid__q2">
+                <span className="ev-grid__item">API Access</span>
+              </div>
+              <div className="ev-grid__cell ev-grid__q3">
+                <span className="ev-grid__item">Mobile App</span>
+              </div>
+              <div className="ev-grid__cell ev-grid__q4">
+                <span className="ev-grid__empty">Everything else waits in the backlog until its signals move.</span>
+              </div>
+              <span className="ev-grid__x" aria-hidden="true">Impact</span>
+              <figcaption className="ev-grid__cap">
+                Illustrative, plotting the dashboard&apos;s sample items. High
+                urgency, high impact goes first.
+              </figcaption>
+            </figure>
           </div>
         </section>
-      </div>
+
+        <section className="ev-helps">
+          <div className="container">
+            <div className="ev-helps__head">
+              <h2>Make better product decisions</h2>
+              <p className="lead">
+                Stop guessing. Know what your users actually need.
+              </p>
+            </div>
+            <dl className="ev-helps__rows">
+              {HELPS.map((h) => (
+                <div className="ev-help" key={h.title}>
+                  <dt>{h.title}</dt>
+                  <dd>{h.body}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        </section>
+
+        <section className="ev-close">
+          <div className="container ev-close__inner">
+            <div>
+              <h2>Ready to see the full picture?</h2>
+              <p>
+                Try the Expert View free for 14 days, no card needed.
+              </p>
+            </div>
+            <Link href="/signup" className="ev-btn ev-btn--band">
+              Start Free Today
+            </Link>
+          </div>
+        </section>
+      </main>
 
       <LandingFooter showCTA={true} />
     </>

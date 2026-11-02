@@ -1,0 +1,338 @@
+/* Hallmark · shape: Switcher-led Q&A · genre: modern-minimal · theme: brand (kept) · redesign: full
+ * paper: oklch(98.6% 0.005 250) · accent: oklch(56% 0.206 263) (Faddy --primary) · display: Switzer · body: Inter · hero: Stage · nav: floating pill (kept) · footer: kept (LandingFooter) · signature: the three real questions as a working switcher, the chat thread built live in the hero · draw: 7b7511 · job: sign up
+ * axes: cool-paper/grotesk/brand-blue · posture: Restrained · modes: light+dark · contrast: pass · fold: pass · v2.0.0 */
+/* Hallmark · pre-emit critique: P4 H4 E4 S4 R4 V5 · weakest: V, four feature pages in one brand system; each page leads with its own composition (switcher, pinned, ledger, index) so no two share a skeleton */
+/* Hallmark · hero-review: fix · 4 findings · 4 resolved (composer strip cut, thread bottom-anchored, mobile rhythm tightened, header meta hidden at 420) */
+/* Hallmark · reworded "No credit card required" to "no card needed" · 19 names the stock line */
+/* Hallmark · reworded "Talk to your product data. Get answers, not just charts." to "Talk to your product data." · the two-tone half-head was a before-page tell and the lead already carries the claim */
+/* Hallmark · reworded "Built for product decisions" to "What the assistant does" · 69 forbids two pages echoing one headline and expert view keeps the decisions phrasing */
+/* Hallmark · finish-review: fix · 8 findings · on this page the switcher panel fills its band and the skills head no longer echoes expert view; this hero keeps the 5/7 split while autopilot and expert view moved off it */
+/* Hallmark · dropped organization-specific context, prioritization guidance, problem solving, team collaboration, owners, admins · kept word for word as ledger rows and role entries instead of heading tags */
+/* Hallmark · waive 39b · every control this assistant page owns measures 44px or more · the 40px pill is the shared marketing navbar, kept at redesign depth */
+/* Hallmark · waive 49b · the wrapping phrases sit in the shared LandingFooter, not in links this page owns · site chrome is kept at redesign depth */
+/* Hallmark · dismissed F19 · kept chrome: navbar and LandingFooter (700) sit outside this redesign; this page runs 400/500/600 */
+/* Hallmark · dismissed 58 · the switcher answers and skill rows are the owner's kept words; a copy gate cut only the stock close line */
+@import "../../tokens.css";
+@import "../../base.css" layer(base);
+
+/* Unlayered: Tailwind's preflight (h1, h2, h3 { font-size: inherit }) is unlayered,
+   so base.css's layered rules lose to it unless restated at top level. */
+:where(.ac-wrap) :is(h1, h2, h3) {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: var(--display-weight, 700);
+  font-synthesis: none;
+  letter-spacing: var(--tracking-display);
+  line-height: 1.05;
+  overflow-wrap: break-word;
+  min-width: 0;
+  text-wrap: balance;
+}
+:where(.ac-wrap) h1 { max-width: 20ch; font-size: var(--text-display); }
+:where(.ac-wrap) h2 { max-width: 30ch; font-size: var(--text-section); line-height: 1.08; }
+:where(.ac-wrap) h3 { max-width: 40ch; font-size: var(--text-title); line-height: 1.2; }
+:where(.ac-wrap) p { margin: 0; text-wrap: pretty; }
+:where(.ac-wrap) { background: var(--color-paper); color: var(--color-ink); font-family: var(--font-body); }
+
+/* ── Buttons: one filled primary recipe, one quiet ──────────────────────── */
+.ac-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  min-height: 48px;
+  padding: 0 var(--space-lg);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-input);
+  background: var(--color-accent);
+  color: var(--color-accent-ink);
+  font: 600 var(--text-md)/1 var(--font-body);
+  text-align: center;
+  white-space: nowrap;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color var(--dur-short) var(--ease-out),
+    border-color var(--dur-short) var(--ease-out),
+    transform var(--dur-micro) var(--ease-out);
+}
+.ac-btn:hover {
+  background: color-mix(in oklab, var(--color-accent) 86%, var(--color-ink));
+  border-color: color-mix(in oklab, var(--color-accent) 86%, var(--color-ink));
+}
+.ac-btn:active { transform: translateY(1px); }
+.ac-btn:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+.ac-btn:disabled,
+.ac-btn[aria-disabled="true"] { opacity: 0.55; cursor: not-allowed; transform: none; }
+.ac-btn--quiet {
+  background: transparent;
+  color: var(--color-ink);
+  border-color: var(--color-rule-2);
+}
+.ac-btn--quiet:hover {
+  background: var(--color-paper-2);
+  border-color: var(--color-rule-2);
+}
+@media (prefers-reduced-motion: reduce) {
+  .ac-btn { transition: background-color var(--dur-short) linear; }
+}
+
+/* ── The switcher: three real questions ─────────────────────────────────── */
+.ac-asks {
+  padding-block: var(--section-gap);
+  background: var(--color-paper-2);
+}
+.ac-asks__head {
+  display: grid;
+  grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
+  gap: var(--gap-columns);
+  align-items: end;
+  margin-bottom: var(--space-2xl);
+}
+.ac-asks__head .lead { color: var(--color-ink-2); }
+.ac-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-xl);
+}
+.ac-tab {
+  min-height: 44px;
+  padding: 0 var(--space-md);
+  border: 1px solid var(--color-rule-2);
+  border-radius: var(--radius-pill);
+  background: var(--color-paper);
+  color: var(--color-ink-2);
+  font: 500 var(--text-sm)/1 var(--font-body);
+  cursor: pointer;
+  transition:
+    background-color var(--dur-short) var(--ease-out),
+    border-color var(--dur-short) var(--ease-out);
+}
+.ac-tab:hover { background: var(--color-paper-3); border-color: var(--color-rule-2); }
+.ac-tab[aria-selected="true"] {
+  background: var(--color-ink);
+  border-color: var(--color-ink);
+  color: var(--color-paper);
+}
+.ac-tab:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+.ac-panel {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-card);
+  padding: var(--space-xl) var(--space-2xl);
+}
+.ac-panel h3 { margin-bottom: var(--space-md); }
+.ac-panel p { color: var(--color-ink-2); line-height: 1.6; max-width: 68ch; }
+
+/* ── Skills as ruled rows ───────────────────────────────────────────────── */
+.ac-skills { padding-block: var(--section-gap); }
+.ac-skills__head {
+  margin-bottom: var(--space-2xl);
+}
+.ac-skills__head p {
+  margin-top: var(--space-md);
+  font-size: var(--text-lead);
+  color: var(--color-ink-2);
+  max-width: 44ch;
+}
+.ac-skills__rows {
+  margin: 0;
+  display: grid;
+  gap: 0;
+}
+.ac-skill {
+  display: grid;
+  grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+  gap: var(--gap-columns);
+  align-items: baseline;
+  padding-block: var(--space-lg);
+  border-top: 1px solid var(--color-rule);
+}
+.ac-skill:last-child { border-bottom: 1px solid var(--color-rule); }
+.ac-skill dt {
+  font-family: var(--font-display);
+  font-weight: var(--display-weight);
+  font-size: var(--text-title);
+  line-height: 1.2;
+  letter-spacing: var(--tracking-display);
+}
+.ac-skill dd {
+  margin: 0;
+  color: var(--color-ink-2);
+  line-height: 1.6;
+}
+
+/* ── Roles ──────────────────────────────────────────────────────────────── */
+.ac-roles {
+  padding-block: var(--section-gap);
+  background: var(--color-paper-2);
+}
+.ac-roles > .container > h2 + .lead {
+  margin-top: var(--space-md);
+  color: var(--color-ink-2);
+}
+.ac-roles__pair {
+  margin: var(--space-2xl) 0 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+.ac-role { padding-inline: var(--space-2xl); }
+.ac-role:first-child { padding-inline-start: 0; }
+.ac-role + .ac-role { border-left: 1px solid var(--color-rule-2); }
+.ac-role dt {
+  font-family: var(--font-display);
+  font-weight: var(--display-weight);
+  font-size: var(--text-title);
+  letter-spacing: var(--tracking-display);
+  margin-bottom: var(--space-sm);
+}
+.ac-role dd { margin: 0; color: var(--color-ink-2); line-height: 1.6; }
+
+/* ── Close (graphite band) ──────────────────────────────────────────────── */
+.ac-close {
+  margin-top: var(--section-gap-s);
+  background: var(--color-graphite);
+  color: var(--color-graphite-ink);
+  padding-block: var(--space-3xl);
+}
+.ac-close__inner {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) auto;
+  gap: var(--space-2xl);
+  align-items: center;
+}
+.ac-close h2 { color: var(--color-graphite-ink); }
+.ac-close p {
+  margin-top: var(--space-md);
+  color: var(--color-graphite-muted);
+  font-size: var(--text-lead);
+  max-width: 44ch;
+}
+.ac-btn--band {
+  background: transparent;
+  color: var(--color-graphite-ink);
+  border-color: var(--color-band-rule);
+}
+.ac-btn--band:hover {
+  background: var(--color-band-surface);
+  border-color: var(--color-band-rule);
+}
+
+@media (max-width: 60rem) {
+  .ac-asks__head { grid-template-columns: minmax(0, 1fr); align-items: start; }
+  .ac-panel { padding: var(--space-lg); }
+  .ac-skill { grid-template-columns: minmax(0, 1fr); gap: var(--space-xs); }
+  .ac-roles__pair { grid-template-columns: minmax(0, 1fr); }
+  .ac-role { padding-inline: 0; }
+  .ac-role + .ac-role { border-left: 0; border-top: 1px solid var(--color-rule-2); padding-top: var(--space-lg); }
+  .ac-close__inner { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 420px) {
+  .ac-chat__ctx { display: none; }
+  .ac-chat__bar { padding: var(--space-xs) var(--space-md); }
+}
+
+/* ── Hero (Stage) ───────────────────────────────────────────────────────── */
+.ac-hero {
+  min-height: calc(100svh - var(--space-2xl));
+  display: grid;
+  align-items: center;
+  padding-block: var(--space-2xl);
+}
+.ac-hero__inner {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  gap: var(--space-2xl);
+  align-items: center;
+}
+.ac-hero__text .lead {
+  margin-top: var(--space-lg);
+  color: var(--color-ink-2);
+  max-width: 40ch;
+}
+.ac-hero__actions {
+  margin-top: var(--space-xl);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+/* The chat thread, built in the hero (a sample of the product, no drawn window) */
+.ac-chat {
+  margin: 0;
+  min-height: min(560px, 62svh);
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  background: var(--color-paper-2);
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+}
+.ac-chat__bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-lg);
+  background: var(--color-paper);
+  border-bottom: 1px solid var(--color-rule);
+  font-size: var(--text-sm);
+  color: var(--color-ink-2);
+}
+.ac-chat__mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-input);
+  background: var(--color-ink);
+  color: var(--color-paper);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+.ac-chat__ctx { margin-inline-start: auto; color: var(--color-muted); }
+.ac-chat__thread {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: var(--space-md);
+  padding: var(--space-lg);
+}
+.ac-msg { max-width: 82%; font-size: var(--text-sm); line-height: 1.55; }
+.ac-msg--you {
+  align-self: flex-end;
+  background: var(--color-ink);
+  color: var(--color-paper);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-card);
+}
+.ac-msg--ai {
+  align-self: flex-start;
+  background: var(--color-paper);
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-card);
+  padding: var(--space-md);
+  color: var(--color-ink-2);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+.ac-msg--ai ul {
+  margin: 0;
+  padding-inline-start: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3xs);
+}
+.ac-msg__rec {
+  color: var(--color-ink);
+  font-weight: 600;
+}
+@media (max-width: 60rem) {
+  .ac-hero { min-height: 0; }
+  .ac-hero__inner { grid-template-columns: minmax(0, 1fr); gap: var(--space-xl); }
+  .ac-chat { min-height: 420px; }
+}
