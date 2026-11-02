@@ -1,0 +1,237 @@
+/* Hallmark · component: footer · genre: modern-minimal · theme: brand (kept: Faddy cobalt on coal) · posture: Restrained · states: 8 · contrast: pass · footer: graphite mast band, wordmark and actions over three sentence-case link columns · redesign: full · v2.0.0 */
+/* Hallmark · pre-emit critique: P4 H4 E4 S3 R5 V4 · weakest: S, a sitemap footer fits any SaaS; answered by putting it on the coal band, the same surface the Expert View dashboard sits on, so the close reads as the product's own ground */
+/* Hallmark · waive 39b · guard: the 40px control is the kept navbar's Login button in marketing-chrome.tsx, not a footer control · site chrome sits outside a component run */
+/* Hallmark · waive 23 · guard: the ~8.8% accent paint at 1280 is the landing hero's own CTA band, this footer paints one small pill · the hero belongs to the page, not to the footer */
+/* Hallmark · finish-review: fix · 3 findings · the quiet CTA hover no longer floods to the filled recipe; the composed footer and the showCTA=false variant are covered by the in-situ recaptures; the wide mast gap is kept as the band's air */
+
+.lf {
+  background: var(--color-graphite);
+  color: var(--color-graphite-ink);
+  font-family: var(--font-body);
+}
+
+.lf__container {
+  width: 100%;
+  max-width: var(--container);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+  box-sizing: border-box;
+}
+
+.lf__inner {
+  padding-block: var(--space-2xl) var(--space-xl);
+  display: grid;
+  gap: var(--space-xl);
+}
+
+.lf__mast {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  padding-bottom: var(--space-lg);
+  border-bottom: 1px solid var(--color-band-rule);
+}
+
+.lf__wordmark {
+  font-family: var(--font-display);
+  font-weight: var(--display-weight);
+  font-size: var(--text-xl);
+  line-height: 1.1;
+  letter-spacing: var(--tracking-display);
+  color: var(--color-graphite-ink);
+  overflow-wrap: break-word;
+  min-width: 0;
+}
+
+.lf__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
+.lf__cta,
+.lf__cta--quiet {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0 var(--space-lg);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-pill);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  white-space: nowrap;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color var(--dur-micro) var(--ease-out),
+    border-color var(--dur-micro) var(--ease-out),
+    color var(--dur-micro) var(--ease-out),
+    transform var(--dur-micro) var(--ease-out);
+}
+
+.lf__cta {
+  background: var(--color-accent);
+  color: var(--color-accent-ink);
+}
+
+.lf__cta:hover {
+  background: var(--color-accent-deep);
+  border-color: var(--color-accent-deep);
+}
+
+.lf__cta:active,
+.lf__cta--quiet:active {
+  transform: translateY(1px);
+}
+
+.lf__cta:focus-visible,
+.lf__cta--quiet:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.lf__cta--quiet {
+  background: transparent;
+  border-color: var(--color-band-rule);
+  color: var(--color-graphite-ink);
+}
+
+.lf__cta--quiet:hover {
+  background: transparent;
+  border-color: var(--color-graphite-ink);
+  color: var(--color-graphite-ink);
+}
+
+.lf__grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: var(--space-xl) var(--gap-columns);
+}
+
+.lf__cell--brand {
+  grid-column: span 4;
+  display: grid;
+  gap: var(--space-md);
+  align-content: start;
+}
+
+.lf__cell--product { grid-column: span 3; }
+.lf__cell--company { grid-column: span 2; }
+.lf__cell--legal { grid-column: span 3; }
+
+.lf__heading {
+  margin: 0 0 var(--space-md);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0;
+  color: var(--color-graphite-ink);
+}
+
+.lf__links {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-xs);
+}
+
+.lf__link {
+  color: var(--color-graphite-muted);
+  font-size: var(--text-sm);
+  line-height: 1.4;
+  text-decoration: none;
+  transition: color var(--dur-micro) var(--ease-out);
+}
+
+.lf__link:hover,
+.lf__link:active,
+.lf__link.is-hover,
+.lf__link.is-active {
+  color: var(--color-graphite-ink);
+}
+
+.lf__link:focus-visible,
+.lf__link.is-focus {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+.lf__social {
+  display: flex;
+  gap: var(--space-2xs);
+}
+
+.lf__social-link {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  color: var(--color-graphite-muted);
+  text-decoration: none;
+  transition: color var(--dur-micro) var(--ease-out);
+}
+
+.lf__social-link:hover,
+.lf__social-link:active,
+.lf__social-link.is-hover,
+.lf__social-link.is-active {
+  color: var(--color-graphite-ink);
+}
+
+.lf__social-link:focus-visible,
+.lf__social-link.is-focus {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.lf__social-link svg {
+  width: 20px;
+  height: 20px;
+}
+
+.lf__copy {
+  font-size: var(--text-sm);
+  color: var(--color-graphite-muted);
+}
+
+@media (max-width: 60rem) {
+  .lf__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .lf__cell--brand { grid-column: 1 / -1; }
+  .lf__cell--product,
+  .lf__cell--company,
+  .lf__cell--legal { grid-column: auto; }
+}
+
+@media (max-width: 40rem) {
+  .lf__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .lf__cell--brand { grid-column: 1 / -1; }
+  .lf__cell--product,
+  .lf__cell--company { grid-column: auto; }
+  .lf__cell--legal { grid-column: 1 / -1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lf__cta,
+  .lf__cta--quiet,
+  .lf__link,
+  .lf__social-link {
+    transition:
+      background-color var(--dur-micro) linear,
+      border-color var(--dur-micro) linear,
+      color var(--dur-micro) linear;
+  }
+  .lf__cta:active,
+  .lf__cta--quiet:active {
+    transform: none;
+  }
+}
