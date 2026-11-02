@@ -9,6 +9,7 @@
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1); --ease-in: cubic-bezier(0.7, 0, 0.84, 0); --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
   --dur-micro: 120ms; --dur-short: 220ms; --dur-long: 420ms;
   --color-error: oklch(52% 0.19 27); --color-success: oklch(50% 0.12 150); --color-success-ink: oklch(44% 0.11 150);
+  --color-caution: oklch(72% 0.15 85); --color-caution-ink: oklch(42% 0.11 80); --color-caution-wash: oklch(96% 0.05 95);
   --container: 1440px; --gutter: 64px; --gap-columns: 32px; --section-gap-s: 120px; --section-gap: 144px; --section-gap-l: 176px;
   --z-base: 1; --z-raised: 10; --z-dropdown: 100; --z-sticky: 200; --z-sticky-nav: 300; --z-modal: 400; --z-toast: 500; --z-tooltip: 600;
 
@@ -60,6 +61,7 @@ html.dark {
   --color-accent-wash: oklch(28% 0.05 264);
   --color-focus: oklch(61% 0.15 264);
   --color-success-ink: oklch(68% 0.13 150);
+  --color-caution: oklch(75% 0.14 85); --color-caution-ink: oklch(82% 0.11 88); --color-caution-wash: oklch(28% 0.055 85);
   --shadow-card: inset 0 0 0 1px var(--color-rule);
 }
 

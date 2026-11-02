@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="State sheet for the redesigned Widgets admin screen, with sample rows only.">
+<title>Widgets screen · state sheet (samples)</title>
+<link rel="stylesheet" href="../../tokens.css">
+<link rel="stylesheet" href="../admin.css">
+<link rel="stylesheet" href="widgets.css">
+<style>
+  /* Preview chrome only. Mirrors the shadcn recipes the screen uses, in tokens. */
+  /* The admin scope maps its roles onto globals.css variables; a static sheet must declare them. Values as found in globals.css light. */
+  :root {
+    --background: 0 0% 97.6%; --foreground: 174 43% 12%;
+    --card: 0 0% 100%; --card-foreground: 174 43% 12%;
+    --muted: 171 20% 92%; --muted-foreground: 174 20% 45%;
+    --primary: 221 83% 55%; --primary-foreground: 0 0% 100%;
+    --border: 0 0% 85%; --input: 0 0% 85%; --ring: 221 83% 55%;
+    --destructive: 0 84% 60%; --destructive-foreground: 0 0% 100%;
+    --success: 142 76% 36%; --warning: 25 95% 53%;
+    --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+  }
+  html, body { overflow-x: clip; }
+  body {
+    margin: 0;
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-body);
+    font-size: var(--text-md);
+    line-height: 1.5;
+  }
+  .pv { max-width: 1100px; margin-inline: auto; padding: var(--space-xl) var(--space-lg) var(--space-2xl); display: grid; gap: var(--space-2xl); }
+  .pv > h1 { font-family: var(--font-display); font-size: var(--text-2xl); font-weight: var(--display-weight); letter-spacing: var(--tracking-display); margin: 0; text-wrap: balance; }
+  .pv__note { font-size: var(--text-sm); color: var(--wdg-secondary, var(--color-muted)); max-width: 65ch; margin: 0; line-height: 1.6; }
+  .pv__section { display: grid; gap: var(--space-md); }
+  h2.pv__label { font-size: var(--text-sm); font-weight: 600; color: var(--wdg-secondary, var(--color-ink-2)); margin: 0; text-wrap: balance; }
+  .pv__row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-md); }
+
+  .pv-btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2xs);
+    min-height: 40px; padding: 0 var(--space-sm); border-radius: var(--radius-input);
+    border: 1px solid transparent; background: var(--color-accent); color: var(--color-accent-ink);
+    font: 500 var(--text-sm)/1 var(--font-body); cursor: pointer; white-space: nowrap; text-decoration: none;
+    transition: background-color var(--dur-micro) var(--ease-out), transform var(--dur-micro) var(--ease-out);
+  }
+  .pv-btn:hover, .pv-btn.is-hover { background: var(--color-accent-deep); }
+  .pv-btn:active, .pv-btn.is-active { transform: translateY(1px); }
+  .pv-btn:focus-visible, .pv-btn.is-focus { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+  .pv-btn:disabled, .pv-btn.is-disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+  .pv-btn--outline { background: transparent; border-color: var(--color-rule-2); color: var(--color-ink); }
+  .pv-btn--outline:hover, .pv-btn--outline.is-hover { background: var(--color-paper-2); }
+  .pv-btn--ghost { background: transparent; color: var(--color-ink); }
+  .pv-btn--ghost:hover, .pv-btn--ghost.is-hover { background: var(--color-paper-2); }
+  .pv-btn--icon { min-height: 32px; width: 32px; padding: 0; }
+
+  .pv-table { width: 100%; border-collapse: collapse; }
+  .pv-table th { text-align: left; font-size: var(--text-sm); font-weight: 600; color: var(--wdg-secondary, var(--color-ink-2)); border-bottom: 1px solid var(--color-rule); padding: var(--space-xs) var(--space-xs) var(--space-xs) 0; }
+  .pv-table td { font-size: var(--text-sm); vertical-align: top; padding: var(--space-sm) var(--space-xs) var(--space-sm) 0; border-bottom: 1px solid var(--color-rule); }
+  .pv-table tr:hover td { background: var(--color-paper-2); }
+  .pv-svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+</style>
+</head>
+<body>
+<main class="pv">
+  <h1>Widgets screen · state sheet</h1>
+  <p class="pv__note">Sample rows only, never shipped copy: the live screen loads its widgets from <code>/api/admin/widgets</code>. The real screen is behind sign-in, so this sheet is what the render tier judges. Disabled, loading and error exist here: disabled is the non-owner form state and the submitting button, loading is the skeleton below, error is the destructive toast the handlers raise.</p>
+
+  <section class="pv__section">
+        <div class="pv__row">
+      <div>
+        <h2 class="wdg__title" style="margin:0">Widget Management</h2>
+        <p class="wdg__lede">Create and manage embeddable feedback widgets for your products</p>
+      </div>
+      <button class="pv-btn" type="button">＋ Create Widget</button>
+    </div>
+  </section>
+
+  <section class="pv__section">
+    <h2 class="pv__label">Full state, the credentials table (samples)</h2>
+    <div class="wdg__table">
+      <table class="pv-table">
+        <thead>
+          <tr><th>Widget</th><th>API key</th><th>API secret</th><th>Allowed domains</th><th style="text-align:right">Actions</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td data-label="Widget">
+              <p class="wdg__name">Product Feedback</p>
+              <p class="wdg__created">Created 10/26/2025</p>
+              <span class="wdg__branding"><span class="wdg__swatch" style="background-color:var(--color-accent)"></span><span class="wdg__hex">#3b82f6</span></span>
+              <ul class="wdg__perms"><li>Voting</li><li>Roadmap</li><li>Secure identity</li></ul>
+            </td>
+            <td data-label="API key">
+              <div class="wdg__keyrow">
+                <span class="wdg__key">fk_live_samplekey000…</span>
+                <button class="pv-btn pv-btn--ghost pv-btn--icon" type="button" aria-label="Copy API key"><svg class="pv-svg" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+              </div>
+            </td>
+            <td data-label="API secret">
+              <div class="wdg__secretcell">
+                <span class="wdg__state wdg__state--ok">Configured</span>
+                <button class="pv-btn pv-btn--outline" type="button">Rotate secret</button>
+              </div>
+            </td>
+            <td data-label="Allowed domains"><div class="wdg__domains"><span class="wdg__domain">yourapp.com</span><span class="wdg__domain">app.yourapp.com</span></div></td>
+            <td style="text-align:right" data-label="Actions">
+              <div class="wdg__actions">
+                <button class="pv-btn pv-btn--outline" type="button">Copy Embed Code</button>
+                <button class="pv-btn pv-btn--ghost pv-btn--icon" type="button" aria-label="Edit Product Feedback"><svg class="pv-svg" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.1 2.1 0 0 1 3 3L12 15l-4 1 1-4Z"/></svg></button>
+                <button class="pv-btn pv-btn--ghost pv-btn--icon wdg__delete" type="button" aria-label="Delete Product Feedback"><svg class="pv-svg" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td data-label="Widget">
+              <p class="wdg__name">Support Portal</p>
+              <p class="wdg__created">Created 09/02/2025</p>
+              <span class="wdg__branding"><span class="wdg__swatch" style="background-color:var(--color-success)"></span><span class="wdg__hex">#10b981</span></span>
+              <ul class="wdg__perms"><li>Voting</li><li>Anonymous submissions</li></ul>
+            </td>
+            <td data-label="API key">
+              <div class="wdg__keyrow">
+                <span class="wdg__key">fk_live_samplekey001…</span>
+                <button class="pv-btn pv-btn--ghost pv-btn--icon" type="button" aria-label="Copy API key"><svg class="pv-svg" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></button>
+              </div>
+            </td>
+            <td data-label="API secret">
+              <div class="wdg__secretcell">
+                <span class="wdg__state wdg__state--bad">Missing, SDK disabled</span>
+                <button class="pv-btn pv-btn--outline" type="button">Generate secret</button>
+              </div>
+            </td>
+            <td data-label="Allowed domains"><span class="wdg__open-domains">All domains, not secure</span></td>
+            <td style="text-align:right" data-label="Actions">
+              <div class="wdg__actions">
+                <button class="pv-btn pv-btn--outline" type="button">Copy Embed Code</button>
+                <button class="pv-btn pv-btn--ghost pv-btn--icon" type="button" aria-label="Edit Support Portal"><svg class="pv-svg" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.1 2.1 0 0 1 3 3L12 15l-4 1 1-4Z"/></svg></button>
+                <button class="pv-btn pv-btn--ghost pv-btn--icon wdg__delete" type="button" aria-label="Delete Support Portal"><svg class="pv-svg" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="pv__section">
+    <h2 class="pv__label">Loading state, a skeleton in the shape of the table</h2>
+    <div class="wdg__skel">
+      <div class="wdg__skel-row"><div class="wdg__skel-bar"></div><div class="wdg__skel-bar"></div><div class="wdg__skel-bar"></div><div class="wdg__skel-bar"></div><div class="wdg__skel-bar"></div></div>
+      <div class="wdg__skel-row"><div class="wdg__skel-bar"></div><div class="wdg__skel-bar"></div><div class="wdg__skel-bar"></div><div class="wdg__skel-bar"></div><div class="wdg__skel-bar"></div></div>
+      <div class="wdg__skel-row"><div class="wdg__skel-bar"></div><div class="wdg__skel-bar"></div><div class="wdg__skel-bar"></div><div class="wdg__skel-bar"></div><div class="wdg__skel-bar"></div></div>
+    </div>
+  </section>
+
+  <section class="pv__section">
+        <div class="wdg__empty">
+      <svg class="pv-svg" viewBox="0 0 24 24" aria-hidden="true" style="width:24px;height:24px;color:var(--color-muted)"><path d="m16 18 6-6-6-6"/><path d="m8 18-6-6 6-6"/></svg>
+      <h3 class="wdg__empty-title">No widgets yet</h3>
+      <p class="wdg__empty-copy">Create your first widget to start collecting feedback from external applications</p>
+      <button class="pv-btn pv-btn--outline" type="button">＋ Create Widget</button>
+    </div>
+  </section>
+
+  <section class="pv__section">
+    <h2 class="pv__label">Secret dialog surface</h2>
+    <div class="wdg__caution" style="max-width:520px">
+      <p class="wdg__caution-text">Use this server-side only to sign SDK identity (HMAC).</p>
+      <div class="wdg__secret" style="margin-top:var(--space-sm)">
+        <code>sk_sample_secret_value_never_shipped_000000</code>
+        <button class="pv-btn pv-btn--ghost pv-btn--icon" type="button" aria-label="Copy API secret"><svg class="pv-svg" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+      </div>
+    </div>
+  </section>
+
+  <section class="pv__section">
+    <h2 class="pv__label">Dialog controls, eight states</h2>
+    <div class="pv__row">
+      <div style="display:grid;gap:var(--space-2xs);min-width:180px">
+        <span class="pv__label" style="font-weight:500;font-size:var(--text-xs)">select, default</span>
+        <div class="wdg__selectwrap"><select class="wdg__control" aria-label="Boards sample"><option>Boards</option></select></div>
+      </div>
+      <div style="display:grid;gap:var(--space-2xs);min-width:180px">
+        <span class="pv__label" style="font-weight:500;font-size:var(--text-xs)">select, hover</span>
+        <div class="wdg__selectwrap"><select class="wdg__control is-hover" aria-label="Boards sample hover"><option>Boards</option></select></div>
+      </div>
+      <div style="display:grid;gap:var(--space-2xs);min-width:180px">
+        <span class="pv__label" style="font-weight:500;font-size:var(--text-xs)">select, focus</span>
+        <div class="wdg__selectwrap"><select class="wdg__control is-focus" aria-label="Boards sample focus"><option>Boards</option></select></div>
+      </div>
+      <div style="display:grid;gap:var(--space-2xs);min-width:180px">
+        <span class="pv__label" style="font-weight:500;font-size:var(--text-xs)">select, disabled</span>
+        <div class="wdg__selectwrap"><select class="wdg__control" disabled aria-label="Boards sample disabled"><option>Boards</option></select></div>
+      </div>
+    </div>
+    <div class="pv__row">
+      <div style="display:grid;gap:var(--space-2xs);min-width:180px">
+        <span class="pv__label" style="font-weight:500;font-size:var(--text-xs)">colour field, default</span>
+        <label class="wdg__swatchfield"><span>Colour</span><span class="wdg__swatch" style="background-color:var(--color-accent)"></span></label>
+      </div>
+      <div style="display:grid;gap:var(--space-2xs);min-width:180px">
+        <span class="pv__label" style="font-weight:500;font-size:var(--text-xs)">colour field, hover</span>
+        <label class="wdg__swatchfield is-hover"><span>Colour</span><span class="wdg__swatch" style="background-color:var(--color-accent)"></span></label>
+      </div>
+      <div style="display:grid;gap:var(--space-2xs);min-width:180px">
+        <span class="pv__label" style="font-weight:500;font-size:var(--text-xs)">colour field, focus</span>
+        <label class="wdg__swatchfield is-focus"><span>Colour</span><span class="wdg__swatch" style="background-color:var(--color-accent)"></span></label>
+      </div>
+    </div>
+    <div class="pv__row">
+      <div style="display:grid;gap:var(--space-2xs)">
+        <span class="pv__label" style="font-weight:500;font-size:var(--text-xs)">delete, hover</span>
+        <button class="pv-btn pv-btn--ghost pv-btn--icon wdg__delete is-hover" type="button" aria-label="Delete sample hover"><svg class="pv-svg" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+      </div>
+      <div style="display:grid;gap:var(--space-2xs)">
+        <span class="pv__label" style="font-weight:500;font-size:var(--text-xs)">delete, focus</span>
+        <button class="pv-btn pv-btn--ghost pv-btn--icon wdg__delete is-focus" type="button" aria-label="Delete sample focus"><svg class="pv-svg" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+      </div>
+      <div style="display:grid;gap:var(--space-2xs)">
+        <span class="pv__label" style="font-weight:500;font-size:var(--text-xs)">delete, active</span>
+        <button class="pv-btn pv-btn--ghost pv-btn--icon wdg__delete is-active" type="button" aria-label="Delete sample active"><svg class="pv-svg" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+      </div>
+      <div style="display:grid;gap:var(--space-2xs)">
+        <span class="pv__label" style="font-weight:500;font-size:var(--text-xs)">primary, disabled (submitting)</span>
+        <button class="pv-btn" type="button" disabled>Create Widget</button>
+      </div>
+    </div>
+  </section>
+</main>
+</body>
+</html>

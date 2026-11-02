@@ -2,6 +2,21 @@
  {
   "mode": "redesign",
   "depth": "full",
+  "scope": "app",
+  "shape": "app screen",
+  "theme": "brand (kept)",
+  "entry": "src/app/admin/widgets/page.tsx",
+  "sections": "head, credentials table, skeleton, empty, secret dialog",
+  "signature": "the credentials column: key, secret state, domain allowlist, HMAC caution",
+  "imagery": "none (app screen)",
+  "states": "loading, empty, error toast, full, disabled",
+  "waived": "37 (shared tokens file)",
+  "prompt": "redesign the widgets tab, keep brand, dull/outdated, trusty",
+  "date": "2026-11-02"
+ },
+ {
+  "mode": "redesign",
+  "depth": "full",
   "scope": "site",
   "entry": "src/app/(marketing)/{ai-chat,autopilot,expert-view,integrations}",
   "shape": "one per page: Switcher (ai-chat), Pinned pipeline (autopilot), Ledger (expert-view), Index with hub (integrations)",

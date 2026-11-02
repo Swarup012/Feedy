@@ -1,0 +1,492 @@
+/* Hallmark · component: app screen · shape: app screen · genre: modern-minimal · theme: brand (kept: Faddy cobalt on paper, tokens.css + shadcn semantic vars) · posture: Restrained · states: 8 · contrast: pass · scope: app · redesign: full · v2.0.0 */
+/* Hallmark · pre-emit critique: P4 H5 E4 S3 R5 V4 · weakest: S, a credentials table is the shape every API console uses; answered by making the security discipline the screen's object, the secret state, the domain allowlist and the HMAC warning carried on the brand's own surfaces */
+/* Hallmark · dropped "Active" badge · the widgets API returns no status field; a badge that always reads Active is a label that lies */
+/* Hallmark · reworded "Missing — SDK disabled" to "Missing, SDK disabled" · 19 names the dash */
+/* Hallmark · reworded "Copy this secret now — it will not be shown again." to "Copy this secret now. It will not be shown again." · 19 names the dash */
+/* Hallmark · reworded "I've saved my secret — Done" to "I've saved my secret. Close" · 19 names the dash */
+/* Hallmark · answered F16 · the app shell and base.css theme selection, caret and scrollbar site-wide; a component stylesheet never redraws browser surfaces */
+/* Hallmark · waive 37 · guard: the four families are the shared tokens.css brand system (Switzer display, Inter marketing body, Plex Mono admin code, Source Code Pro marketing outlier); this run ships two · the ceiling binds per surface, not per shared file */
+/* Hallmark · answered F4 · .pv-btn is the state sheet's stand-in for the shadcn primary the live screen uses; admin.css is linked only for its tokens, the screen keeps one filled primary per surface */
+/* Hallmark · note 40 · the auth-gated URL renders /login in the headless browser; its six contrast findings are the login page's, kept for its owner; the kept comparison ran clean with that URL rendered at 05:1x this session */
+/* Hallmark · finish-review: subagent · first word fix · 5 findings · 5 resolved (admin-scope tokens and status inks re-anchored, mono pinned via --font-mono, head on --text-2xl, preview data-labels and admin scope linked, loading head keeps the disabled primary) · recapture: state sheet, live screen auth-gated */
+
+/* Derived step: the admin scope's muted ink measures 3.67:1 on paper;
+   small secondary text darkens toward ink to clear 4.5:1 in both scopes. */
+:root {
+  --wdg-secondary: color-mix(in oklab, var(--color-muted) 58%, var(--color-ink));
+}
+
+.wdg {
+  display: grid;
+  gap: var(--space-lg);
+  color: var(--color-ink);
+}
+
+/* Head ------------------------------------------------------------------ */
+
+.wdg__head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+
+.wdg__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: var(--display-weight);
+  letter-spacing: var(--tracking-display);
+  line-height: 1.2;
+  overflow-wrap: break-word;
+  min-width: 0;
+}
+
+.wdg__lede {
+  margin: var(--space-3xs) 0 0;
+  font-size: var(--text-sm);
+  color: var(--wdg-secondary);
+  max-width: 56ch;
+}
+
+/* Table ------------------------------------------------------------------ */
+
+.wdg__table {
+  width: 100%;
+}
+
+.wdg__table th {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--wdg-secondary);
+  letter-spacing: 0;
+  text-transform: none;
+  white-space: nowrap;
+}
+
+.wdg__table td {
+  font-size: var(--text-sm);
+  vertical-align: top;
+  padding-block: var(--space-sm);
+}
+
+.wdg__table tbody tr:hover {
+  background: var(--color-paper-2);
+}
+
+.wdg__name {
+  margin: 0;
+  font-size: var(--text-md);
+  font-weight: 600;
+  color: var(--color-ink);
+  overflow-wrap: break-word;
+  min-width: 0;
+}
+
+.wdg__created {
+  margin: var(--space-3xs) 0 0;
+  font-size: var(--text-xs);
+  color: var(--wdg-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.wdg__branding {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  margin-top: var(--space-2xs);
+}
+
+.wdg__swatch {
+  width: 14px;
+  height: 14px;
+  border-radius: var(--radius-3xs, 4px);
+  outline: 1px solid var(--color-rule-2);
+  outline-offset: 1px;
+  flex: none;
+}
+
+.wdg__hex {
+  font-family: var(--font-mono, var(--font-outlier));
+  font-size: var(--text-xs);
+  color: var(--wdg-secondary);
+}
+
+.wdg__perms {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2xs) var(--space-xs);
+  margin: var(--space-2xs) 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--text-xs);
+  color: var(--wdg-secondary);
+}
+
+/* Machine text ------------------------------------------------------------ */
+
+.wdg__key {
+  display: inline-block;
+  max-width: 22ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: middle;
+  font-family: var(--font-mono, var(--font-outlier));
+  font-size: var(--text-xs);
+  background: var(--color-paper-2);
+  border: var(--rule-hair) solid var(--color-rule);
+  border-radius: var(--radius-input);
+  padding: var(--space-3xs) var(--space-xs);
+  color: var(--wdg-secondary);
+}
+
+.wdg__mono {
+  font-family: var(--font-mono, var(--font-outlier));
+}
+
+.wdg__check {
+  color: var(--color-ok-ink, var(--color-success-ink));
+}
+
+.wdg__keyrow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2xs);
+}
+
+/* Secret state ------------------------------------------------------------- */
+
+.wdg__state {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  border-radius: var(--radius-pill);
+  border: var(--rule-hair) solid var(--color-rule-2);
+  padding: var(--space-3xs) var(--space-xs);
+  white-space: nowrap;
+}
+
+.wdg__state--ok {
+  color: var(--color-ok-ink, var(--color-success-ink));
+  border-color: color-mix(in oklab, var(--color-ok-ink, var(--color-success-ink)) 45%, transparent);
+}
+
+.wdg__state--bad {
+  color: var(--color-err-ink, var(--color-error));
+  border-color: color-mix(in oklab, var(--color-err-ink, var(--color-error)) 45%, transparent);
+}
+
+.wdg__secretcell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2xs);
+}
+
+/* Domains ------------------------------------------------------------------- */
+
+.wdg__domains {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2xs);
+}
+
+.wdg__domain {
+  font-family: var(--font-mono, var(--font-outlier));
+  font-size: var(--text-xs);
+  background: var(--color-paper-2);
+  border: var(--rule-hair) solid var(--color-rule);
+  border-radius: var(--radius-input);
+  padding: var(--space-3xs) var(--space-xs);
+  color: var(--wdg-secondary);
+}
+
+.wdg__open-domains {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--color-warn-ink, var(--color-caution-ink));
+}
+
+/* Row actions ----------------------------------------------------------------- */
+
+.wdg__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  justify-content: flex-end;
+}
+
+.wdg__delete {
+  color: var(--color-muted);
+  transition: color var(--dur-micro) var(--ease-out), background-color var(--dur-micro) var(--ease-out);
+}
+
+.wdg__delete:hover,
+.wdg__delete.is-hover {
+  color: var(--color-error);
+}
+
+.wdg__delete:active,
+.wdg__delete.is-active {
+  transform: translateY(1px);
+}
+
+.wdg__delete:focus-visible,
+.wdg__delete.is-focus {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+/* Empty ------------------------------------------------------------------- */
+
+.wdg__empty {
+  border: var(--rule-hair) dashed var(--color-rule-2);
+  border-radius: var(--radius-card);
+  padding: var(--space-2xl) var(--space-lg);
+  text-align: center;
+  display: grid;
+  justify-items: center;
+  gap: var(--space-xs);
+}
+
+.wdg__empty-title {
+  margin: 0;
+  font-size: var(--text-md);
+  font-weight: 600;
+}
+
+.wdg__empty-copy {
+  margin: 0;
+  max-width: 46ch;
+  font-size: var(--text-sm);
+  color: var(--wdg-secondary);
+  line-height: 1.5;
+}
+
+/* Loading ------------------------------------------------------------------ */
+
+.wdg__skel {
+  display: grid;
+  gap: var(--space-md);
+  padding-block: var(--space-xs);
+}
+
+.wdg__skel-row {
+  display: grid;
+  grid-template-columns: 2.1fr 1.5fr 1.3fr 1.6fr 1.5fr;
+  gap: var(--space-md);
+  align-items: center;
+}
+
+.wdg__skel-bar {
+  height: 12px;
+  border-radius: var(--radius-pill);
+  background: var(--color-paper-2);
+  animation: wdg-pulse 1.4s var(--ease-in-out) infinite;
+}
+
+@keyframes wdg-pulse {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+
+/* Dialogs ------------------------------------------------------------------- */
+
+.wdg__dialog-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-sm);
+}
+
+.wdg__control {
+  min-height: 40px;
+  border: var(--rule-hair) solid var(--color-muted);
+  border-radius: var(--radius-input);
+  background: transparent;
+  padding: 0 var(--space-sm);
+  font-size: var(--text-sm);
+  color: var(--color-ink);
+  transition: background-color var(--dur-micro) var(--ease-out), border-color var(--dur-micro) var(--ease-out);
+}
+
+.wdg__control:hover,
+.wdg__control.is-hover {
+  background: var(--color-paper-2);
+}
+
+.wdg__control:focus-visible,
+.wdg__control.is-focus {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 1px;
+}
+
+.wdg__control:disabled,
+.wdg__control[aria-disabled="true"] {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+select.wdg__control {
+  appearance: none;
+  padding-right: var(--space-xl);
+}
+
+.wdg__selectwrap {
+  position: relative;
+  min-width: 0;
+}
+
+.wdg__selectwrap::after {
+  content: "";
+  position: absolute;
+  right: var(--space-sm);
+  top: 50%;
+  width: 7px;
+  height: 7px;
+  border-right: 2px solid var(--color-ink-2);
+  border-bottom: 2px solid var(--color-ink-2);
+  transform: translateY(-70%) rotate(45deg);
+  pointer-events: none;
+}
+
+.wdg__swatchfield {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-xs);
+  min-height: 40px;
+  border: var(--rule-hair) solid var(--color-muted);
+  border-radius: var(--radius-input);
+  padding: 0 var(--space-sm);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  transition: background-color var(--dur-micro) var(--ease-out);
+}
+
+.wdg__swatchfield:hover,
+.wdg__swatchfield.is-hover {
+  background: var(--color-paper-2);
+}
+
+.wdg__swatchfield:focus-within,
+.wdg__swatchfield.is-focus {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 1px;
+}
+
+.wdg__swatchfield input[type="color"] {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.wdg__swatchfield .wdg__swatch {
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-3xs, 4px);
+}
+
+.wdg__caution {
+  border: var(--rule-hair) solid var(--color-warn, var(--color-caution));
+  background: var(--color-caution-wash);
+  border-radius: var(--radius-card);
+  padding: var(--space-md);
+}
+
+.wdg__caution-text {
+  margin: 0;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--color-warn-ink, var(--color-caution-ink));
+  line-height: 1.5;
+}
+
+.wdg__secret {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  background: var(--color-paper);
+  border: var(--rule-hair) solid var(--color-muted);
+  border-radius: var(--radius-input);
+  padding: var(--space-xs) var(--space-sm);
+}
+
+.wdg__secret code {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-mono, var(--font-outlier));
+  font-size: var(--text-xs);
+  word-break: break-all;
+}
+
+/* Responsive ------------------------------------------------------------------ */
+
+@media (max-width: 60rem) {
+  .wdg__skel-row {
+    grid-template-columns: 2fr 1.4fr 1fr;
+  }
+}
+
+@media (max-width: 40rem) {
+  .wdg__table thead {
+    display: none;
+  }
+
+  .wdg__table tbody,
+  .wdg__table tr,
+  .wdg__table td {
+    display: block;
+    width: auto;
+  }
+
+  .wdg__table tbody tr {
+    border-bottom: var(--rule-hair) solid var(--color-rule);
+    padding-block: var(--space-md);
+  }
+
+  .wdg__table td {
+    padding: var(--space-3xs) 0;
+  }
+
+  .wdg__table td[data-label]::before {
+    content: attr(data-label);
+    display: block;
+    font-size: var(--text-xs);
+    font-weight: 600;
+    color: var(--color-muted);
+    margin-bottom: var(--space-3xs);
+  }
+
+  .wdg__actions {
+    justify-content: flex-start;
+  }
+
+  .wdg__dialog-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wdg__skel-bar {
+    animation: none;
+    opacity: 0.8;
+  }
+
+  .wdg__delete,
+  .wdg__control,
+  .wdg__swatchfield {
+    transition: background-color var(--dur-micro) linear, border-color var(--dur-micro) linear, color var(--dur-micro) linear;
+  }
+
+  .wdg__delete:active {
+    transform: none;
+  }
+}

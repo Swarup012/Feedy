@@ -1,19 +1,24 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Copy, Plus, Trash2, Edit, Code, Check } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import api from "@/lib/api";
+import "./widgets.css";
 
 interface Widget {
   id: string;
@@ -74,7 +79,7 @@ function WidgetToggles({
   return (
     <div className="space-y-3">
       {rows.map((row) => (
-        <div key={row.key} className="flex items-center justify-between">
+        <div key={row.key} className="flex items-center justify-between gap-4">
           <div>
             <p className="text-sm font-medium">{row.title}</p>
             <p className="text-xs text-muted-foreground">{row.description}</p>
@@ -97,7 +102,7 @@ export default function WidgetManagementPage() {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [selectedWidget, setSelectedWidget] = useState<Widget | null>(null);
   const [copiedApiKey, setCopiedApiKey] = useState<string | null>(null);
-  const [copiedSnippet, setCopiedSnippet] = useState(false);
+  const [copiedSnippet, setCopiedSnippet] = useState<string | null>(null);
   const [apiSecretDialog, setApiSecretDialog] = useState<string | null>(null);
   const { toast } = useToast();
 
@@ -184,7 +189,7 @@ export default function WidgetManagementPage() {
         toast({
           title: "Success",
           description: data.data.api_secret
-            ? "Widget created — copy the API secret now (shown once)"
+            ? "Widget created, copy the API secret now (shown once)"
             : "Widget created successfully",
         });
         setShowCreateDialog(false);
@@ -304,7 +309,7 @@ export default function WidgetManagementPage() {
         setApiSecretDialog(data.data.api_secret);
         toast({
           title: "Secret rotated",
-          description: "Copy the new API secret now — it will not be shown again.",
+          description: "Copy the new API secret now. It will not be shown again.",
         });
         loadWidgets();
       }
@@ -328,7 +333,7 @@ export default function WidgetManagementPage() {
           setApiSecretDialog(data.data.api_secret);
           toast({
             title: "API secret ready",
-            description: "Copy the API secret now — it will not be shown again.",
+            description: "Copy the API secret now. It will not be shown again.",
           });
         } else {
           toast({ title: "Already configured", description: "This widget already has an API secret." });
@@ -367,8 +372,8 @@ export default function WidgetManagementPage() {
 </script>`;
 
     navigator.clipboard.writeText(snippet);
-    setCopiedSnippet(true);
-    setTimeout(() => setCopiedSnippet(false), 2000);
+    setCopiedSnippet(widget.id);
+    setTimeout(() => setCopiedSnippet(null), 2000);
     toast({
       title: "Copied",
       description: "Embed snippet copied to clipboard",
@@ -405,61 +410,90 @@ export default function WidgetManagementPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-48">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <div className="wdg" aria-busy="true">
+        <div className="wdg__head">
+          <div>
+            <h1 className="wdg__title">Widget Management</h1>
+            <p className="wdg__lede">
+              Create and manage embeddable feedback widgets for your products
+            </p>
+          </div>
+          <Button disabled className="gap-1.5">
+            <Plus className="h-4 w-4" />
+            Create Widget
+          </Button>
+        </div>
+        <div className="wdg__skel">
+          {[0, 1, 2].map((i) => (
+            <div key={i} className="wdg__skel-row">
+              <div className="wdg__skel-bar" />
+              <div className="wdg__skel-bar" />
+              <div className="wdg__skel-bar" />
+              <div className="wdg__skel-bar" />
+              <div className="wdg__skel-bar" />
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
+    <div className="wdg">
+      {/* Head */}
+      <div className="wdg__head">
         <div>
-          <h1 className="text-lg font-bold">Widget Management</h1>
-          <p className="text-sm text-gray-600 mt-1">
+          <h1 className="wdg__title">Widget Management</h1>
+          <p className="wdg__lede">
             Create and manage embeddable feedback widgets for your products
           </p>
         </div>
-        <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-          <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle className="text-lg font-semibold">Create Widget</DialogTitle>
-              <p className="text-sm text-muted-foreground mt-1">
-                Set up a new embeddable feedback widget for your product.
-              </p>
-            </DialogHeader>
-            <form onSubmit={handleCreateWidget} className="space-y-4 pt-2">
-              <div className="space-y-2">
-                <Label htmlFor="name" className="text-sm font-medium">Name</Label>
-                <Input
-                  id="name"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="e.g., Product Feedback Widget"
-                  className="h-11"
-                  required
-                />
-              </div>
+        <Button onClick={() => setShowCreateDialog(true)} className="gap-1.5">
+          <Plus className="h-4 w-4" />
+          Create Widget
+        </Button>
+      </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="allowed_domains" className="text-sm font-medium">Allowed domains</Label>
-                <Input
-                  id="allowed_domains"
-                  value={formData.allowed_domains}
-                  onChange={(e) => setFormData({ ...formData, allowed_domains: e.target.value })}
-                  placeholder="e.g., yourapp.com, app.yourapp.com"
-                  className="h-11"
-                />
-              </div>
+      <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-semibold">Create Widget</DialogTitle>
+            <p className="text-sm text-muted-foreground mt-1">
+              Set up a new embeddable feedback widget for your product.
+            </p>
+          </DialogHeader>
+          <form onSubmit={handleCreateWidget} className="space-y-4 pt-2">
+            <div className="space-y-2">
+              <Label htmlFor="name" className="text-sm font-medium">Name</Label>
+              <Input
+                id="name"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                placeholder="e.g., Product Feedback Widget"
+                className="h-10"
+                required
+              />
+            </div>
 
-              <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="allowed_domains" className="text-sm font-medium">Allowed domains</Label>
+              <Input
+                id="allowed_domains"
+                value={formData.allowed_domains}
+                onChange={(e) => setFormData({ ...formData, allowed_domains: e.target.value })}
+                placeholder="e.g., yourapp.com, app.yourapp.com"
+                className="h-10"
+              />
+            </div>
+
+            <div className="wdg__dialog-grid">
+              <div className="wdg__selectwrap">
                 <select
                   id="default_board_id"
                   aria-label="Boards"
                   value={formData.default_board_id}
                   onChange={(e) => setFormData({ ...formData, default_board_id: e.target.value })}
-                  className="h-11 w-full appearance-none rounded-lg bg-muted px-4 text-sm"
+                  className="wdg__control w-full"
                   required
                 >
                   <option value="">Boards</option>
@@ -469,182 +503,214 @@ export default function WidgetManagementPage() {
                     </option>
                   ))}
                 </select>
+              </div>
 
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      className="h-11 w-full justify-start rounded-lg bg-muted px-4 text-sm font-normal hover:bg-muted/80"
-                    >
-                      Permissions
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent align="start" className="w-72 p-0">
-                    <div className="space-y-3 p-3">
-                      <WidgetToggles formData={formData} setFormData={setFormData} />
-                    </div>
-                  </PopoverContent>
-                </Popover>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="wdg__control w-full justify-start text-sm font-normal"
+                  >
+                    Permissions
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent align="start" className="w-72 p-0">
+                  <div className="space-y-3 p-3">
+                    <WidgetToggles formData={formData} setFormData={setFormData} />
+                  </div>
+                </PopoverContent>
+              </Popover>
 
-                <div className="relative h-11 rounded-lg bg-muted">
-                  <span className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-sm">
-                    Colour
-                  </span>
-                  <input
-                    type="color"
-                    aria-label="Colour"
-                    value={formData.primaryColor}
-                    onChange={(e) => setFormData({ ...formData, primaryColor: e.target.value })}
-                    className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
-                  />
-                </div>
-
-                <Input
-                  aria-label="Color code"
+              <label className="wdg__swatchfield">
+                <span>Colour</span>
+                <span
+                  className="wdg__swatch"
+                  style={{ backgroundColor: formData.primaryColor }}
+                  aria-hidden="true"
+                />
+                <input
+                  type="color"
+                  aria-label="Colour"
                   value={formData.primaryColor}
                   onChange={(e) => setFormData({ ...formData, primaryColor: e.target.value })}
-                  className="h-11 rounded-lg border-transparent bg-muted font-mono"
                 />
-              </div>
+              </label>
 
-              <div className="flex gap-3 pt-2">
-                <Button type="submit" className="flex-1">
-                  Create Widget
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => {
-                    setShowCreateDialog(false);
-                    resetForm();
-                  }}
-                >
-                  Cancel
-                </Button>
-              </div>
-            </form>
-          </DialogContent>
-        </Dialog>
-      </div>
+              <Input
+                aria-label="Color code"
+                value={formData.primaryColor}
+                onChange={(e) => setFormData({ ...formData, primaryColor: e.target.value })}
+                className="wdg__control wdg__mono h-10"
+              />
+            </div>
 
-      {/* Widgets List */}
+            <div className="flex gap-3 pt-2">
+              <Button type="submit" className="flex-1">
+                Create Widget
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setShowCreateDialog(false);
+                  resetForm();
+                }}
+              >
+                Cancel
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Widgets list */}
       {widgets.length === 0 ? (
-        <Card className="p-8 text-center">
-          <Code className="h-8 w-8 mx-auto mb-4 text-gray-400" />
-          <h3 className="text-lg font-semibold mb-2">No widgets yet</h3>
-          <p className="text-gray-600 mb-4">
+        <div className="wdg__empty">
+          <Code className="h-6 w-6 text-muted-foreground" aria-hidden="true" />
+          <h3 className="wdg__empty-title">No widgets yet</h3>
+          <p className="wdg__empty-copy">
             Create your first widget to start collecting feedback from external applications
           </p>
-          <Button onClick={() => setShowCreateDialog(true)}>
-            <Plus className="h-4 w-4 mr-2" />
+          <Button variant="outline" onClick={() => setShowCreateDialog(true)} className="gap-1.5">
+            <Plus className="h-4 w-4" />
             Create Widget
           </Button>
-        </Card>
+        </div>
       ) : (
-        <div className="grid gap-4">
-          {widgets.map((widget) => (
-            <Card key={widget.id} className="p-6">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <h3 className="text-lg font-semibold">{widget.name}</h3>
-                    <Badge variant="outline">Active</Badge>
-                  </div>
+        <div className="wdg__table">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Widget</TableHead>
+                <TableHead>API key</TableHead>
+                <TableHead>API secret</TableHead>
+                <TableHead>Allowed domains</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {widgets.map((widget) => {
+                const perms = [
+                  widget.settings.show_voting && "Voting",
+                  widget.settings.allow_anonymous && "Anonymous submissions",
+                  widget.settings.show_roadmap && "Roadmap",
+                  (widget.settings.require_sdk_identity ?? true) && "Secure identity",
+                ].filter(Boolean) as string[];
 
-                  <div className="space-y-2 text-sm text-gray-600">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium">API Key:</span>
-                      <code className="bg-gray-100 px-2 py-1 rounded text-xs">
-                        {widget.api_key.substring(0, 20)}...
-                      </code>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => copyApiKey(widget.api_key)}
-                        className="h-6 px-2"
-                      >
-                        {copiedApiKey === widget.api_key ? (
-                          <Check className="h-3 w-3 text-green-600" />
-                        ) : (
-                          <Copy className="h-3 w-3" />
-                        )}
-                      </Button>
-                    </div>
-
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-medium">API Secret:</span>
-                      {widget.has_api_secret ? (
-                        <Badge variant="secondary">Configured</Badge>
-                      ) : (
-                        <Badge variant="destructive">Missing — SDK disabled</Badge>
-                      )}
-                      {!widget.has_api_secret ? (
-                        <Button variant="outline" size="sm" onClick={() => handleEnsureSecret(widget.id)}>
-                          Generate Secret
-                        </Button>
-                      ) : (
-                        <Button variant="outline" size="sm" onClick={() => handleRotateSecret(widget.id)}>
-                          Rotate Secret
-                        </Button>
-                      )}
-                    </div>
-
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-medium">Allowed Domains:</span>{" "}
-                      {widget.allowed_domains.length > 0 ? (
-                        widget.allowed_domains.map((d, i) => (
-                          <Badge key={i} variant="secondary" className="ml-1">
-                            {d}
-                          </Badge>
-                        ))
-                      ) : (
-                        <span className="text-yellow-600">All domains (not secure)</span>
-                      )}
-                    </div>
-
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center gap-2">
-                        <div
-                          className="w-4 h-4 rounded"
+                return (
+                  <TableRow key={widget.id}>
+                    <TableCell data-label="Widget" className="max-w-72">
+                      <p className="wdg__name">{widget.name}</p>
+                      <p className="wdg__created">
+                        Created {new Date(widget.created_at).toLocaleDateString()}
+                      </p>
+                      <span className="wdg__branding">
+                        <span
+                          className="wdg__swatch"
                           style={{ backgroundColor: widget.branding.primaryColor }}
+                          aria-hidden="true"
                         />
-                        <span>{widget.branding.primaryColor}</span>
-                      </div>
-                      <span>•</span>
-                      <span>Created {new Date(widget.created_at).toLocaleDateString()}</span>
-                    </div>
-                  </div>
-                </div>
+                        <span className="wdg__hex">{widget.branding.primaryColor}</span>
+                      </span>
+                      {perms.length > 0 && (
+                        <ul className="wdg__perms">
+                          {perms.map((p) => (
+                            <li key={p}>{p}</li>
+                          ))}
+                        </ul>
+                      )}
+                    </TableCell>
 
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => copyEmbedSnippet(widget)}
-                  >
-                    <Code className="h-4 w-4 mr-2" />
-                    {copiedSnippet ? "Copied!" : "Copy Embed Code"}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => openEditDialog(widget)}
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleDeleteWidget(widget.id)}
-                    className="text-red-600 hover:text-red-700"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            </Card>
-          ))}
+                    <TableCell data-label="API key">
+                      <div className="wdg__keyrow">
+                        <span className="wdg__key" title={widget.api_key}>
+                          {widget.api_key.substring(0, 20)}...
+                        </span>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 shrink-0"
+                          onClick={() => copyApiKey(widget.api_key)}
+                          aria-label="Copy API key"
+                        >
+                          {copiedApiKey === widget.api_key ? (
+                            <Check className="wdg__check h-4 w-4" />
+                          ) : (
+                            <Copy className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </div>
+                    </TableCell>
+
+                    <TableCell data-label="API secret">
+                      <div className="wdg__secretcell">
+                        {widget.has_api_secret ? (
+                          <span className="wdg__state wdg__state--ok">Configured</span>
+                        ) : (
+                          <span className="wdg__state wdg__state--bad">Missing, SDK disabled</span>
+                        )}
+                        {widget.has_api_secret ? (
+                          <Button variant="outline" size="sm" onClick={() => handleRotateSecret(widget.id)}>
+                            Rotate secret
+                          </Button>
+                        ) : (
+                          <Button variant="outline" size="sm" onClick={() => handleEnsureSecret(widget.id)}>
+                            Generate secret
+                          </Button>
+                        )}
+                      </div>
+                    </TableCell>
+
+                    <TableCell data-label="Allowed domains">
+                      {widget.allowed_domains.length > 0 ? (
+                        <div className="wdg__domains">
+                          {widget.allowed_domains.map((d, i) => (
+                            <span key={i} className="wdg__domain">
+                              {d}
+                            </span>
+                          ))}
+                        </div>
+                      ) : (
+                        <span className="wdg__open-domains">All domains, not secure</span>
+                      )}
+                    </TableCell>
+
+                    <TableCell data-label="Actions" className="text-right">
+                      <div className="wdg__actions">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => copyEmbedSnippet(widget)}
+                        >
+                          <Code className="h-4 w-4 mr-2" />
+                          {copiedSnippet === widget.id ? "Copied!" : "Copy Embed Code"}
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={() => openEditDialog(widget)}
+                          aria-label={`Edit ${widget.name}`}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="wdg__delete h-8 w-8"
+                          onClick={() => handleDeleteWidget(widget.id)}
+                          aria-label={`Delete ${widget.name}`}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
         </div>
       )}
 
@@ -664,7 +730,7 @@ export default function WidgetManagementPage() {
                 id="edit-name"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="h-11"
+                className="h-10"
                 required
               />
             </div>
@@ -676,33 +742,35 @@ export default function WidgetManagementPage() {
                 value={formData.allowed_domains}
                 onChange={(e) => setFormData({ ...formData, allowed_domains: e.target.value })}
                 placeholder="Comma-separated domains"
-                className="h-11"
+                className="h-10"
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <select
-                id="edit-default_board_id"
-                aria-label="Boards"
-                value={formData.default_board_id}
-                onChange={(e) => setFormData({ ...formData, default_board_id: e.target.value })}
-                className="h-11 w-full appearance-none rounded-lg bg-muted px-4 text-sm"
-                required
-              >
-                <option value="">Boards</option>
-                {boards.map((board) => (
-                  <option key={board.id} value={board.id}>
-                    {board.icon} {board.name}
-                  </option>
-                ))}
-              </select>
+            <div className="wdg__dialog-grid">
+              <div className="wdg__selectwrap">
+                <select
+                  id="edit-default_board_id"
+                  aria-label="Boards"
+                  value={formData.default_board_id}
+                  onChange={(e) => setFormData({ ...formData, default_board_id: e.target.value })}
+                  className="wdg__control w-full"
+                  required
+                >
+                  <option value="">Boards</option>
+                  {boards.map((board) => (
+                    <option key={board.id} value={board.id}>
+                      {board.icon} {board.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
                     type="button"
                     variant="ghost"
-                    className="h-11 w-full justify-start rounded-lg bg-muted px-4 text-sm font-normal hover:bg-muted/80"
+                    className="wdg__control w-full justify-start text-sm font-normal"
                   >
                     Permissions
                   </Button>
@@ -714,24 +782,26 @@ export default function WidgetManagementPage() {
                 </PopoverContent>
               </Popover>
 
-              <div className="relative h-11 rounded-lg bg-muted">
-                <span className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-sm">
-                  Colour
-                </span>
+              <label className="wdg__swatchfield">
+                <span>Colour</span>
+                <span
+                  className="wdg__swatch"
+                  style={{ backgroundColor: formData.primaryColor }}
+                  aria-hidden="true"
+                />
                 <input
                   type="color"
                   aria-label="Colour"
                   value={formData.primaryColor}
                   onChange={(e) => setFormData({ ...formData, primaryColor: e.target.value })}
-                  className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
                 />
-              </div>
+              </label>
 
               <Input
                 aria-label="Color code"
                 value={formData.primaryColor}
                 onChange={(e) => setFormData({ ...formData, primaryColor: e.target.value })}
-                className="h-11 rounded-lg border-transparent bg-muted font-mono"
+                className="wdg__control wdg__mono h-10"
               />
             </div>
 
@@ -760,25 +830,26 @@ export default function WidgetManagementPage() {
           <DialogHeader>
             <DialogTitle className="text-lg font-semibold">API Secret</DialogTitle>
             <p className="text-sm text-muted-foreground mt-1">
-              Copy this secret now — it will not be shown again.
+              Copy this secret now. It will not be shown again.
             </p>
           </DialogHeader>
-          <div className="rounded-lg border border-amber-300 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-700 p-4">
-            <p className="text-xs text-amber-700 dark:text-amber-400 mb-2 font-medium">
+          <div className="wdg__caution">
+            <p className="wdg__caution-text">
               Use this server-side only to sign SDK identity (HMAC).
             </p>
-            <div className="flex items-center gap-2 bg-white dark:bg-zinc-900 rounded-md border px-3 py-2">
-              <code className="text-xs font-mono flex-1 break-all select-all">{apiSecretDialog}</code>
+            <div className="wdg__secret mt-3">
+              <code className="select-all">{apiSecretDialog}</code>
               <Button
-                size="sm"
+                size="icon"
                 variant="ghost"
+                className="h-8 w-8 shrink-0"
                 onClick={() => {
                   if (apiSecretDialog) {
                     navigator.clipboard.writeText(apiSecretDialog);
                     toast({ title: "Copied", description: "API secret copied to clipboard" });
                   }
                 }}
-                className="shrink-0"
+                aria-label="Copy API secret"
               >
                 <Copy className="h-4 w-4" />
               </Button>
@@ -788,7 +859,7 @@ export default function WidgetManagementPage() {
             className="w-full"
             onClick={() => setApiSecretDialog(null)}
           >
-            I've saved my secret — Done
+            I’ve saved my secret. Close
           </Button>
         </DialogContent>
       </Dialog>
