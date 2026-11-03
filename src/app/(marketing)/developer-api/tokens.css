@@ -12,7 +12,7 @@
   --container: 1440px; --gutter: 64px; --gap-columns: 32px; --section-gap-s: 120px; --section-gap: 144px; --section-gap-l: 176px;
   --z-base: 1; --z-raised: 10; --z-dropdown: 100; --z-sticky: 200; --z-sticky-nav: 300; --z-modal: 400; --z-toast: 500; --z-tooltip: 600;
 
-  --color-paper: oklch(98.6% 0.005 250);
+  --color-paper: hsl(0 0% 97.6%); /* #f9f9f9 · brand off-white, globals --background */
   --color-paper-2: oklch(96.2% 0.008 252);
   --color-paper-3: oklch(93% 0.011 252);
   --color-ink: oklch(21% 0.028 262);
@@ -27,7 +27,7 @@
   --color-accent: oklch(56% 0.206 263);
   --color-accent-2: oklch(76% 0.13 254);
   --color-accent-wash: oklch(95% 0.028 256);
-  --color-accent-ink: oklch(98.6% 0.005 250);
+  --color-accent-ink: hsl(0 0% 97.6%);
   --color-accent-deep: oklch(43% 0.2 262);
   --color-accent-edge: oklch(39% 0.16 261);
   --color-focus: oklch(56% 0.206 263);
