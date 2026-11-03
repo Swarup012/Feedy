@@ -1125,55 +1125,51 @@ export function PostDetails({
               </AvatarFallback>
             </Avatar>
 
-            <div className="pd__composer-col">
-              <textarea
-                ref={commentTextareaRef}
-                placeholder={user ? "Post your reply" : "Sign in to leave a comment"}
-                value={newComment}
-                onChange={(e) => {
-                  setNewComment(e.target.value);
-                  autoResizeComment();
-                }}
-                onFocus={() => {
-                  if (!user && onAuthRequired && !isCustomHost) onAuthRequired();
-                }}
-                onKeyDown={(e) => {
-                  if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
-                    e.preventDefault();
-                    handleAddComment();
-                  }
-                }}
-                rows={1}
-                disabled={!user && !onAuthRequired}
-                aria-label="Write a comment"
-                className="pd__composer-input"
-              />
+            <textarea
+              ref={commentTextareaRef}
+              placeholder={user ? "Post your reply" : "Sign in to leave a comment"}
+              value={newComment}
+              onChange={(e) => {
+                setNewComment(e.target.value);
+                autoResizeComment();
+              }}
+              onFocus={() => {
+                if (!user && onAuthRequired && !isCustomHost) onAuthRequired();
+              }}
+              onKeyDown={(e) => {
+                if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+                  e.preventDefault();
+                  handleAddComment();
+                }
+              }}
+              rows={1}
+              disabled={!user && !onAuthRequired}
+              aria-label="Write a comment"
+              className="pd__composer-input"
+            />
 
-              <div className="pd__composer-bar">
-                {newComment.length > 0 && (
-                  <span
-                    className={cn(
-                      "pd__count",
-                      newComment.length > 480 && "pd__count--warn"
-                    )}
-                  >
-                    {newComment.length}
-                  </span>
+            {newComment.length > 0 && (
+              <span
+                className={cn(
+                  "pd__count",
+                  newComment.length > 480 && "pd__count--warn"
                 )}
-                <Button
-                  onClick={handleAddComment}
-                  disabled={!newComment.trim() || submittingComment}
-                  size="sm"
-                  className="h-9 px-4 font-semibold"
-                >
-                  {submittingComment ? (
-                    <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-                  ) : (
-                    "Reply"
-                  )}
-                </Button>
-              </div>
-            </div>
+              >
+                {newComment.length}
+              </span>
+            )}
+            <Button
+              onClick={handleAddComment}
+              disabled={!newComment.trim() || submittingComment}
+              size="sm"
+              className="pd__send h-9 px-4 font-semibold"
+            >
+              {submittingComment ? (
+                <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+              ) : (
+                "Reply"
+              )}
+            </Button>
           </div>
         </div>
       </div>
