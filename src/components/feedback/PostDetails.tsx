@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { PostDetailsSkeleton } from "./PostsListSkeleton";
+import { Skeleton } from "@/components/ui/skeleton";
 import AddToRoadmapModal from "@/components/roadmap/AddToRoadmapModal";
 import { CompletionChangelogDialog } from "./CompletionChangelogDialog";
 import {
@@ -300,7 +300,12 @@ export function PostDetails({
   const [loadingComments, setLoadingComments] = useState(false);
   const [mergedHistory, setMergedHistory] = useState<Post[]>([]);
   const [loadingMergedHistory, setLoadingMergedHistory] = useState(false);
-  const [loadingPost, setLoadingPost] = useState(false);
+  // Which post the mergedHistory array belongs to (same masking reason).
+  const [mergedFor, setMergedFor] = useState<string | null>(null);
+  // Which post the currently-held comments belong to. The thread header and
+  // rail paint instantly from props; the comments block shows a skeleton
+  // until the list for THIS post has arrived (module cache or fetch).
+  const [commentsFor, setCommentsFor] = useState<string | null>(null);
   const [submittingComment, setSubmittingComment] = useState(false);
   const [upvoted, setUpvoted] = useState(false);
   const [upvoting, setUpvoting] = useState(false);
@@ -405,8 +410,8 @@ export function PostDetails({
     if (post) {
       if (commentsCache[post.id]) {
         setComments(commentsCache[post.id]);
-        setLoadingPost(false);
-        
+        setCommentsFor(post.id);
+
         const refreshMethod = user ? postService.getComments : postService.getPublicPostComments;
         refreshMethod(post.id)
           .then(response => {
@@ -415,8 +420,7 @@ export function PostDetails({
           })
           .catch(() => {});
       } else {
-        setLoadingPost(true);
-        fetchComments().finally(() => setLoadingPost(false));
+        fetchComments();
       }
     }
   }, [post?.id]);
@@ -428,6 +432,7 @@ export function PostDetails({
     if (post && user) {
       if (mergedHistoryCache[post.id]) {
         setMergedHistory(mergedHistoryCache[post.id]);
+        setMergedFor(post.id);
 
         postService
           .getFoldedPosts(post.id)
@@ -465,12 +470,13 @@ export function PostDetails({
 
   const fetchComments = async () => {
     if (!post) return;
+    const postId = post.id;
 
     try {
       setLoadingComments(true);
       const fetchMethod = user ? postService.getComments : postService.getPublicPostComments;
-      const response = await fetchMethod(post.id);
-      commentsCache[post.id] = response.data.comments;
+      const response = await fetchMethod(postId);
+      commentsCache[postId] = response.data.comments;
       setComments(response.data.comments);
     } catch (error: any) {
       toast({
@@ -479,17 +485,21 @@ export function PostDetails({
         variant: "destructive",
       });
     } finally {
+      // Unmask the comments block (skeleton → list/empty state) once the
+      // load for this post settles, success or not — same as the old gate.
+      setCommentsFor(postId);
       setLoadingComments(false);
     }
   };
 
   const fetchMergedHistory = async () => {
     if (!post || !user) return;
+    const postId = post.id;
 
     try {
       setLoadingMergedHistory(true);
-      const response = await postService.getFoldedPosts(post.id);
-      mergedHistoryCache[post.id] = response.data.posts;
+      const response = await postService.getFoldedPosts(postId);
+      mergedHistoryCache[postId] = response.data.posts;
       setMergedHistory(response.data.posts);
     } catch (error: any) {
       toast({
@@ -498,6 +508,7 @@ export function PostDetails({
         variant: "destructive",
       });
     } finally {
+      setMergedFor(postId);
       setLoadingMergedHistory(false);
     }
   };
@@ -879,17 +890,6 @@ export function PostDetails({
     return post.id ? `${window.location.origin}/feedback/${post.id}` : "";
   };
 
-  // Show skeleton while loading
-  if (loadingPost && post) {
-    return (
-      <div className={cn("pd", className)}>
-        <div className="pd__thread">
-          <PostDetailsSkeleton />
-        </div>
-      </div>
-    );
-  }
-
   if (!post) {
     return (
       <div className={cn("pd", className)}>
@@ -899,6 +899,10 @@ export function PostDetails({
   }
 
   const commentCount = comments.length;
+  // Comments held in state are for a previous post until this post's load
+  // settles — skeleton in the comments block, neutral heading, never a
+  // stale count or another post's list.
+  const commentsPending = commentsFor !== post.id;
   const userInitial =
     user?.name?.[0]?.toUpperCase() ||
     user?.email?.[0]?.toUpperCase() ||
@@ -1033,7 +1037,7 @@ export function PostDetails({
           </div>
 
           {/* Merged history — reports folded into this post (read-only) */}
-          {mergedHistory.length > 0 && (
+          {mergedFor === post.id && mergedHistory.length > 0 && (
             <div className="pd__fold">
               <Collapsible defaultOpen={false}>
                 <CollapsibleTrigger className="pd__fold-trigger">
@@ -1074,16 +1078,25 @@ export function PostDetails({
             <div className="pd__comments-head">
               <MessageSquare aria-hidden="true" />
               <h2>
-                {commentCount === 0
+                {commentCount === 0 || commentsPending
                   ? "Comments"
                   : `${commentCount} ${commentCount === 1 ? "comment" : "comments"}`}
               </h2>
             </div>
 
-            {loadingComments ? (
-              <div className="pd__loading">
-                <Loader2 aria-hidden="true" />
+            {commentsPending || loadingComments ? (
+              <div className="space-y-4 pt-2" aria-busy="true">
                 <span className="sr-only">Loading comments</span>
+                {[...Array(3)].map((_, i) => (
+                  <div key={i} className="flex gap-3">
+                    <Skeleton className="h-8 w-8 flex-shrink-0 rounded-full" />
+                    <div className="flex-1 space-y-2">
+                      <Skeleton className="h-3 w-32" />
+                      <Skeleton className="h-4 w-full" />
+                      <Skeleton className="h-4 w-2/3" />
+                    </div>
+                  </div>
+                ))}
               </div>
             ) : comments.length === 0 ? (
               <div className="pd__empty">
