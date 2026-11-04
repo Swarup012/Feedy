@@ -105,7 +105,7 @@ export const NavBody = ({ children, className, visible }: NavBodyProps) => {
       animate={{
         backdropFilter: visible ? "blur(12px)" : "none",
         boxShadow: visible ? "0 1px 3px rgba(0,0,0,0.08)" : "none",
-        width: visible ? "70%" : "100%",
+        width: visible ? (typeof window !== "undefined" && window.innerWidth < 1280 ? "92%" : "70%") : "100%",
         y: visible ? 20 : 0,
       }}
       transition={{
@@ -114,7 +114,7 @@ export const NavBody = ({ children, className, visible }: NavBodyProps) => {
         damping: 50,
       }}
       className={cn(
-        "relative z-[60] mx-auto hidden w-full max-w-full flex-row items-center justify-between self-start rounded-full px-8 py-3 lg:flex bg-card dark:bg-background",
+        "relative z-[60] mx-auto hidden w-full max-w-full flex-row items-center justify-between self-start rounded-full px-6 py-3 lg:flex xl:px-8 bg-card dark:bg-background",
         visible && "bg-card/80 dark:bg-background/80",
         className,
       )}
@@ -282,7 +282,7 @@ export const NavItems = ({ items, className, onItemClick }: NavItemsProps) => {
               }}
               onKeyDown={(e) => handleTriggerKeyDown(e, idx, true)}
               className={cn(
-                "relative px-5 py-2 cursor-pointer inline-block rounded-full transition-colors",
+                "relative px-4 py-2 cursor-pointer inline-block rounded-full transition-colors xl:px-5",
                 "text-foreground",
                 "hover:text-primary",
                 "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
@@ -329,7 +329,7 @@ export const NavItems = ({ items, className, onItemClick }: NavItemsProps) => {
               }}
               onKeyDown={(e) => handleTriggerKeyDown(e, idx, false)}
               className={cn(
-                "relative px-5 py-2 cursor-pointer inline-block rounded-full transition-colors",
+                "relative px-4 py-2 cursor-pointer inline-block rounded-full transition-colors xl:px-5",
                 "text-foreground",
                 "hover:text-primary",
                 "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
@@ -464,12 +464,9 @@ export const MobileNav = ({ children, className, visible }: MobileNavProps) => {
   return (
     <motion.div
       animate={{
-        backdropFilter: visible ? "blur(10px)" : "none",
-        boxShadow: "none",
-        width: visible ? "90%" : "100%",
-        paddingRight: visible ? "12px" : "0px",
-        paddingLeft: visible ? "12px" : "0px",
-        borderRadius: visible ? "4px" : "2rem",
+        backdropFilter: visible ? "blur(12px)" : "none",
+        boxShadow: visible ? "0 1px 3px rgba(0,0,0,0.08)" : "none",
+        width: visible ? "92%" : "100%",
         y: visible ? 20 : 0,
       }}
       transition={{
@@ -478,8 +475,8 @@ export const MobileNav = ({ children, className, visible }: MobileNavProps) => {
         damping: 50,
       }}
       className={cn(
-        "relative z-50 mx-auto flex w-full max-w-[calc(100vw-2rem)] flex-col items-center justify-between bg-transparent px-0 py-2 lg:hidden",
-        visible && "bg-card dark:bg-background",
+        "relative z-50 mx-auto flex w-full max-w-full flex-col items-center justify-between rounded-full bg-transparent px-4 py-2 lg:hidden",
+        visible && "bg-card/80 dark:bg-background/80",
         className,
       )}
     >
@@ -581,6 +578,16 @@ export const MobileNavMenu = ({
     };
   }, [isOpen, onClose]);
 
+  // Lock page scroll while the sheet is open
+  useEffect(() => {
+    if (!isOpen) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previous;
+    };
+  }, [isOpen]);
+
   // Return focus when menu closes
   useEffect(() => {
     if (!isOpen && previousFocusRef.current) {
@@ -592,21 +599,35 @@ export const MobileNavMenu = ({
   return (
     <AnimatePresence>
       {isOpen && (
-        <motion.div
-          ref={menuRef}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          role="menu"
-          aria-label="Mobile navigation"
-          id={id}
-          className={cn(
-            "absolute inset-x-0 top-16 z-50 flex w-full flex-col items-start justify-start gap-4 rounded-lg bg-card px-4 py-8 shadow-lg dark:bg-background border border-border",
-            className,
-          )}
-        >
-          {children}
-        </motion.div>
+        <>
+          <motion.div
+            key="mobile-nav-backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            className="fixed inset-0 z-40 bg-black/25"
+            onClick={onClose}
+            aria-hidden="true"
+          />
+          <motion.div
+            ref={menuRef}
+            key="mobile-nav-menu"
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            role="menu"
+            aria-label="Mobile navigation"
+            id={id}
+            className={cn(
+              "absolute inset-x-2 top-full z-50 mt-2 flex max-h-[calc(100dvh-6.5rem)] flex-col items-start gap-1 overflow-y-auto overscroll-contain rounded-2xl border border-border bg-card px-3 py-4 shadow-2xl dark:bg-background",
+              className,
+            )}
+          >
+            {children}
+          </motion.div>
+        </>
       )}
     </AnimatePresence>
   );

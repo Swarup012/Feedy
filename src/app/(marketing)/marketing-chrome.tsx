@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/resizable-navbar";
 import { ThemeToggleDebug } from "@/components/theme-toggle-debug";
 import { Logo } from "@/components/logo";
+import { cn } from "@/lib/utils";
 import {
   MessageSquare,
   BarChart3,
@@ -27,7 +28,67 @@ import {
   Bot,
   Eye,
   Code,
+  ChevronDown,
 } from "lucide-react";
+
+function MobileNavGroup({
+  label,
+  sections,
+  onNavigate,
+}: {
+  label: string;
+  sections: {
+    section: string;
+    items: { name: string; link: string }[];
+  }[];
+  onNavigate: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="w-full">
+      <button
+        type="button"
+        aria-expanded={open}
+        onClick={() => setOpen((o) => !o)}
+        className={cn(
+          "flex w-full items-center justify-between rounded-xl px-3 py-3 text-base font-medium text-foreground",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset",
+          "hover:bg-accent",
+        )}
+      >
+        {label}
+        <ChevronDown
+          aria-hidden="true"
+          className={cn(
+            "h-4 w-4 text-muted-foreground transition-transform duration-200",
+            open && "rotate-180",
+          )}
+        />
+      </button>
+      {open && (
+        <div className="pb-2">
+          {sections.map((section) => (
+            <div key={section.section} className="mt-1">
+              <div className="px-3 pb-1 pt-2 text-sm font-medium text-muted-foreground">
+                {section.section}
+              </div>
+              {section.items.map((item) => (
+                <a
+                  key={`${item.link}-${item.name}`}
+                  href={item.link}
+                  onClick={onNavigate}
+                  className="block rounded-xl px-3 py-3 text-[15px] text-foreground hover:bg-accent hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
+                >
+                  {item.name}
+                </a>
+              ))}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function MarketingChrome({
   children,
@@ -185,63 +246,33 @@ export default function MarketingChrome({
             isOpen={isMobileMenuOpen}
             onClose={() => setIsMobileMenuOpen(false)}
           >
-            {navItems.map((item, idx) => (
-              <div key={`mobile-link-${idx}`} className="mb-4">
-                {item.dropdown ? (
-                  <div>
-                    <span className="block text-lg font-medium text-muted-foreground mb-2">
-                      {item.name}
-                    </span>
-                    {item.dropdown.map((section, sectionIdx) => (
-                      <div
-                        key={`mobile-section-${sectionIdx}`}
-                        className="ml-4 mt-3"
-                      >
-                        <div className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">
-                          {section.section}
-                        </div>
-                        <div className="space-y-2">
-                          {section.items.map((dropdownItem, itemIdx) => (
-                            <a
-                              key={`mobile-dropdown-${itemIdx}`}
-                              href={dropdownItem.link}
-                              onClick={() => setIsMobileMenuOpen(false)}
-                              className="block text-sm text-muted-foreground hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset rounded transition-colors py-1"
-                            >
-                              {dropdownItem.name}
-                            </a>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <a
-                    href={item.link}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="relative text-muted-foreground hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset rounded transition-colors"
-                  >
-                    <span className="block text-lg font-medium">
-                      {item.name}
-                    </span>
-                  </a>
-                )}
-              </div>
-            ))}
-            <div className="flex w-full flex-col gap-3 mt-4">
-              <div className="flex items-center gap-2 pb-2 border-b border-border">
-                <span className="text-sm font-medium text-muted-foreground">
-                  Theme:
-                </span>
-                <ThemeToggleDebug />
-              </div>
+            {navItems.map((item, idx) =>
+              item.dropdown ? (
+                <MobileNavGroup
+                  key={`mobile-group-${idx}`}
+                  label={item.name}
+                  sections={item.dropdown}
+                  onNavigate={() => setIsMobileMenuOpen(false)}
+                />
+              ) : (
+                <a
+                  key={`mobile-link-${idx}`}
+                  href={item.link}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="block w-full rounded-xl px-3 py-3 text-base font-medium text-foreground hover:bg-accent hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
+                >
+                  {item.name}
+                </a>
+              ),
+            )}
+            <div className="mt-2 flex w-full flex-col gap-3 border-t border-border px-1 pb-1 pt-4">
               <NavbarButton
                 onClick={() => {
                   setIsMobileMenuOpen(false);
                   router.push("/login");
                 }}
                 variant="secondary"
-                className="w-full border-2"
+                className="w-full border-2 py-3 text-base"
               >
                 Login
               </NavbarButton>
@@ -251,7 +282,7 @@ export default function MarketingChrome({
                   router.push("/signup");
                 }}
                 variant="primary"
-                className="w-full"
+                className="w-full py-3 text-base"
               >
                 Sign Up
               </NavbarButton>
