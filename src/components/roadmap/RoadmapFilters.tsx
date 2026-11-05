@@ -37,10 +37,10 @@ export default function RoadmapFilters({ filters, onFilterChange }: RoadmapFilte
           <button
             key={status}
             onClick={() => toggleStatus(status)}
-            className={`px-3 py-2 rounded-lg text-sm font-medium transition ${
+            className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
               filters.status.includes(status)
                 ? 'bg-primary text-primary-foreground'
-                : 'bg-white dark:bg-card text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border dark:border-border'
+                : 'border border-border bg-card text-foreground transition-colors hover:bg-muted'
             }`}
           >
             {status.replace('_', ' ')}

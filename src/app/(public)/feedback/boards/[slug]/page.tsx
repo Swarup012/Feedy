@@ -1,3 +1,7 @@
+/* Hallmark · redesign: full · theme: brand (locked design.md) · scope: app · genre: modern-minimal
+ * dropped onBoardClick={handleBoardClick} · the prop is not on LeftSidebarProps (baseline TS2322); the sidebar navigates internally
+ * waive 56 · the pane sticky bands live in their own scroll containers and never overlap the portal header
+ * waive 26a · feedback/[postId]/page.tsx is a server wrapper with no interactive elements; its rings live in the client component */
 "use client";
 
 import { useState, useEffect } from "react";
@@ -26,7 +30,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { LogIn, UserPlus } from "lucide-react";
+import { AlertCircle, LogIn, Plus, UserPlus } from "lucide-react";
+import { IconDisplay } from "@/components/ui/icon-picker";
 import { saveReturnUrl } from "@/lib/returnUrl";
 import { useIsCustomHost } from "@/context/CustomHostContext";
 
@@ -167,8 +172,8 @@ export default function PublicBoardPage() {
         (p) => new Date(p.created_at) <= new Date(filters.endDate),
       );
     filtered.sort((a, b) => {
-      const av = a[filters.sortBy as keyof Post];
-      const bv = b[filters.sortBy as keyof Post];
+      const av = a[filters.sortBy as keyof Post] ?? "";
+      const bv = b[filters.sortBy as keyof Post] ?? "";
       return filters.sortOrder === "asc" ? (av > bv ? 1 : -1) : av < bv ? 1 : -1;
     });
     return filtered;
@@ -178,8 +183,8 @@ export default function PublicBoardPage() {
   useBoardRealtime({
     boardSlug: slug,
     onPostCreated: (post) => {
-      setPosts((prev) => [post, ...prev]);
-      setAllPosts((prev) => [post, ...prev]);
+      setPosts((prev) => [post as Post, ...prev]);
+      setAllPosts((prev) => [post as Post, ...prev]);
     },
     onPostDeleted: (postId) => {
       setPosts((prev) => prev.filter((p: any) => p.id !== postId));
@@ -212,11 +217,6 @@ export default function PublicBoardPage() {
       setAllPosts(patch);
     },
   });
-
-  // ── Board navigation ──
-  const handleBoardClick = (boardSlug: string) => {
-    router.push(`/feedback/boards/${boardSlug}`);
-  };
 
   // ── Create post — show auth modal if guest ──
   // Post-limit enforcement is the server's job (checkPostLimit on the VISITED
@@ -255,92 +255,140 @@ export default function PublicBoardPage() {
     toast({ title: "Success!", description: "Post created successfully" });
   };
 
+  // Board's own color is brand data (not a Tailwind palette class) — used
+  // only for the header icon medallion tint.
+  const boardColor = (currentBoard as (Board & { color?: string }) | null)
+    ?.color;
+
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-50 dark:bg-background">
-      {/* Left Sidebar */}
-      <LeftSidebar
-        boards={boards}
-        currentBoardSlug={slug}
-        onBoardClick={handleBoardClick}
-        filters={filters}
-        onFilterChange={setFilters}
-        selectedBoards={selectedBoards}
-        onBoardSelectionChange={setSelectedBoards}
-        onCreateBoard={(board) => {
-          refreshPosts();
-          toast({
-            title: "Success!",
-            description: `Board "${board.name}" created successfully`,
-          });
-        }}
-        onDeleteBoard={() => {}}
-      />
-
-      {/* Multi-board fetch error banner */}
-      {multiBoardError && (
-        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 max-w-md">
-          <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 shadow-lg">
-            <p className="text-sm text-red-800 dark:text-red-200 font-medium">{multiBoardError}</p>
-          </div>
+    <div className="flex h-screen flex-col overflow-hidden bg-background text-foreground">
+      {/* Board header — icon + name + description, create affordance right */}
+      <header className="flex shrink-0 items-center justify-between gap-4 border-b border-border px-4 py-4 sm:px-6">
+        <div className="flex min-w-0 items-center gap-3">
+          {currentBoard && (
+            <>
+              <span
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-secondary"
+                style={boardColor ? { backgroundColor: boardColor + "20" } : undefined}
+              >
+                <IconDisplay
+                  iconName={currentBoard.icon}
+                  className="h-5 w-5"
+                  style={boardColor ? { color: boardColor } : undefined}
+                />
+              </span>
+              <div className="min-w-0">
+                <h1 className="truncate font-headline text-xl font-semibold tracking-tight text-foreground">
+                  {currentBoard.name}
+                </h1>
+                {currentBoard.description && (
+                  <p className="truncate text-sm text-muted-foreground">
+                    {currentBoard.description}
+                  </p>
+                )}
+              </div>
+            </>
+          )}
         </div>
-      )}
+        <Button
+          variant="outline"
+          onClick={handleCreatePost}
+          className="h-9 shrink-0 gap-2 border-border px-4 text-sm font-medium text-foreground transition-colors hover:bg-secondary focus-visible:ring-2 focus-visible:ring-offset-2"
+        >
+          <Plus className="h-4 w-4" />
+          <span className="max-sm:hidden">Create Post</span>
+          <span className="sm:hidden">Create</span>
+        </Button>
+      </header>
 
-      {/* Middle - Posts List */}
-      <PostsList
-        posts={posts}
-        selectedPost={selectedPost}
-        loading={loading}
-        currentBoard={currentBoard}
-        onPostSelect={setSelectedPost}
-        onCreatePost={handleCreatePost}
-        onSearchChange={(search) => setFilters({ ...filters, search })}
-      />
+      <div className="flex min-h-0 flex-1 overflow-hidden">
+        {/* Left Sidebar */}
+        <LeftSidebar
+          boards={boards}
+          currentBoardSlug={slug}
+          filters={filters}
+          onFilterChange={setFilters}
+          selectedBoards={selectedBoards}
+          onBoardSelectionChange={setSelectedBoards}
+          onCreateBoard={(board) => {
+            refreshPosts();
+            toast({
+              title: "Success!",
+              description: `Board "${board.name}" created successfully`,
+            });
+          }}
+          onDeleteBoard={() => {}}
+        />
 
-      {/* Right - Post Details */}
-      <PostDetails
-        post={selectedPost}
-        currentBoard={currentBoard}
-        onPostUpdated={(updatedPost) => {
-          setSelectedPost(updatedPost);
-          mutatePosts((current) => {
-            if (!current) return current;
-            return {
-              ...current,
-              data: {
-                ...current.data,
-                posts: current.data.posts.map((p) =>
-                  p.id === updatedPost.id ? updatedPost : p,
-                ),
-              },
-            };
-          }, { revalidate: false });
-          setAllPosts((prev) =>
-            prev.map((p) => (p.id === updatedPost.id ? updatedPost : p)),
-          );
-          setPosts((prev) =>
-            prev.map((p) => (p.id === updatedPost.id ? updatedPost : p)),
-          );
-          refreshPosts();
-        }}
-        onPostDeleted={(postId) => {
-          setSelectedPost(null);
-          mutatePosts((current) => {
-            if (!current) return current;
-            return {
-              ...current,
-              data: {
-                ...current.data,
-                posts: current.data.posts.filter((p) => p.id !== postId),
-                count: current.data.count - 1,
-              },
-            };
-          }, { revalidate: false });
-          setAllPosts((prev) => prev.filter((p) => p.id !== postId));
-          setPosts((prev) => prev.filter((p) => p.id !== postId));
-          refreshPosts();
-        }}
-        onAuthRequired={() => setShowAuthModal(true)}
-      />
+        {/* Multi-board fetch error banner */}
+        {multiBoardError && (
+          <div className="fixed left-1/2 top-4 z-50 max-w-md -translate-x-1/2">
+            <div className="flex items-center gap-2 rounded-lg border border-destructive/25 bg-destructive/10 p-3 shadow-lg">
+              <AlertCircle className="h-4 w-4 shrink-0 text-destructive" />
+              <p className="text-sm font-medium text-destructive">
+                {multiBoardError}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Middle - Posts List */}
+        <PostsList
+          posts={posts}
+          selectedPost={selectedPost}
+          loading={loading}
+          currentBoard={currentBoard}
+          onPostSelect={setSelectedPost}
+          onCreatePost={handleCreatePost}
+          onSearchChange={(search) => setFilters({ ...filters, search })}
+        />
+
+        {/* Right - Post Details */}
+        <PostDetails
+          post={selectedPost}
+          currentBoard={currentBoard}
+          onPostUpdated={(updatedPost) => {
+            setSelectedPost(updatedPost);
+            mutatePosts((current) => {
+              if (!current) return current;
+              return {
+                ...current,
+                data: {
+                  ...current.data,
+                  posts: current.data.posts.map((p) =>
+                    p.id === updatedPost.id ? updatedPost : p,
+                  ),
+                },
+              };
+            }, { revalidate: false });
+            setAllPosts((prev) =>
+              prev.map((p) => (p.id === updatedPost.id ? updatedPost : p)),
+            );
+            setPosts((prev) =>
+              prev.map((p) => (p.id === updatedPost.id ? updatedPost : p)),
+            );
+            refreshPosts();
+          }}
+          onPostDeleted={(postId) => {
+            setSelectedPost(null);
+            mutatePosts((current) => {
+              if (!current) return current;
+              return {
+                ...current,
+                data: {
+                  ...current.data,
+                  posts: current.data.posts.filter((p) => p.id !== postId),
+                  count: current.data.count - 1,
+                },
+              };
+            }, { revalidate: false });
+            setAllPosts((prev) => prev.filter((p) => p.id !== postId));
+            setPosts((prev) => prev.filter((p) => p.id !== postId));
+            refreshPosts();
+          }}
+          onAuthRequired={() => setShowAuthModal(true)}
+        />
+      </div>
 
       {/* Create Post Dialog */}
       {user && (
@@ -354,13 +402,13 @@ export default function PublicBoardPage() {
 
       {/* Auth Modal for Guests */}
       <Dialog open={showAuthModal} onOpenChange={setShowAuthModal}>
-        <DialogContent className="sm:max-w-md dark:bg-background dark:border-border">
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-switzer font-medium text-center dark:text-white">
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader className="space-y-3">
+            <DialogTitle className="text-center font-headline text-2xl font-semibold tracking-tight">
               Join the Conversation
             </DialogTitle>
-            <DialogDescription className="text-center text-base dark:text-gray-400">
-              Create an account or sign in to post feedback, vote, and comment
+            <DialogDescription className="text-center text-sm leading-relaxed">
+              Create an account or sign in to post feedback, vote, and comment.
             </DialogDescription>
           </DialogHeader>
 
@@ -371,9 +419,9 @@ export default function PublicBoardPage() {
                 router.push("/signup");
               }}
               size="lg"
-              className="w-full text-lg h-12"
+              className="h-12 w-full gap-2 text-base transition-colors"
             >
-              <UserPlus className="mr-2 h-5 w-5" />
+              <UserPlus className="h-5 w-5" />
               Create Account
             </Button>
 
@@ -384,16 +432,16 @@ export default function PublicBoardPage() {
               }}
               variant="outline"
               size="lg"
-              className="w-full text-lg h-12 dark:bg-card dark:border-border dark:text-white dark:hover:bg-gray-700"
+              className="h-12 w-full gap-2 border-border text-base transition-colors"
             >
-              <LogIn className="mr-2 h-5 w-5" />
+              <LogIn className="h-5 w-5" />
               Sign In
             </Button>
           </div>
 
-          <div className="text-center text-sm text-gray-500 dark:text-gray-400">
-            You can browse all public boards as a guest
-          </div>
+          <p className="text-center text-sm text-muted-foreground">
+            You can browse all public boards as a guest.
+          </p>
         </DialogContent>
       </Dialog>
     </div>

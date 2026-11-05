@@ -1,14 +1,14 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { LoadingAnimation } from '@/components/LoadingAnimation';
 import api from '@/lib/api';
-import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { useIsCustomHost } from '@/context/CustomHostContext';
@@ -26,6 +26,7 @@ import {
   AlertCircle,
   ArrowLeft,
   Sparkles,
+  ClipboardList,
 } from 'lucide-react';
 
 interface RoadmapItem {
@@ -98,12 +99,12 @@ export default function RoadmapIndexPage() {
       // Calculate stats from posts
       const combinedStats = {
         total: posts.length,
-        planned: posts.filter(p => p.status === 'planned').length,
-        in_progress: posts.filter(p => p.status === 'in-progress').length,
-        in_review: posts.filter(p => p.status === 'under-review').length,
-        completed: posts.filter(p => p.status === 'completed').length,
-        total_votes: posts.reduce((sum, p) => sum + (p.upvotes || 0), 0),
-        total_comments: posts.reduce((sum, p) => sum + (p.comment_count || 0), 0),
+        planned: posts.filter((p: any) => p.status === 'planned').length,
+        in_progress: posts.filter((p: any) => p.status === 'in-progress').length,
+        in_review: posts.filter((p: any) => p.status === 'under-review').length,
+        completed: posts.filter((p: any) => p.status === 'completed').length,
+        total_votes: posts.reduce((sum: number, p: any) => sum + (p.upvotes || 0), 0),
+        total_comments: posts.reduce((sum: number, p: any) => sum + (p.comment_count || 0), 0),
       };
       setStats(combinedStats);
 
@@ -216,7 +217,7 @@ export default function RoadmapIndexPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-background">
         <LoadingAnimation />
       </div>
     );
@@ -224,58 +225,70 @@ export default function RoadmapIndexPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <Card className="max-w-md">
-          <CardContent className="pt-6 text-center space-y-4">
-            <div className="text-4xl">📋</div>
-            <h2 className="text-lg font-switzer font-medium text-gray-900">No Roadmap Available</h2>
-            <p className="text-gray-600">
-              There are no public roadmap items to display at this time.
-            </p>
-            <Button onClick={() => router.push('/feedback')}>
-              Go to Feedback
-            </Button>
-          </CardContent>
-        </Card>
+      <div className="flex min-h-screen items-center justify-center bg-background px-4">
+        <div className="max-w-md py-16 text-center">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-secondary">
+            <ClipboardList className="h-6 w-6 text-muted-foreground" />
+          </div>
+          <h2 className="mt-4 font-headline text-lg font-semibold tracking-tight text-foreground">
+            No Roadmap Available
+          </h2>
+          <p className="mt-2 text-sm text-foreground">
+            There are no public roadmap items to display at this time.
+          </p>
+          <Button className="mt-6 focus-visible:ring-2 focus-visible:ring-offset-2" onClick={() => router.push('/feedback')}>
+            Go to Feedback
+          </Button>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-8 space-y-6">
-        {/* Back Button - Only for logged-in users */}
-        {user && (
-          <div className="mb-6">
+    <div className="min-h-screen bg-background text-foreground">
+      {user && (
+        <div className="border-b border-border bg-secondary">
+          <div className="container py-3">
             <Button
               variant="ghost"
+              size="sm"
               onClick={() => router.push('/dashboard')}
-              className="gap-2"
+              className="gap-2 text-secondary-foreground transition-colors hover:bg-background hover:text-foreground"
             >
               <ArrowLeft className="h-4 w-4" />
               Back to Dashboard
             </Button>
           </div>
-        )}
-
-        {/* Header */}
-        <div className="text-center space-y-2 mb-5">
-          <div className="flex items-center justify-center gap-2 mb-2">
-            <Sparkles className="h-6 w-6 text-primary" />
-            <h1 className="text-2xl font-switzer font-medium text-gray-900">{organizationName} Roadmap</h1>
-          </div>
-          <p className="text-base text-gray-600">
-            See what we're working on and what's coming next
-          </p>
         </div>
+      )}
+
+      <div className="container px-4 py-10 md:py-14">
+        {/* Masthead — left aligned */}
+        <header className="border-b border-border pb-8">
+          <div className="flex items-start gap-4">
+            <span className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-secondary">
+              <Sparkles className="h-5 w-5 text-primary" />
+            </span>
+            <div className="min-w-0">
+              <h1 className="font-headline text-3xl font-semibold tracking-tight text-foreground break-words">
+                {organizationName ? `${organizationName} Roadmap` : 'Roadmap'}
+              </h1>
+              <p className="mt-3 max-w-[70ch] text-base text-foreground">
+                See what we&rsquo;re working on and what&rsquo;s coming next
+              </p>
+            </div>
+          </div>
+        </header>
 
         {/* Stats */}
-        {stats && <RoadmapStats stats={stats} />}
+        <div className="mt-8">
+          {stats && <RoadmapStats stats={stats} />}
+        </div>
 
         {/* Filters & View Toggle */}
-        <div className="flex items-center justify-between">
+        <div className="mt-8 flex flex-col gap-4 border-b border-border pb-5 sm:flex-row sm:items-center sm:justify-between">
           <RoadmapFilters filters={filters} onFilterChange={setFilters} />
-          
+
           <Tabs value={viewMode} onValueChange={(v: any) => setViewMode(v)}>
             <TabsList>
               <TabsTrigger value="timeline">Timeline</TabsTrigger>
@@ -285,28 +298,67 @@ export default function RoadmapIndexPage() {
         </div>
 
         {/* Content */}
-        {viewMode === 'timeline' ? (
-          <TimelineView
-            groupedByQuarter={groupedByQuarter}
-            votedItems={votedItems}
-            onVote={handleVote}
-            user={user}
-          />
-        ) : (
-          <BoardView
-            groupedByStatus={groupedByStatus}
-            votedItems={votedItems}
-            onVote={handleVote}
-            user={user}
-          />
-        )}
+        <div className="mt-8">
+          {viewMode === 'timeline' ? (
+            <TimelineView
+              groupedByQuarter={groupedByQuarter}
+              votedItems={votedItems}
+              onVote={handleVote}
+              user={user}
+            />
+          ) : (
+            <BoardView
+              groupedByStatus={groupedByStatus}
+              votedItems={votedItems}
+              onVote={handleVote}
+              user={user}
+            />
+          )}
+        </div>
 
         {items.length === 0 && (
-          <div className="text-center py-12 text-gray-500">
-            No roadmap items available
+          <div className="py-16 text-center">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-secondary">
+              <ClipboardList className="h-6 w-6 text-muted-foreground" />
+            </div>
+            <p className="mt-4 text-sm text-foreground">
+              No roadmap items available
+            </p>
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+// Lane head — one idiom for both views: name, count, hairline.
+function LaneHead({
+  icon,
+  title,
+  count,
+  tint,
+}: {
+  icon?: ReactNode;
+  title: string;
+  count: number;
+  tint?: string;
+}) {
+  return (
+    <div className="mb-4 flex items-center gap-3 border-b border-border pb-3">
+      {icon ? (
+        <span
+          className={`flex h-8 w-8 items-center justify-center rounded-full bg-secondary ${
+            tint || 'text-muted-foreground'
+          }`}
+          aria-hidden="true"
+        >
+          {icon}
+        </span>
+      ) : null}
+      <h2 className="font-headline text-lg font-semibold tracking-tight text-foreground">
+        {title}
+      </h2>
+      <span className="text-sm tabular-nums text-muted-foreground">{count}</span>
     </div>
   );
 }
@@ -316,17 +368,12 @@ function TimelineView({ groupedByQuarter, votedItems, onVote, user }: any) {
   const quarters = Object.keys(groupedByQuarter).sort();
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-10">
       {quarters.map((quarter) => (
-        <div key={quarter}>
-          <div className="flex items-center mb-4">
-            <div className="bg-primary text-primary-foreground px-4 py-2 rounded-lg font-semibold text-lg">
-              {quarter}
-            </div>
-            <div className="flex-1 h-px bg-gray-300 ml-4"></div>
-          </div>
+        <section key={quarter}>
+          <LaneHead title={quarter} count={groupedByQuarter[quarter].length} />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-3">
             {groupedByQuarter[quarter].map((item: RoadmapItem) => (
               <RoadmapCard
                 key={item.id}
@@ -337,19 +384,19 @@ function TimelineView({ groupedByQuarter, votedItems, onVote, user }: any) {
               />
             ))}
           </div>
-        </div>
+        </section>
       ))}
     </div>
   );
 }
 
-// Board View Component
+// Board View Component — status swimlanes
 function BoardView({ groupedByStatus, votedItems, onVote, user }: any) {
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+    <div className="space-y-10">
       <StatusColumn
         title="Planned"
-        icon={<Clock className="h-5 w-5" />}
+        icon={<Clock className="h-4 w-4" />}
         color="gray"
         items={groupedByStatus.planned}
         votedItems={votedItems}
@@ -358,7 +405,7 @@ function BoardView({ groupedByStatus, votedItems, onVote, user }: any) {
       />
       <StatusColumn
         title="In Progress"
-        icon={<TrendingUp className="h-5 w-5" />}
+        icon={<TrendingUp className="h-4 w-4" />}
         color="blue"
         items={groupedByStatus.in_progress}
         votedItems={votedItems}
@@ -367,7 +414,7 @@ function BoardView({ groupedByStatus, votedItems, onVote, user }: any) {
       />
       <StatusColumn
         title="In Review"
-        icon={<AlertCircle className="h-5 w-5" />}
+        icon={<AlertCircle className="h-4 w-4" />}
         color="yellow"
         items={groupedByStatus.in_review}
         votedItems={votedItems}
@@ -376,7 +423,7 @@ function BoardView({ groupedByStatus, votedItems, onVote, user }: any) {
       />
       <StatusColumn
         title="Completed"
-        icon={<CheckCircle2 className="h-5 w-5" />}
+        icon={<CheckCircle2 className="h-4 w-4" />}
         color="green"
         items={groupedByStatus.completed}
         votedItems={votedItems}
@@ -389,118 +436,137 @@ function BoardView({ groupedByStatus, votedItems, onVote, user }: any) {
 
 // Status Column Component
 function StatusColumn({ title, icon, color, items, votedItems, onVote, user }: any) {
-  const colorClasses: any = {
-    gray: 'bg-gray-100 border-gray-300 text-gray-700',
-    blue: 'bg-blue-50 border-blue-300 text-blue-700',
-    yellow: 'bg-yellow-50 border-yellow-300 text-yellow-700',
-    green: 'bg-green-50 border-green-300 text-green-700',
+  const tints: any = {
+    gray: 'text-muted-foreground',
+    blue: 'text-primary',
+    yellow: 'text-warning',
+    green: 'text-success',
   };
 
   return (
-    <div className={`rounded-lg border-2 ${colorClasses[color]} p-4`}>
-      <div className="flex items-center gap-2 mb-4">
-        {icon}
-        <h2 className="font-semibold text-sm uppercase tracking-wide">
-          {title} ({items.length})
-        </h2>
-      </div>
+    <section>
+      <LaneHead
+        icon={icon}
+        title={title}
+        count={items.length}
+        tint={tints[color]}
+      />
 
-      <div className="space-y-3">
-        {items.map((item: RoadmapItem) => (
-          <RoadmapCard
-            key={item.id}
-            item={item}
-            hasVoted={votedItems.has(item.id)}
-            onVote={onVote}
-            user={user}
-          />
-        ))}
-        {items.length === 0 && (
-          <div className="text-center py-8 text-gray-400 text-sm">No items</div>
-        )}
-      </div>
-    </div>
+      {items.length === 0 ? (
+        <div className="flex items-center gap-3 rounded-lg border border-border bg-secondary/30 px-4 py-6">
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-secondary">
+            {icon}
+          </span>
+          <p className="text-sm text-foreground">No items</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-3">
+          {items.map((item: RoadmapItem) => (
+            <RoadmapCard
+              key={item.id}
+              item={item}
+              hasVoted={votedItems.has(item.id)}
+              onVote={onVote}
+              user={user}
+            />
+          ))}
+        </div>
+      )}
+    </section>
   );
 }
 
 // Roadmap Card Component
 function RoadmapCard({ item, hasVoted, onVote, user }: any) {
-  const statusColors: any = {
-    planned: 'border-l-gray-500',
+  const statusAccents: any = {
+    planned: 'border-l-border',
     in_progress: 'border-l-primary',
-    in_review: 'border-l-yellow-500',
-    completed: 'border-l-green-500',
+    in_review: 'border-l-warning',
+    completed: 'border-l-success',
   };
 
   const priorityBadges: any = {
-    low: { color: 'bg-gray-100 text-gray-700', label: 'Low' },
-    medium: { color: 'bg-primary/10 text-primary', label: 'Medium' },
-    high: { color: 'bg-orange-100 text-orange-700', label: 'High' },
-    critical: { color: 'bg-red-100 text-red-700', label: 'Critical' },
+    low: { color: 'border-border bg-secondary text-secondary-foreground', label: 'Low' },
+    medium: { color: 'border-transparent bg-primary/10 text-primary', label: 'Medium' },
+    high: { color: 'border-transparent bg-warning/15 text-foreground', label: 'High' },
+    critical: { color: 'border-transparent bg-destructive/15 text-foreground', label: 'Critical' },
   };
 
   return (
-    <Card
-      className={`hover:shadow-lg transition-all cursor-pointer border-l-4 ${statusColors[item.status]}`}
+    <article
+      className={cn(
+        "flex h-full cursor-pointer flex-col rounded-lg border border-border bg-card p-4 transition-colors hover:bg-secondary/40",
+        "border-l-4",
+        statusAccents[item.status]
+      )}
     >
-      <CardContent className="p-4">
-        <div className="space-y-3">
-          {/* Header */}
-          <div>
-            <h3 className="font-semibold text-base mb-1">{item.title}</h3>
-            <p className="text-sm text-gray-600 line-clamp-2">{item.description}</p>
-          </div>
+      {/* Header */}
+      <div className="min-w-0">
+        <h3 className="text-[15px] font-medium leading-snug text-foreground break-words">
+          {item.title}
+        </h3>
+        <p className="mt-1 line-clamp-2 text-sm text-foreground">
+          {item.description}
+        </p>
+      </div>
 
-          {/* Badges */}
-          <div className="flex flex-wrap gap-2">
-            <Badge className={priorityBadges[item.priority].color}>
-              {priorityBadges[item.priority].label}
-            </Badge>
-            {item.category && (
-              <Badge variant="outline" className="text-xs">
-                {item.category}
-              </Badge>
-            )}
-            {item.target_quarter && (
-              <Badge variant="outline" className="text-xs">
-                <Calendar className="h-3 w-3 mr-1" />
-                {item.target_quarter}
-              </Badge>
-            )}
-          </div>
-
-          {/* Progress */}
-          {item.progress > 0 && (
-            <div className="space-y-1">
-              <div className="flex items-center justify-between text-xs text-gray-500">
-                <span>Progress</span>
-                <span>{item.progress}%</span>
-              </div>
-              <Progress value={item.progress} className="h-2" />
-            </div>
+      {/* Meta */}
+      <div className="mt-3 flex flex-wrap gap-2">
+        <Badge
+          className={cn(
+            "rounded-full px-2.5 py-0.5 text-xs font-medium",
+            priorityBadges[item.priority].color
           )}
+        >
+          {priorityBadges[item.priority].label}
+        </Badge>
+        {item.category && (
+          <Badge
+            variant="outline"
+            className="rounded-full border-border px-2.5 py-0.5 text-xs font-medium text-muted-foreground"
+          >
+            {item.category}
+          </Badge>
+        )}
+        {item.target_quarter && (
+          <Badge
+            variant="outline"
+            className="rounded-full border-border px-2.5 py-0.5 text-xs font-medium text-muted-foreground"
+          >
+            <Calendar className="mr-1 h-3 w-3" />
+            {item.target_quarter}
+          </Badge>
+        )}
+      </div>
 
-          {/* Footer */}
-          <div className="flex items-center justify-between pt-2">
-            <Button
-              variant={hasVoted ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => onVote(item.id)}
-              className="flex items-center gap-1"
-            >
-              <ArrowUpCircle className={`h-4 w-4 ${hasVoted ? 'fill-current' : ''}`} />
-              {item.vote_count}
-            </Button>
-
-            <div className="flex items-center gap-3 text-sm text-gray-500">
-              <span className="flex items-center gap-1">
-                <MessageSquare className="h-4 w-4" />
-                {item.comment_count}
-              </span>
-            </div>
+      {/* Progress */}
+      {item.progress > 0 && (
+        <div className="mt-3 space-y-1.5">
+          <div className="flex items-center justify-between text-xs tabular-nums text-muted-foreground">
+            <span>Progress</span>
+            <span>{item.progress}%</span>
           </div>
+          <Progress value={item.progress} className="h-1.5" />
         </div>
-      </CardContent>
-    </Card>
+      )}
+
+      {/* Footer */}
+      <div className="mt-auto flex items-center justify-between pt-4">
+        <Button
+          variant={hasVoted ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => onVote(item.id)}
+          className="gap-1 tabular-nums"
+        >
+          <ArrowUpCircle className={`h-4 w-4 ${hasVoted ? 'fill-current' : ''}`} />
+          {item.vote_count}
+        </Button>
+
+        <span className="flex items-center gap-1.5 text-sm tabular-nums text-muted-foreground">
+          <MessageSquare className="h-4 w-4" />
+          {item.comment_count}
+        </span>
+      </div>
+    </article>
   );
 }

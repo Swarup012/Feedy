@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { Bell, Eye, AlertCircle } from "lucide-react";
 
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -17,7 +17,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
 import { saveReturnUrl } from "@/lib/returnUrl";
 import { hexToHslTriplet, contrastForeground } from "@/lib/branding-color";
@@ -62,9 +61,9 @@ function AdminViewToggle() {
     return null;
 
   return (
-    <Button variant="outline" asChild>
+    <Button variant="ghost" size="sm" asChild className="gap-2 text-muted-foreground hover:text-foreground">
       <Link href={isAdminView ? "/feedback" : "/admin"}>
-        <Eye className="mr-2 h-4 w-4" />
+        <Eye className="h-4 w-4" />
         {isAdminView ? "Public View" : "Admin View"}
       </Link>
     </Button>
@@ -80,7 +79,7 @@ function OrgLogo({ organization }: { organization: Organization | null }) {
 
   return (
     // Fixed box avoids layout shift when the image loads.
-    <span className="mr-3 flex h-8 w-32 items-center justify-center">
+    <span className="mr-3 flex h-8 w-32 shrink-0 items-center justify-center">
       <img
         src={src}
         alt={organization?.name || "Organization logo"}
@@ -90,6 +89,25 @@ function OrgLogo({ organization }: { organization: Organization | null }) {
         onError={() => setFailed(true)}
       />
     </span>
+  );
+}
+
+function NavLink({ href, label }: { href: string; label: string }) {
+  const pathname = usePathname();
+  const active = !!pathname && (pathname === href || pathname.startsWith(`${href}/`));
+
+  return (
+    <Link
+      href={href}
+      aria-current={active ? "page" : undefined}
+      className={
+        active
+          ? "rounded-sm border-b-2 border-primary pb-1 text-sm font-medium text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          : "rounded-sm border-b-2 border-transparent pb-1 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+      }
+    >
+      {label}
+    </Link>
   );
 }
 
@@ -115,130 +133,113 @@ function AppHeader({
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-white dark:bg-gray-950 shadow-sm">
-      <div className="container flex h-16 items-center">
+    <header className="sticky top-0 z-50 w-full border-b border-border bg-background">
+      <div className="container flex h-16 items-center gap-6">
         {/* Left — org branding + nav */}
-        <div className="mr-4 hidden md:flex">
-          <Link href="/feedback" className="mr-6 flex items-center space-x-2">
-            <OrgLogo organization={organization} />
-            <span className="font-switzer font-medium text-gray-900 dark:text-white">
-              {organization?.name || "Faddy"}
-            </span>
-          </Link>
-          <nav className="flex items-center space-x-6 text-sm font-medium">
-            <Link
-              href="/feedback"
-              className="transition-colors text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
-            >
-              Feedback
-            </Link>
-            <Link
-              href="/roadmap"
-              className="transition-colors text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
-            >
-              Roadmap
-            </Link>
-            <Link
-              href="/changelog"
-              className="transition-colors text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
-            >
-              Changelog
-            </Link>
-          </nav>
-        </div>
+        <Link href="/feedback" className="flex shrink-0 items-center">
+          <OrgLogo organization={organization} />
+          <span className="font-headline text-[15px] font-semibold tracking-tight text-foreground">
+            {organization?.name || "Faddy"}
+          </span>
+        </Link>
+
+        <nav
+          aria-label="Portal"
+          className="flex flex-1 items-center gap-6 overflow-x-auto md:flex-none"
+        >
+          <NavLink href="/feedback" label="Feedback" />
+          <NavLink href="/roadmap" label="Roadmap" />
+          <NavLink href="/changelog" label="Changelog" />
+        </nav>
 
         {/* Right — user controls */}
-        <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
-          <div className="flex items-center space-x-2">
-            <ThemeToggle />
-            {isAuthenticated && user ? (
-              <>
-                <AdminViewToggle />
-                <Button variant="ghost" size="icon">
-                  <Bell className="h-5 w-5" />
-                  <span className="sr-only">Notifications</span>
-                </Button>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      className="relative h-8 w-8 rounded-full"
-                    >
-                      <Avatar className="h-8 w-8">
-                        <AvatarImage
-                          src={
-                            user.avatar_url ||
-                            `https://api.dicebear.com/7.x/initials/svg?seed=${user.name}`
-                          }
-                          alt={user.name}
-                        />
-                        <AvatarFallback>{getUserInitials()}</AvatarFallback>
-                      </Avatar>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-56" align="end" forceMount>
-                    <DropdownMenuLabel className="font-normal">
-                      <div className="flex flex-col space-y-1">
-                        <p className="text-sm font-medium leading-none">
-                          {user.name}
-                        </p>
-                        <p className="text-xs leading-none text-muted-foreground">
-                          {user.email}
-                        </p>
-                      </div>
-                    </DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuGroup>
+        <div className="ml-auto flex items-center gap-2">
+          <ThemeToggle />
+          {isAuthenticated && user ? (
+            <>
+              <AdminViewToggle />
+              <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
+                <Bell className="h-5 w-5" />
+                <span className="sr-only">Notifications</span>
+              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    className="relative h-8 w-8 rounded-full"
+                  >
+                    <Avatar className="h-8 w-8">
+                      {user.avatar_url ? (
+                        <AvatarImage src={user.avatar_url} alt={user.name} />
+                      ) : null}
+                      <AvatarFallback className="bg-secondary font-medium text-secondary-foreground">
+                        {getUserInitials()}
+                      </AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56" align="end" forceMount>
+                  <DropdownMenuLabel className="font-normal">
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium leading-none">
+                        {user.name}
+                      </p>
+                      <p className="text-xs leading-none text-muted-foreground">
+                        {user.email}
+                      </p>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuGroup>
+                    <DropdownMenuItem asChild>
+                      <Link
+                        href={
+                          isCustomHost ? `${APP_URL}/profile` : "/profile"
+                        }
+                      >
+                        Profile
+                      </Link>
+                    </DropdownMenuItem>
+                    {(user.organization_role === "admin" ||
+                      user.organization_role === "owner") && (
                       <DropdownMenuItem asChild>
                         <Link
                           href={
-                            isCustomHost ? `${APP_URL}/profile` : "/profile"
+                            isCustomHost
+                              ? `${APP_URL}/admin/feedback`
+                              : "/admin/feedback"
                           }
                         >
-                          Profile
+                          Admin Dashboard
                         </Link>
                       </DropdownMenuItem>
-                      {(user.organization_role === "admin" ||
-                        user.organization_role === "owner") && (
-                        <DropdownMenuItem asChild>
-                          <Link
-                            href={
-                              isCustomHost
-                                ? `${APP_URL}/admin/feedback`
-                                : "/admin/feedback"
-                            }
-                          >
-                            Admin Dashboard
-                          </Link>
-                        </DropdownMenuItem>
-                      )}
-                      <DropdownMenuItem>Settings</DropdownMenuItem>
-                    </DropdownMenuGroup>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => logout()}>
-                      Log out
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </>
-            ) : (
-              <Button
-                onClick={() => {
-                  if (isCustomHost) {
-                    // Cross-origin: the login page lives on faddy.site only —
-                    // a return path on this host could never be honored, so
-                    // skip saveReturnUrl (it would send them to the wrong org).
-                    window.location.href = `${APP_URL}/login`;
-                    return;
-                  }
-                  saveReturnUrl();
-                  window.location.href = "/login";
-                }}
-              >
-                Sign In
-              </Button>
-            )}
-          </div>
+                    )}
+                    <DropdownMenuItem>Settings</DropdownMenuItem>
+                  </DropdownMenuGroup>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => logout()}>
+                    Log out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </>
+          ) : (
+            <Button
+              onClick={() => {
+                if (isCustomHost) {
+                  // Cross-origin: the login page lives on faddy.site only —
+                  // a return path on this host could never be honored, so
+                  // skip saveReturnUrl (it would send them to the wrong org).
+                  window.location.href = `${APP_URL}/login`;
+                  return;
+                }
+                saveReturnUrl();
+                window.location.href = "/login";
+              }}
+            >
+              Sign In
+            </Button>
+          )}
         </div>
       </div>
     </header>
@@ -249,13 +250,14 @@ function AppHeader({
 // Shown as an inline banner ABOVE the page content — never blocks the render.
 function InvalidOrganizationBanner() {
   return (
-    <div className="w-full bg-destructive/10 border-b border-destructive/20 px-4 py-3">
+    <div className="w-full border-b border-destructive/25 bg-destructive/10 px-4 py-3">
       <div className="container flex items-center gap-3 text-sm text-destructive">
-        <AlertCircle className="h-4 w-4 flex-shrink-0" />
+        <AlertCircle className="h-4 w-4 shrink-0" />
         <span>
-          <strong>Organization not found.</strong> The subdomain you visited
-          doesn&apos;t match any active organization.{" "}
-          <Link href="/" className="underline hover:no-underline">
+          <strong className="font-semibold">Organization not found.</strong>{" "}
+          The subdomain you visited doesn&rsquo;t match any active
+          organization.{" "}
+          <Link href="/" className="underline underline-offset-2 hover:no-underline">
             Go to homepage
           </Link>
         </span>
@@ -272,8 +274,8 @@ function PortalFooter({ organization }: { organization: Organization | null }) {
 
   if (isPaid) {
     return (
-      <footer className="border-t py-4">
-        <div className="container text-sm text-muted-foreground">
+      <footer className="border-t border-border py-5">
+        <div className="container font-headline text-sm font-medium text-muted-foreground">
           {organization?.name}
         </div>
       </footer>
@@ -281,11 +283,11 @@ function PortalFooter({ organization }: { organization: Organization | null }) {
   }
 
   return (
-    <footer className="border-t py-4">
+    <footer className="border-t border-border py-5">
       <div className="container text-sm text-muted-foreground">
         <a
           href="https://faddy.site"
-          className="hover:text-foreground transition-colors"
+          className="transition-colors hover:text-foreground"
         >
           Powered by Faddy
         </a>
@@ -337,7 +339,7 @@ export default function AppLayout({
     const fetchOrg = async () => {
       try {
         const response = await api.get(
-          `/api/organizations/subdomain/${activeSubdomain}`
+          `/api/organizations/subdomain/${activeSubdomain}`,
         );
         if (cancelled) return;
 
@@ -348,7 +350,10 @@ export default function AppLayout({
         }
       } catch {
         if (!cancelled) {
-          console.error("Failed to fetch organization for subdomain:", activeSubdomain);
+          console.error(
+            "Failed to fetch organization for subdomain:",
+            activeSubdomain,
+          );
           setOrgError(true);
         }
       } finally {
@@ -357,7 +362,9 @@ export default function AppLayout({
     };
 
     fetchOrg();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [activeSubdomain]);
 
   // ── Brand color → CSS vars on the wrapper (first paint) AND body ──────
@@ -403,7 +410,7 @@ export default function AppLayout({
   // The header will silently update its org name once the fetch resolves.
   return (
     <CustomHostProvider value={isCustomHost}>
-      <div className="min-h-screen flex flex-col" style={brandStyle}>
+      <div className="flex min-h-screen flex-col bg-background text-foreground" style={brandStyle}>
         <AppHeader organization={organization} isCustomHost={isCustomHost} />
 
         {/* Non-blocking org error banner — only shown when on a known-bad subdomain */}

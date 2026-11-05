@@ -64,7 +64,7 @@ export const PostsList = memo(function PostsList({
   return (
     <div className="flex flex-col h-full bg-white dark:bg-background border-r border-gray-200 dark:border-border max-md:w-full md:w-[300px] md:min-w-[300px]">
       {/* Header */}
-      <div className="p-4 border-b border-gray-200 dark:border-border space-y-3 sticky top-0 bg-white dark:bg-background z-10">
+      <div className="sticky top-0 z-10 space-y-3 border-b border-border bg-background p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             {isMobile && (

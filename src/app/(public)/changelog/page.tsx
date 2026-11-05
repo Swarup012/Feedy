@@ -2,40 +2,37 @@
 
 import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { Loader2, Sparkles, Wrench, Bug } from "lucide-react";
+import { Loader2, Sparkles, Wrench, Bug, Inbox } from "lucide-react";
 import { changelogService, Changelog } from "@/services/changelogService";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import ReactMarkdown from "react-markdown";
 
-// Type icons mapping
+// Type icon — sits in a bg-secondary medallion; the glyph carries the type hue.
 const getTypeIcon = (type: string) => {
   switch (type) {
     case "new":
-      return <Sparkles className="h-5 w-5 text-blue-500" />;
+      return <Sparkles className="h-5 w-5 text-primary" />;
     case "improved":
-      return <Wrench className="h-5 w-5 text-orange-500" />;
+      return <Wrench className="h-5 w-5 text-warning" />;
     case "fixed":
-      return <Bug className="h-5 w-5 text-green-500" />;
+      return <Bug className="h-5 w-5 text-success" />;
     default:
-      return <Sparkles className="h-5 w-5" />;
+      return <Sparkles className="h-5 w-5 text-muted-foreground" />;
   }
 };
 
-// Type badge variant
+// Type label — one quiet pill style; the words carry the meaning.
 const getTypeBadge = (type: string) => {
   switch (type) {
     case "new":
-      return { label: "New Feature", variant: "default" as const };
+      return { label: "New Feature" };
     case "improved":
-      return { label: "Improvement", variant: "secondary" as const };
+      return { label: "Improvement" };
     case "fixed":
-      return { label: "Bug Fix", variant: "outline" as const };
+      return { label: "Bug Fix" };
     default:
-      return { label: type, variant: "default" as const };
+      return { label: type };
   }
 };
 
@@ -54,7 +51,7 @@ export default function ChangelogPage() {
       const response = await changelogService.getPublicChangelogs({
         limit: 50,
       });
-      
+
       if (response.success) {
         setChangelogs(response.data.changelogs);
       }
@@ -72,70 +69,96 @@ export default function ChangelogPage() {
 
   if (loading) {
     return (
-      <div className="container mx-auto py-8 flex items-center justify-center min-h-[400px]">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="container flex min-h-[60vh] max-w-3xl items-center justify-center py-10">
+        <Loader2 className="h-7 w-7 animate-spin text-primary motion-reduce:animate-none" />
+        <span className="sr-only">Loading changelog</span>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto py-8 max-w-4xl">
-      <div className="text-center mb-8">
-        <h1 className="text-2xl font-switzer font-medium tracking-tight">Changelog</h1>
-        <p className="mt-2 text-base text-muted-foreground">
+    <div className="container max-w-3xl px-4 py-10 md:py-14">
+      {/* Masthead — left aligned, weight-led */}
+      <header className="mb-10 border-b border-border pb-8">
+        <h1 className="font-headline text-3xl font-semibold tracking-tight text-foreground">
+          Changelog
+        </h1>
+        <p className="mt-3 text-base text-foreground">
           Discover the latest features, improvements, and bug fixes.
         </p>
-      </div>
+        <p className="mt-2 text-sm tabular-nums text-muted-foreground">
+          {changelogs.length} {changelogs.length === 1 ? "release" : "releases"}{" "}
+          published
+        </p>
+      </header>
 
       {changelogs.length === 0 ? (
-        <Card className="max-w-md mx-auto">
-          <CardContent className="pt-6 text-center">
-            <p className="text-muted-foreground">No changelogs published yet.</p>
-          </CardContent>
-        </Card>
+        <div className="py-16 text-center">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-secondary">
+            <Inbox className="h-6 w-6 text-muted-foreground" />
+          </div>
+          <p className="mt-4 text-sm text-foreground">
+            No changelogs published yet.
+          </p>
+        </div>
       ) : (
-        <div className="space-y-6">
+        <div className="space-y-10">
           {changelogs.map((changelog) => {
             const typeBadge = getTypeBadge(changelog.type);
-            
-            return (
-              <article key={changelog.id} className="space-y-4">
-                {/* Type Icon & Badge */}
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center justify-center w-10 h-10 rounded-full bg-secondary">
-                    {getTypeIcon(changelog.type)}
-                  </div>
-                  <Badge variant={typeBadge.variant}>{typeBadge.label}</Badge>
-                </div>
 
-                {/* Title & Date */}
-                <div>
-                  <h2 className="text-xl font-switzer font-medium mb-2">{changelog.title}</h2>
-                  <time className="text-sm text-muted-foreground">
+            return (
+              <article
+                key={changelog.id}
+                className="space-y-4 border-b border-border pb-10 last:border-0 last:pb-0"
+              >
+                {/* Type medallion, label, date */}
+                <div className="flex items-center gap-3">
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-secondary">
+                    {getTypeIcon(changelog.type)}
+                  </span>
+                  <Badge
+                    variant="outline"
+                    className="border-border font-medium text-foreground"
+                  >
+                    {typeBadge.label}
+                  </Badge>
+                  <time
+                    className="ml-auto text-sm tabular-nums text-muted-foreground"
+                    dateTime={
+                      changelog.published_at || changelog.created_at
+                    }
+                  >
                     {changelog.published_at
                       ? format(new Date(changelog.published_at), "MMMM d, yyyy")
                       : format(new Date(changelog.created_at), "MMMM d, yyyy")}
                   </time>
                 </div>
 
+                {/* Title */}
+                <h2 className="font-headline text-xl font-semibold tracking-tight text-foreground break-words">
+                  {changelog.title}
+                </h2>
+
                 {/* Description */}
                 {changelog.description && (
-                  <p className="text-base text-muted-foreground">{changelog.description}</p>
+                  <p className="max-w-[70ch] text-base text-foreground">
+                    {changelog.description}
+                  </p>
                 )}
 
                 {/* Featured Image */}
                 {changelog.featured_image && (
-                  <div className="relative w-full aspect-video rounded-lg overflow-hidden">
+                  <div className="relative aspect-video w-full overflow-hidden rounded-lg border border-border bg-muted">
                     <img
                       src={changelog.featured_image}
                       alt={changelog.title}
-                      className="w-full h-full object-cover"
+                      className="h-full w-full object-cover"
                     />
                   </div>
                 )}
 
                 {/* Content */}
-                <div className="prose prose-slate dark:prose-invert max-w-none">
+                <div className="prose-blog">
                   <ReactMarkdown
                     components={{
                       img: ({ node, ...props }) => (
@@ -155,37 +178,38 @@ export default function ChangelogPage() {
                 {changelog.labels && changelog.labels.length > 0 && (
                   <div className="flex flex-wrap gap-2">
                     {changelog.labels.map((label, idx) => (
-                      <Badge key={idx} variant="outline">
+                      <span
+                        key={idx}
+                        className="rounded-full border border-border px-2.5 py-0.5 text-xs text-muted-foreground"
+                      >
                         {label}
-                      </Badge>
+                      </span>
                     ))}
                   </div>
                 )}
 
                 {/* Author */}
                 {changelog.author && (
-                  <div className="flex items-center gap-3 pt-4 border-t">
-                    <div className="flex items-center gap-2">
-                      {changelog.author.avatar_url ? (
-                        <img
-                          src={changelog.author.avatar_url}
-                          alt={changelog.author.name}
-                          className="w-8 h-8 rounded-full"
-                        />
-                      ) : (
-                        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-medium">
-                          {changelog.author.name.charAt(0).toUpperCase()}
-                        </div>
-                      )}
-                      <div>
-                        <p className="text-sm font-medium">{changelog.author.name}</p>
-                        <p className="text-xs text-muted-foreground">Author</p>
-                      </div>
+                  <div className="flex items-center gap-3 border-t border-border pt-4">
+                    {changelog.author.avatar_url ? (
+                      <img
+                        src={changelog.author.avatar_url}
+                        alt={changelog.author.name}
+                        className="h-8 w-8 rounded-full object-cover"
+                      />
+                    ) : (
+                      <span className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary text-sm font-medium text-secondary-foreground">
+                        {changelog.author.name.charAt(0).toUpperCase()}
+                      </span>
+                    )}
+                    <div>
+                      <p className="text-sm font-medium text-foreground">
+                        {changelog.author.name}
+                      </p>
+                      <p className="text-xs text-muted-foreground">Author</p>
                     </div>
                   </div>
                 )}
-
-                <Separator className="mt-8" />
               </article>
             );
           })}

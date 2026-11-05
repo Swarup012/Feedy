@@ -6,19 +6,19 @@ interface RoadmapStatsProps {
 
 export default function RoadmapStats({ stats }: RoadmapStatsProps) {
   const items = [
-    { label: 'Total', value: stats.total, color: 'bg-gray-100 text-gray-700' },
-    { label: 'Planned', value: stats.planned, color: 'bg-purple-100 text-purple-700' },
-    { label: 'In Progress', value: stats.in_progress, color: 'bg-primary/10 text-primary' },
-    { label: 'In Review', value: stats.in_review, color: 'bg-yellow-100 text-yellow-700' },
-    { label: 'Completed', value: stats.completed, color: 'bg-green-100 text-green-700' },
+    { label: 'Total', value: stats.total },
+    { label: 'Planned', value: stats.planned },
+    { label: 'In Progress', value: stats.in_progress },
+    { label: 'In Review', value: stats.in_review },
+    { label: 'Completed', value: stats.completed },
   ];
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-5">
       {items.map(item => (
-        <div key={item.label} className="bg-white dark:bg-background rounded-lg border dark:border-border p-4">
-          <div className="text-sm text-gray-600 mb-1">{item.label}</div>
-          <div className="text-3xl font-bold text-gray-900">{item.value}</div>
+        <div key={item.label} className="rounded-lg border border-border bg-card p-4">
+          <div className="mb-1 text-sm text-muted-foreground">{item.label}</div>
+          <div className="font-headline text-3xl font-semibold tabular-nums text-foreground">{item.value}</div>
         </div>
       ))}
     </div>

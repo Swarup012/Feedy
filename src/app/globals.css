@@ -80,17 +80,17 @@
     --secondary-foreground: 174 43% 25%;
 
     --muted: 171 20% 92%;             /* Soft wash for input backgrounds */
-    --muted-foreground: 174 20% 45%;
+    --muted-foreground: 174 18% 40%;
 
     --accent: 221 83% 94%;            /* Very light blue tint for hover states */
     --accent-foreground: 221 83% 45%;
 
     /* Borders & Inputs */
     --border: 0 0% 85%;              /* Neutral gray (#dadada) */
-    --input: 0 0% 85%;
+    --input: 0 0% 56%;
     --ring: 221 83% 55%;              /* Your Blue for focus states */
 
-    --destructive: 0 84% 60%;
+    --destructive: 0 72% 41%;
     --destructive-foreground: 0 0% 100%;
 
     /* Semantic: Success & Warning */
@@ -137,7 +137,7 @@
     --accent-foreground: 211 23.9% 92.5%;
 
     /* Destructive - Error states */
-    --destructive: 0 84% 60%;            /* #ef4444 - Modern red */
+    --destructive: 0 72% 41%;            /* #ef4444 - Modern red */
     --destructive-foreground: 0 0% 100%; /* Pure white */
 
     /* Semantic: Success & Warning */

@@ -35,13 +35,17 @@ interface SubmitFeedbackProps {
   variant?: "default" | "outline";
 }
 
-export function SubmitFeedback({ boards = [], buttonText = "Submit Feedback", variant = "default" }: SubmitFeedbackProps) {
+export function SubmitFeedback({
+  boards = [],
+  buttonText = "Submit Feedback",
+  variant = "default",
+}: SubmitFeedbackProps) {
   const { isAuthenticated } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
   const [formData, setFormData] = useState({
     boardSlug: boards[0]?.slug || "",
     title: "",
@@ -50,7 +54,7 @@ export function SubmitFeedback({ boards = [], buttonText = "Submit Feedback", va
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!isAuthenticated) {
       saveReturnUrl();
       setOpen(false);
@@ -78,7 +82,7 @@ export function SubmitFeedback({ boards = [], buttonText = "Submit Feedback", va
 
     try {
       setIsSubmitting(true);
-      
+
       const response = await postService.createPost(formData.boardSlug, {
         title: formData.title,
         description: formData.description,
@@ -95,16 +99,18 @@ export function SubmitFeedback({ boards = [], buttonText = "Submit Feedback", va
         title: "",
         description: "",
       });
-      
+
       setOpen(false);
-      
+
       // Refresh the page to show the new post
       router.refresh();
     } catch (error: any) {
       console.error("Error submitting feedback:", error);
       toast({
         title: "Error",
-        description: error.response?.data?.message || "Failed to submit feedback. Please try again.",
+        description:
+          error.response?.data?.message ||
+          "Failed to submit feedback. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -115,28 +121,40 @@ export function SubmitFeedback({ boards = [], buttonText = "Submit Feedback", va
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant={variant} className={variant === "outline" ? "bg-white dark:bg-slate-900 text-primary hover:bg-slate-50 dark:hover:bg-slate-800 border-slate-300 dark:border-slate-700" : ""}>
+        <Button
+          variant={variant}
+          className={
+            variant === "outline"
+              ? "border-border bg-background text-primary hover:bg-muted hover:text-primary"
+              : ""
+          }
+        >
           <Plus className="mr-2 h-4 w-4" />
           {buttonText}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[525px]">
         <DialogHeader>
-          <DialogTitle>Submit Feedback</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="font-headline text-xl font-semibold tracking-tight">
+            Submit Feedback
+          </DialogTitle>
+          <DialogDescription className="text-sm text-muted-foreground">
             {isAuthenticated
               ? "Share your ideas, suggestions, or report issues."
               : "Please sign in to submit feedback."}
           </DialogDescription>
         </DialogHeader>
-        
+
         {!isAuthenticated ? (
           <div className="py-4">
-            <Button onClick={() => {
-              saveReturnUrl();
-              setOpen(false);
-              router.push("/login");
-            }} className="w-full">
+            <Button
+              onClick={() => {
+                saveReturnUrl();
+                setOpen(false);
+                router.push("/login");
+              }}
+              className="w-full"
+            >
               Sign In to Submit Feedback
             </Button>
           </div>
@@ -144,7 +162,9 @@ export function SubmitFeedback({ boards = [], buttonText = "Submit Feedback", va
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Board Selection */}
             <div className="space-y-2">
-              <Label htmlFor="board">Board *</Label>
+              <Label htmlFor="board" className="text-sm font-medium">
+                Board *
+              </Label>
               <Select
                 value={formData.boardSlug}
                 onValueChange={(value) =>
@@ -159,7 +179,10 @@ export function SubmitFeedback({ boards = [], buttonText = "Submit Feedback", va
                   {boards.map((board) => (
                     <SelectItem key={board.id} value={board.slug}>
                       <div className="flex items-center gap-2">
-                        <IconDisplay iconName={board.icon} className="h-4 w-4" />
+                        <IconDisplay
+                          iconName={board.icon}
+                          className="h-4 w-4"
+                        />
                         <span>{board.name}</span>
                       </div>
                     </SelectItem>
@@ -175,10 +198,12 @@ export function SubmitFeedback({ boards = [], buttonText = "Submit Feedback", va
 
             {/* Title */}
             <div className="space-y-2">
-              <Label htmlFor="title">Title *</Label>
+              <Label htmlFor="title" className="text-sm font-medium">
+                Title *
+              </Label>
               <Input
                 id="title"
-                placeholder="Enter a clear, concise title..."
+                placeholder="Enter a clear, concise title…"
                 value={formData.title}
                 onChange={(e) =>
                   setFormData({ ...formData, title: e.target.value })
@@ -190,10 +215,12 @@ export function SubmitFeedback({ boards = [], buttonText = "Submit Feedback", va
 
             {/* Description */}
             <div className="space-y-2">
-              <Label htmlFor="description">Description (optional)</Label>
+              <Label htmlFor="description" className="text-sm font-medium">
+                Description (optional)
+              </Label>
               <Textarea
                 id="description"
-                placeholder="Provide more details about your feedback..."
+                placeholder="Provide more details about your feedback…"
                 value={formData.description}
                 onChange={(e) =>
                   setFormData({ ...formData, description: e.target.value })
@@ -213,11 +240,15 @@ export function SubmitFeedback({ boards = [], buttonText = "Submit Feedback", va
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={isSubmitting || boards.length === 0}>
+              <Button
+                type="submit"
+                className="bg-primary text-primary-foreground"
+                disabled={isSubmitting || boards.length === 0}
+              >
                 {isSubmitting ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Submitting...
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" />
+                    Submitting…
                   </>
                 ) : (
                   "Submit Feedback"

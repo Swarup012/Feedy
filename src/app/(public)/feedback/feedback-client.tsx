@@ -2,7 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import {
+  ArrowLeft,
+  ClipboardList,
+  Loader2,
+  MessagesSquare,
+} from "lucide-react";
 import { boardService, Board } from "@/services/boardService";
 import { postService, Post } from "@/services/postService";
 import { useAuth } from "@/hooks/useAuth";
@@ -270,11 +275,11 @@ export default function FeedbackPageClient({
   // Loading state
   if (loading) {
     return (
-      <div className="container mx-auto py-8">
-        <div className="flex items-center justify-center h-[60vh]">
+      <div className="container py-10">
+        <div className="flex h-[60vh] items-center justify-center">
           <div className="text-center">
-            <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
-            <p className="text-gray-500">Loading feedback...</p>
+            <Loader2 className="mx-auto mb-4 h-10 w-10 animate-spin text-primary motion-reduce:animate-none" />
+            <p className="text-sm text-muted-foreground">Loading feedback…</p>
           </div>
         </div>
       </div>
@@ -284,14 +289,16 @@ export default function FeedbackPageClient({
   // Empty state - no boards
   if (boards.length === 0) {
     return (
-      <div className="container mx-auto py-8">
-        <div className="flex items-center justify-center h-[60vh]">
+      <div className="container py-10">
+        <div className="flex h-[60vh] items-center justify-center">
           <div className="text-center">
-            <div className="text-4xl mb-4">📋</div>
-            <h2 className="text-lg font-switzer font-medium mb-2">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-secondary">
+              <ClipboardList className="h-6 w-6 text-muted-foreground" />
+            </div>
+            <h2 className="font-headline text-lg font-semibold tracking-tight text-foreground">
               No Public Boards Available
             </h2>
-            <p className="text-gray-500 mb-4">
+            <p className="mt-1 text-sm text-foreground">
               There are no public feedback boards at the moment.
             </p>
             {isAuthenticated && (
@@ -306,16 +313,16 @@ export default function FeedbackPageClient({
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-slate-950">
+    <div className="min-h-screen bg-background text-foreground">
       {/* Top Bar for Authenticated Users */}
       {isAuthenticated && (
-        <div className="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-3">
+        <div className="border-b border-border bg-secondary">
+          <div className="container py-3">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => router.push("/dashboard")}
-              className="gap-2 hover:bg-slate-200 dark:hover:bg-slate-800"
+              className="gap-2 text-secondary-foreground hover:bg-background hover:text-foreground"
             >
               <ArrowLeft className="h-4 w-4" />
               Back to Dashboard
@@ -324,29 +331,36 @@ export default function FeedbackPageClient({
         </div>
       )}
 
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-5 lg:py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6">
+      <div className="container py-10">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
           {/* Sidebar - Filters */}
           <aside className="lg:col-span-3">
-            <div className="sticky top-20 space-y-6">
+            <div className="sticky top-20 space-y-8">
               {/* Board Filter */}
-              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-4">
-                <h3 className="text-sm font-switzer font-semibold mb-4 text-slate-700 dark:text-slate-300 uppercase tracking-wide">
+              <section>
+                <h2 className="mb-3 px-3 text-sm font-semibold text-foreground">
                   Boards
-                </h3>
+                </h2>
                 <div className="space-y-1">
                   <button
                     onClick={() => setSelectedBoard("all")}
                     className={cn(
-                      "w-full text-left px-3 py-2 rounded-md text-sm font-switzer font-medium transition-colors",
+                      "w-full rounded-md px-3 py-2 text-left text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
                       selectedBoard === "all"
                         ? "bg-primary text-primary-foreground"
-                        : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800",
+                        : "text-foreground hover:bg-muted",
                     )}
                   >
-                    <div className="flex items-center justify-between">
-                      <span>All Boards</span>
-                      <span className="text-xs opacity-70">
+                    <div className="flex items-center gap-2">
+                      <span className="flex-1">All Boards</span>
+                      <span
+                        className={cn(
+                          "text-xs tabular-nums",
+                          selectedBoard === "all"
+                            ? "text-primary-foreground"
+                            : "text-muted-foreground",
+                        )}
+                      >
                         {allPosts.length}
                       </span>
                     </div>
@@ -360,34 +374,46 @@ export default function FeedbackPageClient({
                         key={board.id}
                         onClick={() => setSelectedBoard(board.slug)}
                         className={cn(
-                          "w-full text-left px-3 py-2 rounded-md text-sm font-switzer font-medium transition-colors",
+                          "w-full rounded-md px-3 py-2 text-left text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
                           selectedBoard === board.slug
                             ? "bg-primary text-primary-foreground"
-                            : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800",
+                            : "text-foreground hover:bg-muted",
                         )}
                       >
                         <div className="flex items-center gap-2">
                           <IconDisplay
                             iconName={board.icon}
-                            className="h-4 w-4"
+                            className="h-4 w-4 shrink-0"
                           />
-                          <span className="flex-1">{board.name}</span>
-                          <span className="text-xs opacity-70">{count}</span>
+                          <span className="flex-1 truncate">{board.name}</span>
+                          <span
+                            className={cn(
+                              "text-xs tabular-nums",
+                              selectedBoard === board.slug
+                                ? "text-primary-foreground"
+                                : "text-muted-foreground",
+                            )}
+                          >
+                            {count}
+                          </span>
                         </div>
                       </button>
                     );
                   })}
                 </div>
-              </div>
+              </section>
 
               {/* Status Filter */}
-              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-4">
-                <h3 className="text-sm font-switzer font-semibold mb-4 text-slate-700 dark:text-slate-300 uppercase tracking-wide">
+              <section>
+                <h2 className="mb-3 px-3 text-sm font-semibold text-foreground">
                   Status
-                </h3>
-                <div className="space-y-2">
+                </h2>
+                <div className="space-y-1 px-3">
                   {feedbackStatuses.map((status) => (
-                    <div key={status} className="flex items-center space-x-2">
+                    <div
+                      key={status}
+                      className="flex items-center gap-2 rounded-md py-1.5"
+                    >
                       <Checkbox
                         id={`status-${status}`}
                         checked={selectedStatuses.includes(status)}
@@ -395,35 +421,35 @@ export default function FeedbackPageClient({
                       />
                       <Label
                         htmlFor={`status-${status}`}
-                        className="capitalize font-normal cursor-pointer text-sm text-slate-700 dark:text-slate-300"
+                        className="cursor-pointer text-sm font-normal capitalize text-foreground"
                       >
                         {status.replace("-", " ")}
                       </Label>
                     </div>
                   ))}
                 </div>
-              </div>
+              </section>
             </div>
           </aside>
 
           {/* Main Content */}
           <main className="lg:col-span-9">
             {/* Header with Sort and Create Post */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-5 gap-4">
+            <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <h1 className="text-xl font-switzer font-semibold text-slate-900 dark:text-white tracking-tight">
+                <h1 className="font-headline text-2xl font-semibold tracking-tight text-foreground">
                   {selectedBoard === "all"
                     ? "All Feedback"
                     : boards.find((b) => b.slug === selectedBoard)?.name}
                 </h1>
-                <p className="text-sm text-slate-600 dark:text-slate-400 mt-2">
+                <p className="mt-1 text-sm text-muted-foreground tabular-nums">
                   {filteredPosts.length}{" "}
                   {filteredPosts.length === 1 ? "post" : "posts"}
                 </p>
               </div>
               <div className="flex items-center gap-3">
                 <Select value={sortBy} onValueChange={setSortBy}>
-                  <SelectTrigger className="w-[180px] bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800">
+                  <SelectTrigger className="w-[180px] whitespace-nowrap">
                     <SelectValue placeholder="Sort by" />
                   </SelectTrigger>
                   <SelectContent>
@@ -440,37 +466,48 @@ export default function FeedbackPageClient({
                     <a href={`${APP_URL}/login`}>Log in to create a post</a>
                   </Button>
                 ) : (
-                  <SubmitFeedback boards={boards} buttonText="Create Post" variant="outline" />
+                  <SubmitFeedback
+                    boards={boards}
+                    buttonText="Create Post"
+                    variant="outline"
+                  />
                 )}
               </div>
             </div>
 
             {/* Feedback List */}
             {loading ? (
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {[1, 2, 3].map((i) => (
                   <div
                     key={i}
-                    className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-4 animate-pulse"
+                    className="animate-pulse rounded-lg border border-border bg-card p-5"
                   >
-                    <div className="h-6 bg-slate-200 dark:bg-slate-700 rounded w-3/4 mb-3"></div>
-                    <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-full mb-2"></div>
-                    <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-5/6"></div>
+                    <div className="flex gap-4">
+                      <div className="h-14 w-14 rounded-lg bg-muted" />
+                      <div className="flex-1 space-y-3">
+                        <div className="h-5 w-3/4 rounded bg-muted" />
+                        <div className="h-4 w-full rounded bg-muted" />
+                        <div className="h-4 w-5/6 rounded bg-muted" />
+                      </div>
+                    </div>
                   </div>
                 ))}
               </div>
             ) : filteredPosts.length === 0 ? (
-              <div className="text-center py-10">
-                <div className="text-4xl mb-4">💬</div>
-                <h3 className="text-lg font-switzer font-semibold text-slate-900 dark:text-white mb-2">
+              <div className="py-16 text-center">
+                <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-secondary">
+                  <MessagesSquare className="h-6 w-6 text-muted-foreground" />
+                </div>
+                <h3 className="font-headline text-lg font-semibold tracking-tight text-foreground">
                   No feedback yet
                 </h3>
-                <p className="text-slate-600 dark:text-slate-400">
+                <p className="mt-1 text-sm text-foreground">
                   Be the first to share your ideas!
                 </p>
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {filteredPosts.map((feedback) => (
                   <FeedbackCard
                     key={feedback.id}
@@ -484,12 +521,8 @@ export default function FeedbackPageClient({
 
             {/* Load More */}
             {filteredPosts.length > 0 && (
-              <div className="flex items-center justify-center mt-8">
-                <Button
-                  variant="outline"
-                  disabled
-                  className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800"
-                >
+              <div className="mt-8 flex items-center justify-center">
+                <Button variant="outline" disabled>
                   No more
                 </Button>
               </div>

@@ -245,7 +245,7 @@ export function LeftSidebar({
   return (
     <div className="w-60 border-r border-gray-200 dark:border-border bg-white dark:bg-background overflow-y-auto" style={{ width: '240px' }}>
       {/* Header */}
-      <div className="p-4 border-b border-gray-200 dark:border-border sticky top-0 bg-white dark:bg-background z-10">
+      <div className="sticky top-0 z-10 border-b border-border bg-background p-4">
         <h2 className="font-semibold text-lg mb-2 text-gray-900 dark:text-white">Boards</h2>
 
         {/* ✅ SHOW FOR OWNERS AND ADMINS */}

@@ -7,13 +7,6 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
   Select,
   SelectContent,
   SelectItem,
@@ -24,7 +17,6 @@ import {
   CheckCircle2,
   Loader2,
 } from "lucide-react";
-import { LandingFooter } from "@/components/ui/landing-footer";
 import api from "@/lib/api";
 
 type SubjectType = "Feature Request" | "Bug Report" | "Billing" | "Other";
@@ -54,8 +46,8 @@ export default function ContactPage() {
   // Determine form type based on authentication
   const formType = user ? "Support Request" : "General Inquiry";
   const formDescription = user
-    ? "We're here to help! Submit your support request and we'll get back to you as soon as possible."
-    : "Have a question or feedback? We'd love to hear from you. Fill out the form below and we'll be in touch.";
+    ? "We’re here to help! Submit your support request and we’ll get back to you as soon as possible."
+    : "Have a question or feedback? We’d love to hear from you. Fill out the form below and we’ll be in touch.";
 
   // Handle form field changes
   const handleChange = (field: string, value: string) => {
@@ -134,141 +126,100 @@ export default function ContactPage() {
   // Success state - Thank You message
   if (isSubmitted) {
     return (
-      <>
-        <div className="min-h-screen bg-slate-50 dark:bg-background">
-          <div className="relative max-w-3xl mx-auto px-4 py-12">
-            <Card className="border border-slate-200 dark:border-border shadow-xl">
-              <CardContent className="relative pt-10 pb-10 text-center">
-                {/* Success Icon */}
-                <div className="flex justify-center mb-5">
-                  <div className="relative">
-                    <div className="p-4 rounded-full bg-green-600 shadow-lg">
-                      <CheckCircle2
-                        className="h-12 w-12 text-white"
-                        strokeWidth={2.5}
-                      />
-                    </div>
-                  </div>
-                </div>
+      <div className="bg-background text-foreground">
+        <div className="container max-w-3xl py-12">
+          <div className="rounded-lg border border-border bg-card p-8 text-center sm:p-10">
+            {/* Success Icon */}
+            <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-full bg-success/15">
+              <CheckCircle2
+                className="h-7 w-7 text-success"
+                strokeWidth={2}
+              />
+            </div>
 
-                <h2 className="text-2xl font-switzer font-medium text-slate-900 dark:text-white mb-4">
-                  Message Sent Successfully!
-                </h2>
+            <h2 className="font-headline text-2xl font-semibold tracking-tight text-foreground">
+              Message sent successfully
+            </h2>
 
-                <p className="text-base text-slate-700 dark:text-slate-300 mb-3 font-medium">
-                  Thank you for reaching out to us.
+            <p className="mt-3 text-base font-medium text-foreground">
+              Thank you for reaching out to us.
+            </p>
+
+            <p className="mx-auto mt-2 max-w-xl text-sm leading-relaxed text-muted-foreground">
+              {user
+                ? "Our support team will review your request and respond to you via email within 24-48 hours."
+                : "We’ll get back to you at the email address you provided within 24-48 hours."}
+            </p>
+
+            {/* Info — hairline surfaces, not cards */}
+            <div className="mt-8 grid gap-4 sm:grid-cols-2">
+              <div className="rounded-md border border-border bg-secondary/50 p-4 text-left">
+                <p className="text-sm font-medium text-foreground">
+                  Response Time
                 </p>
-
-                <p className="text-base text-slate-600 dark:text-slate-400 mb-6 max-w-xl mx-auto leading-relaxed">
-                  {user
-                    ? "Our support team will review your request and respond to you via email within 24-48 hours."
-                    : "We'll get back to you at the email address you provided within 24-48 hours."}
+                <p className="mt-1 text-sm text-muted-foreground">
+                  24-48 hours
                 </p>
+              </div>
+              <div className="rounded-md border border-border bg-secondary/50 p-4 text-left">
+                <p className="text-sm font-medium text-foreground">
+                  Secure Delivery
+                </p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Message encrypted
+                </p>
+              </div>
+            </div>
 
-                {/* Info Cards */}
-                <div className="grid sm:grid-cols-2 gap-4 mb-6 max-w-2xl mx-auto">
-                  <div className="p-4 rounded-xl bg-blue-50 dark:bg-blue-950/30 border border-blue-200/50 dark:border-blue-800/50">
-                    <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                      Response Time
-                    </p>
-                    <p className="text-xs text-slate-600 dark:text-slate-400">
-                      24-48 hours
-                    </p>
-                  </div>
-                  <div className="p-4 rounded-xl bg-green-50 dark:bg-green-950/30 border border-green-200/50 dark:border-green-800/50">
-                    <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                      Secure Delivery
-                    </p>
-                    <p className="text-xs text-slate-600 dark:text-slate-400">
-                      Message encrypted
-                    </p>
-                  </div>
-                </div>
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
+              <Button
+                variant="outline"
+                size="lg"
+                onClick={() => {
+                  setIsSubmitted(false);
+                  setFormData({
+                    email: user?.email || "",
+                    subject: "",
+                    message: "",
+                    honeypot: "",
+                  });
+                }}
+              >
+                Send Another Message
+              </Button>
 
-                <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                  <Button
-                    variant="outline"
-                    size="lg"
-                    className="border-2 hover:border-blue-600 dark:hover:border-blue-500"
-                    onClick={() => {
-                      setIsSubmitted(false);
-                      setFormData({
-                        email: user?.email || "",
-                        subject: "",
-                        message: "",
-                        honeypot: "",
-                      });
-                    }}
-                  >
-                    Send Another Message
-                  </Button>
-
-                  <Button
-                    size="lg"
-                    className="bg-blue-600 hover:bg-blue-700 shadow-lg"
-                    onClick={() =>
-                      (window.location.href = user ? "/admin" : "/")
-                    }
-                  >
-                    {user ? "Back to Dashboard" : "Back to Home"}
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+              <Button
+                size="lg"
+                onClick={() =>
+                  (window.location.href = user ? "/admin" : "/")
+                }
+              >
+                {user ? "Back to Dashboard" : "Back to Home"}
+              </Button>
+            </div>
           </div>
         </div>
-      </>
+      </div>
     );
   }
 
   // Main contact form
   return (
-    <>
-      <div className="min-h-screen bg-slate-50 dark:bg-background">
-        <div className="relative max-w-5xl mx-auto px-4 py-10 lg:py-12">
-          {/* Header Section */}
-          <div className="text-center mb-8">
-            <h1 className="text-3xl lg:text-4xl font-switzer font-medium text-slate-900 dark:text-white mb-5 tracking-tight">
-              {formType}
-            </h1>
+    <div className="bg-background text-foreground">
+      <div className="container max-w-5xl py-12">
+        <div className="grid gap-10 lg:grid-cols-12">
+          {/* Main — the form */}
+          <div className="lg:col-span-7">
+            <div className="rounded-lg border border-border bg-card p-6 sm:p-8">
+              <h2 className="font-headline text-xl font-semibold tracking-tight text-foreground">
+                Send Us a Message
+              </h2>
+              <p className="mt-1.5 text-sm text-muted-foreground">
+                All fields are required. We typically respond within 24-48
+                hours.
+              </p>
 
-            <p className="text-base text-slate-600 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed">
-              {formDescription}
-            </p>
-
-            {user && (
-              <div className="mt-6 inline-flex items-center gap-2.5 px-5 py-3 bg-blue-50 dark:bg-blue-950/30 rounded-full border border-blue-200 dark:border-blue-800 shadow-sm">
-                <div className="p-1 rounded-full bg-green-500">
-                  <CheckCircle2
-                    className="h-3 w-3 text-white"
-                    strokeWidth={3}
-                  />
-                </div>
-                <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                  Logged in as {user.email}
-                </span>
-              </div>
-            )}
-          </div>
-
-          {/* Contact Form Card */}
-          <Card className="border border-slate-200 dark:border-border shadow-xl">
-            <CardHeader className="relative border-b border-slate-200 dark:border-border bg-slate-50 dark:bg-gray-800/50 pb-5">
-              <div className="flex items-start gap-4">
-                <div className="flex-1">
-                  <CardTitle className="text-xl font-switzer font-medium tracking-tight mb-2 text-slate-900 dark:text-white">
-                    Send Us a Message
-                  </CardTitle>
-                  <CardDescription className="text-base">
-                    All fields are required. We typically respond within 24-48
-                    hours.
-                  </CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-
-            <CardContent className="relative pt-5">
-              <form onSubmit={handleSubmit} className="space-y-7">
+              <form onSubmit={handleSubmit} className="mt-6 space-y-5">
                 {/* Honeypot - Hidden field for spam protection */}
                 <input
                   type="text"
@@ -281,11 +232,8 @@ export default function ContactPage() {
                 />
 
                 {/* Email Field */}
-                <div className="space-y-3">
-                  <Label
-                    htmlFor="email"
-                    className="text-base font-switzer font-medium flex items-center gap-2 text-slate-900 dark:text-white"
-                  >
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="text-sm font-medium">
                     Email Address
                   </Label>
                   <Input
@@ -296,24 +244,24 @@ export default function ContactPage() {
                     onChange={(e) => handleChange("email", e.target.value)}
                     disabled={!!user}
                     required
-                    className={`text-base h-12 border-2 focus:border-blue-500 dark:focus:border-blue-400 ${formErrors.email ? "border-red-500 dark:border-red-500" : ""}`}
+                    className={formErrors.email ? "border-destructive" : undefined}
                   />
                   {formErrors.email && (
-                    <p className="text-sm text-red-600 dark:text-red-400">{formErrors.email}</p>
+                    <p className="text-sm text-destructive">{formErrors.email}</p>
                   )}
                   {user && !formErrors.email && (
-                    <p className="text-sm text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-                      <CheckCircle2 className="h-3.5 w-3.5 text-green-600" />
+                    <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                      <CheckCircle2 className="h-3.5 w-3.5 text-success" />
                       Email auto-filled from your account
                     </p>
                   )}
                 </div>
 
                 {/* Subject Dropdown */}
-                <div className="space-y-3">
+                <div className="space-y-2">
                   <Label
                     htmlFor="subject"
-                    className="text-base font-switzer font-medium text-slate-900 dark:text-white"
+                    className="text-sm font-medium"
                   >
                     Subject
                   </Label>
@@ -322,8 +270,10 @@ export default function ContactPage() {
                     onValueChange={(value) => handleChange("subject", value)}
                     required
                   >
-                    <SelectTrigger className={`text-base h-12 border-2 focus:border-blue-500 dark:focus:border-blue-400 ${formErrors.subject ? "border-red-500 dark:border-red-500" : ""}`}>
-                      <SelectValue placeholder="Select a subject..." />
+                    <SelectTrigger
+                      className={formErrors.subject ? "border-destructive" : undefined}
+                    >
+                      <SelectValue placeholder="Select a subject…" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="Feature Request">
@@ -341,37 +291,37 @@ export default function ContactPage() {
                     </SelectContent>
                   </Select>
                   {formErrors.subject && (
-                    <p className="text-sm text-red-600 dark:text-red-400">{formErrors.subject}</p>
+                    <p className="text-sm text-destructive">{formErrors.subject}</p>
                   )}
                 </div>
 
                 {/* Message Textarea */}
-                <div className="space-y-3">
+                <div className="space-y-2">
                   <Label
                     htmlFor="message"
-                    className="text-base font-switzer font-medium text-slate-900 dark:text-white"
+                    className="text-sm font-medium"
                   >
                     Message
                   </Label>
                   <Textarea
                     id="message"
-                    placeholder="Please provide as much detail as possible..."
+                    placeholder="Please provide as much detail as possible…"
                     value={formData.message}
                     onChange={(e) => handleChange("message", e.target.value)}
                     required
                     rows={8}
-                    className={`text-base resize-none border-2 focus:border-blue-500 dark:focus:border-blue-400 ${formErrors.message ? "border-red-500 dark:border-red-500" : ""}`}
+                    className={`resize-none ${formErrors.message ? "border-destructive" : ""}`}
                     maxLength={5000}
                   />
                   {formErrors.message && (
-                    <p className="text-sm text-red-600 dark:text-red-400">{formErrors.message}</p>
+                    <p className="text-sm text-destructive">{formErrors.message}</p>
                   )}
-                  <div className="flex justify-between text-sm">
-                    <span className="text-slate-500 dark:text-slate-400">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">
                       Minimum 10 characters
                     </span>
                     <span
-                      className={`font-semibold ${formData.message.length < 10 ? "text-amber-600" : formData.message.length > 4500 ? "text-red-600" : "text-slate-600 dark:text-slate-400"}`}
+                      className={`tabular-nums ${formData.message.length > 4500 ? "text-destructive" : "text-muted-foreground"}`}
                     >
                       {formData.message.length}/5000
                     </span>
@@ -380,115 +330,122 @@ export default function ContactPage() {
 
                 {/* Submit Error Banner */}
                 {submitError && (
-                  <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
-                    <p className="text-sm text-red-800 dark:text-red-200 font-medium">{submitError}</p>
+                  <div className="rounded-md border border-destructive/30 bg-destructive/10 p-3">
+                    <p className="text-sm font-medium text-destructive">{submitError}</p>
                   </div>
                 )}
 
                 {/* Submit Button */}
-                <div className="pt-6">
-                  <Button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="w-full text-lg py-7 bg-blue-600 hover:bg-blue-700 shadow-xl hover:shadow-2xl transition-all duration-300 font-switzer font-medium"
-                    size="lg"
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-                        Sending...
-                      </>
-                    ) : (
-                      <>
-                        Send Message
-                      </>
-                    )}
-                  </Button>
-                </div>
+                <Button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full focus-visible:ring-2 focus-visible:ring-offset-2"
+                  size="lg"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" />
+                      Sending…
+                    </>
+                  ) : (
+                    <>
+                      Send Message
+                    </>
+                  )}
+                </Button>
 
                 {/* Additional Info */}
-                <div className="pt-6 border-t border-slate-200 dark:border-slate-800">
-                  <div className="flex items-center justify-center text-sm text-slate-600 dark:text-slate-400">
-                    <p>
-                      {user
-                        ? "Your message will be associated with your account for faster support."
-                        : "Your information is secure and will never be shared."}
-                    </p>
-                  </div>
-                </div>
+                <p className="border-t border-border pt-4 text-center text-sm text-muted-foreground">
+                  {user
+                    ? "Your message will be associated with your account for faster support."
+                    : "Your information is secure and will never be shared."}
+                </p>
               </form>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
-          {/* Alternative Contact Methods - Enhanced */}
-          <div className="mt-8">
-            <div className="text-center mb-5">
-              <h2 className="text-xl font-switzer font-medium text-slate-900 dark:text-white mb-2">
+          {/* Aside — reassurance and other channels */}
+          <aside className="lg:col-span-5">
+            <h1 className="font-headline text-2xl font-semibold tracking-tight text-foreground lg:text-3xl">
+              {formType}
+            </h1>
+            <p className="mt-3 text-base leading-relaxed text-muted-foreground">
+              {formDescription}
+            </p>
+
+            {user && (
+              <div className="mt-5 inline-flex items-center gap-2 rounded-full border border-border bg-secondary px-3.5 py-1.5">
+                <CheckCircle2 className="h-3.5 w-3.5 text-success" strokeWidth={2.5} />
+                <span className="text-sm font-medium text-foreground">
+                  Logged in as {user.email}
+                </span>
+              </div>
+            )}
+
+            <div className="mt-10">
+              <h2 className="font-headline text-lg font-semibold tracking-tight text-foreground">
                 Other Ways to Reach Us
               </h2>
-              <p className="text-slate-600 dark:text-slate-400">
+              <p className="mt-1 text-sm text-muted-foreground">
                 Choose the method that works best for you
               </p>
-            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Card className="group text-center p-5 hover:shadow-2xl transition-all duration-300 border-2 hover:border-blue-300 dark:hover:border-blue-700 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
-                <h3 className="font-switzer font-medium text-lg mb-2 text-slate-900 dark:text-white">
-                  Email Us
-                </h3>
-                <p className="text-slate-600 dark:text-slate-400 mb-3">
-                  Get a response within 24 hours
-                </p>
-                <a
-                  href="mailto:support@faddy.com"
-                  className="text-sm font-semibold text-blue-600 dark:text-blue-400 hover:underline"
-                >
-                  support@faddy.com
-                </a>
-              </Card>
+              <div className="mt-5">
+                <div className="border-t border-border py-5 first:pt-0">
+                  <h3 className="text-sm font-medium text-foreground">
+                    Email Us
+                  </h3>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Get a response within 24 hours
+                  </p>
+                  <a
+                    href="mailto:support@faddy.com"
+                    className="mt-1.5 inline-block text-sm font-medium text-primary underline-offset-2 transition-colors hover:underline"
+                  >
+                    support@faddy.com
+                  </a>
+                </div>
 
-              <Card className="group text-center p-5 hover:shadow-2xl transition-all duration-300 border-2 hover:border-green-300 dark:hover:border-green-700 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
-                <h3 className="font-switzer font-medium text-lg mb-2 text-slate-900 dark:text-white">
-                  WhatsApp
-                </h3>
-                <p className="text-slate-600 dark:text-slate-400 mb-3">
-                  Chat with our team ,Mon-Fri, 9am-5pm EST
-                </p>
-                <p className="text-sm font-semibold text-green-600 dark:text-green-400">
-                  +91 8240635683
-                </p>
-              </Card>
+                <div className="border-t border-border py-5 first:pt-0">
+                  <h3 className="text-sm font-medium text-foreground">
+                    WhatsApp
+                  </h3>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Chat with our team, Mon-Fri, 9am-5pm EST
+                  </p>
+                  <p className="mt-1.5 text-sm font-medium text-foreground">
+                    +91 8240635683
+                  </p>
+                </div>
 
-              <Card className="group text-center p-5 hover:shadow-2xl transition-all duration-300 border-2 hover:border-purple-300 dark:hover:border-purple-700 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
-                <h3 className="font-switzer font-medium text-lg mb-2 text-slate-900 dark:text-white">
-                  Help Center
-                </h3>
-                <p className="text-slate-600 dark:text-slate-400 mb-3">
-                  Available 24/7
-                </p>
-                <p className="text-sm font-semibold text-purple-600 dark:text-purple-400">
+                <div className="border-t border-border py-5 first:pt-0">
+                  <h3 className="text-sm font-medium text-foreground">
+                    Help Center
+                  </h3>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Available 24/7
+                  </p>
                   <a
                     href="https://whatsapp.com/channel/0029VaBW4gzHltYELmDUZ13T"
                     target="_blank"
                     rel="noopener noreferrer"
+                    className="mt-1.5 inline-block text-sm font-medium text-primary underline-offset-2 transition-colors hover:underline"
                   >
                     Click to join the Channel
                   </a>
-                </p>
-              </Card>
+                </div>
+              </div>
             </div>
-          </div>
 
-          {/* Trust Indicators */}
-          <div className="mt-8 text-center">
-            <div className="inline-flex items-center px-6 py-3 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600">
-              <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                Average response time: 6 hours
-              </span>
+            <div className="mt-8 rounded-md border border-border bg-secondary/50 px-4 py-3">
+              <p className="text-sm text-muted-foreground">
+                Average response time:{" "}
+                <span className="font-medium text-foreground">6 hours</span>
+              </p>
             </div>
-          </div>
+          </aside>
         </div>
       </div>
-    </>
+    </div>
   );
 }
