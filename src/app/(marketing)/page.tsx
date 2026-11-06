@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect } from "react";
+import Script from "next/script";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { LandingFooter } from "@/components/ui/landing-footer";
@@ -148,9 +149,20 @@ export default function LandingPage() {
               <button type="button" onClick={handleClick} className="lp-btn">
                 Try for Free
               </button>
-              <a href="/pricing" className="lp-btn lp-btn--quiet">
-                View Pricing
-              </a>
+              <button
+                type="button"
+                onClick={() => {
+                  const sd = (
+                    window as unknown as {
+                      Supademo?: { open: (id: string) => void };
+                    }
+                  ).Supademo;
+                  sd?.open("cmw4h2tcs05knqmrb5nter8p1");
+                }}
+                className="lp-btn lp-btn--quiet"
+              >
+                Smartflow demo
+              </button>
             </div>
             <ul className="lp-hero__stats">
               {HERO_STATS.map((stat) => (
@@ -357,6 +369,10 @@ export default function LandingPage() {
         </section>
       </main>
 
+      <Script
+        src="https://script.supademo.com/supademo.js"
+        strategy="afterInteractive"
+      />
       <LandingFooter showCTA={true} />
     </div>
   );
