@@ -1,5 +1,22 @@
 [
  {
+  "shape": "Ledger (kept system)",
+  "theme": "brand (kept)",
+  "axes": "cool-paper/grotesk/brand-blue",
+  "hero": "Stage: text left, sample board right",
+  "nav": "floating pill (kept) + End Users in Core",
+  "footer": "kept LandingFooter",
+  "imagery": "owner Supademo embed with captured first-frame poster",
+  "signature": "live Supademo product demo, full measure",
+  "entry": "src/app/(marketing)/end-users/page.tsx",
+  "fingerprint": "end-users: stage hero + owner demo embed as signature",
+  "sections": "hero, demo, ledger, places, close, footer",
+  "waived": "39b (shared navbar)",
+  "prompt": "build end users page in marketing, dropdown of product core, include supademo demo embed",
+  "date": "2026-11-06",
+  "mode": "build"
+ },
+ {
   "mode": "redesign",
   "depth": "full",
   "scope": "app",

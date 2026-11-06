@@ -1,0 +1,292 @@
+/* Hallmark · shape: Ledger (shared core-page system) · genre: modern-minimal · theme: brand (kept) · new page in the kept system · draw: n/a (brand system inherited)
+ * paper: hsl(0 0% 97.6%) (#f9f9f9 brand off-white) · accent: oklch(56% 0.206 263) (Faddy --primary) · display: Switzer · body: Inter · hero: Stage · nav: floating pill (kept) · footer: kept (LandingFooter) · signature: the owner's live Supademo product demo, full-measure below the hero · job: sign up
+ * axes: cool-paper/grotesk/brand-blue · posture: Restrained · modes: light+dark · contrast: pass · fold: pass · v2.0.0 */
+/* Hallmark · pre-emit critique: P4 H4 E4 S4 R4 V4 · weakest: V, a fifth page in one brand system; this one leads with the owner's live demo instead of a built dashboard, so it opens differently from Expert View, Smartflow and Developer & API */
+/* Hallmark · the demo embed is the owner's own Supademo markup; wrapper styles move to classes, every attribute (src, loading, title, allow, fullscreen flags) kept */
+/* Hallmark · dismissed 25 · 44ch is the shared lede measure of every product-core page in this system (expert-view, developer-api); this page does not widen it */
+/* Hallmark · sweep note · an earlier render captured the login page (the route was missing from AuthContext's PUBLIC_PATHS, fixed this pass); the 40 FAIL and 77 WARN belonged to that capture, not to this page */
+/* Hallmark · waive 39b · the 40px control is the shared marketing navbar's kept Login/Sign Up pair, as on every sibling page · this page's own controls measure 48px or more */
+/* Hallmark · dismissed 58 · the 89-word slice straddles the ledger and places boundary; each screen on its own runs under 80 (ledger 62, places 43) */
+/* Hallmark · the Supademo embed sits behind a focus facade (the figure is the tab stop, Enter moves focus into the frame) because Chromium cannot match :focus on a cross-origin iframe; the demo keeps every owner embed attribute */
+/* Hallmark · finish-review: subagent, first word fix · 4 findings · 4 resolved (the demo now carries a poster captured from the owner's own Supademo first frame; the ledger head names its own verbs; the places grid leads wider on the boards door; Play the demo moves focus into the facade) */
+/* Hallmark · owner fix · the poster ghosted behind the Supademo player's transparent edges (the doubled window the owner reported); the figure's background drops to plain paper once the iframe reports loaded, the poster still serves as the pre-load frame */
+/* Hallmark · owner change · the poster is gone entirely on the owner's call: the figure carries no background, the demo sits directly on the section surface; the pre-load frame is empty box plus the Open-it-directly fallback link */
+@import "../../tokens.css";
+@import "../../base.css" layer(base);
+
+:where(.eu-wrap) :is(h1, h2, h3) {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: var(--display-weight, 700);
+  font-synthesis: none;
+  letter-spacing: var(--tracking-display);
+  line-height: 1.05;
+  overflow-wrap: break-word;
+  min-width: 0;
+  text-wrap: balance;
+}
+:where(.eu-wrap) h1 { max-width: 20ch; font-size: var(--text-display); }
+:where(.eu-wrap) h2 { max-width: 30ch; font-size: var(--text-section); line-height: 1.08; }
+:where(.eu-wrap) p { margin: 0; text-wrap: pretty; }
+:where(.eu-wrap) { background: var(--color-paper); color: var(--color-ink); font-family: var(--font-body); }
+
+/* ── Buttons ────────────────────────────────────────────────────────────── */
+.eu-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  min-height: 48px;
+  padding: 0 var(--space-lg);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-input);
+  background: var(--color-accent);
+  color: var(--color-accent-ink);
+  font: 600 var(--text-md)/1 var(--font-body);
+  text-align: center;
+  white-space: nowrap;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color var(--dur-short) var(--ease-out),
+    border-color var(--dur-short) var(--ease-out),
+    transform var(--dur-micro) var(--ease-out);
+}
+.eu-btn:hover {
+  background: color-mix(in oklab, var(--color-accent) 86%, var(--color-ink));
+  border-color: color-mix(in oklab, var(--color-accent) 86%, var(--color-ink));
+}
+.eu-btn:active { transform: translateY(1px); }
+.eu-btn:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+.eu-btn--quiet { background: transparent; color: var(--color-ink); border-color: var(--color-rule-2); }
+.eu-btn--quiet:hover { background: var(--color-paper-2); border-color: var(--color-rule-2); }
+@media (prefers-reduced-motion: reduce) {
+  .eu-btn { transition: background-color var(--dur-short) linear; }
+}
+
+/* ── Hero (Stage) ───────────────────────────────────────────────────────── */
+.eu-hero {
+  min-height: calc(100svh - var(--space-2xl));
+  display: grid;
+  align-items: center;
+  padding-block: var(--space-2xl);
+}
+.eu-hero__inner {
+  display: grid;
+  grid-template-columns: minmax(0, 8fr) minmax(0, 4fr);
+  gap: var(--space-2xl);
+  align-items: center;
+}
+.eu-hero h1 { max-width: 16ch; }
+.eu-hero .lead {
+  margin-top: var(--space-lg);
+  color: var(--color-ink-2);
+  font-size: var(--text-lead);
+  max-width: 34ch;
+}
+.eu-hero__actions {
+  margin-top: var(--space-xl);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+/* The sample board, built live in the hero */
+.eu-board {
+  margin: 0;
+  align-self: center;
+  background: var(--color-paper-2);
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+}
+.eu-board__bar {
+  display: flex;
+  align-items: center;
+  padding: var(--space-sm) var(--space-lg);
+  background: var(--color-paper);
+  border-bottom: 1px solid var(--color-rule);
+  font-size: var(--text-sm);
+  color: var(--color-ink-2);
+}
+.eu-board__ctx { margin-inline-start: auto; color: var(--color-muted); }
+.eu-board__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.eu-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--space-md);
+  align-items: center;
+  padding: var(--space-xl);
+  border-top: 1px solid var(--color-rule);
+  font-size: var(--text-xl);
+}
+.eu-board__list .eu-row:first-child { border-top: 0; }
+.eu-row__name { color: var(--color-ink); font-weight: 500; }
+.eu-row__votes {
+  font-family: var(--font-display);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--display-weight);
+  color: var(--color-accent-deep);
+  font-size: var(--text-md);
+  padding: var(--space-3xs) var(--space-sm);
+  border: 1px solid var(--color-rule-2);
+  border-radius: var(--radius-pill);
+  background: var(--color-paper);
+}
+
+/* ── Demo ───────────────────────────────────────────────────────────────── */
+.eu-demo {
+  padding-block: var(--section-gap-s);
+  background: var(--color-paper-2);
+  border-top: 1px solid var(--color-rule);
+  border-bottom: 1px solid var(--color-rule);
+}
+.eu-demo__head {
+  display: grid;
+  grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
+  gap: var(--gap-columns);
+  align-items: end;
+  margin-bottom: var(--space-xl);
+}
+.eu-demo__head .lead { color: var(--color-ink-2); }
+.eu-demo__frame {
+  position: relative;
+  box-sizing: content-box;
+  max-height: 80vh;
+  max-height: 80svh;
+  width: 100%;
+  aspect-ratio: 2.15;
+  padding: var(--space-xl) 0 var(--space-xl) 0;
+}
+.eu-demo__frame iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  border-radius: var(--radius-card);
+}
+.eu-demo__frame:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+.eu-demo__fallback {
+  margin-top: var(--space-sm);
+  font-size: var(--text-sm);
+  color: var(--color-muted);
+}
+.eu-demo__fallback a {
+  color: var(--color-accent-deep);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.eu-demo__fallback a:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+
+/* ── Ledger ─────────────────────────────────────────────────────────────── */
+.eu-doing { padding-block: var(--section-gap); }
+.eu-doing__head { margin-bottom: var(--space-2xl); }
+.eu-doing__head p {
+  margin-top: var(--space-md);
+  font-size: var(--text-lead);
+  color: var(--color-ink-2);
+  max-width: 44ch;
+}
+.eu-doing__rows { margin: 0; }
+.eu-do {
+  display: grid;
+  grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+  gap: var(--gap-columns);
+  align-items: baseline;
+  padding-block: var(--space-lg);
+  border-top: 1px solid var(--color-rule);
+}
+.eu-do:last-child { border-bottom: 1px solid var(--color-rule); }
+.eu-do dt {
+  font-family: var(--font-display);
+  font-weight: var(--display-weight);
+  font-size: var(--text-title);
+  letter-spacing: var(--tracking-display);
+}
+.eu-do dd { margin: 0; color: var(--color-ink-2); line-height: 1.6; }
+
+/* ── Places ─────────────────────────────────────────────────────────────── */
+.eu-places {
+  padding-block: var(--section-gap);
+  background: var(--color-paper-2);
+}
+.eu-places__head { margin-bottom: var(--space-2xl); }
+.eu-places__head p {
+  margin-top: var(--space-md);
+  font-size: var(--text-lead);
+  color: var(--color-ink-2);
+  max-width: 44ch;
+}
+.eu-places__rows {
+  margin: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 4fr) minmax(0, 4fr);
+  gap: var(--gap-columns);
+}
+.eu-place { padding-inline: var(--space-2xl); }
+.eu-place:first-child { padding-inline-start: 0; }
+.eu-place + .eu-place { border-left: 1px solid var(--color-rule-2); }
+.eu-place dt {
+  font-family: var(--font-display);
+  font-weight: var(--display-weight);
+  font-size: var(--text-title);
+  letter-spacing: var(--tracking-display);
+  margin-bottom: var(--space-sm);
+}
+.eu-place dd { margin: 0; color: var(--color-ink-2); line-height: 1.6; }
+.eu-place__link {
+  display: inline-block;
+  margin-top: var(--space-sm);
+  font-size: var(--text-sm);
+  color: var(--color-accent-deep);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.eu-place__link:hover { color: var(--color-accent); }
+.eu-place__link:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+
+/* ── Close (graphite band) ──────────────────────────────────────────────── */
+.eu-close {
+  background: var(--color-graphite);
+  color: var(--color-graphite-ink);
+  padding-block: var(--space-3xl);
+}
+.eu-close__inner {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) auto;
+  gap: var(--space-2xl);
+  align-items: center;
+}
+.eu-close h2 { color: var(--color-graphite-ink); }
+.eu-close p {
+  margin-top: var(--space-md);
+  color: var(--color-graphite-muted);
+  font-size: var(--text-lead);
+  max-width: 44ch;
+}
+.eu-btn--band { background: transparent; color: var(--color-graphite-ink); border-color: var(--color-band-rule); }
+.eu-btn--band:hover { background: var(--color-band-surface); border-color: var(--color-band-rule); }
+
+/* ── Responsive ─────────────────────────────────────────────────────────── */
+@media (max-width: 60rem) {
+  .eu-hero { min-height: 0; padding-block: var(--space-2xl) var(--space-xl); }
+  .eu-hero__inner { grid-template-columns: minmax(0, 1fr); gap: var(--space-xl); align-items: start; }
+  .eu-demo__head { grid-template-columns: minmax(0, 1fr); align-items: start; }
+  .eu-do { grid-template-columns: minmax(0, 1fr); gap: var(--space-xs); }
+  .eu-places__rows { grid-template-columns: minmax(0, 1fr); gap: var(--space-xl); }
+  .eu-place { padding-inline: 0; }
+  .eu-place + .eu-place { border-left: 0; border-top: 1px solid var(--color-rule-2); padding-top: var(--space-lg); }
+  .eu-close__inner { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 40rem) {
+  .eu-demo__frame { aspect-ratio: 1.4; }
+}

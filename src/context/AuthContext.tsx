@@ -40,6 +40,7 @@ const PUBLIC_PATHS: Array<string | { prefix: string }> = [
   "/ai-chat",
   "/expert-view",
   "/developer-api",
+  "/end-users",
   // App public pages
   "/changelog",
   "/feedback",
