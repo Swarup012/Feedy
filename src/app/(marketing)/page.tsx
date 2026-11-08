@@ -320,8 +320,8 @@ export default function LandingPage() {
                   <div>
                     <dt>Built for</dt>
                     <dd>
-                      Startups and indie hackers. Not enterprise. No
-                      complexity. No per-user pricing traps.
+                      Built for teams who care about their customers. No
+                      per-user pricing traps.
                     </dd>
                   </div>
                   <div>
