@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -8,43 +8,19 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Logo } from "@/components/logo";
 import { useAuth } from "@/hooks/useAuth";
-import { useToast } from "@/hooks/use-toast";
-import { Eye, EyeOff, ArrowRight, Lock, Mail } from "lucide-react";
-import { LoadingAnimation } from "@/components/LoadingAnimation";
+import { Eye, EyeOff, Lock, Mail, Loader2 } from "lucide-react";
 import { GoogleAuthButton } from "@/components/auth/GoogleAuthButton";
-import gsap from "gsap";
+import "../auth.css";
 
 function LoginForm() {
   const { login } = useAuth();
-  const { toast } = useToast();
   const searchParams = useSearchParams();
-  const formRef = useRef<HTMLDivElement>(null);
 
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-
-  // Entrance animation — respects prefers-reduced-motions
-  useEffect(() => {
-    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const ctx = gsap.context(() => {
-      if (prefersReduced) {
-        gsap.set(".login-reveal", { opacity: 1 });
-      } else {
-        gsap.from(".login-reveal", {
-          y: 12,
-          opacity: 0,
-          scale: 0.98,
-          duration: 0.8,
-          stagger: 0.08,
-          ease: "power3.out",
-        });
-      }
-    }, formRef);
-    return () => ctx.revert();
-  }, []);
 
   useEffect(() => {
     try {
@@ -83,7 +59,6 @@ function LoginForm() {
     setFormError("");
     try {
       await login(formData.email.trim(), formData.password);
-      toast({ title: "Welcome back" });
     } catch (err: any) {
       const message = err?.message || "Login failed";
       let description = message;
@@ -101,92 +76,80 @@ function LoginForm() {
   };
 
   return (
-    <div ref={formRef} className="h-screen overflow-hidden flex bg-background">
-      {/* Left Side - Branding */}
-      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
-        {/* Decorative elements */}
-        <div className="absolute inset-0 opacity-40 dark:opacity-20 pointer-events-none">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/30 dark:bg-primary/20 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-muted/50 dark:bg-muted/30 rounded-full blur-3xl"></div>
+    <div className="auth">
+      <aside className="auth__brand" aria-label="About Faddy">
+        <Link href="/" className="auth__lockup">
+          <span className="auth__lockup-tile" aria-hidden="true">
+            <Logo width={14} height={20} />
+          </span>
+          <span className="auth__lockup-name">Faddy</span>
+        </Link>
+
+        <div className="auth__brand-body">
+          <p className="auth__brand-title">Close the loop on what your users ask for.</p>
+          <p className="auth__brand-lede">
+            One place to collect requests, find the signal with AI, and show people what shipped.
+          </p>
+          <ol className="auth__loop">
+            <li>
+              <span className="auth__loop-num">01</span>
+              <span className="auth__loop-copy">
+                <span className="auth__loop-title">Collect</span>
+                <span className="auth__loop-text">Capture feedback everywhere your customers talk, from the widget and public boards to Slack, Intercom and more.</span>
+              </span>
+            </li>
+            <li>
+              <span className="auth__loop-num">02</span>
+              <span className="auth__loop-copy">
+                <span className="auth__loop-title">Cluster</span>
+                <span className="auth__loop-text">Smartflow groups requests by theme.</span>
+              </span>
+            </li>
+            <li>
+              <span className="auth__loop-num">03</span>
+              <span className="auth__loop-copy">
+                <span className="auth__loop-title">Close</span>
+                <span className="auth__loop-text">Ship it on the roadmap and changelog.</span>
+              </span>
+            </li>
+          </ol>
         </div>
-        
-        {/* Content */}
-        <div className="relative z-10 flex flex-col justify-between p-8 lg:p-10 w-full">
-          {/* Logo */}
-          <div className="login-reveal">
-            <Link href="/" className="inline-flex items-center gap-3">
-              <Logo width={36} height={36} className="text-primary" />
-              <span className="text-lg font-switzer font-bold text-foreground">Faddy</span>
-            </Link>
-          </div>
 
-          {/* Main Content - Illustration */}
-          <div className="login-reveal flex-1 flex items-center justify-center mt-6 mb-6">
-            <img 
-              src="/images/login/Secure%20lock.svg" 
-              alt="Welcome back illustration" 
-              className="w-full max-w-[400px] h-auto object-contain drop-shadow-2xl" 
-            />
-          </div>
+        <p className="auth__brand-foot">Built for small SaaS teams.</p>
+      </aside>
 
-          {/* Footer */}
-          <div className="login-reveal text-sm text-muted-foreground">
-            © 2026 Faddy. All rights reserved.
-          </div>
-        </div>
-      </div>
+      <main className="auth__pane">
+        <div className="auth__column">
+          <Link href="/" className="auth__mobile-mark" aria-label="Faddy home">
+            <Logo width={26} height={26} />
+            <span>Faddy</span>
+          </Link>
 
-      {/* Right Side - Login Form */}
-      <div className="flex-1 flex items-center justify-center p-6 lg:p-8">
-        <div className="w-full max-w-md">
-          {/* Mobile Logo */}
-          <div className="login-reveal lg:hidden mb-6 text-center">
-            <Link href="/" className="inline-flex items-center gap-3">
-              <Logo width={36} height={36} className="text-primary" />
-              <span className="text-lg font-switzer font-bold text-foreground">Faddy</span>
-            </Link>
-          </div>
+          <header className="auth__head">
+            <h1 className="auth__title">Sign in to your account</h1>
+            <p className="auth__lede">Enter your credentials to access your dashboard.</p>
+          </header>
 
-          {/* Form Header */}
-          <div className="login-reveal mb-6">
-            <h2 className="text-lg font-switzer font-bold text-foreground">
-              Sign in to your account
-            </h2>
-            <p className="mt-1.5 text-sm text-muted-foreground">
-              Enter your credentials to access your dashboard
-            </p>
-          </div>
-
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="login-reveal space-y-5" noValidate>
+          <form onSubmit={handleSubmit} className="auth__form" noValidate>
             <div aria-live="polite" className="sr-only">
               {Object.values(errors).filter(Boolean).length > 0 && (
                 <span>{Object.values(errors).filter(Boolean).join(". ")}</span>
               )}
             </div>
-            {/* Google Sign In */}
-            <div className="space-y-3">
+
+            <div className="auth__sso">
               <GoogleAuthButton mode="login" />
-              
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t border-border" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-background px-2 text-muted-foreground">
-                    Or continue with email
-                  </span>
-                </div>
+              <div className="auth__divider">
+                <span>Or continue with email</span>
               </div>
             </div>
 
-            {/* Email */}
-            <div>
-              <Label htmlFor="email" className="text-sm font-medium text-foreground">
+            <div className="auth__field">
+              <Label htmlFor="email" className="auth__label">
                 Email address
               </Label>
-              <div className="relative mt-2">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
+              <div className="auth__control">
+                <Mail className="auth__icon" size={18} aria-hidden="true" />
                 <Input
                   id="email"
                   type="email"
@@ -200,31 +163,27 @@ function LoginForm() {
                   required
                   aria-invalid={!!errors.email}
                   aria-describedby={errors.email ? "email-error" : undefined}
-                  className="pl-10 h-12 bg-card border-border text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-lg font-switzer"
+                  className="auth__input"
                 />
               </div>
               {errors.email && (
-                <p id="email-error" className="text-xs mt-2 text-destructive">
+                <p id="email-error" className="auth__error">
                   {errors.email}
                 </p>
               )}
             </div>
 
-            {/* Password */}
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <Label htmlFor="password" className="text-sm font-medium text-foreground">
+            <div className="auth__field">
+              <div className="auth__label-row">
+                <Label htmlFor="password" className="auth__label">
                   Password
                 </Label>
-                <Link 
-                  href="/forgot-password"
-                  className="text-sm text-primary hover:text-primary/80 font-medium transition-colors"
-                >
+                <Link href="/forgot-password" className="auth__forgot">
                   Forgot password?
                 </Link>
               </div>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
+              <div className="auth__control">
+                <Lock className="auth__icon" size={18} aria-hidden="true" />
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
@@ -237,72 +196,54 @@ function LoginForm() {
                   required
                   aria-invalid={!!errors.password}
                   aria-describedby={errors.password ? "password-error" : undefined}
-                  className="pl-10 pr-12 h-12 bg-card border-border text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-lg font-switzer"
+                  className="auth__input auth__input--reveal"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(p => !p)}
                   aria-label={showPassword ? "Hide password" : "Show password"}
                   aria-pressed={showPassword}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  className="auth__reveal"
                 >
-                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  {showPassword ? <EyeOff size={18} aria-hidden="true" /> : <Eye size={18} aria-hidden="true" />}
                 </button>
               </div>
               {errors.password && (
-                <p id="password-error" className="text-xs mt-2 text-destructive">
+                <p id="password-error" className="auth__error">
                   {errors.password}
                 </p>
               )}
             </div>
 
-            {/* Submit Error Banner */}
             {formError && (
-              <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
-                <p className="text-sm text-red-800 dark:text-red-200 font-medium">{formError}</p>
+              <div className="auth__alert" role="alert">
+                <p>{formError}</p>
               </div>
             )}
 
-            {/* Submit Button */}
-            <Button
-              type="submit"
-              disabled={loading}
-              className="w-full h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-switzer font-semibold rounded-lg transition-all duration-200 shadow-lg shadow-primary/25 hover:shadow-primary/40 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
+            <Button type="submit" disabled={loading} className="auth__submit" aria-busy={loading}>
               {loading ? (
-                <LoadingAnimation width={20} height={20} />
+                <Loader2 className="auth__spinner" size={18} aria-hidden="true" />
               ) : (
-                <span className="flex items-center justify-center gap-2">
-                  Sign in
-                  <ArrowRight size={18} />
-                </span>
+                "Sign in"
               )}
             </Button>
           </form>
 
-          {/* Sign up link */}
-          <p className="login-reveal text-center mt-6 text-sm text-muted-foreground">
-            Don't have an account?{" "}
-            <Link href="/signup" className="text-primary hover:text-primary/80 font-semibold transition-colors">
-              Create account
-            </Link>
+          <p className="auth__switch">
+            Don’t have an account? <Link href="/signup">Create account</Link>
           </p>
 
-          {/* Privacy links */}
-          <div className="login-reveal mt-6 pt-6 border-t border-border">
-            <p className="text-xs text-center text-muted-foreground">
+          <div className="auth__legal">
+            <p>
               By signing in, you agree to our{" "}
-              <Link href="/policy/terms" className="text-primary hover:text-primary/80 hover:underline">
-                Terms
-              </Link>
+              <Link href="/policy/terms">Terms</Link>
               {" "}and{" "}
-              <Link href="/policy/privacy" className="text-primary hover:text-primary/80 hover:underline">
-                Privacy Policy
-              </Link>
+              <Link href="/policy/privacy">Privacy Policy</Link>.
             </p>
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }
@@ -310,8 +251,8 @@ function LoginForm() {
 export default function LoginPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <LoadingAnimation width={40} height={40} />
+      <div className="auth__pane">
+        <Loader2 className="auth__spinner" size={32} aria-hidden="true" />
       </div>
     }>
       <LoginForm />

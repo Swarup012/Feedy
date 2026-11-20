@@ -133,7 +133,7 @@ describe('portal board page → CreatePostDialog', () => {
 // Guest create-post paths (Stage 3b-2 step 2).
 //
 // First-party guest -> auth modal (login/signup in-app).
-// Custom-host guest -> absolute https://faddy.site/login — /login does not
+// Custom-host guest -> absolute https://faddy.online/login — /login does not
 // exist on a custom hostname (middleware allowlist 404s it).
 // ============================================================
 
@@ -161,7 +161,7 @@ describe('guest create-post (custom host vs first-party)', () => {
     expect(window.location.href).toBe('');
   });
 
-  it('custom-host guest: redirects to https://faddy.site/login, no modal', async () => {
+  it('custom-host guest: redirects to https://faddy.online/login, no modal', async () => {
     render(
       <CustomHostProvider value={true}>
         <PublicBoardPage />
@@ -170,7 +170,7 @@ describe('guest create-post (custom host vs first-party)', () => {
 
     fireEvent.click(screen.getByText('Mock Create Post'));
 
-    expect(window.location.href).toBe('https://faddy.site/login');
+    expect(window.location.href).toBe('https://faddy.online/login');
     expect(screen.queryByText('Join the Conversation')).toBeNull();
   });
 });

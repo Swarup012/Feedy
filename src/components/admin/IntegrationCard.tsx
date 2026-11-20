@@ -10,11 +10,39 @@ import {
 } from '@/components/ui/popover';
 import {
   AlertTriangle,
+  Info,
   Loader2,
   Plug,
   Unplug,
   Settings2,
 } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { cn } from '@/lib/utils';
+import { INTERCOM_UNDER_REVIEW } from '@/components/admin/integration-brands';
+
+export function IntercomUnderReviewBadge() {
+  if (!INTERCOM_UNDER_REVIEW) return null;
+  return (
+    <Badge
+      variant="outline"
+      className="shrink-0 whitespace-nowrap px-1.5 py-0 text-[10px] font-medium text-muted-foreground"
+    >
+      Under review
+    </Badge>
+  );
+}
+
+export function IntercomUnderReviewNotice({ className }: { className?: string }) {
+  if (!INTERCOM_UNDER_REVIEW) return null;
+  return (
+    <Alert className={cn('px-3 py-2 [&>svg]:left-3 [&>svg]:top-2.5', className)}>
+      <Info className="h-4 w-4" />
+      <AlertDescription className="text-xs leading-relaxed">
+        Intercom is under review. The integration is available, but Intercom has not fully approved it yet, so connecting may be limited until approval.
+      </AlertDescription>
+    </Alert>
+  );
+}
 
 function formatDate(iso: string | null) {
   if (!iso) return null;
@@ -85,6 +113,7 @@ export interface IntegrationCardConnectedProps {
   settingsContent: ReactNode;
   footerContent?: ReactNode;
   reconnectButton?: ReactNode;
+  badge?: ReactNode;
 }
 
 export function IntegrationCardConnected({
@@ -96,6 +125,7 @@ export function IntegrationCardConnected({
   settingsContent,
   footerContent,
   reconnectButton,
+  badge,
 }: IntegrationCardConnectedProps) {
   return (
     <>
@@ -109,8 +139,9 @@ export function IntegrationCardConnected({
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <span className="font-medium text-sm">{name}</span>
+            {badge}
             <StatusIndicator status={status} />
-            {status === 'active' && (
+            {status === 'active' && !badge && (
               <span className="text-emerald-600 dark:text-emerald-400 text-xs font-medium">
                 Active
               </span>
@@ -159,6 +190,7 @@ export interface IntegrationCardAddProps {
   description: string;
   onConnect: () => void;
   disabled?: boolean;
+  badge?: ReactNode;
 }
 
 export function IntegrationCardAdd({
@@ -168,6 +200,7 @@ export function IntegrationCardAdd({
   description,
   onConnect,
   disabled,
+  badge,
 }: IntegrationCardAddProps) {
   return (
     <div
@@ -184,7 +217,8 @@ export function IntegrationCardAdd({
       >
         {icon}
       </div>
-      <h3 className="text-sm font-semibold flex-1 min-w-0">{name}</h3>
+      <h3 className="text-sm font-semibold flex-1 min-w-0 truncate">{name}</h3>
+      {badge}
     </div>
   );
 }

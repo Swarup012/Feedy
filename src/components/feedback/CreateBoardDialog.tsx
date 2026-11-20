@@ -25,7 +25,6 @@ import { Loader2, Check, Lock, Globe, Sparkles, Users } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { boardService, Board, BoardCategory } from "@/services/boardService";
 import { useToast } from "@/hooks/use-toast";
-import { IconPicker, IconDisplay } from "@/components/ui/icon-picker";
 import { UpgradeDialog } from "@/components/UpgradeDialog";
 import { useOrganization } from "@/context/OrganizationContext";
 import { useJobRoles } from "@/hooks/useJobRoles";
@@ -62,7 +61,6 @@ export function CreateBoardDialog({
   const [creating, setCreating] = useState(false);
   const [customCategory, setCustomCategory] = useState("");
   const [showCustomCategory, setShowCustomCategory] = useState(false);
-  const [showIconPicker, setShowIconPicker] = useState(false); // Icon picker state
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false); // Upgrade dialog state
 
   // Form state
@@ -71,7 +69,6 @@ export function CreateBoardDialog({
     description: "",
     is_private: false,
     color: "#6366f1",
-    icon: "Lightbulb", // Default to Lucide icon name
     visible_to_roles: [] as string[], // ✅ ADD JOB ROLES FILTER
   });
 
@@ -177,7 +174,6 @@ export function CreateBoardDialog({
         description: "",
         is_private: false,
         color: "#6366f1",
-        icon: "💡",
         visible_to_roles: [],
       });
 
@@ -279,51 +275,24 @@ export function CreateBoardDialog({
             )}
           </div>
 
-          {/* Icon + Preview side by side */}
-          <div className="flex gap-3 items-stretch">
-            {/* Icon picker button */}
-            <button
-              type="button"
-              onClick={() => setShowIconPicker(true)}
-              disabled={creating}
-              className="flex-shrink-0 w-16 h-16 rounded-xl border border-gray-200 dark:border-border bg-gray-50 dark:bg-muted flex flex-col items-center justify-center gap-1 hover:border-primary transition-colors"
-            >
-              <div
-                className="h-8 w-8 rounded-lg flex items-center justify-center"
-                style={{ backgroundColor: formData.color + "20" }}
-              >
-                <IconDisplay iconName={formData.icon} className="h-5 w-5" style={{ color: formData.color }} />
+          {/* Board preview */}
+          <div
+            className="rounded-xl border bg-gray-50 dark:bg-muted p-3 flex items-center justify-center min-h-[64px]"
+            style={{ borderColor: formData.name ? formData.color : undefined }}
+          >
+            {formData.name ? (
+              <div className="w-full">
+                <p className="text-sm font-semibold leading-tight flex items-center gap-1 text-foreground">
+                  {formData.name}
+                  {formData.is_private && <Lock className="h-3 w-3 text-gray-400" />}
+                </p>
+                {formData.description && (
+                  <p className="text-xs text-gray-400 line-clamp-1">{formData.description}</p>
+                )}
               </div>
-              <span className="text-[10px] text-gray-400">icon</span>
-            </button>
-
-            {/* Board preview */}
-            <div
-              className="flex-1 rounded-xl border bg-gray-50 dark:bg-muted p-3 flex items-center justify-center min-h-[64px]"
-              style={{ borderColor: formData.name ? formData.color : undefined }}
-            >
-              {formData.name ? (
-                <div className="flex items-center gap-2 w-full">
-                  <div
-                    className="h-8 w-8 rounded-lg flex-shrink-0 flex items-center justify-center"
-                    style={{ backgroundColor: formData.color + "20" }}
-                  >
-                    <IconDisplay iconName={formData.icon} className="h-4 w-4" style={{ color: formData.color }} />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold leading-tight flex items-center gap-1 text-foreground">
-                      {formData.name}
-                      {formData.is_private && <Lock className="h-3 w-3 text-gray-400" />}
-                    </p>
-                    {formData.description && (
-                      <p className="text-xs text-gray-400 line-clamp-1">{formData.description}</p>
-                    )}
-                  </div>
-                </div>
-              ) : (
-                <p className="text-xs text-gray-400 text-center">how the board look like<br />with icon should be here</p>
-              )}
-            </div>
+            ) : (
+              <p className="text-xs text-gray-400 text-center">Your board preview</p>
+            )}
           </div>
 
           {/* Create Board button — right-aligned */}
@@ -351,14 +320,6 @@ export function CreateBoardDialog({
           </div>
         </form>
       </DialogContent>
-
-      {/* Icon Picker Dialog */}
-      <IconPicker
-        open={showIconPicker}
-        onOpenChange={setShowIconPicker}
-        onSelectIcon={(iconName) => setFormData({ ...formData, icon: iconName })}
-        currentIcon={formData.icon}
-      />
 
       {/* Upgrade Dialog */}
       <UpgradeDialog

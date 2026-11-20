@@ -4,27 +4,16 @@ import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
-  DialogFooter,
-  DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { invitationService } from '@/services/invitationService';
-import { Mail, UserPlus, Loader2 } from 'lucide-react';
+import { Mail, Check, Loader2, X } from 'lucide-react';
 import { UpgradeDialog } from '@/components/UpgradeDialog';
 import { useJobRoles } from '@/hooks/useJobRoles';
-import { IconDisplay } from '@/components/ui/icon-picker';
+import '../ui/dialog-forms.css';
 
 interface InviteMemberModalProps {
   open: boolean;
@@ -33,6 +22,11 @@ interface InviteMemberModalProps {
   organizationName: string;
   onInviteSent?: () => void;
 }
+
+const ORGANIZATION_ROLES = [
+  { value: 'member' as const, name: 'Member', note: 'Can view and comment on feedback' },
+  { value: 'admin' as const, name: 'Admin', note: 'Can manage feedback and settings' },
+];
 
 export function InviteMemberModal({
   open,
@@ -78,7 +72,7 @@ export function InviteMemberModal({
       await invitationService.createInvitation(organizationId, email, role, jobRole);
 
       toast({
-        title: 'Invitation sent! 📧',
+        title: 'Invitation sent',
         description: `We've sent an invitation to ${email}. They'll receive an email with instructions to join.`,
       });
 
@@ -116,114 +110,131 @@ export function InviteMemberModal({
   return (
     <>
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <UserPlus className="h-5 w-5 text-blue-600" />
-            Invite Member to {organizationName}
-          </DialogTitle>
-          <DialogDescription>
-            Send an email invitation to add a new member to your organization. The invitation will expire in 7 days.
-          </DialogDescription>
-        </DialogHeader>
+      <DialogContent className="fd w-[min(94vw,600px)] max-w-none gap-0 border-0 bg-transparent p-0 shadow-none [&>button]:hidden">
+        <form onSubmit={handleSubmit} className="fd__shell">
+          <header className="fd__head">
+            <div className="fd__headtext">
+              <DialogTitle className="fd__title">Invite a member</DialogTitle>
+              <DialogDescription className="fd__lede">
+                To {organizationName}. The invitation expires in 7 days.
+              </DialogDescription>
+            </div>
+            <DialogClose type="button" className="fd__close" aria-label="Close">
+              <X className="h-4 w-4" aria-hidden="true" />
+            </DialogClose>
+          </header>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-4">
-            {/* Email Input */}
-            <div className="space-y-2">
-              <Label htmlFor="email">Email Address</Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="colleague@company.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="pl-10"
-                  disabled={loading}
-                  required
-                />
+          <div className="fd__body">
+            <section className="fd-section">
+              <p className="fd-section__title">Recipient</p>
+
+              <div className="fd-field">
+                <label className="fd-label" htmlFor="email">Email address</label>
+                <div className="inv-email">
+                  <Mail aria-hidden="true" />
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    className="fd-input"
+                    placeholder="colleague@company.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    disabled={loading}
+                    required
+                  />
+                </div>
+                <p className="fd-help-single">
+                  They need to sign in with this exact address to accept.
+                </p>
               </div>
-              <p className="text-xs text-gray-500">
-                They must log in with this exact email address to accept the invitation.
-              </p>
-            </div>
+            </section>
 
-            {/* Role Selection */}
-            <div className="space-y-2">
-              <Label htmlFor="role">Role</Label>
-              <Select value={role} onValueChange={(value: 'member' | 'admin') => setRole(value)} disabled={loading}>
-                <SelectTrigger id="role">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="member">
-                    <div className="flex flex-col items-start">
-                      <span className="font-medium">Member</span>
-                      <span className="text-xs text-gray-500">Can view and comment on feedback</span>
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="admin">
-                    <div className="flex flex-col items-start">
-                      <span className="font-medium">Admin</span>
-                      <span className="text-xs text-gray-500">Can manage feedback and settings</span>
-                    </div>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-              <p className="text-xs text-gray-500">
-                You can change their role later from the members page.
-              </p>
-            </div>
+            <section className="fd-section">
+              <p className="fd-section__title">Access</p>
 
-            {/* Job Role Selection */}
-            <div className="space-y-2">
-              <Label htmlFor="jobRole">Job Role (Optional)</Label>
-              <Select value={jobRole} onValueChange={setJobRole} disabled={loading || rolesLoading}>
-                <SelectTrigger id="jobRole">
-                  <SelectValue placeholder="Select a job role" />
-                </SelectTrigger>
-                <SelectContent>
-                  {jobRoles.map((roleOpt) => (
-                    <SelectItem key={roleOpt.key} value={roleOpt.key}>
-                      <div className="flex items-center gap-2">
-                        <IconDisplay iconName={roleOpt.icon} className="h-4 w-4 text-gray-500" />
-                        <span>{roleOpt.name}</span>
-                      </div>
-                    </SelectItem>
+              <div className="fd-field">
+                <span className="fd-label" id="role-label">Role</span>
+                <div className="inv-roles" role="group" aria-labelledby="role-label" id="role">
+                  {ORGANIZATION_ROLES.map((option) => (
+                    <button
+                      key={option.value}
+                      type="button"
+                      className="inv-role"
+                      aria-pressed={role === option.value}
+                      onClick={() => setRole(option.value)}
+                      disabled={loading}
+                    >
+                      <span className="inv-role__top">
+                        <span className="inv-role__name">{option.name}</span>
+                        {role === option.value && (
+                          <Check className="inv-role__check" aria-hidden="true" />
+                        )}
+                      </span>
+                      <span className="inv-role__note">{option.note}</span>
+                    </button>
                   ))}
-                </SelectContent>
-              </Select>
-              <p className="text-xs text-gray-500">
-                Assign a professional job role to this member.
-              </p>
-            </div>
+                </div>
+                <p className="fd-help-single">
+                  You can change their role later from the members page.
+                </p>
+              </div>
+
+              <div className="fd-field">
+                <div className="fd-field__top">
+                  <label className="fd-label" htmlFor="jobRole">Job role</label>
+                  <span className="fd-opt">Optional</span>
+                </div>
+                <div className="fd-select">
+                  <select
+                    id="jobRole"
+                    name="jobRole"
+                    value={jobRole}
+                    onChange={(e) => setJobRole(e.target.value)}
+                    disabled={loading || rolesLoading}
+                  >
+                    {jobRoles.map((roleOpt) => (
+                      <option key={roleOpt.key} value={roleOpt.key}>
+                        {roleOpt.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <p className="fd-help-single">
+                  Assign a professional job role to this member.
+                </p>
+              </div>
+            </section>
           </div>
 
-          <DialogFooter className="gap-2 sm:gap-0">
-            <Button
+          <footer className="fd__foot">
+            <button
               type="button"
-              variant="outline"
+              className="fd-btn fd-btn--quiet"
               onClick={onClose}
               disabled={loading}
             >
               Cancel
-            </Button>
-            <Button type="submit" disabled={loading}>
+            </button>
+            <button
+              type="submit"
+              className="fd-btn fd-btn--primary fd-btn--commit"
+              disabled={loading}
+              aria-busy={loading}
+            >
               {loading ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Sending...
+                  <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                  Sending…
                 </>
               ) : (
                 <>
-                  <Mail className="mr-2 h-4 w-4" />
-                  Send Invitation
+                  <Mail className="h-4 w-4" aria-hidden="true" />
+                  Send invitation
                 </>
               )}
-            </Button>
-          </DialogFooter>
+            </button>
+          </footer>
         </form>
       </DialogContent>
     </Dialog>
@@ -232,8 +243,7 @@ export function InviteMemberModal({
     <UpgradeDialog
       open={showUpgradeDialog}
       onOpenChange={setShowUpgradeDialog}
-      title="Upgrade to Add More Team Members"
-      description="You've reached the team member limit for the Free plan (3 members). Upgrade to Starter for unlimited team members."
+      featureName="unlimited team members"
       feature="team_members"
     />
   </>

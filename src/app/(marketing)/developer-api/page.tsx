@@ -32,7 +32,7 @@ const useCases = [
     title: "Submit Feedback via API",
     description:
       "Create feedback posts programmatically from your app, website, or backend services.",
-    code: `const res = await fetch('https://api.faddy.site/api/v1/posts', {
+    code: `const res = await fetch('https://api.faddy.online/api/v1/posts', {
   method: 'POST',
   headers: {
     'Authorization': 'Bearer fdy_live_YOUR_KEY',
@@ -59,7 +59,7 @@ console.log(data);`,
 });
 
 const res = await fetch(
-  \`https://api.faddy.site/api/v1/posts?\${params}\`,
+  \`https://api.faddy.online/api/v1/posts?\${params}\`,
   {
     headers: { 'Authorization': 'Bearer fdy_live_YOUR_KEY' }
   }
@@ -143,7 +143,7 @@ export default function DeveloperApiPage() {
                     &quot;Authorization: Bearer fdy_live_YOUR_KEY&quot;
                   </span>{" "}
                   \{"\n"}
-                  {"   https://api.faddy.site/api/v1/posts"}
+                  {"   https://api.faddy.online/api/v1/posts"}
                   {"\n\n"}
                   <span className="c">{"# Or use Node.js / fetch"}</span>
                   {"\n"}
@@ -154,7 +154,7 @@ export default function DeveloperApiPage() {
                   {"\n"}
                   {"   "}
                   <span className="k">
-                    &apos;https://api.faddy.site/api/v1/boards&apos;
+                    &apos;https://api.faddy.online/api/v1/boards&apos;
                   </span>
                   ,{"\n"}
                   {"   { headers: { "}

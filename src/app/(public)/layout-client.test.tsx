@@ -122,14 +122,14 @@ describe('branding present (Starter/Pro with color + logo)', () => {
 // ── Free plan ───────────────────────────────────────────────────────────────
 
 describe('Free plan (branding null)', () => {
-  it('renders the small Powered by Faddy footer linking to faddy.site', async () => {
+  it('renders the small Powered by Faddy footer linking to faddy.online', async () => {
     apiGet.mockResolvedValue(
       orgResponse({ id: 'org-1', name: 'FreeCo', subdomain: 'freeco', logo_url: null, branding: null }),
     );
     render(<AppLayout isCustomHost={false}>page</AppLayout>);
 
     const link = await screen.findByText('Powered by Faddy');
-    expect(link.getAttribute('href')).toBe('https://faddy.site');
+    expect(link.getAttribute('href')).toBe('https://faddy.online');
   });
 
   it('no --primary inline vars → current look', async () => {
@@ -191,13 +191,13 @@ describe('main domain (no subdomain)', () => {
 // ── Custom host (Stage 3b-2 step 1) ─────────────────────────────────────────
 
 describe('custom host (isCustomHost=true)', () => {
-  it('Sign In goes straight to https://faddy.site/login — no saveReturnUrl', async () => {
+  it('Sign In goes straight to https://faddy.online/login — no saveReturnUrl', async () => {
     setHostname('feedback.acm.com');
     render(<AppLayout isCustomHost={true}>page</AppLayout>);
 
     fireEvent.click(screen.getByText('Sign In'));
 
-    expect(window.location.href).toBe('https://faddy.site/login');
+    expect(window.location.href).toBe('https://faddy.online/login');
     expect(saveReturnUrl).not.toHaveBeenCalled();
   });
 

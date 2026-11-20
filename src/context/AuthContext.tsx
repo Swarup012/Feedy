@@ -54,6 +54,7 @@ const PUBLIC_PATHS: Array<string | { prefix: string }> = [
   { prefix: "/feedback/boards/" },
   { prefix: "/roadmap" },
   { prefix: "/blog" },
+  { prefix: "/dialog-preview" },
 ];
 
 function isPublicPath(pathname: string): boolean {

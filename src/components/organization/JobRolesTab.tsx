@@ -4,17 +4,14 @@ import { useState } from 'react';
 import { useOrganization } from '@/context/OrganizationContext';
 import { useJobRoles } from '@/hooks/useJobRoles';
 import jobRolesService, { JobRole } from '@/services/jobRolesService';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { useToast } from '@/hooks/use-toast';
-import { Loader2, Plus, Settings, X, BriefcaseBusiness, AlertCircle } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
+import { Loader2, Plus, Settings, X, AlertCircle } from 'lucide-react';
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
-  DialogFooter,
-  DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
 import {
@@ -28,6 +25,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { IconDisplay } from '@/components/ui/icon-picker';
+import '../ui/dialog-forms.css';
 
 export function JobRolesTab() {
   const { organization, organizationRole } = useOrganization();
@@ -153,7 +151,7 @@ export function JobRolesTab() {
           {roles.map((role) => (
             <div
               key={role.key}
-              className="group inline-flex max-w-full items-center gap-1 rounded-md border border-slate-200 bg-slate-50/80 pl-2.5 pr-1 py-1 text-sm transition-all duration-150 hover:border-slate-300 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800/60 dark:hover:border-slate-600 dark:hover:bg-slate-800"
+              className="group inline-flex max-w-full items-center gap-1 rounded-md border border-slate-200 bg-slate-50/80 pl-2.5 pr-1 py-1 text-sm transition-colors duration-150 hover:border-slate-300 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800/60 dark:hover:border-slate-600 dark:hover:bg-slate-800"
             >
               <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded text-slate-500 dark:text-slate-400">
                 <IconDisplay iconName={role.icon || 'UserCircle'} className="h-3.5 w-3.5" />
@@ -200,37 +198,68 @@ export function JobRolesTab() {
 
       {/* Create/Edit Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{editingRole ? 'Edit Job Role' : 'Create Job Role'}</DialogTitle>
-            <DialogDescription>
-              {editingRole
-                ? 'Update the name or icon for this job role.'
-                : 'Add a new custom job role for your team.'}
-            </DialogDescription>
-          </DialogHeader>
+        <DialogContent className="fd w-[min(92vw,480px)] max-w-none gap-0 border-0 bg-transparent p-0 shadow-none [&>button]:hidden">
+          <form
+            className="fd__shell"
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (formData.name.trim()) handleSave();
+            }}
+          >
+            <header className="fd__head">
+              <div className="fd__headtext">
+                <DialogTitle className="fd__title">
+                  {editingRole ? 'Edit job role' : 'New job role'}
+                </DialogTitle>
+                <DialogDescription className="fd__lede">
+                  {editingRole
+                    ? 'Rename the role. Members who hold it keep it.'
+                    : 'Add a role your team can be assigned to.'}
+                </DialogDescription>
+              </div>
+              <DialogClose type="button" className="fd__close" aria-label="Close">
+                <X className="h-4 w-4" aria-hidden="true" />
+              </DialogClose>
+            </header>
 
-          <div className="space-y-5 py-4">
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">Role Name</Label>
-              <Input
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="e.g. Senior Developer"
-                className="h-11"
-              />
+            <div className="fd__body">
+              <div className="fd-section">
+                <div className="fd-field jr-name">
+                  <label className="fd-label" htmlFor="job-role-name">Role name</label>
+                  <input
+                    id="job-role-name"
+                    name="job-role-name"
+                    className="fd-input"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    placeholder="Senior developer"
+                    autoFocus
+                  />
+                  <p className="fd-help-single">Shown on member profiles and in the invite form.</p>
+                </div>
+              </div>
             </div>
-          </div>
 
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDialogOpen(false)} disabled={submitting}>
-              Cancel
-            </Button>
-            <Button onClick={handleSave} disabled={submitting || !formData.name.trim()}>
-              {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Save Role
-            </Button>
-          </DialogFooter>
+            <footer className="fd__foot">
+              <button
+                type="button"
+                className="fd-btn fd-btn--quiet"
+                onClick={() => setIsDialogOpen(false)}
+                disabled={submitting}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="fd-btn fd-btn--primary fd-btn--commit"
+                disabled={submitting || !formData.name.trim()}
+                aria-busy={submitting}
+              >
+                {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />}
+                {editingRole ? 'Save changes' : 'Create role'}
+              </button>
+            </footer>
+          </form>
         </DialogContent>
       </Dialog>
 

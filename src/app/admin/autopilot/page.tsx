@@ -38,6 +38,7 @@ import {
 } from 'lucide-react';
 import { WIDE_CONTAINER } from '@/lib/layout-constants';
 import { INTEGRATION_BRAND_COLORS, type IntegrationProvider } from '@/components/admin/integration-brands';
+import { IntercomUnderReviewNotice } from '@/components/admin/IntegrationCard';
 import { Skeleton } from '@/components/ui/skeleton';
 
 type StatusFilter = AutopilotSuggestionStatus | 'all';
@@ -442,6 +443,7 @@ function AutopilotPageInner() {
               );
             })}
           </div>
+          <IntercomUnderReviewNotice className="mt-3 max-w-lg" />
         </header>
       </div>
       </PaidFeatureGate>

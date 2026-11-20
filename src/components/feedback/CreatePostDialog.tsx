@@ -3,30 +3,17 @@
 import { useState, useRef, useEffect } from "react";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Loader2, Paperclip, X, Sparkles } from "lucide-react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { boardService, BoardCategory } from "@/services/boardService";
+import { ChevronDown, Loader2, Paperclip, X } from "lucide-react";
 import { postService, Post } from "@/services/postService";
 import { useToast } from "@/hooks/use-toast";
 import { TokenManager } from "@/lib/tokenManager";
 import { useOrganization } from "@/context/OrganizationContext";
 import api from "@/lib/api";
+import "../ui/dialog-forms.css";
 
 interface CreatePostDialogProps {
   open: boolean;
@@ -44,6 +31,7 @@ export function CreatePostDialog({
   const { toast } = useToast();
   const { organization } = useOrganization();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const titleInputRef = useRef<HTMLInputElement>(null);
   const [creating, setCreating] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [formData, setFormData] = useState({
@@ -56,6 +44,20 @@ export function CreatePostDialog({
   const [showCustomCategory, setShowCustomCategory] = useState(false);
   const [fileError, setFileError] = useState<string | null>(null);
   const [labels, setLabels] = useState<{ id: string; name: string }[]>([]);
+  const [catOpen, setCatOpen] = useState(false);
+  const catRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    if (!catOpen) return;
+    const handleOutside = (e: MouseEvent) => {
+      if (catRef.current && !catRef.current.contains(e.target as Node)) {
+        setCatOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleOutside);
+    return () => document.removeEventListener("mousedown", handleOutside);
+  }, [catOpen]);
 
   const defaultCategories = [
     { id: "1", name: "Feature Request" },
@@ -236,196 +238,240 @@ export function CreatePostDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]">
-        <form onSubmit={handleSubmit}>
-          <DialogHeader>
-            <DialogTitle>Create New Post</DialogTitle>
-            <DialogDescription>
-              Share your feedback, ideas, or report issues
-            </DialogDescription>
-          </DialogHeader>
+      <DialogContent
+        className="fd post-dialog w-[min(92vw,760px)] max-w-none gap-0 border-0 bg-transparent p-0 shadow-none [&>button]:hidden"
+        aria-describedby={undefined}
+        onOpenAutoFocus={(event) => {
+          event.preventDefault();
+          titleInputRef.current?.focus();
+        }}
+      >
+        <div className="fd__shell">
+          <form onSubmit={handleSubmit} className="fd__form" noValidate>
+            <header className="fd__head">
+              <div className="fd__headtext">
+                <DialogTitle className="fd__title">New post</DialogTitle>
+                <p className="post-board">
+                  Posting to <span>{boardSlug}</span>
+                </p>
+              </div>
+              <DialogClose type="button" className="fd__close" aria-label="Close">
+                <X className="h-4 w-4" aria-hidden="true" />
+              </DialogClose>
+            </header>
 
-          <div className="space-y-4 py-4">
-            {/* Title */}
-            <div className="space-y-2">
-              <Label htmlFor="title">
-                Title <span className="text-red-500">*</span>
-              </Label>
-              <Input
-                id="title"
-                placeholder="Brief description of your feedback"
-                value={formData.title}
-                onChange={(e) => handleChange("title", e.target.value)}
-                maxLength={500}
-                className={errors.title ? "border-red-500" : ""}
-              />
-              {errors.title && (
-                <p className="text-sm text-red-500">{errors.title}</p>
-              )}
-              <p className="text-xs text-gray-500">
-                {formData.title.length}/500 characters
-              </p>
-            </div>
+            <div className="fd__body post-body">
+              <div className="post-main">
+                <div className="fd-field">
+                  <div className="fd-field__top">
+                    <label className="fd-label" htmlFor="post-title">
+                      Title
+                    </label>
+                    <span className="fd-req">Required</span>
+                  </div>
+                  <input
+                    id="post-title"
+                    ref={titleInputRef}
+                    className="fd-input post-title-input"
+                    placeholder="A short, specific title"
+                    value={formData.title}
+                    onChange={(e) => handleChange("title", e.target.value)}
+                    maxLength={500}
+                    aria-required="true"
+                    aria-invalid={!!errors.title}
+                    aria-describedby="post-title-help"
+                  />
+                  <div className="fd-help" id="post-title-help">
+                    <span className={errors.title ? "fd-error" : undefined}>
+                      {errors.title || "Name the change or problem in one line."}
+                    </span>
+                    <span className="fd-count">{formData.title.length}/500</span>
+                  </div>
+                </div>
 
-            {/* ✅ CATEGORY SELECTION */}
-            <div className="space-y-2">
-              <Label htmlFor="category">
-                Category{" "}
-                <span className="text-gray-500 text-sm font-normal">
-                  (optional)
-                </span>
-              </Label>
-              <Select
-                value={showCustomCategory ? "custom" : formData.category}
-                onValueChange={handleCategoryChange}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a category" />
-                </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="">No Category</SelectItem>
-                      {predefinedCategories.map((category) => (
-                        <SelectItem key={category.id} value={category.name}>
-                          <span>{category.name}</span>
-                        </SelectItem>
-                      ))}
-                      <SelectItem value="custom">
-                        <div className="flex items-center gap-2">
-                          <Sparkles className="h-4 w-4" />
-                          <span>Custom Category</span>
-                        </div>
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
+                <div className="fd-field">
+                  <div className="fd-field__top">
+                    <label className="fd-label" htmlFor="post-description">
+                      Description
+                    </label>
+                    <span className="fd-opt">Optional</span>
+                  </div>
+                  <textarea
+                    id="post-description"
+                    className="fd-textarea post-description"
+                    placeholder="What happened, what you expected, and what would help."
+                    value={formData.description}
+                    onChange={(e) => handleChange("description", e.target.value)}
+                    rows={7}
+                    maxLength={5000}
+                    aria-invalid={!!errors.description}
+                    aria-describedby="post-description-help"
+                  />
+                  <div className="fd-help" id="post-description-help">
+                    <span className={errors.description ? "fd-error" : undefined}>
+                      {errors.description || "Add the detail that helps someone reproduce it."}
+                    </span>
+                    <span className="fd-count">{formData.description.length}/5000</span>
+                  </div>
+                </div>
+              </div>
 
-              {/* Custom Category Input */}
-              {showCustomCategory && (
-                <Input
-                  placeholder="Enter custom category"
-                  value={customCategory}
-                  onChange={(e) => setCustomCategory(e.target.value)}
-                  maxLength={100}
-                />
-              )}
-            </div>
+              <aside className="post-rail" aria-label="Post details">
+                <div className="fd-field">
+                  <div className="fd-field__top">
+                    <span className="fd-label">Category</span>
+                    <span className="fd-opt">Optional</span>
+                  </div>
+                  <div className="post-cat-select" ref={catRef}>
+                    <button
+                      type="button"
+                      className="post-cat-trigger"
+                      aria-haspopup="listbox"
+                      aria-expanded={catOpen}
+                      onClick={() => setCatOpen((o) => !o)}
+                    >
+                      <span className={
+                        !formData.category && !showCustomCategory
+                          ? "post-cat-placeholder"
+                          : "post-cat-value"
+                      }>
+                        {showCustomCategory
+                          ? (customCategory.trim() || "Custom…")
+                          : formData.category || "No category"}
+                      </span>
+                      <ChevronDown
+                        className="post-cat-chevron"
+                        aria-hidden="true"
+                      />
+                    </button>
 
-            {/* Description */}
-            <div className="space-y-2">
-              <Label htmlFor="description">Description (optional)</Label>
-              <div className="relative">
-                <Textarea
-                  id="description"
-                  placeholder="Provide more details about your feedback..."
-                  value={formData.description}
-                  onChange={(e) => handleChange("description", e.target.value)}
-                  rows={4}
-                  maxLength={5000}
-                  className={errors.description ? "border-red-500 pr-12" : "pr-12"}
-                />
-                {/* Attachment Button */}
-                <div className="absolute bottom-2 right-2">
+                    {catOpen && (
+                      <ul className="post-cat-menu" role="listbox" aria-label="Category">
+                        <li
+                          role="option"
+                          aria-selected={!formData.category && !showCustomCategory}
+                          className="post-cat-option"
+                          onClick={() => { handleCategoryChange(""); setCatOpen(false); }}
+                        >
+                          No category
+                        </li>
+                        {predefinedCategories.map((category) => (
+                          <li
+                            key={category.id}
+                            role="option"                            aria-selected={!showCustomCategory && formData.category === category.name}
+                            className="post-cat-option"
+                            onClick={() => { handleCategoryChange(category.name); setCatOpen(false); }}
+                          >
+                            {category.name}
+                          </li>
+                        ))}
+                        <li
+                          role="option"
+                          aria-selected={showCustomCategory}
+                          className="post-cat-option"
+                          onClick={() => { handleCategoryChange("custom"); setCatOpen(false); }}
+                        >
+                          Custom…
+                        </li>
+                      </ul>
+                    )}
+                  </div>
+                  {showCustomCategory && (
+                    <input
+                      className="fd-input post-custom"
+                      aria-label="Custom category"
+                      placeholder="Name the category"
+                      value={customCategory}
+                      onChange={(e) => setCustomCategory(e.target.value)}
+                      maxLength={100}
+                    />
+                  )}
+                </div>
+
+                <div className="fd-field">
+                  <div className="fd-field__top">
+                    <span className="fd-label">Images</span>
+                    <span className="fd-opt">Up to 5</span>
+                  </div>
+                  <div className="post-images">
+                    {formData.images.map((url, index) => (
+                      <div className="post-thumb" key={`${url}-${index}`}>
+                        <img src={url} alt={`Attachment ${index + 1}`} />
+                        <button
+                          type="button"
+                          className="post-thumb__remove"
+                          onClick={() => removeImage(index)}
+                          aria-label={`Remove image ${index + 1}`}
+                        >
+                          <X className="h-3 w-3" aria-hidden="true" />
+                        </button>
+                      </div>
+                    ))}
+                    {formData.images.length < 5 && (
+                      <button
+                        type="button"
+                        className="post-add"
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={uploading}
+                        aria-label="Add an image"
+                      >
+                        {uploading ? (
+                          <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                        ) : (
+                          <Paperclip className="h-4 w-4" aria-hidden="true" />
+                        )}
+                        <span>{uploading ? "Uploading" : "Add"}</span>
+                      </button>
+                    )}
+                  </div>
                   <input
                     ref={fileInputRef}
                     type="file"
                     accept="image/*"
                     multiple
-                    className="hidden"
+                    className="sr-only"
+                    tabIndex={-1}
                     onChange={(e) => handleFileUpload(e.target.files)}
                   />
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="ghost"
-                    className="h-8 w-8 p-0"
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={uploading || formData.images.length >= 5}
-                  >
-                    {uploading ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Paperclip className="h-4 w-4 text-muted-foreground hover:text-primary" />
-                    )}
-                  </Button>
+                  <div className="fd-help">
+                    <span>{formData.images.length} of 5 attached</span>
+                  </div>
+                  {fileError && (
+                    <p className="fd-error post-file-error" role="alert">
+                      {fileError}
+                    </p>
+                  )}
                 </div>
-              </div>
-              {errors.description && (
-                <p className="text-sm text-red-500">{errors.description}</p>
-              )}
-              <div className="flex items-center justify-between text-xs text-muted-foreground">
-                <span>{formData.description.length}/5000 characters</span>
-                {formData.images.length > 0 && (
-                  <span>{formData.images.length}/5 images attached</span>
+              </aside>
+            </div>
+
+            <footer className="fd__foot">
+              <button
+                type="button"
+                className="fd-btn fd-btn--quiet"
+                onClick={() => onOpenChange(false)}
+                disabled={creating}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="fd-btn fd-btn--primary fd-btn--commit"
+                disabled={creating}
+                aria-busy={creating}
+              >
+                {creating ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                    Creating…
+                  </>
+                ) : (
+                  "Create post"
                 )}
-              </div>
-            </div>
-
-            {/* Image Previews */}
-            {formData.images.length > 0 && (
-              <div className="space-y-2">
-                <Label>Attached Images</Label>
-                <div className="grid grid-cols-4 gap-2">
-                  {formData.images.map((url, index) => (
-                    <div
-                      key={index}
-                      className="relative group aspect-square rounded-lg overflow-hidden border border-border"
-                    >
-                      <img
-                        src={url}
-                        alt={`Attachment ${index + 1}`}
-                        className="w-full h-full object-cover"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => removeImage(index)}
-                        className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <X className="h-3 w-3" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* File upload error */}
-            {fileError && (
-              <p className="text-sm text-red-500">{fileError}</p>
-            )}
-
-            {/* Tips */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-              <p className="text-sm text-blue-800 font-medium mb-1">
-                💡 Tips for good feedback:
-              </p>
-              <ul className="text-xs text-blue-700 space-y-1 ml-4 list-disc">
-                <li>Be clear and specific</li>
-                <li>Explain why this matters to you</li>
-                <li>Include examples if relevant</li>
-              </ul>
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              disabled={creating}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" disabled={creating}>
-              {creating ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Creating...
-                </>
-              ) : (
-                "Create Post"
-              )}
-            </Button>
-          </DialogFooter>
-        </form>
+              </button>
+            </footer>
+          </form>
+        </div>
       </DialogContent>
     </Dialog>
   );

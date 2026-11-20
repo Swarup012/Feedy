@@ -4,17 +4,12 @@ import {
   Post,
   getPostAuthorDisplayName,
   isWidgetPost,
-  getSourcePlatformBadgeStyle,
 } from "@/services/postService";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { ArrowUp, MessageSquare, TrendingUp } from "lucide-react";
+import { MessageSquare, TrendingUp } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { IconDisplay } from "@/components/ui/icon-picker";
 
 interface FeedbackCardProps {
   feedback: Post;
@@ -23,7 +18,7 @@ interface FeedbackCardProps {
 }
 
 const STATUS_COLORS: Record<string, string> = {
-  open: "bg-secondary text-secondary-foreground",
+  open: "bg-muted text-muted-foreground",
   "under-review": "bg-primary/10 text-primary",
   planned: "bg-warning/15 text-foreground",
   "in-progress": "bg-progress/15 text-foreground",
@@ -39,6 +34,21 @@ const STATUS_LABELS: Record<string, string> = {
   completed: "Completed",
   closed: "Closed",
 };
+
+/**
+ * Compact vote counts for the vote box: 999 → "999", 1000 → "1k",
+ * 1234 → "1.2k", 1_200_000 → "1.2m". The full number stays in the
+ * button's aria-label/title.
+ */
+export function formatVoteCount(count: number): string {
+  if (count < 1000) return String(count);
+  return new Intl.NumberFormat("en", {
+    notation: "compact",
+    maximumFractionDigits: 1,
+  })
+    .format(count)
+    .toLowerCase();
+}
 
 export function FeedbackCard({
   feedback,
@@ -75,127 +85,128 @@ export function FeedbackCard({
     }
   };
 
+  const showAuthor =
+    feedback.author || feedback.external_author || feedback.source_platform;
+
   return (
     <div
       role="link"
       tabIndex={0}
-      className="group flex cursor-pointer gap-4 rounded-lg border border-border bg-card p-5 transition-[border-color,box-shadow] hover:border-primary/30 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none"
+      className="flex cursor-pointer items-start gap-3 rounded-xl border border-border bg-card p-4 transition-[border-color,box-shadow] hover:border-primary/30 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none sm:gap-6 sm:p-5"
       onClick={handleClick}
       onKeyDown={(e) => {
+        if (e.target !== e.currentTarget) return;
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
           handleClick();
         }
       }}
     >
-      {/* Large Upvote Button */}
-      <div className="flex items-start">
-        <Button
-          size="sm"
-          className={cn(
-            "flex h-auto min-w-[56px] flex-col gap-1.5 rounded-lg border px-2.5 py-2.5 transition-transform motion-reduce:transition-none",
-            isUpvoted
-              ? "border-primary bg-primary text-primary-foreground hover:bg-primary/90"
-              : "border-border bg-secondary text-secondary-foreground hover:border-primary/40",
-          )}
-          onClick={handleUpvote}
-          disabled={isVoting}
-        >
-          <ArrowUp className={cn("h-4 w-4", isUpvoted && "fill-current")} />
-          <span className="font-headline text-base font-semibold tabular-nums">
-            {feedback.upvotes}
-          </span>
-        </Button>
-      </div>
-
       {/* Content */}
-      <div className="min-w-0 flex-1 space-y-3">
-        {/* Title and Trending Badge */}
-        <div className="flex items-start gap-2">
-          <h3 className="flex-1 font-headline text-[17px] font-semibold leading-snug text-foreground transition-colors group-hover:text-primary">
-            {feedback.title}
-          </h3>
-          {isTrending() && (
-            <Badge
-              variant="secondary"
-              className="flex shrink-0 items-center gap-1 border border-warning/30 bg-warning/15 text-foreground"
-            >
-              <TrendingUp className="h-3 w-3" />
-              Trending
-            </Badge>
-          )}
-        </div>
+      <div className="flex min-w-0 flex-1 flex-col gap-2">
+        <h3 className="break-words font-headline text-xl font-medium leading-snug text-foreground sm:text-2xl">
+          {feedback.title}
+        </h3>
 
-        {/* Description */}
         {feedback.description && (
-          <p className="line-clamp-2 text-sm leading-relaxed text-foreground">
+          <p className="truncate text-sm text-muted-foreground">
             {feedback.description}
           </p>
         )}
 
-        {/* Meta Info */}
-        <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-          {/* Status Badge */}
-          <Badge
-            variant="secondary"
+        {/* Status, board, comments */}
+        <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+          <span
             className={cn(
-              "font-headline text-xs font-medium",
+              "inline-flex shrink-0 items-center rounded-full px-2.5 py-1 text-xs font-medium",
               STATUS_COLORS[feedback.status],
             )}
           >
             {STATUS_LABELS[feedback.status]}
-          </Badge>
+          </span>
 
-          {/* Board Badge */}
           {feedback.board && (
-            <div
-              className="flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium"
-              style={{
-                backgroundColor: feedback.board.color + "15",
-                color: feedback.board.color,
-              }}
-            >
-              <IconDisplay iconName={feedback.board.icon} className="h-3 w-3" />
-              <span>{feedback.board.name}</span>
-            </div>
+            <span className="inline-flex min-w-0 max-w-[10rem] items-center truncate rounded-full bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground">
+              {feedback.board.name}
+            </span>
           )}
 
-          {/* Comments */}
-          <div className="flex items-center gap-1.5 transition-colors hover:text-primary">
-            <MessageSquare className="h-4 w-4" />
-            <span className="font-headline font-medium tabular-nums">
-              {feedback.comment_count}
-            </span>
-          </div>
-
-          {/* Author & Time */}
-          <span className="ml-auto flex flex-wrap items-center justify-end gap-2 text-xs text-muted-foreground">
-            {(feedback.author ||
-              feedback.external_author ||
-              feedback.source_platform) && (
-              <>
-                <span className="font-medium text-foreground">
-                  {getPostAuthorDisplayName(feedback)}
-                </span>
-                {feedback.source_platform && (
-                  <span
-                    className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-medium ${getSourcePlatformBadgeStyle(feedback.source_platform)}`}
-                  >
-                    {feedback.source_platform}
-                  </span>
-                )}
-                {isWidgetPost(feedback) && (
-                  <span className="inline-flex items-center rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary">
-                    via Widget
-                  </span>
-                )}
-              </>
-            )}
-            {formatDistanceToNow(new Date(feedback.created_at), {
-              addSuffix: true,
-            })}
+          <span className="inline-flex items-center gap-1 tabular-nums">
+            <MessageSquare className="h-3.5 w-3.5" aria-hidden="true" />
+            {feedback.comment_count}
           </span>
         </div>
+
+        {/* Author / source / trending */}
+        {(showAuthor || isTrending()) && (
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
+            {showAuthor && (
+              <>
+                <span className="truncate">
+                  by{" "}
+                  <span className="font-medium text-foreground">
+                    {getPostAuthorDisplayName(feedback)}
+                  </span>
+                </span>
+                {feedback.source_platform && (
+                  <span className="truncate capitalize">
+                    · {feedback.source_platform}
+                  </span>
+                )}
+                {isWidgetPost(feedback) && <span>· via Widget</span>}
+              </>
+            )}
+            {isTrending() && (
+              <span className="inline-flex items-center gap-1">
+                <TrendingUp className="h-3 w-3" aria-hidden="true" />
+                Trending
+              </span>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Vote */}
+      <div className="flex shrink-0 flex-col items-center gap-1.5">
+        <button
+          type="button"
+          aria-label={
+            isUpvoted
+              ? `Remove upvote, ${feedback.upvotes} votes`
+              : `Upvote, ${feedback.upvotes} votes`
+          }
+          aria-pressed={isUpvoted}
+          title={`${feedback.upvotes} votes`}
+          disabled={isVoting}
+          onClick={handleUpvote}
+          className={cn(
+            "group flex w-16 flex-col items-center justify-center gap-1 rounded-xl border px-2 py-4 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 motion-reduce:transition-none sm:w-20",
+            isUpvoted
+              ? "border-primary bg-primary/10 text-primary hover:bg-primary/15"
+              : "border-border bg-card text-foreground hover:border-primary focus-visible:border-primary",
+          )}
+        >
+          <svg
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+            className={cn(
+              "h-6 w-7 fill-current transition-colors",
+              !isUpvoted &&
+                "text-vote-arrow-light dark:text-vote-arrow-dark group-hover:text-primary group-focus-visible:text-primary",
+            )}
+          >
+            <path d="M12 4 24 20H0Z" />
+          </svg>
+          <span className="font-headline text-2xl font-bold leading-none tabular-nums">
+            {formatVoteCount(feedback.upvotes)}
+          </span>
+        </button>
+
+        <span className="w-16 text-center text-[11px] leading-tight text-muted-foreground sm:w-20">
+          {formatDistanceToNow(new Date(feedback.created_at), {
+            addSuffix: true,
+          })}
+        </span>
       </div>
     </div>
   );

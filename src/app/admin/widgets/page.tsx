@@ -2,9 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   Table,
@@ -14,11 +12,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Copy, Plus, Trash2, Edit, Code, Check } from "lucide-react";
+import { Copy, Plus, Trash2, Edit, Code, Check, ChevronDown, X } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import api from "@/lib/api";
 import "./widgets.css";
+import "../../../components/ui/dialog-forms.css";
 
 interface Widget {
   id: string;
@@ -455,111 +454,145 @@ export default function WidgetManagementPage() {
       </div>
 
       <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="text-lg font-semibold">Create Widget</DialogTitle>
-            <p className="text-sm text-muted-foreground mt-1">
-              Set up a new embeddable feedback widget for your product.
-            </p>
-          </DialogHeader>
-          <form onSubmit={handleCreateWidget} className="space-y-4 pt-2">
-            <div className="space-y-2">
-              <Label htmlFor="name" className="text-sm font-medium">Name</Label>
-              <Input
-                id="name"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="e.g., Product Feedback Widget"
-                className="h-10"
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="allowed_domains" className="text-sm font-medium">Allowed domains</Label>
-              <Input
-                id="allowed_domains"
-                value={formData.allowed_domains}
-                onChange={(e) => setFormData({ ...formData, allowed_domains: e.target.value })}
-                placeholder="e.g., yourapp.com, app.yourapp.com"
-                className="h-10"
-              />
-            </div>
-
-            <div className="wdg__dialog-grid">
-              <div className="wdg__selectwrap">
-                <select
-                  id="default_board_id"
-                  aria-label="Boards"
-                  value={formData.default_board_id}
-                  onChange={(e) => setFormData({ ...formData, default_board_id: e.target.value })}
-                  className="wdg__control w-full"
-                  required
-                >
-                  <option value="">Boards</option>
-                  {boards.map((board) => (
-                    <option key={board.id} value={board.id}>
-                      {board.icon} {board.name}
-                    </option>
-                  ))}
-                </select>
+        <DialogContent className="fd wg w-[min(94vw,720px)] max-w-none gap-0 border-0 bg-transparent p-0 shadow-none [&>button]:hidden">
+          <form onSubmit={handleCreateWidget} className="fd__shell">
+            <header className="fd__head">
+              <div className="fd__headtext">
+                <DialogTitle className="fd__title">New widget</DialogTitle>
+                <DialogDescription className="fd__lede">
+                  An embeddable feedback surface for your product.
+                </DialogDescription>
               </div>
+              <DialogClose type="button" className="fd__close" aria-label="Close">
+                <X className="h-4 w-4" aria-hidden="true" />
+              </DialogClose>
+            </header>
 
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    className="wdg__control w-full justify-start text-sm font-normal"
-                  >
-                    Permissions
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent align="start" className="w-72 p-0">
-                  <div className="space-y-3 p-3">
-                    <WidgetToggles formData={formData} setFormData={setFormData} />
+            <div className="fd__body">
+              <section className="fd-section">
+                <p className="fd-section__title">The widget</p>
+
+                <div className="fd-field wg-name">
+                  <label className="fd-label" htmlFor="name">Name</label>
+                  <input
+                    id="name"
+                    name="name"
+                    className="fd-input"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    placeholder="Product feedback"
+                    required
+                  />
+                </div>
+
+                <div className="fd-field">
+                  <div className="fd-field__top">
+                    <label className="fd-label" htmlFor="allowed_domains">Allowed domains</label>
+                    <span className="fd-opt">Optional</span>
                   </div>
-                </PopoverContent>
-              </Popover>
+                  <input
+                    id="allowed_domains"
+                    name="allowed_domains"
+                    className="fd-input"
+                    value={formData.allowed_domains}
+                    onChange={(e) => setFormData({ ...formData, allowed_domains: e.target.value })}
+                    placeholder="yourapp.com, app.yourapp.com"
+                  />
+                  <p className="fd-help-single">Leave empty to allow every domain.</p>
+                </div>
+              </section>
 
-              <label className="wdg__swatchfield">
-                <span>Colour</span>
-                <span
-                  className="wdg__swatch"
-                  style={{ backgroundColor: formData.primaryColor }}
-                  aria-hidden="true"
-                />
-                <input
-                  type="color"
-                  aria-label="Colour"
-                  value={formData.primaryColor}
-                  onChange={(e) => setFormData({ ...formData, primaryColor: e.target.value })}
-                />
-              </label>
+              <section className="fd-section">
+                <p className="fd-section__title">Placement and look</p>
 
-              <Input
-                aria-label="Color code"
-                value={formData.primaryColor}
-                onChange={(e) => setFormData({ ...formData, primaryColor: e.target.value })}
-                className="wdg__control wdg__mono h-10"
-              />
+                <div className="fd-row">
+                  <div className="fd-field">
+                    <label className="fd-label" htmlFor="default_board_id">Board</label>
+                    <div className="fd-select">
+                      <select
+                        id="default_board_id"
+                        name="default_board_id"
+                        aria-label="Boards"
+                        value={formData.default_board_id}
+                        onChange={(e) => setFormData({ ...formData, default_board_id: e.target.value })}
+                        required
+                      >
+                        <option value="">Choose a board</option>
+                        {boards.map((board) => (
+                          <option key={board.id} value={board.id}>
+                            {board.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="fd-field">
+                    <span className="fd-label" id="wg-perm-create-label">Permissions</span>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <button
+                          type="button"
+                          className="fd-btn fd-btn--quiet wg-perm"
+                          aria-labelledby="wg-perm-create-label wg-perm-create-value"
+                        >
+                          <span id="wg-perm-create-value">Defaults</span>
+                          <ChevronDown className="h-4 w-4" aria-hidden="true" />
+                        </button>
+                      </PopoverTrigger>
+                      <PopoverContent align="start" className="w-72 p-0">
+                        <div className="space-y-3 p-3">
+                          <WidgetToggles formData={formData} setFormData={setFormData} />
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                </div>
+
+                <div className="fd-field">
+                  <span className="fd-label">Brand colour</span>
+                  <div className="wg-colour">
+                    <label className="fd-swatch">
+                      <span
+                        className="fd-swatch__chip"
+                        style={{ backgroundColor: formData.primaryColor }}
+                        aria-hidden="true"
+                      />
+                      <span>Pick a colour</span>
+                      <input
+                        type="color"
+                        aria-label="Colour"
+                        value={formData.primaryColor}
+                        onChange={(e) => setFormData({ ...formData, primaryColor: e.target.value })}
+                      />
+                    </label>
+                    <input
+                      aria-label="Color code"
+                      className="fd-input wdg__mono"
+                      value={formData.primaryColor}
+                      onChange={(e) => setFormData({ ...formData, primaryColor: e.target.value })}
+                    />
+                  </div>
+                  <p className="fd-help-single">Used by the embedded widget on your site.</p>
+                </div>
+              </section>
             </div>
 
-            <div className="flex gap-3 pt-2">
-              <Button type="submit" className="flex-1">
-                Create Widget
-              </Button>
-              <Button
+            <footer className="fd__foot">
+              <button
                 type="button"
-                variant="outline"
+                className="fd-btn fd-btn--quiet"
                 onClick={() => {
                   setShowCreateDialog(false);
                   resetForm();
                 }}
               >
                 Cancel
-              </Button>
-            </div>
+              </button>
+              <button type="submit" className="fd-btn fd-btn--primary fd-btn--commit">
+                Create widget
+              </button>
+            </footer>
           </form>
         </DialogContent>
       </Dialog>
@@ -716,102 +749,133 @@ export default function WidgetManagementPage() {
 
       {/* Edit Dialog */}
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="text-lg font-semibold">Edit Widget</DialogTitle>
-            <p className="text-sm text-muted-foreground mt-1">
-              Update your widget configuration.
-            </p>
-          </DialogHeader>
-          <form onSubmit={handleUpdateWidget} className="space-y-4 pt-2">
-            <div className="space-y-2">
-              <Label htmlFor="edit-name" className="text-sm font-medium">Name</Label>
-              <Input
-                id="edit-name"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="h-10"
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="edit-allowed_domains" className="text-sm font-medium">Allowed domains</Label>
-              <Input
-                id="edit-allowed_domains"
-                value={formData.allowed_domains}
-                onChange={(e) => setFormData({ ...formData, allowed_domains: e.target.value })}
-                placeholder="Comma-separated domains"
-                className="h-10"
-              />
-            </div>
-
-            <div className="wdg__dialog-grid">
-              <div className="wdg__selectwrap">
-                <select
-                  id="edit-default_board_id"
-                  aria-label="Boards"
-                  value={formData.default_board_id}
-                  onChange={(e) => setFormData({ ...formData, default_board_id: e.target.value })}
-                  className="wdg__control w-full"
-                  required
-                >
-                  <option value="">Boards</option>
-                  {boards.map((board) => (
-                    <option key={board.id} value={board.id}>
-                      {board.icon} {board.name}
-                    </option>
-                  ))}
-                </select>
+        <DialogContent className="fd wg w-[min(94vw,720px)] max-w-none gap-0 border-0 bg-transparent p-0 shadow-none [&>button]:hidden">
+          <form onSubmit={handleUpdateWidget} className="fd__shell">
+            <header className="fd__head">
+              <div className="fd__headtext">
+                <DialogTitle className="fd__title">Edit widget</DialogTitle>
+                <DialogDescription className="fd__lede">
+                  Change where the widget lives and how it looks.
+                </DialogDescription>
               </div>
+              <DialogClose type="button" className="fd__close" aria-label="Close">
+                <X className="h-4 w-4" aria-hidden="true" />
+              </DialogClose>
+            </header>
 
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    className="wdg__control w-full justify-start text-sm font-normal"
-                  >
-                    Permissions
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent align="start" className="w-72 p-0">
-                  <div className="space-y-3 p-3">
-                    <WidgetToggles formData={formData} setFormData={setFormData} />
+            <div className="fd__body">
+              <section className="fd-section">
+                <p className="fd-section__title">The widget</p>
+
+                <div className="fd-field wg-name">
+                  <label className="fd-label" htmlFor="edit-name">Name</label>
+                  <input
+                    id="edit-name"
+                    name="edit-name"
+                    className="fd-input"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    required
+                  />
+                </div>
+
+                <div className="fd-field">
+                  <div className="fd-field__top">
+                    <label className="fd-label" htmlFor="edit-allowed_domains">Allowed domains</label>
+                    <span className="fd-opt">Optional</span>
                   </div>
-                </PopoverContent>
-              </Popover>
+                  <input
+                    id="edit-allowed_domains"
+                    name="edit-allowed_domains"
+                    className="fd-input"
+                    value={formData.allowed_domains}
+                    onChange={(e) => setFormData({ ...formData, allowed_domains: e.target.value })}
+                    placeholder="Comma-separated domains"
+                  />
+                  <p className="fd-help-single">Leave empty to allow every domain.</p>
+                </div>
+              </section>
 
-              <label className="wdg__swatchfield">
-                <span>Colour</span>
-                <span
-                  className="wdg__swatch"
-                  style={{ backgroundColor: formData.primaryColor }}
-                  aria-hidden="true"
-                />
-                <input
-                  type="color"
-                  aria-label="Colour"
-                  value={formData.primaryColor}
-                  onChange={(e) => setFormData({ ...formData, primaryColor: e.target.value })}
-                />
-              </label>
+              <section className="fd-section">
+                <p className="fd-section__title">Placement and look</p>
 
-              <Input
-                aria-label="Color code"
-                value={formData.primaryColor}
-                onChange={(e) => setFormData({ ...formData, primaryColor: e.target.value })}
-                className="wdg__control wdg__mono h-10"
-              />
+                <div className="fd-row">
+                  <div className="fd-field">
+                    <label className="fd-label" htmlFor="edit-default_board_id">Board</label>
+                    <div className="fd-select">
+                      <select
+                        id="edit-default_board_id"
+                        name="edit-default_board_id"
+                        aria-label="Boards"
+                        value={formData.default_board_id}
+                        onChange={(e) => setFormData({ ...formData, default_board_id: e.target.value })}
+                        required
+                      >
+                        <option value="">Choose a board</option>
+                        {boards.map((board) => (
+                          <option key={board.id} value={board.id}>
+                            {board.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="fd-field">
+                    <span className="fd-label" id="wg-perm-edit-label">Permissions</span>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <button
+                          type="button"
+                          className="fd-btn fd-btn--quiet wg-perm"
+                          aria-labelledby="wg-perm-edit-label wg-perm-edit-value"
+                        >
+                          <span id="wg-perm-edit-value">Defaults</span>
+                          <ChevronDown className="h-4 w-4" aria-hidden="true" />
+                        </button>
+                      </PopoverTrigger>
+                      <PopoverContent align="start" className="w-72 p-0">
+                        <div className="space-y-3 p-3">
+                          <WidgetToggles formData={formData} setFormData={setFormData} />
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                </div>
+
+                <div className="fd-field">
+                  <span className="fd-label">Brand colour</span>
+                  <div className="wg-colour">
+                    <label className="fd-swatch">
+                      <span
+                        className="fd-swatch__chip"
+                        style={{ backgroundColor: formData.primaryColor }}
+                        aria-hidden="true"
+                      />
+                      <span>Pick a colour</span>
+                      <input
+                        type="color"
+                        aria-label="Colour"
+                        value={formData.primaryColor}
+                        onChange={(e) => setFormData({ ...formData, primaryColor: e.target.value })}
+                      />
+                    </label>
+                    <input
+                      aria-label="Color code"
+                      className="fd-input wdg__mono"
+                      value={formData.primaryColor}
+                      onChange={(e) => setFormData({ ...formData, primaryColor: e.target.value })}
+                    />
+                  </div>
+                  <p className="fd-help-single">Used by the embedded widget on your site.</p>
+                </div>
+              </section>
             </div>
 
-            <div className="flex gap-3 pt-2">
-              <Button type="submit" className="flex-1">
-                Save Changes
-              </Button>
-              <Button
+            <footer className="fd__foot">
+              <button
                 type="button"
-                variant="outline"
+                className="fd-btn fd-btn--quiet"
                 onClick={() => {
                   setShowEditDialog(false);
                   setSelectedWidget(null);
@@ -819,48 +883,66 @@ export default function WidgetManagementPage() {
                 }}
               >
                 Cancel
-              </Button>
-            </div>
+              </button>
+              <button type="submit" className="fd-btn fd-btn--primary fd-btn--commit">
+                Save changes
+              </button>
+            </footer>
           </form>
         </DialogContent>
       </Dialog>
 
       <Dialog open={Boolean(apiSecretDialog)} onOpenChange={() => setApiSecretDialog(null)}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-lg font-semibold">API Secret</DialogTitle>
-            <p className="text-sm text-muted-foreground mt-1">
-              Copy this secret now. It will not be shown again.
-            </p>
-          </DialogHeader>
-          <div className="wdg__caution">
-            <p className="wdg__caution-text">
-              Use this server-side only to sign SDK identity (HMAC).
-            </p>
-            <div className="wdg__secret mt-3">
-              <code className="select-all">{apiSecretDialog}</code>
-              <Button
-                size="icon"
-                variant="ghost"
-                className="h-8 w-8 shrink-0"
-                onClick={() => {
-                  if (apiSecretDialog) {
-                    navigator.clipboard.writeText(apiSecretDialog);
-                    toast({ title: "Copied", description: "API secret copied to clipboard" });
-                  }
-                }}
-                aria-label="Copy API secret"
-              >
-                <Copy className="h-4 w-4" />
-              </Button>
+        <DialogContent className="fd w-[min(92vw,520px)] max-w-none gap-0 border-0 bg-transparent p-0 shadow-none [&>button]:hidden">
+          <div className="fd__shell">
+            <header className="fd__head">
+              <div className="fd__headtext">
+                <DialogTitle className="fd__title">API secret</DialogTitle>
+                <DialogDescription className="fd__lede">
+                  Shown once. Copy it before you close this.
+                </DialogDescription>
+              </div>
+              <DialogClose type="button" className="fd__close" aria-label="Close">
+                <X className="h-4 w-4" aria-hidden="true" />
+              </DialogClose>
+            </header>
+
+            <div className="fd__body wh-secret-body">
+              <div className="wh-secret">
+                <div className="wh-secret__head">
+                  <span className="wh-secret__title">Signing secret</span>
+                  <span className="wh-secret__tag">Shown once</span>
+                </div>
+                <p className="wh-secret__note">
+                  Use this server-side only to sign SDK identity (HMAC).
+                </p>
+                <div className="wh-secret__row">
+                  <code className="wh-secret__code select-all">{apiSecretDialog}</code>
+                  <button
+                    type="button"
+                    className="fd-btn fd-btn--quiet fd-btn--sm"
+                    onClick={() => {
+                      if (apiSecretDialog) {
+                        navigator.clipboard.writeText(apiSecretDialog);
+                        toast({ title: "Copied", description: "API secret copied to clipboard" });
+                      }
+                    }}
+                    aria-label="Copy API secret"
+                  >
+                    <Copy className="h-4 w-4" aria-hidden="true" />
+                    Copy
+                  </button>
+                </div>
+                <button
+                  type="button"
+                  className="fd-btn fd-btn--primary wh-secret__done"
+                  onClick={() => setApiSecretDialog(null)}
+                >
+                  Done, I saved it
+                </button>
+              </div>
             </div>
           </div>
-          <Button
-            className="w-full"
-            onClick={() => setApiSecretDialog(null)}
-          >
-            I’ve saved my secret. Close
-          </Button>
         </DialogContent>
       </Dialog>
     </div>

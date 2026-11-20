@@ -82,6 +82,11 @@
     --muted: 171 20% 92%;             /* Soft wash for input backgrounds */
     --muted-foreground: 174 18% 40%;
 
+    /* Neutral idle vote arrow - not tied to org branding */
+    --vote-idle: 215 16.2% 46.9%;     /* #64748B */
+    --vote-arrow-idle-light: color-mix(in srgb, hsl(var(--primary)) 55%, hsl(var(--vote-idle)) 45%);
+    --vote-arrow-idle-dark: color-mix(in srgb, hsl(var(--primary)) 55%, hsl(var(--vote-idle)) 45%);
+
     --accent: 221 83% 94%;            /* Very light blue tint for hover states */
     --accent-foreground: 221 83% 45%;
 
@@ -132,6 +137,9 @@
     --muted: 214 17.1% 12.7%;            /* #1b2026 - brand paper-3 */
     --muted-foreground: 214 7.6% 58%;    /* #8c939c - brand dark muted */
 
+    /* Neutral idle vote arrow - not tied to org branding */
+    --vote-idle: 215 20% 65%;            /* #94A3B8 */
+
     /* Accent - Highlight color */
     --accent: 215 12.4% 18.5%;           /* #292e35 - brand rule */
     --accent-foreground: 211 23.9% 92.5%;
@@ -181,10 +189,6 @@
   ::selection {
     background: hsl(var(--primary) / 0.25);
     color: hsl(var(--foreground));
-  }
-
-  *:focus-visible {
-    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
   }
 
   /* Custom thin slate scrollbar */
@@ -246,6 +250,22 @@
     @media (hover: hover) and (pointer: fine) {
       opacity: 1;
     }
+  }
+
+  .board-active {
+    background-color: color-mix(
+      in srgb,
+      hsl(var(--primary)) 12%,
+      hsl(var(--card))
+    );
+  }
+
+  .board-active-text {
+    color: color-mix(
+      in srgb,
+      hsl(var(--primary)) 35%,
+      hsl(var(--foreground)) 65%
+    );
   }
 }
 

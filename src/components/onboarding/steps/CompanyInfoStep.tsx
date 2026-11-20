@@ -148,7 +148,7 @@ export function CompanyInfoStep({ data, onUpdate, companyNameError }: CompanyInf
                   <Check className="h-3 w-3" />
                   Available: {' '}
                   <span className="font-mono font-medium">
-                    {data.companyName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')}.faddy.site
+                    {data.companyName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')}.faddy.online
                   </span>
                 </p>
               ) : subdomainStatus.available === false && subdomainStatus.suggestedSubdomain ? (
@@ -156,7 +156,7 @@ export function CompanyInfoStep({ data, onUpdate, companyNameError }: CompanyInf
                   <X className="h-3 w-3" />
                   Taken. You'll get: {' '}
                   <span className="font-mono font-medium">
-                    {subdomainStatus.suggestedSubdomain}.faddy.site
+                    {subdomainStatus.suggestedSubdomain}.faddy.online
                   </span>
                 </p>
               ) : (
@@ -164,8 +164,8 @@ export function CompanyInfoStep({ data, onUpdate, companyNameError }: CompanyInf
                   Your workspace: {' '}
                   <span className="font-mono text-primary font-medium">
                     {data.companyName
-                      ? `${data.companyName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')}.faddy.site`
-                      : 'your-company.faddy.site'}
+                      ? `${data.companyName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')}.faddy.online`
+                      : 'your-company.faddy.online'}
                   </span>
                 </p>
               )}

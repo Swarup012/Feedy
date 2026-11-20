@@ -149,7 +149,7 @@ function Endpoint({
 // Examples
 // ─────────────────────────────────────────────────────────────
 
-const BASE = 'https://api.faddy.site';
+const BASE = 'https://api.faddy.online';
 const KEY = 'fdy_live_YOUR_KEY';
 
 function examples(get: string, post?: { body: string; patch?: boolean }): Record<Language, string> {
@@ -242,7 +242,6 @@ const endpoints = [
         "created_at": "2026-09-13T00:20:03.211023+00:00",
         "updated_at": "2026-09-15T10:40:38.088199+00:00",
         "allow_anonymous": false,
-        "require_approval": false,
         "icon": "Lightbulb",
         "post_count": 25,
         "organization_id": "34c02762-b708-4751-8b31-ef5b5c134925",
@@ -456,7 +455,7 @@ console.log(data);`,
   {
     method: 'POST',
     path: '/api/v1/posts',
-    description: 'Create a new post. Webhooks fire automatically (post.created). Optional attribution: author_name is stored on the post; author_email links (or creates) an end-user contact — existing contacts are never modified.',
+    description: 'Create a new post. Webhooks fire automatically (post.created). Posts created through the API also fire post.created, so a Zap that creates posts in Faddy must filter out data.post.source = "api" to avoid loops. Optional attribution: author_name is stored on the post; author_email links (or creates) an end-user contact — existing contacts are never modified.',
     scopes: ['posts:write'],
     examples: examples('/api/v1/posts', {
       body: `{
@@ -707,7 +706,7 @@ console.log(data);`,
     method: 'POST',
     path: '/api/v1/webhooks',
     description:
-      'Subscribe: create a webhook that delivers events (e.g. post.created) to your URL. HTTPS required. Subscribing the same URL twice is idempotent (returns the existing webhook, 200). The secret_key is returned on creation only and is used to sign deliveries.',
+      'Subscribe: create a webhook that delivers events (e.g. post.created) to your URL. HTTPS required. Subscribing the same URL twice is idempotent (returns the existing webhook, 200). The secret_key is not returned by the v1 API, and posts created with severity "high" do not fire post.created (use post.needs_attention).',
     scopes: ['webhooks:write'],
     examples: examples('/api/v1/webhooks', {
       body: `{
@@ -754,7 +753,6 @@ console.log(data);`,
     "webhooks": [
       {
         "id": "8b0d7e4a-1f2c-4a6e-9f0e-3d5b7c9a1e44",
-        "organization_id": "34c02762-b708-4751-8b31-ef5b5c134925",
         "name": "zapier-9f2c4e1a7b3d5e80",
         "url": "https://hooks.example.com/faddy",
         "type": "custom",

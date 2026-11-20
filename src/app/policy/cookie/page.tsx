@@ -20,7 +20,7 @@ export default function CookiePolicyPage() {
             
             <section>
               <p className="mb-4">
-                This Cookie Policy explains how <strong>Faddy</strong> ("<strong>Company</strong>," "<strong>we</strong>," "<strong>us</strong>," and "<strong>our</strong>") uses cookies and similar technologies to recognize you when you visit our website at <a href="https://faddy.site" className="text-blue-600 dark:text-blue-400 hover:underline">https://faddy.site</a> ("<strong>Website</strong>"). It explains what these technologies are and why we use them, as well as your rights to control our use of them.
+                This Cookie Policy explains how <strong>Faddy</strong> ("<strong>Company</strong>," "<strong>we</strong>," "<strong>us</strong>," and "<strong>our</strong>") uses cookies and similar technologies to recognize you when you visit our website at <a href="https://faddy.online" className="text-blue-600 dark:text-blue-400 hover:underline">https://faddy.online</a> ("<strong>Website</strong>"). It explains what these technologies are and why we use them, as well as your rights to control our use of them.
               </p>
               <p>
                 In some cases we may use cookies to collect personal information, or that becomes personal information if we combine it with other information.
@@ -98,8 +98,8 @@ export default function CookiePolicyPage() {
                 If you have any questions about our use of cookies or other technologies, please contact us at:
               </p>
               <p>
-                <a href="mailto:support@faddy.site" className="text-blue-600 dark:text-blue-400 hover:underline font-medium">
-                  support@faddy.site
+                <a href="mailto:support@faddy.online" className="text-blue-600 dark:text-blue-400 hover:underline font-medium">
+                  support@faddy.online
                 </a>
               </p>
             </section>

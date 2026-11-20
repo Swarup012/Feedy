@@ -24,7 +24,7 @@ const LEGAL_BASES = [
   },
   {
     tag: "Consent",
-    desc: "Where you have given us explicit permission to process your data for a specific purpose. You may withdraw consent at any time by contacting us at support@faddy.site.",
+    desc: "Where you have given us explicit permission to process your data for a specific purpose. You may withdraw consent at any time by contacting us at support@faddy.online.",
   },
   {
     tag: "Legitimate Interest",
@@ -335,7 +335,7 @@ export default function PrivacyPolicy() {
       <div className="pp-wrapper">
         {/* Sidebar */}
         <aside className="pp-sidebar">
-          <a href="https://faddy.site" className="pp-logo">
+          <a href="https://faddy.online" className="pp-logo">
             <span className="pp-logo-dot" />
             Faddy
           </a>
@@ -366,7 +366,7 @@ export default function PrivacyPolicy() {
                 Last updated <span>August 5, 2026</span>
               </div>
               <div className="pp-meta-item">
-                Applies to <span>faddy.site</span>
+                Applies to <span>faddy.online</span>
               </div>
             </div>
             <InfoCard>
@@ -635,8 +635,8 @@ export default function PrivacyPolicy() {
               <p>
                 If we learn we hold data about a minor, we will promptly delete
                 it. Please contact us at{" "}
-                <a href="mailto:support@faddy.site" className="pp-link">
-                  support@faddy.site
+                <a href="mailto:support@faddy.online" className="pp-link">
+                  support@faddy.online
                 </a>{" "}
                 if you believe this has occurred.
               </p>
@@ -663,12 +663,12 @@ export default function PrivacyPolicy() {
               </div>
               <p style={{ marginTop: 16 }}>
                 To exercise any of these rights, visit your{" "}
-                <a href="https://faddy.site/admin/profile" className="pp-link">
+                <a href="https://faddy.online/admin/profile" className="pp-link">
                   account settings
                 </a>{" "}
                 or email{" "}
-                <a href="mailto:support@faddy.site" className="pp-link">
-                  support@faddy.site
+                <a href="mailto:support@faddy.online" className="pp-link">
+                  support@faddy.online
                 </a>
                 . We will respond within{" "}
                 <strong style={{ color: "#0f172a" }}>30 days</strong>.
@@ -707,8 +707,8 @@ export default function PrivacyPolicy() {
                   </strong>
                   <span>Barasat, West Bengal 743248, India</span>
                 </div>
-                <a href="mailto:support@faddy.site" className="pp-contact-btn">
-                  ✉ support@faddy.site
+                <a href="mailto:support@faddy.online" className="pp-contact-btn">
+                  ✉ support@faddy.online
                 </a>
               </div>
             </div>

@@ -488,11 +488,6 @@ export default function WidgetPage() {
         style={{ backgroundColor: primaryColor }}
       >
         <div className="flex items-center gap-2">
-          {config?.board?.icon && (
-            <span className="text-2xl" aria-hidden="true">
-              {config.board.icon}
-            </span>
-          )}
           <h1 className="text-white font-semibold text-lg">
             {config?.board?.name || "Feedback"}
           </h1>

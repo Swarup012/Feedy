@@ -4,9 +4,11 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
+  ChevronDown,
   ClipboardList,
   Loader2,
   MessagesSquare,
+  SlidersHorizontal,
 } from "lucide-react";
 import { boardService, Board } from "@/services/boardService";
 import { postService, Post } from "@/services/postService";
@@ -26,9 +28,8 @@ import {
 import { saveReturnUrl } from "@/lib/returnUrl";
 import { cn } from "@/lib/utils";
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://faddy.site";
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://faddy.online";
 
-import { IconDisplay } from "@/components/ui/icon-picker";
 import { SubmitFeedback } from "./components/submit-feedback";
 
 const feedbackStatuses = [
@@ -64,6 +65,10 @@ export default function FeedbackPageClient({
   const [sortBy, setSortBy] = useState<string>("most-votes");
   const [viewMode, setViewMode] = useState<"grid" | "list">("list");
   const [upvotedPosts, setUpvotedPosts] = useState<Set<string>>(new Set());
+  const [filtersOpen, setFiltersOpen] = useState(false);
+
+  const activeFilterCount =
+    (selectedBoard === "all" ? 0 : 1) + selectedStatuses.length;
 
   // Handle upvote — same-origin POST through the public catch-all proxy
   // (auth via the access_token cookie; the proxy attaches the tenant).
@@ -332,10 +337,37 @@ export default function FeedbackPageClient({
       )}
 
       <div className="container py-10">
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[260px_minmax(0,1fr)] lg:gap-12">
+          <Button
+            type="button"
+            variant="outline"
+            aria-expanded={filtersOpen}
+            aria-controls="feedback-filters"
+            onClick={() => setFiltersOpen((open) => !open)}
+            className="w-full justify-between lg:hidden"
+          >
+            <span className="flex items-center gap-2">
+              <SlidersHorizontal aria-hidden="true" />
+              <span>
+                Filters
+                {activeFilterCount > 0 ? ` · ${activeFilterCount}` : ""}
+              </span>
+            </span>
+            <ChevronDown
+              aria-hidden="true"
+              className={cn(
+                "transition-transform motion-reduce:transition-none",
+                filtersOpen && "rotate-180",
+              )}
+            />
+          </Button>
+
           {/* Sidebar - Filters */}
-          <aside className="lg:col-span-3">
-            <div className="sticky top-20 space-y-8">
+          <aside
+            id="feedback-filters"
+            className={cn("lg:block", filtersOpen ? "block" : "hidden")}
+          >
+            <div className="space-y-10 lg:sticky lg:top-20 lg:max-h-[calc(100dvh-6rem)] lg:overflow-y-auto lg:scroll-py-2 lg:pb-2">
               {/* Board Filter */}
               <section>
                 <h2 className="mb-3 px-3 text-sm font-semibold text-foreground">
@@ -343,27 +375,25 @@ export default function FeedbackPageClient({
                 </h2>
                 <div className="space-y-1">
                   <button
+                    type="button"
+                    aria-pressed={selectedBoard === "all"}
                     onClick={() => setSelectedBoard("all")}
                     className={cn(
-                      "w-full rounded-md px-3 py-2 text-left text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+                      "flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring",
                       selectedBoard === "all"
-                        ? "bg-primary text-primary-foreground"
+                        ? "board-active board-active-text"
                         : "text-foreground hover:bg-muted",
                     )}
                   >
-                    <div className="flex items-center gap-2">
-                      <span className="flex-1">All Boards</span>
-                      <span
-                        className={cn(
-                          "text-xs tabular-nums",
-                          selectedBoard === "all"
-                            ? "text-primary-foreground"
-                            : "text-muted-foreground",
-                        )}
-                      >
-                        {allPosts.length}
-                      </span>
-                    </div>
+                    <span className="min-w-0 flex-1 truncate">All Boards</span>
+                    <span
+                      className={cn(
+                        "min-w-[2ch] shrink-0 text-right text-xs tabular-nums",
+                        selectedBoard !== "all" && "text-muted-foreground",
+                      )}
+                    >
+                      {allPosts.length}
+                    </span>
                   </button>
                   {boards.map((board) => {
                     const count = allPosts.filter(
@@ -371,32 +401,29 @@ export default function FeedbackPageClient({
                     ).length;
                     return (
                       <button
+                        type="button"
                         key={board.id}
+                        aria-pressed={selectedBoard === board.slug}
                         onClick={() => setSelectedBoard(board.slug)}
                         className={cn(
-                          "w-full rounded-md px-3 py-2 text-left text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+                          "flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring",
                           selectedBoard === board.slug
-                            ? "bg-primary text-primary-foreground"
+                            ? "board-active board-active-text"
                             : "text-foreground hover:bg-muted",
                         )}
                       >
-                        <div className="flex items-center gap-2">
-                          <IconDisplay
-                            iconName={board.icon}
-                            className="h-4 w-4 shrink-0"
-                          />
-                          <span className="flex-1 truncate">{board.name}</span>
-                          <span
-                            className={cn(
-                              "text-xs tabular-nums",
-                              selectedBoard === board.slug
-                                ? "text-primary-foreground"
-                                : "text-muted-foreground",
-                            )}
-                          >
-                            {count}
-                          </span>
-                        </div>
+                        <span className="min-w-0 flex-1 truncate">
+                          {board.name}
+                        </span>
+                        <span
+                          className={cn(
+                            "min-w-[2ch] shrink-0 text-right text-xs tabular-nums",
+                            selectedBoard !== board.slug &&
+                              "text-muted-foreground",
+                          )}
+                        >
+                          {count}
+                        </span>
                       </button>
                     );
                   })}
@@ -408,7 +435,7 @@ export default function FeedbackPageClient({
                 <h2 className="mb-3 px-3 text-sm font-semibold text-foreground">
                   Status
                 </h2>
-                <div className="space-y-1 px-3">
+                <div className="space-y-1 px-3 pb-1">
                   {feedbackStatuses.map((status) => (
                     <div
                       key={status}
@@ -418,6 +445,7 @@ export default function FeedbackPageClient({
                         id={`status-${status}`}
                         checked={selectedStatuses.includes(status)}
                         onCheckedChange={() => toggleStatus(status)}
+                        className="h-3.5 w-3.5 rounded [&_svg]:h-3 [&_svg]:w-3"
                       />
                       <Label
                         htmlFor={`status-${status}`}
@@ -433,7 +461,7 @@ export default function FeedbackPageClient({
           </aside>
 
           {/* Main Content */}
-          <main className="lg:col-span-9">
+          <main>
             {/* Header with Sort and Create Post */}
             <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
               <div>

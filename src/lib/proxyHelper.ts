@@ -22,13 +22,13 @@ const RESERVED_SUBDOMAINS = new Set(['www', 'api', 'admin']);
 
 /**
  * Host suffixes that are never custom hosts (env-configurable).
- * NON_CUSTOM_HOST_SUFFIXES="faddy.site,localhost" — comma-separated.
- * Default by NODE_ENV: production -> "faddy.site" only; anything else
- * (dev/test) -> "localhost" only (spec: faddy.site first-party only in
- * production, localhost only outside it).
+ * NON_CUSTOM_HOST_SUFFIXES="faddy.online,faddy.site,localhost" — comma-separated.
+ * Default by NODE_ENV: production -> "faddy.online,faddy.site" (both accepted
+ * during transition, .online primary); anything else (dev/test) -> "localhost"
+ * only (spec: first-party domains only in production, localhost only outside it).
  */
 const DEFAULT_NON_CUSTOM_SUFFIXES =
-  process.env.NODE_ENV === 'production' ? 'faddy.site' : 'localhost';
+  process.env.NODE_ENV === 'production' ? 'faddy.online,faddy.site' : 'localhost';
 
 const NON_CUSTOM_SUFFIXES: string[] = (
   process.env.NON_CUSTOM_HOST_SUFFIXES || DEFAULT_NON_CUSTOM_SUFFIXES

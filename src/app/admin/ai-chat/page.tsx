@@ -305,6 +305,7 @@ function ConversationSidebar({
           <Button
             onClick={onNew}
             size="sm"
+            variant="ghost"
             className="flex-1 gap-2 justify-start min-h-[44px]"
           >
             <Plus className="w-3.5 h-3.5" /> New chat
@@ -796,8 +797,8 @@ function AiChatContent() {
           </div>
 
           {/* Input */}
-          <div className="flex-shrink-0 px-3 py-3">
-            <div className="max-w-3xl mx-auto space-y-2">
+          <div className="flex-shrink-0 px-4 py-3">
+            <div className="max-w-2xl mx-auto space-y-2">
               {/* Message limit counter (any plan with a monthly quota) */}
               {orgId && planAllowsFeature(currentPlan, "ai_chat") && (
                 <MessageLimitCounter
@@ -819,7 +820,7 @@ function AiChatContent() {
               )}
 
               <div
-                className={`flex items-end gap-2 rounded-2xl border transition-all duration-200 ${isStreaming ? "border-primary/40 bg-primary/5" : "border-border bg-background"} shadow-sm px-3 py-2.5`}
+                className={`flex items-end gap-2 rounded-2xl border transition-all duration-200 ${isStreaming ? "border-primary/40" : "border-border"} shadow-sm px-3 py-2 bg-white dark:bg-card`}
               >
                 <label htmlFor="chat-input" className="sr-only">
                   Type your message
@@ -844,13 +845,13 @@ function AiChatContent() {
                         : "Ask about your feedback, clusters, or priorities…"
                   }
                   rows={1}
-                  className="flex-1 resize-none bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none focus-visible:ring-0 leading-relaxed min-h-[24px] max-h-[160px] disabled:opacity-50"
+                  className="flex-1 resize-none bg-white dark:bg-card text-sm text-foreground placeholder:text-muted-foreground outline-none focus:outline-none ring-0 focus:ring-0 focus-visible:ring-0 leading-relaxed min-h-[24px] max-h-[160px] disabled:opacity-50 py-1.5"
                 />
                 <Button
                   size="sm"
                   onClick={() => sendMessage()}
                   disabled={!input.trim() || isStreaming || limitReached}
-                  className="flex-shrink-0 min-w-[44px] min-h-[44px] p-0 rounded-xl"
+                  className="flex-shrink-0 h-8 w-8 p-0 rounded-lg focus-visible:ring-0 focus-visible:outline-none"
                   aria-label="Send message"
                 >
                   <Send className="w-3.5 h-3.5" />

@@ -372,12 +372,6 @@ export default function DashboardPage() {
                                 <CardHeader className="pb-3 px-4 pt-4">
                                   <div className="flex items-start justify-between">
                                     <div className="flex items-center gap-3">
-                                      <div 
-                                        className="p-2 rounded-lg"
-                                        style={{ backgroundColor: `${board.color}15` }}
-                                      >
-                                        <IconDisplay iconName={board.icon} className="h-5 w-5" style={{ color: board.color }} />
-                                      </div>
                                       <div className="flex-1 min-w-0">
                                         <CardTitle className="text-sm font-semibold flex items-center gap-2 text-gray-900 dark:text-white truncate">
                                           {board.name}
@@ -528,9 +522,6 @@ export default function DashboardPage() {
                             <Card key={board.id} className="hover:shadow-lg transition-shadow border border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 cursor-pointer" onClick={() => router.push(`/admin/feedback/boards/${board.slug}`)}>
                               <CardHeader>
                                 <div className="flex items-center gap-3">
-                                  <div className="p-2 rounded-lg" style={{ backgroundColor: `${board.color}15` }}>
-                                    <IconDisplay iconName={board.icon} className="h-6 w-6" style={{ color: board.color }} />
-                                  </div>
                                   <div>
                                     <CardTitle className="text-base text-gray-900 dark:text-white">{board.name}</CardTitle>
                                     <CardDescription className="text-xs">

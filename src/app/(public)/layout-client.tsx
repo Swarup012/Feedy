@@ -7,6 +7,7 @@ import { Bell, Eye, AlertCircle } from "lucide-react";
 
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,12 +20,12 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/hooks/useAuth";
 import { saveReturnUrl } from "@/lib/returnUrl";
-import { hexToHslTriplet, contrastForeground } from "@/lib/branding-color";
+import { hexToHslTriplet, contrastForeground, voteIdleStyles } from "@/lib/branding-color";
 import { CustomHostProvider } from "@/context/CustomHostContext";
 import type { PublicOrganization as Organization } from "@/lib/customHostOrg";
 import api from "@/lib/api";
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://faddy.site";
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://faddy.online";
 
 // ─── Subdomain detection (pure, synchronous, side-effect free) ───────────────
 // Runs immediately during the first client render — no network call.
@@ -78,14 +79,14 @@ function OrgLogo({ organization }: { organization: Organization | null }) {
   if (!src || failed) return null;
 
   return (
-    // Fixed box avoids layout shift when the image loads.
-    <span className="mr-3 flex h-8 w-32 shrink-0 items-center justify-center">
+    // Height stays 32px; width follows the artwork so a narrow logo doesn't
+    // leave a 128px gap before the org name.
+    <span className="flex h-8 shrink-0 items-center">
       <img
         src={src}
         alt={organization?.name || "Organization logo"}
         height={32}
-        width={128}
-        className="h-8 w-32 object-contain object-left"
+        className="h-8 w-auto max-w-32 object-contain object-left"
         onError={() => setFailed(true)}
       />
     </span>
@@ -100,11 +101,12 @@ function NavLink({ href, label }: { href: string; label: string }) {
     <Link
       href={href}
       aria-current={active ? "page" : undefined}
-      className={
+      className={cn(
+        "relative inline-flex h-full items-center rounded-sm text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
         active
-          ? "rounded-sm border-b-2 border-primary pb-1 text-sm font-medium text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-          : "rounded-sm border-b-2 border-transparent pb-1 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-      }
+          ? "text-foreground after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:bg-primary"
+          : "text-muted-foreground hover:text-foreground",
+      )}
     >
       {label}
     </Link>
@@ -134,9 +136,9 @@ function AppHeader({
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background">
-      <div className="container flex h-16 items-center gap-6">
+      <div className="container flex min-h-16 flex-wrap items-center gap-x-6 md:h-16 md:flex-nowrap">
         {/* Left — org branding + nav */}
-        <Link href="/feedback" className="flex shrink-0 items-center">
+        <Link href="/feedback" className="flex shrink-0 items-center gap-2.5">
           <OrgLogo organization={organization} />
           <span className="font-headline text-[15px] font-semibold tracking-tight text-foreground">
             {organization?.name || "Faddy"}
@@ -145,7 +147,7 @@ function AppHeader({
 
         <nav
           aria-label="Portal"
-          className="flex flex-1 items-center gap-6 overflow-x-auto md:flex-none"
+          className="order-last flex h-10 w-full items-center gap-6 overflow-x-auto md:order-none md:h-auto md:w-auto md:flex-none md:self-stretch"
         >
           <NavLink href="/feedback" label="Feedback" />
           <NavLink href="/roadmap" label="Roadmap" />
@@ -227,7 +229,7 @@ function AppHeader({
             <Button
               onClick={() => {
                 if (isCustomHost) {
-                  // Cross-origin: the login page lives on faddy.site only —
+                  // Cross-origin: the login page lives on the primary app domain only —
                   // a return path on this host could never be honored, so
                   // skip saveReturnUrl (it would send them to the wrong org).
                   window.location.href = `${APP_URL}/login`;
@@ -286,7 +288,7 @@ function PortalFooter({ organization }: { organization: Organization | null }) {
     <footer className="border-t border-border py-5">
       <div className="container text-sm text-muted-foreground">
         <a
-          href="https://faddy.site"
+          href={APP_URL}
           className="transition-colors hover:text-foreground"
         >
           Powered by Faddy
@@ -381,6 +383,7 @@ export default function AppLayout({
           "--primary": primaryTriplet,
           "--primary-foreground": foregroundTriplet,
           "--ring": primaryTriplet,
+          ...(brandHex ? voteIdleStyles(brandHex) : {}),
         } as React.CSSProperties)
       : undefined;
 

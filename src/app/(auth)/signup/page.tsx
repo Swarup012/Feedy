@@ -1,7 +1,6 @@
-
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -10,19 +9,17 @@ import { Label } from "@/components/ui/label";
 import { Logo } from "@/components/logo";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { Eye, EyeOff, User, Mail, Lock, ArrowRight, CheckCircle2, Zap, Shield } from "lucide-react";
-import { LoadingAnimation } from "@/components/LoadingAnimation";
+import { Eye, EyeOff, User, Mail, Lock, Loader2 } from "lucide-react";
 import { GoogleAuthButton } from "@/components/auth/GoogleAuthButton";
-import gsap from "gsap";
 import { getPublicReturnUrl, clearReturnUrl } from "@/lib/returnUrl";
 import { TokenManager } from "@/lib/tokenManager";
 import { supabase } from "@/lib/supabase";
+import "../auth.css";
 
 export default function SignupPage() {
   const router = useRouter();
   const { signup } = useAuth();
   const { toast } = useToast();
-  const containerRef = useRef<HTMLDivElement>(null);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -34,26 +31,19 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  // Entrance animation (matched to login)
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      gsap.from(".signup-reveal", {
-        y: 12,
-        opacity: 0,
-        scale: 0.98,
-        duration: 0.8,
-        stagger: 0.08,
-        ease: "power3.out",
-      });
-    }, containerRef);
-    return () => ctx.revert();
-  }, []);
-
   const validateForm = () => {
     const e: Record<string, string> = {};
     if (!formData.name.trim()) e.name = "Name is required";
     if (!formData.email.trim()) e.email = "Email is required";
-    if (!formData.password) e.password = "Password is required";
+    if (!formData.password) {
+      e.password = "Password is required";
+    } else if (
+      formData.password.length < 8 ||
+      !/[A-Z]/.test(formData.password) ||
+      !/[0-9]/.test(formData.password)
+    ) {
+      e.password = "Use 8+ characters, including an uppercase letter and a number.";
+    }
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -111,110 +101,104 @@ export default function SignupPage() {
   };
 
   return (
-    <div ref={containerRef} className="h-screen overflow-hidden flex bg-white dark:bg-slate-950">
-      {/* Left Side - Branding */}
-      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
-        {/* Decorative elements */}
-        <div className="absolute inset-0 opacity-40 dark:opacity-20 pointer-events-none">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-200/50 dark:bg-blue-900/30 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-slate-200/50 dark:bg-slate-800/30 rounded-full blur-3xl"></div>
+    <div className="auth">
+      <aside className="auth__brand" aria-label="About Faddy">
+        <Link href="/" className="auth__lockup">
+          <span className="auth__lockup-tile" aria-hidden="true">
+            <Logo width={14} height={20} />
+          </span>
+          <span className="auth__lockup-name">Faddy</span>
+        </Link>
+
+        <div className="auth__brand-body">
+          <p className="auth__brand-title">Close the loop on what your users ask for.</p>
+          <p className="auth__brand-lede">
+            One place to collect requests, find the signal with AI, and show people what shipped.
+          </p>
+          <ol className="auth__loop">
+            <li>
+              <span className="auth__loop-num">01</span>
+              <span className="auth__loop-copy">
+                <span className="auth__loop-title">Collect</span>
+                <span className="auth__loop-text">Capture feedback everywhere your customers talk, from the widget and public boards to Slack, Intercom and more.</span>
+              </span>
+            </li>
+            <li>
+              <span className="auth__loop-num">02</span>
+              <span className="auth__loop-copy">
+                <span className="auth__loop-title">Cluster</span>
+                <span className="auth__loop-text">Smartflow groups requests by theme.</span>
+              </span>
+            </li>
+            <li>
+              <span className="auth__loop-num">03</span>
+              <span className="auth__loop-copy">
+                <span className="auth__loop-title">Close</span>
+                <span className="auth__loop-text">Ship it on the roadmap and changelog.</span>
+              </span>
+            </li>
+          </ol>
         </div>
-        
-        {/* Content */}
-        <div className="relative z-10 flex flex-col justify-between p-8 lg:p-10 w-full">
-          {/* Logo */}
-          <div className="signup-reveal">
-            <Link href="/" className="inline-flex items-center gap-3">
-              <Logo width={36} height={36} className="text-blue-600" />
-              <span className="text-lg font-switzer font-bold text-slate-900 dark:text-white">Faddy</span>
-            </Link>
-          </div>
 
-          {/* Main Content - Illustration */}
-          <div className="signup-reveal flex-1 flex items-center justify-center mt-6 mb-6">
-            <img 
-              src="/images/login/Login.svg" 
-              alt="Sign up illustration" 
-              className="w-full max-w-[400px] h-auto object-contain drop-shadow-2xl" 
-            />
-          </div>
+        <p className="auth__brand-foot">Built for small SaaS teams.</p>
+      </aside>
 
-          {/* Footer */}
-          <div className="signup-reveal text-sm text-slate-500 dark:text-slate-400">
-            © 2026 Faddy. All rights reserved.
-          </div>
-        </div>
-      </div>
+      <main className="auth__pane">
+        <div className="auth__column">
+          <Link href="/" className="auth__mobile-mark" aria-label="Faddy home">
+            <Logo width={26} height={26} />
+            <span>Faddy</span>
+          </Link>
 
-      {/* Right Side - Signup Form */}
-      <div className="flex-1 h-full overflow-y-auto flex items-center justify-center py-4 px-6 lg:px-8 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-        <div className="w-full max-w-md">
-          {/* Mobile Logo */}
-          <div className="signup-reveal lg:hidden mb-4 text-center">
-            <Link href="/" className="inline-flex items-center gap-3">
-              <Logo width={32} height={32} className="text-blue-600" />
-              <span className="text-lg font-switzer font-bold text-slate-900 dark:text-white">Faddy</span>
-            </Link>
-          </div>
+          <header className="auth__head">
+            <h1 className="auth__title">Create your account</h1>
+            <p className="auth__lede">Start collecting feedback in minutes.</p>
+          </header>
 
-          {/* Form Header */}
-          <div className="signup-reveal mb-4">
-            <h2 className="text-lg font-switzer font-bold text-slate-900 dark:text-white">
-              Create your account
-            </h2>
-            <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-              Start collecting feedback in minutes
-            </p>
-          </div>
+          <form onSubmit={handleSubmit} className="auth__form" noValidate>
+            <div aria-live="polite" className="sr-only">
+              {Object.values(errors).filter(Boolean).length > 0 && (
+                <span>{Object.values(errors).filter(Boolean).join(". ")}</span>
+              )}
+            </div>
 
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="signup-reveal space-y-3">
-            {/* Google Sign Up */}
-            <div className="space-y-3">
+            <div className="auth__sso">
               <GoogleAuthButton mode="signup" />
-              
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t border-slate-300 dark:border-slate-700" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-white dark:bg-slate-950 px-2 text-slate-500 dark:text-slate-400">
-                    Or continue with email
-                  </span>
-                </div>
+              <div className="auth__divider">
+                <span>Or continue with email</span>
               </div>
             </div>
 
-            {/* Name */}
-            <div>
-              <Label htmlFor="name" className="text-sm font-medium text-slate-700 dark:text-slate-300">
+            <div className="auth__field">
+              <Label htmlFor="name" className="auth__label">
                 Full name
               </Label>
-              <div className="relative mt-1.5">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+              <div className="auth__control">
+                <User className="auth__icon" size={18} aria-hidden="true" />
                 <Input
                   id="name"
                   value={formData.name}
                   onChange={handleChange}
                   disabled={loading}
-                  placeholder="Jane Doe"
-                  className="pl-9 h-10 bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 rounded-lg font-switzer text-sm"
+                  placeholder="Your name"
+                  autoComplete="name"
+                  required
+                  aria-invalid={!!errors.name}
+                  aria-describedby={errors.name ? "name-error" : undefined}
+                  className="auth__input"
                 />
               </div>
               {errors.name && (
-                <p className="text-xs mt-1 text-red-600 dark:text-red-400">
-                  {errors.name}
-                </p>
+                <p id="name-error" className="auth__error">{errors.name}</p>
               )}
             </div>
 
-            {/* Email */}
-            <div>
-              <Label htmlFor="email" className="text-sm font-medium text-slate-700 dark:text-slate-300">
+            <div className="auth__field">
+              <Label htmlFor="email" className="auth__label">
                 Email address
               </Label>
-              <div className="relative mt-1.5">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+              <div className="auth__control">
+                <Mail className="auth__icon" size={18} aria-hidden="true" />
                 <Input
                   id="email"
                   type="email"
@@ -222,23 +206,26 @@ export default function SignupPage() {
                   onChange={handleChange}
                   disabled={loading}
                   placeholder="you@company.com"
-                  className="pl-9 h-10 bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 rounded-lg font-switzer text-sm"
+                  autoComplete="email"
+                  inputMode="email"
+                  maxLength={254}
+                  required
+                  aria-invalid={!!errors.email}
+                  aria-describedby={errors.email ? "email-error" : undefined}
+                  className="auth__input"
                 />
               </div>
               {errors.email && (
-                <p className="text-xs mt-1 text-red-600 dark:text-red-400">
-                  {errors.email}
-                </p>
+                <p id="email-error" className="auth__error">{errors.email}</p>
               )}
             </div>
 
-            {/* Password */}
-            <div>
-              <Label htmlFor="password" className="text-sm font-medium text-slate-700 dark:text-slate-300">
+            <div className="auth__field">
+              <Label htmlFor="password" className="auth__label">
                 Password
               </Label>
-              <div className="relative mt-1.5">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+              <div className="auth__control">
+                <Lock className="auth__icon" size={18} aria-hidden="true" />
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
@@ -246,74 +233,61 @@ export default function SignupPage() {
                   onChange={handleChange}
                   disabled={loading}
                   placeholder="••••••••"
-                  className="pl-9 pr-12 h-10 bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 rounded-lg font-switzer text-sm"
+                  autoComplete="new-password"
+                  maxLength={128}
+                  required
+                  aria-invalid={!!errors.password}
+                  aria-describedby={errors.password ? "password-error" : "password-hint"}
+                  className="auth__input auth__input--reveal"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(p => !p)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  aria-pressed={showPassword}
+                  className="auth__reveal"
                 >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  {showPassword ? <EyeOff size={18} aria-hidden="true" /> : <Eye size={18} aria-hidden="true" />}
                 </button>
               </div>
               {errors.password ? (
-                <p className="text-xs mt-1 text-red-600 dark:text-red-400">
-                  {errors.password}
-                </p>
+                <p id="password-error" className="auth__error">{errors.password}</p>
               ) : (
-                <p className="text-xs mt-1 text-slate-500 dark:text-slate-500">
-                  8+ characters • uppercase • number
+                <p id="password-hint" className="auth__hint">
+                  8+ characters, including an uppercase letter and a number.
                 </p>
               )}
             </div>
 
-            {/* Submit Error Banner */}
             {formError && (
-              <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
-                <p className="text-sm text-red-800 dark:text-red-200 font-medium">{formError}</p>
+              <div className="auth__alert" role="alert">
+                <p>{formError}</p>
               </div>
             )}
 
-            {/* Submit Button */}
-            <Button
-              type="submit"
-              disabled={loading}
-              className="w-full h-10 bg-blue-600 hover:bg-blue-700 text-white font-switzer font-semibold rounded-lg transition-all duration-200 shadow-lg shadow-blue-600/25 hover:shadow-blue-600/40 disabled:opacity-50 disabled:cursor-not-allowed mt-2"
-            >
+            <Button type="submit" disabled={loading} className="auth__submit" aria-busy={loading}>
               {loading ? (
-                <LoadingAnimation width={20} height={20} />
+                <Loader2 className="auth__spinner" size={18} aria-hidden="true" />
               ) : (
-                <span className="flex items-center justify-center gap-2">
-                  Create account
-                  <ArrowRight size={18} />
-                </span>
+                "Create account"
               )}
             </Button>
           </form>
 
-          {/* Sign in link */}
-          <p className="signup-reveal text-center mt-4 text-sm text-slate-600 dark:text-slate-400">
-            Already have an account?{" "}
-            <Link href="/login" className="text-blue-600 hover:text-blue-700 font-semibold transition-colors">
-              Sign in
-            </Link>
+          <p className="auth__switch">
+            Already have an account? <Link href="/login">Sign in</Link>
           </p>
 
-          {/* Privacy links */}
-          <div className="signup-reveal mt-4 pt-4 border-t border-slate-200 dark:border-slate-800">
-            <p className="text-xs text-center text-slate-500 dark:text-slate-500">
+          <div className="auth__legal">
+            <p>
               By signing up, you agree to our{" "}
-              <Link href="/policy/terms" className="text-blue-600 hover:text-blue-700 hover:underline">
-                Terms
-              </Link>
+              <Link href="/policy/terms">Terms</Link>
               {" "}and{" "}
-              <Link href="/policy/privacy" className="text-blue-600 hover:text-blue-700 hover:underline">
-                Privacy Policy
-              </Link>
+              <Link href="/policy/privacy">Privacy Policy</Link>.
             </p>
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }

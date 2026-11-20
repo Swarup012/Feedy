@@ -4,8 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Mail,
-  MessageSquare,
-  Lightbulb,
   TrendingUp,
   Users,
   Target,
@@ -21,7 +19,6 @@ import {
   ThumbsUp,
   FileText,
   UserCheck,
-  Zap,
   BarChart3,
   Heart,
   Clock,
@@ -196,38 +193,19 @@ export default function CollectFeedbackPage() {
                         </div>
                       </div>
 
-                      {/* Board Icon Picker */}
+                      {/* Board Description */}
                       <div className="space-y-2">
                         <label className="text-sm font-medium text-slate-900 dark:text-white">
-                          Board Icon
+                          Description
                         </label>
-                        <div className="grid grid-cols-6 gap-2">
-                          {[
-                            { icon: Lightbulb, selected: true },
-                            { icon: MessageSquare, selected: false },
-                            { icon: Target, selected: false },
-                            { icon: Zap, selected: false },
-                            { icon: Heart, selected: false },
-                            { icon: Star, selected: false },
-                          ].map((item, i) => (
-                            <button
-                              key={i}
-                              className={`p-3 rounded-lg border-2 transition-all ${
-                                item.selected
-                                  ? "border-blue-600 bg-blue-50 dark:bg-blue-950/30"
-                                  : "border-slate-200 dark:border-border hover:border-slate-300 dark:hover:border-gray-600"
-                              }`}
-                            >
-                              <item.icon
-                                className={`h-5 w-5 ${
-                                  item.selected
-                                    ? "text-blue-600 dark:text-blue-400"
-                                    : "text-slate-400 dark:text-muted-foreground"
-                                }`}
-                              />
-                            </button>
-                          ))}
+                        <div className="min-h-16 bg-white dark:bg-background rounded-lg border border-slate-200 dark:border-border px-3 py-2 flex items-start">
+                          <span className="text-slate-400 dark:text-muted-foreground text-sm">
+                            Collect feature requests, bug reports, and ideas in one place.
+                          </span>
                         </div>
+                        <p className="text-xs text-slate-500 dark:text-muted-foreground">
+                          Help users understand what to post here
+                        </p>
                       </div>
 
                       {/* Categories */}
@@ -345,7 +323,7 @@ export default function CollectFeedbackPage() {
                       <div className="flex gap-2">
                         <div className="flex-1 h-10 bg-slate-100 dark:bg-card rounded border border-slate-200 dark:border-border flex items-center px-3">
                           <span className="text-sm text-slate-500 dark:text-muted-foreground">
-                            faddy.site/feedback/your-board
+                            faddy.online/feedback/your-board
                           </span>
                         </div>
                         <Button

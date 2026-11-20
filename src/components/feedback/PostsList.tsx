@@ -10,7 +10,6 @@ import { Board } from "@/services/boardService";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import { PostsListSkeleton } from "./PostsListSkeleton";
-import { IconDisplay } from "@/components/ui/icon-picker";
 
 interface PostsListProps {
   posts: Post[];
@@ -80,16 +79,6 @@ export const PostsList = memo(function PostsList({
             )}
             {currentBoard && (
               <div className="flex items-center gap-2">
-                <div
-                  className="h-8 w-8 rounded-lg flex items-center justify-center flex-shrink-0"
-                  style={{ backgroundColor: currentBoard.color + "20" }}
-                >
-                  <IconDisplay 
-                    iconName={currentBoard.icon} 
-                    className="h-5 w-5" 
-                    style={{ color: currentBoard.color }} 
-                  />
-                </div>
                 <h1 className="text-xl font-bold text-foreground">{currentBoard.name}</h1>
               </div>
             )}

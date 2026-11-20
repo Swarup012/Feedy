@@ -41,7 +41,10 @@ describe('isCustomHost (fail closed)', () => {
     // absent host → restricted
     [null, true],
     ['', true],
-    // valid first-party (suffix match)
+    // valid first-party (suffix match) — both apexes accepted during transition
+    ['api.faddy.online', false],
+    ['faddy.online', false],
+    ['acme.faddy.online', false],
     ['api.faddy.site', false],
     ['faddy.site', false],
     ['acme.faddy.site', false],
@@ -63,6 +66,8 @@ describe('isCustomHost (fail closed)', () => {
     ['feedback.acm.com.', true],
     ['evilfaddy.site', true],
     ['faddy.site.evil.com', true],
+    ['evilfaddy.online', true],
+    ['faddy.online.evil.com', true],
   ])('%s -> custom=%s', (host, expected) => {
     expect(isCustomHost(host as string | null)).toBe(expected);
   });
@@ -363,11 +368,14 @@ describe('NON_CUSTOM suffix default by NODE_ENV (D)', () => {
     vi.resetModules();
   });
 
-  it('production default: faddy.site only — localhost hosts become custom/restricted', async () => {
+  it('production default: faddy.online + faddy.site — localhost becomes custom/restricted', async () => {
     delete process.env.NON_CUSTOM_HOST_SUFFIXES;
     vi.stubEnv('NODE_ENV', 'production');
     vi.resetModules();
     const m = await import('@/lib/proxyHelper');
+    expect(m.isCustomHost('acme.faddy.online')).toBe(false);
+    expect(m.extractSubdomainFromHost('acme.faddy.online')).toBe('acme');
+    expect(m.isCustomHost('faddy.online')).toBe(false);
     expect(m.isCustomHost('acme.faddy.site')).toBe(false);
     expect(m.extractSubdomainFromHost('acme.faddy.site')).toBe('acme');
     expect(m.isCustomHost('faddy.site')).toBe(false);
@@ -375,7 +383,7 @@ describe('NON_CUSTOM suffix default by NODE_ENV (D)', () => {
     expect(m.isCustomHost('localhost')).toBe(true);
   });
 
-  it('non-production default: localhost only — faddy.site hosts become custom/restricted', async () => {
+  it('non-production default: localhost only — both platform domains become custom/restricted', async () => {
     delete process.env.NON_CUSTOM_HOST_SUFFIXES;
     vi.stubEnv('NODE_ENV', 'test');
     vi.resetModules();
@@ -385,6 +393,8 @@ describe('NON_CUSTOM suffix default by NODE_ENV (D)', () => {
     expect(m.isCustomHost('localhost')).toBe(false);
     expect(m.isCustomHost('acme.faddy.site')).toBe(true);
     expect(m.isCustomHost('faddy.site')).toBe(true);
+    expect(m.isCustomHost('acme.faddy.online')).toBe(true);
+    expect(m.isCustomHost('faddy.online')).toBe(true);
   });
 
   it('explicit NON_CUSTOM_HOST_SUFFIXES wins over the NODE_ENV default in production', async () => {

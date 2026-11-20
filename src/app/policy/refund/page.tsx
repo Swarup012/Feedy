@@ -41,7 +41,7 @@ export default function RefundPolicyPage() {
                   All payments are processed by Paddle.com, who acts as the merchant of record for purchases made through Faddy. Refund requests may be reviewed and processed by Paddle in accordance with Paddle's Buyer Terms, available at <a href="https://www.paddle.com/legal/checkout-buyer-terms" target="_blank" rel="noopener noreferrer" className="text-blue-600 dark:text-blue-400 hover:underline">https://www.paddle.com/legal/checkout-buyer-terms</a>.
                 </li>
                 <li>
-                  In cases of duplicate charges, billing errors, or unauthorized transactions, please contact us at <a href="mailto:support@faddy.site" className="text-blue-600 dark:text-blue-400 hover:underline">support@faddy.site</a> within 7 days of the charge for review.
+                  In cases of duplicate charges, billing errors, or unauthorized transactions, please contact us at <a href="mailto:support@faddy.online" className="text-blue-600 dark:text-blue-400 hover:underline">support@faddy.online</a> within 7 days of the charge for review.
                 </li>
                 <li>
                   Approved refunds, if any, will be processed to the original payment method within 5-10 business days.
@@ -57,8 +57,8 @@ export default function RefundPolicyPage() {
                 If you have any questions concerning our return policy, please contact us at:
               </p>
               <p>
-                <a href="mailto:support@faddy.site" className="text-blue-600 dark:text-blue-400 hover:underline font-medium">
-                  support@faddy.site
+                <a href="mailto:support@faddy.online" className="text-blue-600 dark:text-blue-400 hover:underline font-medium">
+                  support@faddy.online
                 </a>
               </p>
             </section>

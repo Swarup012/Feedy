@@ -11,7 +11,6 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
-import { IconDisplay } from "@/components/ui/icon-picker";
 import {
   ArrowLeft,
   ArrowBigUp,
@@ -26,7 +25,7 @@ import {
 import { formatDistanceToNow } from "date-fns";
 import { saveReturnUrl } from "@/lib/returnUrl";
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://faddy.site";
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://faddy.online";
 
 interface PostDetailClientProps {
   /** True on a Cloudflare-for-SaaS custom hostname (set server-side). */
@@ -588,11 +587,6 @@ export default function PostDetailClient({ isCustomHost }: PostDetailClientProps
                   </Badge>
                   {post.board && (
                     <Badge variant="outline" className="gap-1.5 border-border font-medium">
-                      <IconDisplay
-                        iconName={post.board.icon}
-                        className="h-3.5 w-3.5"
-                        style={{ color: post.board.color }}
-                      />
                       {post.board.name}
                     </Badge>
                   )}
@@ -668,10 +662,10 @@ export default function PostDetailClient({ isCustomHost }: PostDetailClientProps
                 {isCustomHost ? (
                   <div className="rounded-lg border border-border bg-secondary/50 p-6 text-center">
                     <p className="mb-3 text-muted-foreground">
-                      Log in on faddy.site to vote and comment.
+                      Log in on faddy.online to vote and comment.
                     </p>
                     <Button asChild className="transition-colors">
-                      <a href={`${APP_URL}/login`}>Log in on faddy.site</a>
+                      <a href={`${APP_URL}/login`}>Log in on faddy.online</a>
                     </Button>
                   </div>
                 ) : isAuthenticated ? (
@@ -716,7 +710,7 @@ export default function PostDetailClient({ isCustomHost }: PostDetailClientProps
               {isCustomHost ? (
                 <a
                   href={`${APP_URL}/login`}
-                  title="Log in on faddy.site to vote"
+                  title="Log in on faddy.online to vote"
                   className="flex w-full items-center justify-between rounded-lg border border-border bg-secondary px-4 py-3 transition-colors hover:bg-muted"
                 >
                   <span className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground">
@@ -771,11 +765,6 @@ export default function PostDetailClient({ isCustomHost }: PostDetailClientProps
                     href={`/feedback/boards/${post.board.slug}`}
                     className="inline-flex min-w-0 items-center gap-2 font-medium text-foreground transition-colors hover:text-primary"
                   >
-                    <IconDisplay
-                      iconName={post.board.icon}
-                      className="h-4 w-4 shrink-0"
-                      style={{ color: post.board.color }}
-                    />
                     <span className="truncate">{post.board.name}</span>
                   </Link>
                 </div>

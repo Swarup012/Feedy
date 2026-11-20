@@ -7,7 +7,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
-import { Board } from "@/services/boardService";
 import { Post } from "@/services/postService";
 import { useBoardRealtime } from "@/hooks/useBoardRealtime";
 import { useAuth } from "@/hooks/useAuth";
@@ -31,11 +30,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { AlertCircle, LogIn, Plus, UserPlus } from "lucide-react";
-import { IconDisplay } from "@/components/ui/icon-picker";
 import { saveReturnUrl } from "@/lib/returnUrl";
 import { useIsCustomHost } from "@/context/CustomHostContext";
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://faddy.site";
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://faddy.online";
 
 export default function PublicBoardPage() {
   const params = useParams();
@@ -255,28 +253,13 @@ export default function PublicBoardPage() {
     toast({ title: "Success!", description: "Post created successfully" });
   };
 
-  // Board's own color is brand data (not a Tailwind palette class) — used
-  // only for the header icon medallion tint.
-  const boardColor = (currentBoard as (Board & { color?: string }) | null)
-    ?.color;
-
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-background text-foreground">
-      {/* Board header — icon + name + description, create affordance right */}
+      {/* Board header — name + description, create affordance right */}
       <header className="flex shrink-0 items-center justify-between gap-4 border-b border-border px-4 py-4 sm:px-6">
         <div className="flex min-w-0 items-center gap-3">
           {currentBoard && (
             <>
-              <span
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-secondary"
-                style={boardColor ? { backgroundColor: boardColor + "20" } : undefined}
-              >
-                <IconDisplay
-                  iconName={currentBoard.icon}
-                  className="h-5 w-5"
-                  style={boardColor ? { color: boardColor } : undefined}
-                />
-              </span>
               <div className="min-w-0">
                 <h1 className="truncate font-headline text-xl font-semibold tracking-tight text-foreground">
                   {currentBoard.name}

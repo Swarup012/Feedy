@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-export const DOCS_SITE_URL = "https://faddy.site";
+export const DOCS_SITE_URL = "https://faddy.online";
 
 export type DocsArticleMeta = {
   title: string;

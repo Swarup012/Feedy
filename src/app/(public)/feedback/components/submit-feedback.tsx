@@ -27,7 +27,6 @@ import {
 import { Plus, Loader2 } from "lucide-react";
 import { saveReturnUrl } from "@/lib/returnUrl";
 import { useToast } from "@/hooks/use-toast";
-import { IconDisplay } from "@/components/ui/icon-picker";
 
 interface SubmitFeedbackProps {
   boards?: Board[];
@@ -179,10 +178,6 @@ export function SubmitFeedback({
                   {boards.map((board) => (
                     <SelectItem key={board.id} value={board.slug}>
                       <div className="flex items-center gap-2">
-                        <IconDisplay
-                          iconName={board.icon}
-                          className="h-4 w-4"
-                        />
                         <span>{board.name}</span>
                       </div>
                     </SelectItem>

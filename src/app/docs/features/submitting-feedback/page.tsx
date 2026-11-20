@@ -10,7 +10,7 @@ export default function SubmittingFeedbackPage() {
       <DocsH2>Finding the right board</DocsH2>
       <p>
         Go to your company&rsquo;s feedback page (for example,{" "}
-        <code>yourcompany.faddy.site/feedback</code>). You&rsquo;ll see a list
+        <code>yourcompany.faddy.online/feedback</code>). You&rsquo;ll see a list
         of boards — each one is a category like &ldquo;Feature Requests&rdquo;
         or &ldquo;Bug Reports.&rdquo; Click the board that best fits what you
         want to share.

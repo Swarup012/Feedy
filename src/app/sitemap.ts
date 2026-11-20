@@ -2,9 +2,9 @@ import type { MetadataRoute } from "next";
 import { getAllBlogPosts } from "@/lib/blog";
 import { orderedDocsHref } from "./docs/docs-nav";
 
-// Canonical first-party domain: faddy.site serves production (nginx/SSL/
+// Canonical first-party domain: faddy.online serves production (nginx/SSL/
 // deploy runbook all target it); www.usefaddy.com does not resolve.
-const SITE_URL = "https://faddy.site";
+const SITE_URL = "https://faddy.online";
 const BACKEND_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 

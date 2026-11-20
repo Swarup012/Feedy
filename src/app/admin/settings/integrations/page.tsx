@@ -49,9 +49,11 @@ import {
   IntegrationCardAdd,
   IntegrationDisconnectButton,
   IntegrationReconnectBanner,
+  IntercomUnderReviewBadge,
+  IntercomUnderReviewNotice,
   formatDate,
 } from '@/components/admin/IntegrationCard';
-import { INTEGRATION_BRAND_COLORS } from '@/components/admin/integration-brands';
+import { INTEGRATION_BRAND_COLORS, INTERCOM_UNDER_REVIEW } from '@/components/admin/integration-brands';
 
 const ZAPIER_BRAND_COLOR = '#FF4F00';
 
@@ -690,9 +692,12 @@ function IntegrationsPageInner() {
       });
       return;
     }
-    // No listing URL configured yet: the manual path still works —
-    // create an API key and paste it into Zapier.
-    window.open('/admin/api-keys', '_blank', 'noopener,noreferrer');
+    // No listing URL configured yet: nothing to open, so say so instead of
+    // silently bouncing the user to an unrelated page.
+    toast({
+      title: 'Zapier connection is not configured yet',
+      description: 'Zapier setup is unavailable right now. Please try again later.',
+    });
   };
 
   const handleDisconnectIntercom = async () => {
@@ -928,6 +933,7 @@ function IntegrationsPageInner() {
                 {isIntercomActive && (
                   <IntegrationCardConnected
                     name="Intercom"
+                    badge={INTERCOM_UNDER_REVIEW ? <IntercomUnderReviewBadge /> : undefined}
                     icon={<IntercomIcon className="h-5 w-5" />}
                     brandColor={INTEGRATION_BRAND_COLORS.intercom}
                     status={intercomStatus?.status === 'error' ? 'error' : 'active'}
@@ -1255,6 +1261,7 @@ function IntegrationsPageInner() {
                   description="Receive closed conversation transcripts and generate feedback suggestions."
                   onConnect={handleConnectIntercom}
                   disabled={starterLimitReached}
+                  badge={INTERCOM_UNDER_REVIEW ? <IntercomUnderReviewBadge /> : undefined}
                 />
               )}
               {!isSlackActive && (
@@ -1288,6 +1295,12 @@ function IntegrationsPageInner() {
                 />
               )}
             </div>
+            {!zapierActive && !ZAPIER_APP_URL && (
+              <p className="mt-3 text-xs text-muted-foreground">
+                Zapier connection is not configured yet.
+              </p>
+            )}
+            <IntercomUnderReviewNotice className="mt-3" />
           </section>
         </>
       )}

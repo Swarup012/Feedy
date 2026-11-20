@@ -133,7 +133,7 @@ export function DocsShell({ children }: { children: ReactNode }) {
                 Contact support
               </Link>
               <Link href="/" className="transition-colors hover:text-[var(--docs-ink)]">
-                faddy.site
+                faddy.online
               </Link>
             </div>
           </div>

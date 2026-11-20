@@ -18,7 +18,6 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { boardService } from "@/services/boardService";
-import { IconPicker, IconDisplay } from "@/components/ui/icon-picker";
 import { UpgradeDialog } from "@/components/UpgradeDialog";
 import { useOrganization } from "@/context/OrganizationContext";
 import { useJobRoles } from "@/hooks/useJobRoles";
@@ -62,7 +61,6 @@ export default function FirstBoardWelcomePage() {
   const { roles: jobRoles, loading: rolesLoading } = useJobRoles(organization?.id);
   const [step, setStep] = useState<"welcome" | "create">("welcome");
   const [loading, setLoading] = useState(false);
-  const [showIconPicker, setShowIconPicker] = useState(false);
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
   
   const [formData, setFormData] = useState({
@@ -70,7 +68,6 @@ export default function FirstBoardWelcomePage() {
     description: "",
     is_private: false,
     color: "#6366f1",
-    icon: "Lightbulb",
     visible_to_roles: [] as string[],
   });
 
@@ -294,51 +291,24 @@ export default function FirstBoardWelcomePage() {
                   )}
                 </div>
 
-                {/* Icon + Preview side by side */}
-                <div className="flex gap-3 items-stretch">
-                  {/* Icon picker button */}
-                  <button
-                    type="button"
-                    onClick={() => setShowIconPicker(true)}
-                    disabled={loading}
-                    className="flex-shrink-0 w-16 h-16 rounded-xl border border-border bg-muted flex flex-col items-center justify-center gap-1 hover:border-primary transition-colors"
-                  >
-                    <div
-                      className="h-8 w-8 rounded-lg flex items-center justify-center"
-                      style={{ backgroundColor: formData.color + "20" }}
-                    >
-                      <IconDisplay iconName={formData.icon} className="h-5 w-5" style={{ color: formData.color }} />
+                {/* Board preview */}
+                <div
+                  className="rounded-xl border bg-muted p-3 flex items-center justify-center min-h-[64px]"
+                  style={{ borderColor: formData.name ? formData.color : undefined }}
+                >
+                  {formData.name ? (
+                    <div className="w-full">
+                      <p className="text-sm font-semibold leading-tight flex items-center gap-1">
+                        {formData.name}
+                        {formData.is_private && <Lock className="h-3 w-3 text-muted-foreground/70" />}
+                      </p>
+                      {formData.description && (
+                        <p className="text-xs text-muted-foreground/70 line-clamp-1">{formData.description}</p>
+                      )}
                     </div>
-                    <span className="text-[10px] text-muted-foreground/70">icon</span>
-                  </button>
-
-                  {/* Board preview */}
-                  <div
-                    className="flex-1 rounded-xl border bg-muted p-3 flex items-center justify-center min-h-[64px]"
-                    style={{ borderColor: formData.name ? formData.color : undefined }}
-                  >
-                    {formData.name ? (
-                      <div className="flex items-center gap-2 w-full">
-                        <div
-                          className="h-8 w-8 rounded-lg flex-shrink-0 flex items-center justify-center"
-                          style={{ backgroundColor: formData.color + "20" }}
-                        >
-                          <IconDisplay iconName={formData.icon} className="h-4 w-4" style={{ color: formData.color }} />
-                        </div>
-                        <div>
-                          <p className="text-sm font-semibold leading-tight flex items-center gap-1">
-                            {formData.name}
-                            {formData.is_private && <Lock className="h-3 w-3 text-muted-foreground/70" />}
-                          </p>
-                          {formData.description && (
-                            <p className="text-xs text-muted-foreground/70 line-clamp-1">{formData.description}</p>
-                          )}
-                        </div>
-                      </div>
-                    ) : (
-                      <p className="text-xs text-muted-foreground/70 text-center">how the board look like<br />with icon should be here</p>
-                    )}
-                  </div>
+                  ) : (
+                    <p className="text-xs text-muted-foreground/70 text-center">Your board preview</p>
+                  )}
                 </div>
 
                 {/* Create Board button — right-aligned */}
@@ -360,14 +330,6 @@ export default function FirstBoardWelcomePage() {
             </Card>
           </div>
         </div>
-        
-        {/* Icon Picker Dialog */}
-        <IconPicker
-          open={showIconPicker}
-          onOpenChange={setShowIconPicker}
-          onSelectIcon={(iconName) => setFormData({ ...formData, icon: iconName })}
-          currentIcon={formData.icon}
-        />
       </div>
     );
   }
@@ -455,51 +417,24 @@ export default function FirstBoardWelcomePage() {
                   )}
                 </div>
 
-                {/* Icon + Preview side by side */}
-                <div className="flex gap-3 items-stretch">
-                  {/* Icon picker button */}
-                  <button
-                    type="button"
-                    onClick={() => setShowIconPicker(true)}
-                    disabled={loading}
-                    className="flex-shrink-0 w-16 h-16 rounded-xl border border-border bg-muted flex flex-col items-center justify-center gap-1 hover:border-primary transition-colors"
-                  >
-                    <div
-                      className="h-8 w-8 rounded-lg flex items-center justify-center"
-                      style={{ backgroundColor: formData.color + "20" }}
-                    >
-                      <IconDisplay iconName={formData.icon} className="h-5 w-5" style={{ color: formData.color }} />
+                {/* Board preview */}
+                <div
+                  className="rounded-xl border bg-muted p-3 flex items-center justify-center min-h-[64px]"
+                  style={{ borderColor: formData.name ? formData.color : undefined }}
+                >
+                  {formData.name ? (
+                    <div className="w-full">
+                      <p className="text-sm font-semibold leading-tight flex items-center gap-1">
+                        {formData.name}
+                        {formData.is_private && <Lock className="h-3 w-3 text-muted-foreground/70" />}
+                      </p>
+                      {formData.description && (
+                        <p className="text-xs text-muted-foreground/70 line-clamp-1">{formData.description}</p>
+                      )}
                     </div>
-                    <span className="text-[10px] text-muted-foreground/70">icon</span>
-                  </button>
-
-                  {/* Board preview */}
-                  <div
-                    className="flex-1 rounded-xl border bg-muted p-3 flex items-center justify-center min-h-[64px]"
-                    style={{ borderColor: formData.name ? formData.color : undefined }}
-                  >
-                    {formData.name ? (
-                      <div className="flex items-center gap-2 w-full">
-                        <div
-                          className="h-8 w-8 rounded-lg flex-shrink-0 flex items-center justify-center"
-                          style={{ backgroundColor: formData.color + "20" }}
-                        >
-                          <IconDisplay iconName={formData.icon} className="h-4 w-4" style={{ color: formData.color }} />
-                        </div>
-                        <div>
-                          <p className="text-sm font-semibold leading-tight flex items-center gap-1">
-                            {formData.name}
-                            {formData.is_private && <Lock className="h-3 w-3 text-muted-foreground/70" />}
-                          </p>
-                          {formData.description && (
-                            <p className="text-xs text-muted-foreground/70 line-clamp-1">{formData.description}</p>
-                          )}
-                        </div>
-                      </div>
-                    ) : (
-                      <p className="text-xs text-muted-foreground/70 text-center">how the board look like<br />with icon should be here</p>
-                    )}
-                  </div>
+                  ) : (
+                    <p className="text-xs text-muted-foreground/70 text-center">Your board preview</p>
+                  )}
                 </div>
 
                 {/* Create Board button — right-aligned */}
@@ -522,14 +457,6 @@ export default function FirstBoardWelcomePage() {
           </div>
         </div>
       </div>
-
-      {/* Icon Picker Dialog */}
-      <IconPicker
-        open={showIconPicker}
-        onOpenChange={setShowIconPicker}
-        onSelectIcon={(iconName) => setFormData({ ...formData, icon: iconName })}
-        currentIcon={formData.icon}
-      />
 
       {/* Upgrade Dialog */}
       <UpgradeDialog

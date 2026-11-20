@@ -11,6 +11,7 @@
 /* Hallmark · waive 49b · the wrapping label is the shared site footer's kept link, whose copy is the owner's · a footer phrase that cannot shorten is the guard this gate names */
 /* Hallmark · waive 39b · the 40px control is the shared marketing navbar's kept Login/Sign Up pair, while every button and link this landing page owns measures 44px or more · site chrome is kept at redesign depth, so only this page's own controls are in scope here */
 /* Hallmark · dropped · /images/Faddy_Landnding_hero.png (a stale seeded-data screenshot of lorem-ipsum threads, rejected by the owner) and /videos/SaaS_ai_landing.mp4 (84: a stock promo showing someone else's interface) */
+/* Hallmark · owner change · the hero note reads "Feedback in, priorities out." as plain accent text; the pill, its pulsing dot and the lp-pulse keyframes are removed at the owner's call */
 /* Hallmark · hero-review: subagent, first word recapture · resolved: the stale seeded capture is gone from the page entirely and the owner's own hero is restored on their call */
 /* Hallmark · reworded "Everything you need to manage product feedback" to "Collect, understand, prioritize" · 69: the old h2 echoed the hero's claim one screen below it */
 /* Hallmark · reworded "Your users are waiting to tell you what to build." to "Your users are waiting to tell you what to build" · 50: display heads carry no trailing punctuation */
@@ -128,28 +129,9 @@
 }
 
 .lp-hero__note {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-xs);
-  padding: var(--space-2xs) var(--space-md);
-  border-radius: var(--radius-pill);
-  border: var(--rule-hair) solid color-mix(in oklab, var(--color-accent) 32%, transparent);
-  background: var(--color-accent-wash);
   color: var(--color-accent-deep);
-  font-size: var(--text-sm);
-  font-weight: 600;
-}
-.lp-hero__note::before {
-  content: "";
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--color-accent);
-  animation: lp-pulse 2.4s var(--ease-in-out) infinite;
-}
-@keyframes lp-pulse {
-  0%, 100% { opacity: 0.45; transform: scale(0.8); }
-  50% { opacity: 1; transform: scale(1); }
+  font-size: var(--text-md);
+  font-weight: 500;
 }
 
 /* The three rotating lines own their size: the shared display clamp starts
@@ -218,6 +200,18 @@
 @media (max-width: 40rem) and (max-height: 42rem) {
   .lp-hero { padding-block: var(--space-md) var(--space-lg); }
   .lp-hero__inner { gap: var(--space-xs); }
+}
+
+/* ── Showcase (launch film) ─────────────────────────────────────────────── */
+.lp-showcase { padding-block: var(--section-gap) 0; }
+.lp-showcase__video {
+  width: 100%;
+  display: block;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-card);
+  background: var(--color-ink);
 }
 
 /* ── Tabs (Switcher) ────────────────────────────────────────────────────── */

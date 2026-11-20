@@ -10,7 +10,7 @@ export default function ReadingChangelogPage() {
       <DocsH2>Opening the changelog</DocsH2>
       <p>
         Go to your company changelog page (for example,{" "}
-        <code>yourcompany.faddy.site/changelog</code>). You can also find a
+        <code>yourcompany.faddy.online/changelog</code>). You can also find a
         link in the top navigation of the feedback board.
       </p>
 

@@ -6,4 +6,4 @@ Disallow: /settings
 Disallow: /onboarding
 Disallow: /create-organization
 
-Sitemap: https://faddy.site/sitemap.xml
+Sitemap: https://faddy.online/sitemap.xml

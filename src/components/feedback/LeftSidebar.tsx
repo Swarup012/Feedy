@@ -48,7 +48,6 @@ import { cn } from "@/lib/utils";
 import { CreateBoardDialog } from "./CreateBoardDialog";
 import { UpgradeDialog } from "@/components/UpgradeDialog";
 import { useToast } from "@/hooks/use-toast";
-import { IconPicker, IconDisplay } from "@/components/ui/icon-picker";
 import { useEffect } from "react"; // Add useEffect
 
 interface LeftSidebarProps {
@@ -85,7 +84,6 @@ export function LeftSidebar({
   const [loadingDependencies, setLoadingDependencies] = useState(false);
   const [deleteConfirmed, setDeleteConfirmed] = useState(false);
   const [showAllBoards, setShowAllBoards] = useState(false); // View All toggle
-  const [showIconPicker, setShowIconPicker] = useState(false); // Icon picker state
   const [canCreateBoard, setCanCreateBoard] = useState(true); // Pre-load this
   const [editNameError, setEditNameError] = useState("");
   const [editFormData, setEditFormData] = useState({
@@ -93,7 +91,6 @@ export function LeftSidebar({
     description: '',
     is_private: false,
     color: '#3B82F6',
-    icon: 'Lightbulb', // Default to Lucide icon name
   });
 
   // Pre-load usage data for instant popup — signed-in only: guests can't
@@ -158,7 +155,6 @@ export function LeftSidebar({
       description: board.description || '',
       is_private: board.is_private,
       color: board.color,
-      icon: board.icon,
     });
     setShowEditDialog(true);
   };
@@ -311,12 +307,6 @@ export function LeftSidebar({
               onClick={() => router.push(`/admin/feedback/boards/${board.slug}`)}
               className="flex items-center gap-3 flex-1 min-w-0"
             >
-              <div
-                className="h-10 w-10 rounded-lg flex items-center justify-center flex-shrink-0"
-                style={{ backgroundColor: board.color + "20" }}
-              >
-                <IconDisplay iconName={board.icon} className="h-5 w-5" style={{ color: board.color }} />
-              </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1">
                   <p className="font-medium text-sm truncate text-foreground">{board.name}</p>
@@ -533,20 +523,6 @@ export function LeftSidebar({
                 className="mt-1 dark:bg-card dark:border-border dark:text-white"
               />
             </div>
-            <div>
-              <Label htmlFor="edit-icon" className="text-foreground">Icon</Label>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setShowIconPicker(true)}
-                className="w-full mt-1 justify-start dark:bg-card dark:border-border dark:text-foreground dark:hover:bg-muted"
-              >
-                <div className="h-6 w-6 rounded-lg bg-primary/10 flex items-center justify-center mr-2">
-                  <IconDisplay iconName={editFormData.icon} className="h-4 w-4 text-primary" />
-                </div>
-                {editFormData.icon || "Choose Icon"}
-              </Button>
-            </div>
             <div className="flex items-center space-x-2">
               <Switch
                 id="edit-private"
@@ -630,14 +606,6 @@ export function LeftSidebar({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
-      {/* Icon Picker Dialog */}
-      <IconPicker
-        open={showIconPicker}
-        onOpenChange={setShowIconPicker}
-        onSelectIcon={(iconName) => setEditFormData({ ...editFormData, icon: iconName })}
-        currentIcon={editFormData.icon}
-      />
 
       {/* Upgrade Dialog */}
       <UpgradeDialog

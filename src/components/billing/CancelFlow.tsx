@@ -188,7 +188,7 @@ export function CancelFlow({ open, onOpenChange, subscription, onSuccess }: Canc
                         Request a feature
                       </p>
                       <p className="text-xs text-gray-500">
-                        Send us a message at support@faddy.site with what you need
+                        Send us a message at support@faddy.online with what you need
                       </p>
                     </div>
                   </CardContent>

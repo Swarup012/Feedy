@@ -26,7 +26,7 @@ if (!Element.prototype.releasePointerCapture) {
 // any test file imports. Dedicated default-by-NODE_ENV tests delete this,
 // vi.resetModules(), and re-import to see the real default.
 process.env.NON_CUSTOM_HOST_SUFFIXES =
-  process.env.NON_CUSTOM_HOST_SUFFIXES || 'faddy.site,localhost';
+  process.env.NON_CUSTOM_HOST_SUFFIXES || 'faddy.online,faddy.site,localhost';
 
 // This jsdom build exposes localStorage as a plain object without Storage
 // methods; components call localStorage.setItem on mount. Provide an

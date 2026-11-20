@@ -209,7 +209,7 @@ export default function TermsOfService() {
 
       <div className="tos-wrap">
         <aside className="tos-side">
-          <a href="https://faddy.site" className="tos-logo">
+          <a href="https://faddy.online" className="tos-logo">
             <span className="tos-dot" /> Faddy
           </a>
           <p className="tos-label">On this page</p>
@@ -238,7 +238,7 @@ export default function TermsOfService() {
                 Last updated <span>August 5, 2026</span>
               </div>
               <div className="tos-meta-item">
-                Applies to <span>faddy.site</span>
+                Applies to <span>faddy.online</span>
               </div>
             </div>
             <InfoBox>
@@ -255,8 +255,8 @@ export default function TermsOfService() {
               Faddy is a service operated by <strong>Swarup Basu</strong>, a
               sole proprietor based in India, providing a role-based,
               multi-tenant user feedback management platform at{" "}
-              <a href="https://faddy.site" className="tos-link">
-                faddy.site
+              <a href="https://faddy.online" className="tos-link">
+                faddy.online
               </a>
               . Faddy helps businesses and developers collect, track, and
               organise user feedback across teams and organisations.
@@ -282,8 +282,8 @@ export default function TermsOfService() {
             <P>
               We may update these Terms at any time. We will notify you of
               material changes via email to{" "}
-              <a href="mailto:info@faddy.site" className="tos-link">
-                info@faddy.site
+              <a href="mailto:info@faddy.online" className="tos-link">
+                info@faddy.online
               </a>{" "}
               or through an in-app notice. Continued use of the Services after
               the effective date constitutes acceptance of the updated Terms.
@@ -443,8 +443,8 @@ export default function TermsOfService() {
                 Refund Policy
               </a>
               . For questions, email{" "}
-              <a href="mailto:support@faddy.site" className="tos-link">
-                support@faddy.site
+              <a href="mailto:support@faddy.online" className="tos-link">
+                support@faddy.online
               </a>
               .
             </P>
@@ -681,8 +681,8 @@ export default function TermsOfService() {
                 </strong>
                 <span>Barasat, West Bengal 743248, India</span>
               </div>
-              <a href="mailto:support@faddy.site" className="tos-btn">
-                ✉ support@faddy.site
+              <a href="mailto:support@faddy.online" className="tos-btn">
+                ✉ support@faddy.online
               </a>
             </div>
           </section>

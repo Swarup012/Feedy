@@ -61,7 +61,7 @@ export function SuccessStep({ data }: SuccessStepProps) {
             <div className="px-4 py-3 flex items-center justify-between">
               <span className="text-sm text-muted-foreground">Workspace</span>
               <span className="text-sm font-mono font-medium text-primary">
-                {data.companyName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')}.faddy.site
+                {data.companyName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')}.faddy.online
               </span>
             </div>
           )}

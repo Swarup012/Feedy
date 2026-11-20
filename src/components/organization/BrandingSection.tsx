@@ -11,7 +11,8 @@ import api, { isPlanUpgradeRequired } from '@/lib/api';
 import { uploadService } from '@/services/uploadService';
 import { planAllowsFeature, resolvePlan } from '@/config/plans';
 import { UpgradeDialog } from '@/components/UpgradeDialog';
-import { ImagePlus, Loader2, X } from 'lucide-react';
+import { contrastForeground } from '@/lib/branding-color';
+import { ImagePlus, Loader2, X, ArrowUp, MessageSquare } from 'lucide-react';
 
 const DEFAULT_COLOR = '#3b82f6';
 const HEX_RE = /^#[0-9a-fA-F]{6}$/;
@@ -236,24 +237,98 @@ export function BrandingSection() {
           )}
         </div>
 
-        {/* Live preview */}
+        {/* Live preview — mini portal page, mirrors (public) feedback layout */}
         <div className="space-y-2">
           <Label className="text-sm font-medium text-foreground">Preview</Label>
-          <div className="rounded-md border border-border p-4 space-y-3">
-            <div
-              className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-semibold text-white"
-              style={{ backgroundColor: hexValid ? hex : DEFAULT_COLOR }}
-            >
-              Header
-            </div>
-            <button
-              type="button"
-              className="rounded-md px-3 py-1.5 text-sm font-medium text-white"
-              style={{ backgroundColor: hexValid ? hex : DEFAULT_COLOR }}
-            >
-              Sample button
-            </button>
-          </div>
+          {(() => {
+            const brandHex = hexValid ? hex : DEFAULT_COLOR;
+            const brandFg = contrastForeground(brandHex) || '0 0% 100%';
+            const brandSoft = `${brandHex}1a`;
+            const posts = [
+              { title: 'Dark mode support', desc: 'Would love a dark theme for the feedback portal.', status: 'Planned', votes: 42, comments: 8, author: 'Sarah K.' },
+              { title: 'Export roadmap as CSV', desc: 'Need to share the roadmap with my team.', status: 'In Progress', votes: 27, comments: 5, author: 'Alex M.' },
+            ];
+
+            return (
+              <div className="overflow-hidden rounded-lg border border-border bg-background shadow-sm">
+                {/* Browser chrome */}
+                <div className="flex items-center gap-1.5 border-b border-border bg-muted/50 px-3 py-2">
+                  <span className="h-2.5 w-2.5 rounded-full bg-red-400" />
+                  <span className="h-2.5 w-2.5 rounded-full bg-yellow-400" />
+                  <span className="h-2.5 w-2.5 rounded-full bg-green-400" />
+                  <div className="ml-2 flex-1 truncate rounded bg-background px-2 py-0.5 text-[10px] text-muted-foreground">
+                    {organization?.subdomain ? `${organization.subdomain}.faddy.online` : 'your-org.faddy.online'}
+                  </div>
+                </div>
+
+                {/* Portal header */}
+                <div className="flex items-center gap-3 border-b border-border px-4 py-3">
+                  {logoUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={logoUrl} alt="" className="h-6 w-16 shrink-0 object-contain object-left" />
+                  ) : (
+                    <div className="h-6 w-16 shrink-0 rounded border border-dashed border-border" />
+                  )}
+                  <span className="truncate text-sm font-semibold text-foreground">
+                    {organization?.name || 'Your Organization'}
+                  </span>
+                  <nav className="ml-auto flex shrink-0 items-center gap-3 text-xs">
+                    <span
+                      className="border-b-2 pb-0.5 font-medium"
+                      style={{ borderColor: brandHex, color: brandHex }}
+                    >
+                      Feedback
+                    </span>
+                    <span className="text-muted-foreground">Roadmap</span>
+                    <span className="text-muted-foreground">Changelog</span>
+                  </nav>
+                </div>
+
+                {/* Board + posts */}
+                <div className="space-y-3 p-4">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-sm font-semibold" style={{ color: brandHex }}>
+                      Feature Requests
+                    </h4>
+                    <span
+                      className="rounded-md px-2.5 py-1 text-[11px] font-medium"
+                      style={{ backgroundColor: brandHex, color: `hsl(${brandFg})` }}
+                    >
+                      + New Post
+                    </span>
+                  </div>
+
+                  {posts.map((post) => (
+                    <div key={post.title} className="rounded-md border border-border p-3">
+                      <div className="flex gap-3">
+                        <div className="flex shrink-0 flex-col items-center rounded-md border border-border px-2 py-1">
+                          <ArrowUp className="h-3 w-3" style={{ color: brandHex }} />
+                          <span className="text-[11px] font-semibold text-foreground">{post.votes}</span>
+                        </div>
+                        <div className="min-w-0 flex-1 space-y-1">
+                          <p className="truncate text-xs font-semibold text-foreground">{post.title}</p>
+                          <p className="line-clamp-1 text-[11px] text-muted-foreground">{post.desc}</p>
+                          <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
+                            <span
+                              className="rounded-full px-1.5 py-0.5 font-medium"
+                              style={{ backgroundColor: brandSoft, color: brandHex }}
+                            >
+                              {post.status}
+                            </span>
+                            <span className="flex items-center gap-0.5">
+                              <MessageSquare className="h-3 w-3" />
+                              {post.comments}
+                            </span>
+                            <span>by {post.author}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
         </div>
 
         {editable && (

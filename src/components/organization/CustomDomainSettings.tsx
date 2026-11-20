@@ -356,7 +356,7 @@ export function CustomDomainSettings({ organizationId }: CustomDomainSettingsPro
               Custom Domain
             </CardTitle>
             <CardDescription>
-              Use your own subdomain instead of *.faddy.site
+              Use your own subdomain instead of *.faddy.online
             </CardDescription>
           </div>
         </div>

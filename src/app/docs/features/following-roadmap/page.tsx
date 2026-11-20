@@ -10,7 +10,7 @@ export default function FollowingRoadmapPage() {
       <DocsH2>Opening the roadmap</DocsH2>
       <p>
         Go to your company roadmap page (for example,{" "}
-        <code>yourcompany.faddy.site/roadmap</code>). You can also find a link
+        <code>yourcompany.faddy.online/roadmap</code>). You can also find a link
         to it in the top navigation of the feedback board.
       </p>
 

@@ -1,11 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
+import React, { useState, useEffect } from "react";
 import {
   Plus,
   Search,
@@ -29,38 +24,22 @@ import { useOrganization } from "@/context/OrganizationContext";
 import { changelogService, Changelog } from "@/services/changelogService";
 import { formatDistanceToNow, format, parseISO } from "date-fns";
 import ReactMarkdown from "react-markdown";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { NARROW_CONTAINER } from '@/lib/layout-constants';
-
-if (typeof window !== "undefined") {
-  gsap.registerPlugin(ScrollTrigger);
-}
 
 const TYPE_CONFIG = {
   new: {
     label: "New",
     icon: Sparkles,
-    badgeColor: "bg-blue-500",
-    textColor: "text-blue-600 dark:text-blue-400",
-    bgColor: "bg-blue-50 dark:bg-blue-950/30",
-    borderColor: "border-blue-200 dark:border-blue-800",
+    className: "clog__type--new",
   },
   improved: {
     label: "Improved",
     icon: Wrench,
-    badgeColor: "bg-purple-500",
-    textColor: "text-purple-600 dark:text-purple-400",
-    bgColor: "bg-purple-50 dark:bg-purple-950/30",
-    borderColor: "border-purple-200 dark:border-purple-800",
+    className: "clog__type--improved",
   },
   fixed: {
     label: "Fixed",
     icon: CheckCircle2,
-    badgeColor: "bg-green-500",
-    textColor: "text-green-600 dark:text-green-400",
-    bgColor: "bg-green-50 dark:bg-green-950/30",
-    borderColor: "border-green-200 dark:border-green-800",
+    className: "clog__type--fixed",
   },
 };
 
@@ -92,9 +71,6 @@ export default function ChangelogPage() {
   });
   const [newLabel, setNewLabel] = useState("");
 
-  const changelogRefs = useRef<(HTMLElement | null)[]>([]);
-  const dateHeaderRefs = useRef<(HTMLDivElement | null)[]>([]);
-
   useEffect(() => {
     fetchChangelogs();
   }, []);
@@ -117,27 +93,6 @@ export default function ChangelogPage() {
 
     setFilteredChangelogs(filtered);
   }, [changelogs, searchQuery, filterType]);
-
-  useEffect(() => {
-    if (!loading && filteredChangelogs.length > 0) {
-      // Staggered reveal animation
-      gsap.fromTo(
-        changelogRefs.current,
-        {
-          opacity: 0,
-          y: 20,
-        },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.4,
-          stagger: 0.08,
-          ease: "power2.out",
-          clearProps: "all",
-        }
-      );
-    }
-  }, [loading, filteredChangelogs]);
 
   const fetchChangelogs = async () => {
     try {
@@ -336,6 +291,14 @@ export default function ChangelogPage() {
     input.click();
   };
 
+  const typeCounts = {
+    new: changelogs.filter((changelog) => changelog.type === "new").length,
+    improved: changelogs.filter((changelog) => changelog.type === "improved").length,
+    fixed: changelogs.filter((changelog) => changelog.type === "fixed").length,
+  };
+  const allFiltersOn = filterType.new && filterType.improved && filterType.fixed;
+  const isNarrowed = Boolean(searchQuery) || !allFiltersOn;
+
   // Group changelogs by date
   const groupedChangelogs = filteredChangelogs.reduce((acc, changelog) => {
     const date = changelog.published_at
@@ -351,366 +314,407 @@ export default function ChangelogPage() {
   const dateGroups = Object.entries(groupedChangelogs);
 
   return (
-    <div className="flex-1 overflow-hidden bg-background">
-      {/* Hero Header */}
-      <div className="border-b border-border/50 bg-gradient-to-b from-background to-muted/20">
-        <div className={`${NARROW_CONTAINER} py-10`}>
-          <div className="flex items-start justify-between mb-6">
-            <div>
-              <h1 className="text-2xl font-bold tracking-tight text-foreground mb-3">
-                Changelog
-              </h1>
-              <p className="text-lg text-muted-foreground max-w-xl leading-relaxed">
-                New features, improvements, and fixes. Follow our journey as we build better tools for your team.
-              </p>
-            </div>
+    <div className="flex-1 overflow-y-auto bg-background">
+      <div className="clog">
+        {/* Masthead */}
+        <header className="clog__masthead">
+          <div className="clog__headline">
+            <h1 className="clog__title">Changelog</h1>
+            <p className="clog__lede">
+              New features, improvements, and fixes. Follow our journey as we build
+              better tools for your team.
+            </p>
           </div>
 
-          {/* Action Bar */}
-          <div className="flex items-center gap-3 mt-8">
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search updates..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 bg-background/60 border-border/50 focus:bg-background"
-              />
+          <aside className="clog__register" aria-label="Release register">
+            <div className="clog__register-total">
+              <span className="clog__register-number">{changelogs.length}</span>
+              <span className="clog__register-label">
+                {changelogs.length === 1 ? "entry" : "entries"}
+              </span>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
+            <div className="clog__register-bar" aria-hidden="true">
+              {typeCounts.new > 0 && (
+                <span
+                  className="clog__register-seg clog__register-seg--new"
+                  style={{ flexGrow: typeCounts.new }}
+                />
+              )}
+              {typeCounts.improved > 0 && (
+                <span
+                  className="clog__register-seg clog__register-seg--improved"
+                  style={{ flexGrow: typeCounts.improved }}
+                />
+              )}
+              {typeCounts.fixed > 0 && (
+                <span
+                  className="clog__register-seg clog__register-seg--fixed"
+                  style={{ flexGrow: typeCounts.fixed }}
+                />
+              )}
+            </div>
+            <ul className="clog__register-key">
+              <li>
+                <span className="clog__key clog__key--new" aria-hidden="true" />
+                New <span className="clog__key-value">{typeCounts.new}</span>
+              </li>
+              <li>
+                <span className="clog__key clog__key--improved" aria-hidden="true" />
+                Improved <span className="clog__key-value">{typeCounts.improved}</span>
+              </li>
+              <li>
+                <span className="clog__key clog__key--fixed" aria-hidden="true" />
+                Fixed <span className="clog__key-value">{typeCounts.fixed}</span>
+              </li>
+            </ul>
+          </aside>
+        </header>
+
+        {/* Toolbar */}
+        <div className="clog__toolbar">
+          <div className="clog__search">
+            <Search aria-hidden="true" />
+            <input
+              type="search"
+              className="clog__input"
+              placeholder="Search updates..."
+              aria-label="Search updates"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          <div className="clog__tools">
+            <button
+              type="button"
+              className="btn"
               onClick={() => setShowFilters(!showFilters)}
-              className="gap-2"
+              aria-expanded={showFilters}
+              aria-controls="changelog-filters"
             >
-              <Filter className="h-4 w-4" />
+              <Filter className="h-4 w-4" aria-hidden="true" />
               Filter
-            </Button>
+            </button>
             {canManage && (
-              <Button onClick={handleCreateNew} size="sm" className="gap-2">
-                <Plus className="h-4 w-4" />
+              <button
+                type="button"
+                className="btn btn--primary"
+                onClick={handleCreateNew}
+              >
+                <Plus className="h-4 w-4" aria-hidden="true" />
                 New Entry
-              </Button>
+              </button>
             )}
           </div>
-
-          {/* Type Filters */}
-          {showFilters && (
-            <div className="flex flex-wrap gap-2 mt-4 p-4 bg-muted/30 rounded-lg border border-border/50">
-              {Object.entries(TYPE_CONFIG).map(([key, config]) => {
-                const Icon = config.icon;
-                const isActive = filterType[key as keyof typeof filterType];
-                return (
-                  <button
-                    key={key}
-                    onClick={() =>
-                      setFilterType({
-                        ...filterType,
-                        [key]: !isActive,
-                      })
-                    }
-                    className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
-                      isActive
-                        ? `${config.bgColor} ${config.textColor} ${config.borderColor} border`
-                        : "bg-background/50 text-muted-foreground hover:bg-background"
-                    }`}
-                  >
-                    <Icon className="h-3.5 w-3.5" />
-                    {config.label}
-                  </button>
-                );
-              })}
-            </div>
-          )}
         </div>
-      </div>
 
-      {/* Timeline Content */}
-      <div className="flex-1 overflow-y-auto">
-        <div className={`${NARROW_CONTAINER} py-8`}>
-          {loading ? (
-            <div className="flex items-center justify-center py-24">
-              <div className="text-center">
-                <div className="w-8 h-8 border-2 border-muted-foreground/20 border-t-foreground rounded-full animate-spin mx-auto mb-4" />
-                <p className="text-sm text-muted-foreground">Loading changelog...</p>
-              </div>
-            </div>
-          ) : filteredChangelogs.length === 0 ? (
-            <div className="flex items-center justify-center py-24">
-              <div className="text-center max-w-md">
-                <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Sparkles className="h-8 w-8 text-muted-foreground" />
+        {/* Type Filters */}
+        {showFilters && (
+          <div className="clog__filters" id="changelog-filters" role="group" aria-label="Filter by type">
+            {Object.entries(TYPE_CONFIG).map(([key, config]) => {
+              const Icon = config.icon;
+              const isActive = filterType[key as keyof typeof filterType];
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  aria-pressed={isActive}
+                  onClick={() =>
+                    setFilterType({
+                      ...filterType,
+                      [key]: !isActive,
+                    })
+                  }
+                  className="clog__filter"
+                >
+                  <Icon className="h-4 w-4" aria-hidden="true" />
+                  <span>{config.label}</span>
+                  <span className="clog__filter-count">
+                    {typeCounts[key as keyof typeof typeCounts]}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        {isNarrowed && !loading && (
+          <p className="clog__result" role="status">
+            {filteredChangelogs.length} of {changelogs.length} entries shown
+          </p>
+        )}
+
+        {/* Timeline Content */}
+        {loading ? (
+          <div className="clog__state" aria-live="polite">
+            <span className="clog__spinner" aria-hidden="true" />
+            <p className="clog__state-note">Loading changelog…</p>
+          </div>
+        ) : filteredChangelogs.length === 0 ? (
+          <div className="clog__state">
+            <span className="clog__state-icon">
+              <Sparkles className="h-7 w-7" aria-hidden="true" />
+            </span>
+            <h2 className="clog__state-title">No updates yet</h2>
+            <p className="clog__state-note">
+              Start documenting your product journey by creating your first changelog entry.
+            </p>
+            {canManage && (
+              <button type="button" className="btn btn--primary" onClick={handleCreateNew}>
+                <Plus className="h-4 w-4" aria-hidden="true" />
+                Create First Entry
+              </button>
+            )}
+          </div>
+        ) : (
+          <div className="clog__stream">
+            {dateGroups.map(([date, logs]) => (
+              <section className="clog__month" key={date}>
+                <div className="clog__month-head">
+                  <h2 className="clog__month-label">{date}</h2>
+                  <span className="clog__month-count">
+                    {logs.length} {logs.length === 1 ? "entry" : "entries"}
+                  </span>
                 </div>
-                <h3 className="text-lg font-semibold text-foreground mb-2">No updates yet</h3>
-                <p className="text-sm text-muted-foreground mb-6">
-                  Start documenting your product journey by creating your first changelog entry.
-                </p>
-                {canManage && (
-                  <Button onClick={handleCreateNew} size="sm">
-                    <Plus className="mr-2 h-4 w-4" />
-                    Create First Entry
-                  </Button>
-                )}
-              </div>
-            </div>
-          ) : (
-            <div className="relative">
-              {/* Timeline Spine */}
-              <div className="absolute left-[19px] top-8 bottom-0 w-[2px] bg-gradient-to-b from-border via-border to-transparent" />
 
-              {/* Changelog Entries */}
-              <div className="space-y-8">
-                {dateGroups.map(([date, logs], groupIndex) => (
-                  <div key={date}>
-                    {/* Date Header */}
-                    <div
-                      ref={(el) => (dateHeaderRefs.current[groupIndex] = el)}
-                      className="sticky top-0 z-10 -mx-6 px-6 py-3 bg-background/80 backdrop-blur-sm border-b border-border/50 mb-8"
-                    >
-                      <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-                        {date}
-                      </h2>
-                    </div>
+                <div className="clog__entries">
+                  {logs.map((changelog) => {
+                    const config = TYPE_CONFIG[changelog.type];
+                    const Icon = config.icon;
 
-                    {/* Changelog Items */}
-                    <div className="space-y-6">
-                      {logs.map((changelog, index) => {
-                        const config = TYPE_CONFIG[changelog.type];
-                        const Icon = config.icon;
-                        const globalIndex = groupIndex * 100 + index;
-
-                        return (
-                          <article
-                            key={changelog.id}
-                            ref={(el) => (changelogRefs.current[globalIndex] = el)}
-                            className="relative pl-14 group transition-all duration-300 hover:translate-x-1"
+                    return (
+                      <article className="clog__entry" key={changelog.id}>
+                        <div className="clog__entry-meta">
+                          <span className={`clog__type ${config.className}`}>
+                            <Icon className="h-3.5 w-3.5" aria-hidden="true" />
+                            {config.label}
+                          </span>
+                          {changelog.status === "draft" && (
+                            <span className="clog__draft">Draft</span>
+                          )}
+                          <time
+                            className="clog__date"
+                            dateTime={changelog.published_at || undefined}
                           >
-                            {/* Timeline Node */}
-                            <div className={`absolute left-0 top-0 w-10 h-10 rounded-full ${config.bgColor} border-2 ${config.borderColor} flex items-center justify-center shadow-sm`}>
-                              <Icon className={`h-5 w-5 ${config.textColor}`} />
-                            </div>
+                            {changelog.published_at
+                              ? formatDistanceToNow(new Date(changelog.published_at), {
+                                  addSuffix: true,
+                                })
+                              : "Not published"}
+                          </time>
 
-                            {/* Edit Button */}
-                            {canManage && (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="absolute -top-2 right-0 h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                                onClick={() => handleEditChangelog(changelog)}
-                              >
-                                <Edit className="h-4 w-4 text-muted-foreground" />
-                              </Button>
-                            )}
+                          {canManage && (
+                            <button
+                              type="button"
+                              className="clog__edit"
+                              onClick={() => handleEditChangelog(changelog)}
+                              aria-label={`Edit ${changelog.title}`}
+                            >
+                              <Edit className="h-4 w-4" aria-hidden="true" />
+                            </button>
+                          )}
+                        </div>
 
-                            {/* Header */}
-                            <div className="mb-4">
-                              <div className="flex items-start gap-3 mb-2">
-                                <h3 className="text-lg font-semibold text-foreground leading-tight flex-1">
-                                  {changelog.title}
-                                </h3>
-                                {changelog.status === "draft" && (
-                                  <Badge variant="outline" className="text-xs bg-yellow-500/10 text-yellow-600 border-yellow-200">
-                                    Draft
-                                  </Badge>
-                                )}
-                              </div>
-                              <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                                <Badge
-                                  variant="outline"
-                                  className={`text-xs ${config.textColor} ${config.bgColor} ${config.borderColor} border`}
-                                >
-                                  {config.label}
-                                </Badge>
-                                <span>
-                                  {changelog.published_at
-                                    ? formatDistanceToNow(new Date(changelog.published_at), {
-                                        addSuffix: true,
-                                      })
-                                    : "Not published"}
-                                </span>
-                              </div>
-                            </div>
+                        <h3 className="clog__entry-title">{changelog.title}</h3>
 
-                            {/* Content */}
-                            <div className="prose prose-sm dark:prose-invert max-w-none prose-p:text-muted-foreground prose-headings:text-foreground prose-a:text-primary prose-strong:text-foreground">
-                              <ReactMarkdown
-                                components={{
-                                  img: ({ node, ...props }) => (
-                                    <img
-                                      {...props}
-                                      className="rounded-lg my-4 max-w-full h-auto"
-                                      style={{ maxWidth: "388px", maxHeight: "388px", objectFit: "cover" }}
-                                    />
-                                  ),
-                                }}
-                              >
-                                {changelog.content}
-                              </ReactMarkdown>
-                            </div>
+                        <div className="clog__prose prose-blog">
+                          <ReactMarkdown
+                            components={{
+                              img: ({ node, ...props }) => (
+                                <img
+                                  {...props}
+                                  className="clog__prose-image"
+                                  style={{ maxWidth: "100%" }}
+                                />
+                              ),
+                            }}
+                          >
+                            {changelog.content}
+                          </ReactMarkdown>
+                        </div>
 
-                            {/* Labels */}
-                            {changelog.labels && changelog.labels.length > 0 && (
-                              <div className="flex flex-wrap gap-2 mt-4">
-                                {changelog.labels.map((label, idx) => (
-                                  <Badge
-                                    key={idx}
-                                    variant="outline"
-                                    className="text-xs bg-muted/50 text-muted-foreground"
-                                  >
-                                    {label}
-                                  </Badge>
-                                ))}
-                              </div>
-                            )}
-                          </article>
-                        );
-                      })}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
+                        {changelog.labels && changelog.labels.length > 0 && (
+                          <ul className="clog__labels">
+                            {changelog.labels.map((label, idx) => (
+                              <li className="clog__label" key={idx}>
+                                {label}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </article>
+                    );
+                  })}
+                </div>
+              </section>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Editor Panel */}
       {isEditorOpen && (
-        <div className="fixed top-0 right-0 w-[480px] h-screen border-l border-border flex flex-col bg-background shadow-2xl z-50">
-          <div className="p-4 border-b border-border flex items-center justify-between bg-muted/30">
-            <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="sm"
+        <div
+          className="clog-editor"
+          role="dialog"
+          aria-modal="true"
+          aria-label={isCreating ? "New entry" : "Edit entry"}
+        >
+          <div className="clog-editor__head">
+            <div className="clog-editor__headline">
+              <button
+                type="button"
+                className="clog-tool"
                 onClick={handleCloseEditor}
-                className="h-8 w-8 p-0"
+                aria-label="Close editor"
               >
-                <X className="h-4 w-4" />
-              </Button>
-              <h2 className="text-sm font-semibold">
+                <X className="h-4 w-4" aria-hidden="true" />
+              </button>
+              <h2 className="clog-editor__title">
                 {isCreating ? "New Entry" : "Edit Entry"}
               </h2>
             </div>
-            <Button
+            <button
+              type="button"
+              className="btn btn--primary"
               onClick={handleSave}
               disabled={!formData.title || !formData.content}
-              size="sm"
             >
               {formData.status === "published" ? "Publish" : "Save Draft"}
-            </Button>
+            </button>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-6 space-y-6">
-            <div>
-              <Label className="text-sm font-medium mb-2 block">Title</Label>
-              <Input
+          <div className="clog-editor__body">
+            <div className="clog-field">
+              <label className="clog-field__label" htmlFor="changelog-title">
+                Title
+              </label>
+              <input
+                id="changelog-title"
+                className="clog-input"
                 placeholder="What's new?"
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               />
             </div>
 
-            <div>
-              <Label className="text-sm font-medium mb-2 block">Type</Label>
-              <div className="grid grid-cols-3 gap-2">
+            <div className="clog-field">
+              <span className="clog-field__label">Type</span>
+              <div className="clog-types">
                 {Object.entries(TYPE_CONFIG).map(([key, config]) => {
                   const Icon = config.icon;
                   const isSelected = formData.type === key;
                   return (
                     <button
                       key={key}
+                      type="button"
+                      aria-pressed={isSelected}
                       onClick={() => setFormData({ ...formData, type: key as any })}
-                      className={`flex flex-col items-center gap-2 p-3 rounded-lg border transition-all ${
-                        isSelected
-                          ? `${config.bgColor} ${config.borderColor} border-2`
-                          : "border-border hover:bg-muted/50"
-                      }`}
+                      className="clog-type-option"
                     >
-                      <Icon className={`h-5 w-5 ${isSelected ? config.textColor : "text-muted-foreground"}`} />
-                      <span className={`text-xs font-medium ${isSelected ? config.textColor : "text-muted-foreground"}`}>
-                        {config.label}
-                      </span>
+                      <Icon className="h-5 w-5" aria-hidden="true" />
+                      <span>{config.label}</span>
                     </button>
                   );
                 })}
               </div>
             </div>
 
-            <div>
-              <Label className="text-sm font-medium mb-2 block">Content</Label>
-              <div className="border border-border rounded-lg overflow-hidden">
-                <div className="flex items-center gap-1 p-2 border-b border-border bg-muted/30">
-                  <Button variant="ghost" size="sm" onClick={handleBold} className="h-7 w-7 p-0">
-                    <Bold className="h-3.5 w-3.5" />
-                  </Button>
-                  <Button variant="ghost" size="sm" onClick={handleItalic} className="h-7 w-7 p-0">
-                    <Italic className="h-3.5 w-3.5" />
-                  </Button>
-                  <Button variant="ghost" size="sm" onClick={handleCode} className="h-7 w-7 p-0">
-                    <Code className="h-3.5 w-3.5" />
-                  </Button>
-                  <Button variant="ghost" size="sm" onClick={handleLink} className="h-7 w-7 p-0">
-                    <Link className="h-3.5 w-3.5" />
-                  </Button>
-                  <div className="w-px h-4 bg-border mx-1" />
-                  <Button variant="ghost" size="sm" onClick={handleList} className="h-7 w-7 p-0">
-                    <List className="h-3.5 w-3.5" />
-                  </Button>
-                  <Button variant="ghost" size="sm" onClick={handleOrderedList} className="h-7 w-7 p-0">
-                    <ListOrdered className="h-3.5 w-3.5" />
-                  </Button>
-                  <div className="w-px h-4 bg-border mx-1" />
-                  <Button variant="ghost" size="sm" onClick={handleImageUpload} className="h-7 w-7 p-0">
-                    <Image className="h-3.5 w-3.5" />
-                  </Button>
+            <div className="clog-field">
+              <label className="clog-field__label" htmlFor="changelog-content">
+                Content
+              </label>
+              <div className="clog-editor__content">
+                <div className="clog-editor__toolbar" role="toolbar" aria-label="Formatting">
+                  <button type="button" className="clog-tool" onClick={handleBold} aria-label="Bold">
+                    <Bold className="h-3.5 w-3.5" aria-hidden="true" />
+                  </button>
+                  <button type="button" className="clog-tool" onClick={handleItalic} aria-label="Italic">
+                    <Italic className="h-3.5 w-3.5" aria-hidden="true" />
+                  </button>
+                  <button type="button" className="clog-tool" onClick={handleCode} aria-label="Code">
+                    <Code className="h-3.5 w-3.5" aria-hidden="true" />
+                  </button>
+                  <button type="button" className="clog-tool" onClick={handleLink} aria-label="Link">
+                    <Link className="h-3.5 w-3.5" aria-hidden="true" />
+                  </button>
+                  <span className="clog-tool--sep" aria-hidden="true" />
+                  <button type="button" className="clog-tool" onClick={handleList} aria-label="Bullet list">
+                    <List className="h-3.5 w-3.5" aria-hidden="true" />
+                  </button>
+                  <button
+                    type="button"
+                    className="clog-tool"
+                    onClick={handleOrderedList}
+                    aria-label="Numbered list"
+                  >
+                    <ListOrdered className="h-3.5 w-3.5" aria-hidden="true" />
+                  </button>
+                  <span className="clog-tool--sep" aria-hidden="true" />
+                  <button
+                    type="button"
+                    className="clog-tool"
+                    onClick={handleImageUpload}
+                    aria-label="Upload image"
+                  >
+                    <Image className="h-3.5 w-3.5" aria-hidden="true" />
+                  </button>
                 </div>
-                <Textarea
+                <textarea
+                  id="changelog-content"
                   ref={textareaRef}
+                  className="clog-textarea"
                   placeholder="Describe the update in detail..."
                   value={formData.content}
                   onChange={(e) => setFormData({ ...formData, content: e.target.value })}
                   rows={14}
-                  className="border-0 resize-none focus-visible:ring-0 font-mono text-sm"
                 />
               </div>
-              <p className="text-xs text-muted-foreground mt-2">
-                Markdown supported. <kbd className="px-1.5 py-0.5 bg-muted rounded text-xs">Ctrl+B</kbd> bold, <kbd className="px-1.5 py-0.5 bg-muted rounded text-xs">Ctrl+I</kbd> italic
+              <p className="clog-field__hint">
+                Markdown supported.{" "}
+                <kbd className="clog-kbd">Ctrl+B</kbd> bold,{" "}
+                <kbd className="clog-kbd">Ctrl+I</kbd> italic
               </p>
             </div>
 
-            <div>
-              <Label className="text-sm font-medium mb-2 block">Labels (optional)</Label>
-              <div className="flex gap-2 mb-2">
-                <Input
-                  placeholder="Add label..."
-                  value={newLabel}
-                  onChange={(e) => setNewLabel(e.target.value)}
-                  onKeyPress={(e) => {
-                    if (e.key === "Enter") {
-                      e.preventDefault();
-                      addLabel();
-                    }
-                  }}
-                />
-              </div>
-              <div className="flex flex-wrap gap-2">
+            <div className="clog-field">
+              <label className="clog-field__label" htmlFor="changelog-label">
+                Labels (optional)
+              </label>
+              <input
+                id="changelog-label"
+                className="clog-input"
+                placeholder="Add label..."
+                value={newLabel}
+                onChange={(e) => setNewLabel(e.target.value)}
+                onKeyPress={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    addLabel();
+                  }
+                }}
+              />
+              <div className="clog-labels-edit">
                 {formData.labels.map((label, idx) => (
-                  <Badge key={idx} variant="outline" className="gap-1">
+                  <span className="clog-chip" key={idx}>
                     {label}
-                    <X
-                      className="h-3 w-3 cursor-pointer hover:text-foreground"
+                    <button
+                      type="button"
+                      className="clog-chip__remove"
                       onClick={() => removeLabel(label)}
-                    />
-                  </Badge>
+                      aria-label={`Remove ${label}`}
+                    >
+                      <X className="h-3 w-3" aria-hidden="true" />
+                    </button>
+                  </span>
                 ))}
               </div>
             </div>
 
-            <div className="flex items-center justify-between pt-4 border-t border-border">
-              <Label className="text-sm font-medium">Status</Label>
-              <Button
-                variant="outline"
-                size="sm"
+            <div className="clog-editor__status">
+              <span className="clog-field__label">Status</span>
+              <button
+                type="button"
+                className="btn"
                 onClick={() =>
                   setFormData({
                     ...formData,
@@ -719,18 +723,14 @@ export default function ChangelogPage() {
                 }
               >
                 {formData.status === "published" ? "Published" : "Draft"}
-              </Button>
+              </button>
             </div>
 
             {selectedChangelog && (
-              <Button
-                onClick={handleDelete}
-                variant="outline"
-                className="w-full border-red-500/50 text-red-600 hover:bg-red-500/10"
-              >
-                <Trash2 className="mr-2 h-4 w-4" />
+              <button type="button" className="btn clog-delete" onClick={handleDelete}>
+                <Trash2 className="mr-2 h-4 w-4" aria-hidden="true" />
                 Delete Entry
-              </Button>
+              </button>
             )}
           </div>
         </div>

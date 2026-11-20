@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import Script from "next/script";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
@@ -61,6 +61,24 @@ const HERO_STATS = [
 export default function LandingPage() {
   const router = useRouter();
   const { user, loading } = useAuth();
+  const showcaseRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const video = showcaseRef.current;
+    if (!video) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          video.play().catch(() => {});
+        } else {
+          video.pause();
+        }
+      },
+      { threshold: 0.5 }
+    );
+    observer.observe(video);
+    return () => observer.disconnect();
+  }, []);
 
   const handleClick = () => {
     router.push("/signup");
@@ -129,7 +147,7 @@ export default function LandingPage() {
         <section className="lp-hero">
           <HeroBackdrop />
           <div className="lp-hero__inner lp-wrap">
-            <span className="lp-hero__note">Up and running in minutes</span>
+            <span className="lp-hero__note">Feedback in, priorities out.</span>
             <h1 className="lp-hero__title">
               <span className="lp-hero__line">
                 Collect feedback from <RotatingPhrase items={INTEGRATIONS} />
@@ -173,6 +191,29 @@ export default function LandingPage() {
               ))}
             </ul>
           </div>
+        </section>
+
+        {/* Showcase · the launch film, owner's own capture */}
+        <section className="lp-showcase lp-wrap">
+          <div className="lp-head">
+            <h2>See Faddy in motion</h2>
+            <p className="lead">
+              Forty-four seconds from first request to shipped changelog.
+            </p>
+          </div>
+          <video
+            ref={showcaseRef}
+            className="lp-showcase__video"
+            src="/videos/faddy-launch.mp4"
+            poster="/videos/faddy-launch-poster.jpg"
+            controls
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            aria-label="Faddy product tour"
+          />
         </section>
 
         {/* Tabs · Switcher: the full loop in four panels */}

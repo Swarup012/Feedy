@@ -58,7 +58,7 @@ import api from "@/lib/api";
 import { useIsCustomHost } from "@/context/CustomHostContext";
 import "./post-details.css";
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://faddy.site";
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://faddy.online";
 
 // 🔥 GLOBAL cache for comments (persists across post switches!)
 const commentsCache: Record<string, Comment[]> = {};

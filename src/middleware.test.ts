@@ -64,6 +64,13 @@ describe('first-party host: derive from Host, strip forged headers', () => {
     expect(resolveHostMock).not.toHaveBeenCalled(); // first-party never resolves
   });
 
+  it('acme.faddy.online: first-party too — derived x-subdomain, no lookup', async () => {
+    const res = await middleware(makeReq('acme.faddy.online', '/api/boards', FORGED));
+    expect(forwarded(res, 'x-subdomain')).toBe('acme');
+    expect(res.cookies.get('x-subdomain')?.value).toBe('acme');
+    expect(resolveHostMock).not.toHaveBeenCalled();
+  });
+
   it('apex faddy.site: forged x-subdomain deleted, nothing derived', async () => {
     const res = await middleware(makeReq('faddy.site', '/api/boards', FORGED));
     expect(forwarded(res, 'x-subdomain')).toBeNull();

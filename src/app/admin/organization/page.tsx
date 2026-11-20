@@ -3,7 +3,7 @@
 import { useState, useEffect, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { useOrganization } from '@/context/OrganizationContext';
-import { resolvePlan } from '@/config/plans';
+import { resolvePlan, PLANS } from '@/config/plans';
 import { useAuth } from '@/hooks/useAuth';
 import { useScrollToHash } from '@/hooks/useScrollToHash';
 import api from '@/lib/api';
@@ -416,7 +416,7 @@ export default function OrganizationSettingsPage() {
 
   const copySubdomain = () => {
     if (!organization) return;
-    const url = `https://${organization.subdomain}.faddy.site`;
+    const url = `https://${organization.subdomain}.faddy.online`;
     navigator.clipboard.writeText(url);
     setCopiedSubdomain(true);
     setTimeout(() => setCopiedSubdomain(false), 2000);
@@ -451,6 +451,14 @@ export default function OrganizationSettingsPage() {
         return <Users className="h-4 w-4" />;
     }
   };
+
+  const planTier = resolvePlan(organization);
+  const planFeatures = PLANS[planTier]?.features;
+  const maxAdmins = planFeatures?.admin_members ?? 10;
+  const isUnlimitedMembers = planFeatures?.team_members === -1;
+  const adminCount = members.filter(
+    (m) => m.organization_role === 'admin' || m.organization_role === 'owner'
+  ).length;
 
   return (
     <div className="flex min-h-[calc(100vh-70px)]">
@@ -605,7 +613,7 @@ export default function OrganizationSettingsPage() {
                   <div>
                     <h2 className="text-lg font-semibold text-foreground">Team Members</h2>
                     <p className="text-sm text-muted-foreground mt-1">
-                      {members.length} / {organization.max_users} members
+                      {adminCount} / {maxAdmins} admins • {isUnlimitedMembers ? '∞ Members' : `${members.length} / ${planFeatures?.team_members} Members`}
                     </p>
                   </div>
                   {organizationRole === 'owner' && (
@@ -718,7 +726,7 @@ export default function OrganizationSettingsPage() {
                       <Label>Current Subdomain</Label>
                       <div className="flex items-center gap-2 mt-2">
                         <code className="px-4 py-2 bg-muted rounded-md flex-1">
-                          {organization.subdomain}.faddy.site
+                          {organization.subdomain}.faddy.online
                         </code>
                         <Button variant="outline" size="icon" onClick={copySubdomain}>
                           {copiedSubdomain ? (
@@ -740,12 +748,12 @@ export default function OrganizationSettingsPage() {
                       <Label>Public Access URL</Label>
                       <div className="flex items-center gap-2 mt-2">
                         <Input
-                          value={`https://${organization.subdomain}.faddy.site`}
+                          value={`https://${organization.subdomain}.faddy.online`}
                           readOnly
                           className="flex-1"
                         />
                         <Button variant="outline" asChild>
-                          <a href={`https://${organization.subdomain}.faddy.site`} target="_blank" rel="noopener noreferrer">
+                          <a href={`https://${organization.subdomain}.faddy.online`} target="_blank" rel="noopener noreferrer">
                             <ExternalLink className="h-4 w-4" />
                           </a>
                         </Button>

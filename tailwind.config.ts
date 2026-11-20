@@ -69,6 +69,8 @@ export default {
   				DEFAULT: 'hsl(var(--muted))',
   				foreground: 'hsl(var(--muted-foreground))'
   			},
+  			'vote-arrow-light': 'var(--vote-arrow-idle-light)',
+  			'vote-arrow-dark': 'var(--vote-arrow-idle-dark)',
   			accent: {
   				DEFAULT: 'hsl(var(--accent))',
   				foreground: 'hsl(var(--accent-foreground))'

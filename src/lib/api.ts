@@ -41,20 +41,22 @@ const api: AxiosInstance = axios.create({
 // /api/* straight to Express, bypassing the Next server, so nothing
 // server-side (middleware / buildBackendHeaders) ever sees those requests.
 //
-// First-party *.faddy.site ONLY: custom (customer) hostnames get x-subdomain
-// from Next middleware, never from the browser. No-op server-side (SSR uses
-// the absolute API_URL; the server-side Host derivation is authoritative
-// there and a client-supplied header must never be trusted).
+// First-party *.faddy.online / *.faddy.site ONLY: custom (customer) hostnames
+// get x-subdomain from Next middleware, never from the browser. No-op
+// server-side (SSR uses the absolute API_URL; the server-side Host derivation
+// is authoritative there and a client-supplied header must never be trusted).
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     if (config.headers && typeof window !== "undefined") {
       const hostname = window.location.hostname;
-      const suffix = ".faddy.site";
+      const suffix = [".faddy.online", ".faddy.site"].find((s) =>
+        hostname.endsWith(s),
+      );
       let subdomain: string | null = null;
 
-      // First-party production: acme.faddy.site — exactly one label before
+      // First-party production: acme.faddy.online — exactly one label before
       // the suffix, same rule as proxyHelper.extractSubdomainFromHost.
-      if (hostname.endsWith(suffix)) {
+      if (suffix) {
         const label = hostname.slice(0, -suffix.length);
         if (
           /^[a-z0-9-]{1,63}$/.test(label) &&

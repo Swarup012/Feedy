@@ -13,7 +13,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { useIsCustomHost } from '@/context/CustomHostContext';
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://faddy.site";
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://faddy.online";
 import RoadmapStats from '@/components/roadmap/RoadmapStats';
 import RoadmapFilters from '@/components/roadmap/RoadmapFilters';
 import {

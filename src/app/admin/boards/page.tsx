@@ -56,7 +56,6 @@ import {
   ArrowLeft,
   Loader2,
 } from 'lucide-react';
-import { IconPicker, IconDisplay } from '@/components/ui/icon-picker';
 
 export default function BoardsManagementPage() {
   const router = useRouter();
@@ -71,8 +70,6 @@ export default function BoardsManagementPage() {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [selectedBoard, setSelectedBoard] = useState<Board | null>(null);
-  const [showIconPicker, setShowIconPicker] = useState(false); // Icon picker state
-  const [iconPickerMode, setIconPickerMode] = useState<'create' | 'edit'>('create'); // Track which form is using picker
   const [boardDependencies, setBoardDependencies] = useState<{ id: string; provider: string; status: string }[]>([]);
   const [loadingDependencies, setLoadingDependencies] = useState(false);
   const [deleteConfirmed, setDeleteConfirmed] = useState(false);
@@ -81,7 +78,6 @@ export default function BoardsManagementPage() {
     description: '',
     is_private: false,
     color: '#3B82F6',
-    icon: 'Lightbulb', // Default to Lucide icon name
   });
 
   // Check if user is admin or owner
@@ -180,7 +176,6 @@ export default function BoardsManagementPage() {
       description: board.description || '',
       is_private: board.is_private,
       color: board.color,
-      icon: board.icon,
     });
     setShowEditDialog(true);
   };
@@ -206,7 +201,6 @@ export default function BoardsManagementPage() {
       description: '',
       is_private: false,
       color: '#3B82F6',
-      icon: '📋',
     });
   };
 
@@ -257,30 +251,22 @@ export default function BoardsManagementPage() {
           <Card key={board.id} className="hover:shadow-lg transition-shadow">
             <CardHeader className="pb-3">
               <div className="flex items-start justify-between">
-                <div className="flex items-center gap-3">
-                  <div
-                    className="w-12 h-12 rounded-lg flex items-center justify-center"
-                    style={{ backgroundColor: `${board.color}20` }}
-                  >
-                    <IconDisplay iconName={board.icon} className="h-6 w-6" style={{ color: board.color }} />
-                  </div>
-                  <div>
-                    <CardTitle className="text-lg">{board.name}</CardTitle>
-                    <div className="flex items-center gap-2 mt-1">
-                      <Badge variant={board.is_private ? 'secondary' : 'default'}>
-                        {board.is_private ? (
-                          <>
-                            <EyeOff className="h-3 w-3 mr-1" />
-                            Private
-                          </>
-                        ) : (
-                          <>
-                            <Eye className="h-3 w-3 mr-1" />
-                            Public
-                          </>
-                        )}
-                      </Badge>
-                    </div>
+                <div>
+                  <CardTitle className="text-lg">{board.name}</CardTitle>
+                  <div className="flex items-center gap-2 mt-1">
+                    <Badge variant={board.is_private ? 'secondary' : 'default'}>
+                      {board.is_private ? (
+                        <>
+                          <EyeOff className="h-3 w-3 mr-1" />
+                          Private
+                        </>
+                      ) : (
+                        <>
+                          <Eye className="h-3 w-3 mr-1" />
+                          Public
+                        </>
+                      )}
+                    </Badge>
                   </div>
                 </div>
                 {isAdminOrOwner && (
@@ -378,31 +364,14 @@ export default function BoardsManagementPage() {
                 rows={3}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="icon">Icon</Label>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => {
-                    setIconPickerMode('create');
-                    setShowIconPicker(true);
-                  }}
-                  className="w-full justify-start"
-                >
-                  <IconDisplay iconName={formData.icon} className="h-4 w-4 mr-2" />
-                  {formData.icon || "Choose Icon"}
-                </Button>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="color">Color</Label>
-                <Input
-                  id="color"
-                  type="color"
-                  value={formData.color}
-                  onChange={(e) => handleInputChange('color', e.target.value)}
-                />
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="color">Color</Label>
+              <Input
+                id="color"
+                type="color"
+                value={formData.color}
+                onChange={(e) => handleInputChange('color', e.target.value)}
+              />
             </div>
             <div className="flex items-center justify-between p-4 rounded-lg border">
               <div>
@@ -457,23 +426,6 @@ export default function BoardsManagementPage() {
                 placeholder="What is this board for?"
                 rows={3}
               />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-icon">Icon</Label>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => {
-                  setIconPickerMode('edit');
-                  setShowIconPicker(true);
-                }}
-                className="w-full justify-start"
-              >
-                <div className="h-6 w-6 rounded-lg bg-primary/10 flex items-center justify-center mr-2">
-                  <IconDisplay iconName={formData.icon} className="h-4 w-4 text-primary" />
-                </div>
-                {formData.icon || "Choose Icon"}
-              </Button>
             </div>
             <div className="flex items-center justify-between p-4 rounded-lg border">
               <div>
@@ -568,14 +520,6 @@ export default function BoardsManagementPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
-      {/* Icon Picker Dialog */}
-      <IconPicker
-        open={showIconPicker}
-        onOpenChange={setShowIconPicker}
-        onSelectIcon={(iconName) => handleInputChange('icon', iconName)}
-        currentIcon={formData.icon}
-      />
     </div>
   );
 }

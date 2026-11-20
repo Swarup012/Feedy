@@ -7,3 +7,7 @@ export const INTEGRATION_BRAND_COLORS = {
 } as const;
 
 export type IntegrationProvider = keyof typeof INTEGRATION_BRAND_COLORS;
+
+// Intercom hasn't fully approved the integration yet. Flip to false to hide
+// the notice everywhere.
+export const INTERCOM_UNDER_REVIEW = true;
