@@ -14,7 +14,7 @@ import { PostsList } from "@/components/feedback/PostsList";
 import { PostDetails } from "@/components/feedback/PostDetails";
 import { CreatePostDialog } from "@/components/feedback/CreatePostDialog";
 import { UpgradeDialog } from "@/components/UpgradeDialog";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { PostDetailSheet } from "@/components/feedback/PostDetailSheet";
 import { useIsNarrow } from "@/hooks/useIsNarrow";
 import usageService from "@/services/usageService";
 
@@ -338,36 +338,24 @@ export default function BoardPage() {
         </div>
 
         {/* ── Post Details:
-              < 1280px → Sheet drawer (progressive collapse, D3 approved)
+              < 1280px → PostDetailSheet drawer (progressive collapse, D3 approved)
               ≥ 1280px → Inline third pane (original three-pane layout)
               Mobile   → Full-screen overlay (existing behaviour preserved)
         ── */}
         {isNarrow ? (
-          /* Drawer mode: <1280px. PostDetails content is identical — only the
-             container changes. All handlers, props, and functionality are preserved.
-             Width accommodates both thread and rail comfortably, and stacks
-             automatically on mobile / screens under 680px. */
-          <Sheet
+          <PostDetailSheet
             open={!!selectedPost}
             onOpenChange={(open) => {
               if (!open) handleBackToList();
             }}
-          >
-            <SheetContent
-              side="right"
-              className="w-full sm:max-w-[760px] md:max-w-[820px] lg:max-w-[880px] p-0 overflow-hidden flex flex-col"
-            >
-              <PostDetails
-                post={selectedPost}
-                currentBoard={currentBoard}
-                onPostUpdated={handlePostUpdated}
-                onPostDeleted={handlePostDeleted}
-                onBack={handleBackToList}
-                isMobile
-                className="pd--sheet"
-              />
-            </SheetContent>
-          </Sheet>
+            post={selectedPost}
+            currentBoard={currentBoard}
+            boards={boards}
+            onPostUpdated={handlePostUpdated}
+            onPostDeleted={handlePostDeleted}
+            onClose={handleBackToList}
+            isMobile
+          />
         ) : (
           /* Three-pane inline mode: ≥1280px */
           <div className={`

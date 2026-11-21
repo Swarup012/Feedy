@@ -32,11 +32,6 @@
   height: 100%;
 }
 
-.pd--sheet .pd__rail-inner {
-  padding-top: calc(var(--space-md) + 8px);
-  padding-right: calc(var(--space-md) + 24px);
-}
-
 /* ------------------------------------------------------------
    Thread — post, history, comments, pinned composer
    ------------------------------------------------------------ */

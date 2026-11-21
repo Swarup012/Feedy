@@ -16,12 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet';
+import { PostDetailSheet } from '@/components/feedback/PostDetailSheet';
 import {
   Search,
   ArrowUp,
@@ -47,29 +42,7 @@ import { WIDE_CONTAINER } from '@/lib/layout-constants';
 import { Skeleton } from '@/components/ui/skeleton';
 import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
-import dynamic from 'next/dynamic';
 import './users.css';
-
-// PostDetails (~1.6k lines + roadmap/changelog/realtime deps) is only rendered
-// inside the Sheet once a post is clicked — load it on demand instead of
-// putting it in this route's First Load JS.
-const PostDetails = dynamic(
-  () => import('@/components/feedback/PostDetails').then((m) => m.PostDetails),
-  {
-    ssr: false,
-    // Fixed height matching the sheet body (calc(100vh - 64px)) so the
-    // chunk-loading skeleton occupies the same box as the real component.
-    loading: () => (
-      <div className="u-sheetloading">
-        <Skeleton className="h-6 w-64" />
-        <Skeleton className="h-4 w-96 max-w-full" />
-        <Skeleton className="h-4 w-full" />
-        <Skeleton className="h-4 w-5/6" />
-        <Skeleton className="h-4 w-4/6" />
-      </div>
-    ),
-  },
-);
 
 const STATUS_LABELS: Record<string, string> = {
   open: 'Open',
@@ -701,26 +674,16 @@ export default function UsersPage() {
           </aside>
         </div>
 
-        {/* ── Post Detail Sheet ──────────────────────────────────── */}
-        <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-          <SheetContent className="w-[70vw] sm:max-w-[70vw] p-0 overflow-hidden">
-            <SheetHeader className="px-6 pt-5 pb-3 border-b border-border">
-              <SheetTitle>Post Details</SheetTitle>
-            </SheetHeader>
-            <div className="u-sheetbody">
-              {sheetPost && (
-                <PostDetails
-                  post={sheetPost}
-                  currentBoard={sheetBoard}
-                  onPostUpdated={handlePostUpdated}
-                  onPostDeleted={handlePostDeleted}
-                  onBack={() => setSheetOpen(false)}
-                  className="pd pd--sheet"
-                />
-              )}
-            </div>
-          </SheetContent>
-        </Sheet>
+        {/* ── Post Detail Sheet (shared component) ──────────────── */}
+        <PostDetailSheet
+          open={sheetOpen}
+          onOpenChange={setSheetOpen}
+          post={sheetPost}
+          currentBoard={sheetBoard}
+          onPostUpdated={handlePostUpdated}
+          onPostDeleted={handlePostDeleted}
+          onClose={() => setSheetOpen(false)}
+        />
 
         {/* Delete User Confirmation */}
         <AlertDialog open={!!deleteTarget} onOpenChange={(v) => {
