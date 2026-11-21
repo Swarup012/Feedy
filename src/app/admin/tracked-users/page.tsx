@@ -72,22 +72,24 @@ function getStatusBadge(status: string, percent: number) {
   const config: Record<string, { label: string; className: string; icon: React.ElementType }> = {
     good: {
       label: 'Good',
-      className: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 border-green-200 dark:border-green-800',
+      // Token-driven: status-success-* adapts automatically to light/dark
+      className: 'bg-status-success-bg text-status-success-text border-status-success-border',
       icon: CheckCircle,
     },
     warning: {
       label: 'Warning',
-      className: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-450 border-yellow-200 dark:border-yellow-800',
+      className: 'bg-status-warning-bg text-status-warning-text border-status-warning-border',
       icon: AlertTriangle,
     },
     critical: {
       label: 'Critical',
-      className: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400 border-orange-200 dark:border-orange-800',
+      // No dedicated "critical" token — use warning with slightly stronger tint
+      className: 'bg-status-warning-bg text-status-warning-text border-status-warning-border',
       icon: AlertTriangle,
     },
     exceeded: {
       label: 'Limit Reached',
-      className: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400 border-red-200 dark:border-red-800',
+      className: 'bg-status-error-bg text-status-error-text border-status-error-border',
       icon: AlertTriangle,
     },
   };

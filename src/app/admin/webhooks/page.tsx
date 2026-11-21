@@ -56,9 +56,12 @@ function typeLabel(type: string) {
 }
 
 function typeBadgeVariant(type: string): BadgeProps["variant"] {
-  return (
-    { custom: "info", discord: "info", slack: "info" }[type] ?? "secondary"
-  );
+  const map: Record<string, BadgeProps["variant"]> = {
+    custom: "info",
+    discord: "info",
+    slack: "info",
+  };
+  return map[type] ?? "secondary";
 }
 
 function successRate(webhook: Webhook) {

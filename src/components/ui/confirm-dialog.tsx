@@ -23,6 +23,13 @@ interface ConfirmDialogProps {
   onConfirm: () => void;
 }
 
+/**
+ * ConfirmDialog — reusable AlertDialog wrapper for confirmation flows.
+ *
+ * Uses token-driven colours from globals.css — no hardcoded dark: overrides
+ * needed. The `destructive` variant applies brand-compliant destructive styles
+ * to the confirm action button.
+ */
 export function ConfirmDialog({
   open,
   onOpenChange,
@@ -35,17 +42,13 @@ export function ConfirmDialog({
 }: ConfirmDialogProps) {
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className="dark:bg-background dark:border-border">
+      <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle className="text-foreground">{title}</AlertDialogTitle>
-          <AlertDialogDescription className="text-muted-foreground">
-            {description}
-          </AlertDialogDescription>
+          <AlertDialogTitle>{title}</AlertDialogTitle>
+          <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel className="dark:bg-card dark:border-border dark:text-foreground dark:hover:bg-muted">
-            {cancelLabel}
-          </AlertDialogCancel>
+          <AlertDialogCancel>{cancelLabel}</AlertDialogCancel>
           <AlertDialogAction
             onClick={onConfirm}
             className={

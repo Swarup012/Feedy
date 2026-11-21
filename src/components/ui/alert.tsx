@@ -8,9 +8,20 @@ const alertVariants = cva(
   {
     variants: {
       variant: {
+        /** Neutral — informational, no semantic colour */
         default: "bg-background text-foreground",
+        /** Error / danger */
         destructive:
           "border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive",
+        /** Cautionary — amber warning */
+        warning:
+          "border-warning/40 bg-warning/8 text-foreground [&>svg]:text-warning dark:border-warning/30 dark:bg-warning/10",
+        /** Positive / success */
+        success:
+          "border-success/40 bg-success/8 text-foreground [&>svg]:text-success dark:border-success/30 dark:bg-success/10",
+        /** Pure informational — blue tint */
+        info:
+          "border-primary/30 bg-primary/6 text-foreground [&>svg]:text-primary dark:border-primary/20 dark:bg-primary/10",
       },
     },
     defaultVariants: {

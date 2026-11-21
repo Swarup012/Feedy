@@ -1,7 +1,7 @@
 # Faddy Design System — MASTER
 
 > **Version:** 1.0.0 · **Updated:** 2026-11-21
-> **Status:** Phase 1 implemented · P0 complete
+> **Status:** Phase 1 implemented · P0 ✅ · P1 ✅ · P2 partial (input, dialog, empty-state, skeleton ✅ · DataTable 🔜)
 > **Source of truth for:** tokens, component specs, shell architecture, responsive strategy
 
 ---

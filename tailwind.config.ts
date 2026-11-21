@@ -98,6 +98,23 @@ export default {
 				github: 'var(--brand-github)',
 				'github-light': 'var(--brand-github-light)',
 			},
+			// Status colour palette — use these instead of hardcoded Tailwind
+			// colour shades (green-100, red-800 etc.) so light/dark themes
+			// are handled by the token layer rather than duplicate dark: classes.
+			status: {
+				'success-bg':     'var(--status-success-bg)',
+				'success-border': 'var(--status-success-border)',
+				'success-text':   'var(--status-success-text)',
+				'warning-bg':     'var(--status-warning-bg)',
+				'warning-border': 'var(--status-warning-border)',
+				'warning-text':   'var(--status-warning-text)',
+				'error-bg':       'var(--status-error-bg)',
+				'error-border':   'var(--status-error-border)',
+				'error-text':     'var(--status-error-text)',
+				'info-bg':        'var(--status-info-bg)',
+				'info-border':    'var(--status-info-border)',
+				'info-text':      'var(--status-info-text)',
+			},
 			white: '#f9f9f9',
   		},
   		borderRadius: {

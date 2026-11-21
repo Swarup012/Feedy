@@ -475,8 +475,8 @@ export default function BoardsManagementPage() {
             </div>
           ) : boardDependencies.length > 0 ? (
             <div className="space-y-3">
-              <div className="rounded-lg border border-amber-200 bg-amber-50/80 dark:border-amber-900/50 dark:bg-amber-950/30 p-3">
-                <p className="text-sm font-medium text-amber-800 dark:text-amber-300 mb-2">
+              <div className="rounded-lg border border-status-warning-border bg-status-warning-bg p-3">
+                <p className="text-sm font-medium text-status-warning-text mb-2">
                   This board is connected to {boardDependencies.length} integration{boardDependencies.length > 1 ? 's' : ''}:
                 </p>
                 <ul className="space-y-1.5">
@@ -513,7 +513,7 @@ export default function BoardsManagementPage() {
             <Button
               onClick={handleDelete}
               disabled={boardDependencies.length > 0 && !deleteConfirmed}
-              className="bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Delete
             </Button>
