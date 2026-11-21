@@ -226,6 +226,7 @@ export default function BoardPage() {
   }, []);
 
   const handleBackToList = useCallback(() => {
+    setSelectedPost(null);
     setMobileView("list");
   }, []);
 
@@ -343,7 +344,9 @@ export default function BoardPage() {
         ── */}
         {isNarrow ? (
           /* Drawer mode: <1280px. PostDetails content is identical — only the
-             container changes. All handlers, props, and functionality are preserved. */
+             container changes. All handlers, props, and functionality are preserved.
+             Width accommodates both thread and rail comfortably, and stacks
+             automatically on mobile / screens under 680px. */
           <Sheet
             open={!!selectedPost}
             onOpenChange={(open) => {
@@ -352,7 +355,7 @@ export default function BoardPage() {
           >
             <SheetContent
               side="right"
-              className="w-full sm:max-w-[480px] p-0 overflow-y-auto"
+              className="w-full sm:max-w-[760px] md:max-w-[820px] lg:max-w-[880px] p-0 overflow-hidden flex flex-col"
             >
               <PostDetails
                 post={selectedPost}
@@ -361,6 +364,7 @@ export default function BoardPage() {
                 onPostDeleted={handlePostDeleted}
                 onBack={handleBackToList}
                 isMobile
+                className="pd--sheet"
               />
             </SheetContent>
           </Sheet>

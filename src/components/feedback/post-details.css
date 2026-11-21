@@ -15,6 +15,8 @@
 :root { --ink-soft: color-mix(in oklab, var(--color-muted) 68%, var(--color-ink)); }
 
 .pd {
+  container-type: inline-size;
+  container-name: postdetails;
   display: flex;
   flex: 1 1 auto;
   min-width: 0;
@@ -26,7 +28,14 @@
   font-family: var(--font-body);
 }
 
-.pd--sheet { height: 100%; }
+.pd--sheet {
+  height: 100%;
+}
+
+.pd--sheet .pd__rail-inner {
+  padding-top: calc(var(--space-md) + 8px);
+  padding-right: calc(var(--space-md) + 24px);
+}
 
 /* ------------------------------------------------------------
    Thread — post, history, comments, pinned composer
@@ -554,7 +563,7 @@
    Rail — field ledger
    ------------------------------------------------------------ */
 .pd__rail {
-  width: 19rem;
+  width: 16.5rem;
   flex-shrink: 0;
   min-height: 0;
   overflow-y: auto;
@@ -719,17 +728,89 @@
 }
 
 /* ------------------------------------------------------------
-   Responsive
+   Responsive & Container Queries
    ------------------------------------------------------------ */
 @media (max-width: 64rem) {
-  .pd__rail { width: 17rem; }
+  .pd__rail { width: 16rem; }
 }
 
-@media (max-width: 48rem) {
-  .pd__rail { display: none; }
+/* When the container or drawer is narrower than 680px, stack thread & rail cleanly */
+@container postdetails (max-width: 680px) {
+  .pd {
+    flex-direction: column;
+    overflow-y: auto;
+    height: 100%;
+  }
+
+  .pd__thread {
+    flex: none;
+    min-height: auto;
+    overflow: visible;
+  }
+
+  .pd__scroll {
+    overflow-y: visible;
+    flex: none;
+  }
+
+  .pd__rail {
+    width: 100%;
+    border-left: none;
+    border-top: var(--rule-hair) solid var(--color-rule);
+    overflow-y: visible;
+    flex: none;
+    background: var(--color-paper-2);
+  }
+
   .pd__head,
   .pd__fold,
-  .pd__comments { padding-inline: var(--space-md); }
+  .pd__comments {
+    padding-inline: var(--space-md);
+  }
+
+  .pd__rail-inner {
+    padding: var(--space-md);
+  }
+}
+
+/* Fallback for viewports below 48rem (768px) */
+@media (max-width: 48rem) {
+  .pd {
+    flex-direction: column;
+    overflow-y: auto;
+    height: 100%;
+  }
+
+  .pd__thread {
+    flex: none;
+    min-height: auto;
+    overflow: visible;
+  }
+
+  .pd__scroll {
+    overflow-y: visible;
+    flex: none;
+  }
+
+  .pd__rail {
+    width: 100%;
+    border-left: none;
+    border-top: var(--rule-hair) solid var(--color-rule);
+    overflow-y: visible;
+    flex: none;
+    display: block;
+    background: var(--color-paper-2);
+  }
+
+  .pd__head,
+  .pd__fold,
+  .pd__comments {
+    padding-inline: var(--space-md);
+  }
+
+  .pd__rail-inner {
+    padding: var(--space-md);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
