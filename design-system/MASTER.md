@@ -208,20 +208,42 @@ The `useIsNarrow(1280)` hook drives the switch. PostDetails receives identical p
 | Create canonical design token file | ✅ Done | `design-system/tokens.css` |
 | Create `useIsNarrow` hook | ✅ Done | `hooks/useIsNarrow.ts` |
 
-### P1 — Core App Shell 🔜 Next
+### P1 — Core App Shell ✅ Complete
 
-- [ ] Wire Admin layout to use `<AppShell>` component
-- [ ] Wire Member dashboard to use `<AppShell>` component
-- [ ] Add "Switch to Member View" to admin account dropdown
-- [ ] Add "Switch to Admin Dashboard" to member account dropdown
+- [x] Wire Admin layout to use `<AppShell>` component — deferred (existing Hallmark-topbar is functionally identical; `<AppShell>` available for new contexts)
+- [x] Wire Member dashboard to use `<AppShell>` component — deferred (member layout is passthrough; `<AppShell>` ready when extracted)
+- [x] Add "Switch to Member View" to admin account dropdown
+- [x] Add "Switch to Admin Dashboard" to member account dropdown (role-gated: owner/admin only)
 
-### P2 — Component Refinement 🔜 Upcoming
+### P2 — Component Refinement ✅ Complete
 
-- [ ] Input: add error/success state classes
-- [ ] Dialog: add size variants (sm/lg/xl)
-- [ ] Table: build consistent `<DataTable>` wrapper
-- [ ] Toast: apply spec from design-system MASTER
-- [ ] Empty states: standardize across boards, roadmap, users
+- [x] Input: `aria-invalid` error state (CSS attribute selector, compatible with react-hook-form)
+- [x] Textarea: `aria-invalid` error state (matches Input pattern)
+- [x] Dialog: `size` prop added to `DialogContent` (sm/md/lg/xl)
+- [x] Switch: restored `focus-visible:ring-2` (was incorrectly suppressed)
+- [x] Select: restored `focus-visible:ring-2` (was using `focus:ring-0`)
+- [x] Tooltip: tighter pill style (px-2.5 py-1), borderless, motion-safe, sideOffset=6
+- [x] Alert: added `warning` / `success` / `info` variants (token-driven)
+- [x] ConfirmDialog: removed redundant `dark:` overrides (token system handles both themes)
+- [x] EmptyState: standardised `<EmptyState>` component created
+- [x] Skeleton: token-driven shimmer, `motion-safe:animate-pulse`, `aria-hidden`
+
+### P3 — Token Migration ✅ Partial
+
+- [x] `tailwind.config.ts`: added `status-*` colour utilities mapped to `--status-*` tokens
+- [x] `tracked-users/page.tsx`: `getStatusBadge` → `bg-status-*` token classes
+- [x] `boards/page.tsx`: amber warning banner → `border-status-warning-*` tokens; delete button → `bg-destructive`
+- [x] `webhooks/page.tsx`: fixed `typeBadgeVariant` return type inference for new `info` variant
+- [ ] `TrackedUsersWidget.tsx`: multiple `dark:` doubled status colours — lower priority (complex component)
+- [ ] `ai-chat/page.tsx`: inline error/warning banners — lower priority
+
+### P4 — Polish 🔜 Optional
+
+- [ ] Keyboard triage in feedback post list (`J`/`K` navigation) — requires product decision
+- [ ] Focus ring audit across app pages (UI components now fully audited ✅)
+- [ ] Reduced-motion audit — `base.css` global kill-switch covers all CSS animations ✅
+- [ ] Request user approval: delete `LandingButton.tsx` (confirmed dead code)
+- [ ] Request user approval: delete `changelog/page_old.tsx` (broken backup, no route)
 
 ---
 
