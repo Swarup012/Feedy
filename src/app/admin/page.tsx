@@ -75,7 +75,7 @@ export default function AdminPage() {
   return (
     <ProtectedRoute allowedRoles={["owner", "admin"]}>
       <div className="bg-background flex flex-col min-h-full">
-        <div className="dash" style={{ maxWidth: "var(--container)", marginInline: "auto", paddingInline: "var(--gutter)" }}>
+        <div className="dash" style={{ width: "100%", paddingInline: "var(--gutter)" }}>
           <section className="dash__head">
             <h1 className="dash__title">
               What needs your attention right now

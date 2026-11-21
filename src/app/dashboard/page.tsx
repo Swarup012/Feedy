@@ -112,12 +112,12 @@ export default function DashboardPage() {
   return (
     <ProtectedRoute allowedRoles={["owner", "admin", "member", "user"]}>
       <div className="h-screen flex flex-col bg-background overflow-hidden">
-        {/* Navbar — token-driven, respects light/dark theme preference (D4) */}
-        <nav className="fixed top-0 left-0 right-0 bg-background border-b border-border shadow-sm z-50 flex-shrink-0">
-            <div className="container mx-auto flex items-center justify-between px-4 py-3">
+        {/* Navbar — brand primary color */}
+        <nav className="fixed top-0 left-0 right-0 bg-primary border-b border-primary shadow-sm z-50 flex-shrink-0">
+          <div className="container mx-auto flex items-center justify-between px-4 py-3">
             {/* Left side - Brand + Org Switcher + Nav Links */}
             <div className="flex items-center gap-6">
-              <Link href="/dashboard" className="text-base font-semibold tracking-tight text-foreground">
+              <Link href="/dashboard" className="text-lg font-bold tracking-tight text-white">
                 Dashboard
               </Link>
 
@@ -128,14 +128,14 @@ export default function DashboardPage() {
               <div className="hidden md:flex items-center gap-1">
                 <Link
                   href="/feedback"
-                  className="text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent px-2.5 py-1.5 rounded-md transition-colors"
+                  className="text-sm font-medium text-white/80 hover:text-white hover:bg-white/10 px-2.5 py-1.5 rounded-md transition-colors"
                 >
                   Feedback Boards
                 </Link>
                 {boards.length > 0 && (
                   <Link
                     href={`/roadmap/${boards[0]?.slug || 'general'}`}
-                    className="text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent px-2.5 py-1.5 rounded-md transition-colors"
+                    className="text-sm font-medium text-white/80 hover:text-white hover:bg-white/10 px-2.5 py-1.5 rounded-md transition-colors"
                   >
                     Roadmap
                   </Link>
@@ -143,7 +143,7 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* Right side - Submit Button + Admin Button + Role Badge + User Menu */}
+            {/* Right side - Admin Button + Role Badge + User Menu */}
             <div className="flex items-center gap-3">
               {/* Admin Dashboard Button - Only for Admins/Owners */}
               {(organizationRole === 'owner' || organizationRole === 'admin') && (
@@ -151,26 +151,15 @@ export default function DashboardPage() {
                   size="sm"
                   variant="outline"
                   onClick={() => router.push('/admin')}
-                  className="hidden md:flex gap-2"
+                  className="hidden md:flex gap-2 bg-white/10 text-white border-white/20 hover:bg-white/20 hover:text-white"
                 >
                   <Building2 className="h-4 w-4" />
                   Admin Dashboard
                 </Button>
               )}
 
-              {/* Submit Feedback Button */}
-              {boards.length > 0 && (
-                <Button
-                  size="sm"
-                  onClick={() => router.push(`/feedback/${boards[0]?.slug || 'general'}`)}
-                  className="hidden md:flex"
-                >
-                  Submit Feedback
-                </Button>
-              )}
-
               {organization && (
-                <div className="hidden lg:flex items-center gap-2 text-sm text-muted-foreground">
+                <div className="hidden lg:flex items-center gap-2 text-sm text-white/80">
                   <Building2 className="h-4 w-4" />
                   <span>{organizationRole === 'owner' ? 'Owner' : organizationRole === 'admin' ? 'Admin' : 'Member'}</span>
                 </div>
@@ -178,7 +167,7 @@ export default function DashboardPage() {
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+                  <Button variant="ghost" className="relative h-10 w-10 rounded-full hover:bg-white/10">
                     <Avatar className="h-10 w-10">
                       <AvatarImage src={user?.avatar_url} alt={user?.name || user?.email} />
                       <AvatarFallback>{getUserInitials()}</AvatarFallback>
