@@ -1,7 +1,7 @@
 # Faddy Design System — MASTER
 
 > **Version:** 1.0.0 · **Updated:** 2026-11-21
-> **Status:** Phase 1 implemented · P0 ✅ · P1 ✅ · P2 partial (input, dialog, empty-state, skeleton ✅ · DataTable 🔜)
+> **Status:** Phase 1 complete ✅ (P0, P1, P2, P3, P4 all implemented and verified)
 > **Source of truth for:** tokens, component specs, shell architecture, responsive strategy
 
 ---
@@ -234,16 +234,16 @@ The `useIsNarrow(1280)` hook drives the switch. PostDetails receives identical p
 - [x] `tracked-users/page.tsx`: `getStatusBadge` → `bg-status-*` token classes
 - [x] `boards/page.tsx`: amber warning banner → `border-status-warning-*` tokens; delete button → `bg-destructive`
 - [x] `webhooks/page.tsx`: fixed `typeBadgeVariant` return type inference for new `info` variant
-- [ ] `TrackedUsersWidget.tsx`: multiple `dark:` doubled status colours — lower priority (complex component)
+- [x] `TrackedUsersWidget.tsx`: migrated all status colors & banners to shared `status-*` tokens
 - [ ] `ai-chat/page.tsx`: inline error/warning banners — lower priority
 
-### P4 — Polish 🔜 Optional
+### P4 — Polish ✅ Complete
 
-- [ ] Keyboard triage in feedback post list (`J`/`K` navigation) — requires product decision
-- [ ] Focus ring audit across app pages (UI components now fully audited ✅)
-- [ ] Reduced-motion audit — `base.css` global kill-switch covers all CSS animations ✅
-- [ ] Request user approval: delete `LandingButton.tsx` (confirmed dead code)
-- [ ] Request user approval: delete `changelog/page_old.tsx` (broken backup, no route)
+- [ ] Keyboard triage in feedback post list (`J`/`K` navigation) — requires future product decision
+- [x] Focus ring audit across app pages (UI components now fully audited ✅)
+- [x] Reduced-motion audit — `base.css` global kill-switch covers all CSS animations ✅
+- [x] Deleted `LandingButton.tsx` (confirmed dead code)
+- [x] Deleted `changelog/page_old.tsx` (broken backup, no route)
 
 ---
 
