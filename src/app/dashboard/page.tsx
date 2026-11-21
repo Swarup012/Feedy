@@ -111,13 +111,13 @@ export default function DashboardPage() {
 
   return (
     <ProtectedRoute allowedRoles={["owner", "admin", "member", "user"]}>
-      <div className="h-screen flex flex-col bg-gray-50 dark:bg-background overflow-hidden">
-        {/* Navbar */}
-        <nav className="fixed top-0 left-0 right-0 bg-primary border-b border-primary shadow-sm z-50 flex-shrink-0">
-            <div className="container mx-auto flex items-center justify-between px-4 py-4">
+      <div className="h-screen flex flex-col bg-background overflow-hidden">
+        {/* Navbar — token-driven, respects light/dark theme preference (D4) */}
+        <nav className="fixed top-0 left-0 right-0 bg-background border-b border-border shadow-sm z-50 flex-shrink-0">
+            <div className="container mx-auto flex items-center justify-between px-4 py-3">
             {/* Left side - Brand + Org Switcher + Nav Links */}
             <div className="flex items-center gap-6">
-              <Link href="/dashboard" className="text-xl font-bold tracking-tight text-white">
+              <Link href="/dashboard" className="text-base font-semibold tracking-tight text-foreground">
                 Dashboard
               </Link>
 
@@ -125,17 +125,17 @@ export default function DashboardPage() {
               <OrganizationSwitcher />
 
               {/* Navigation Links */}
-              <div className="hidden md:flex items-center gap-4">
+              <div className="hidden md:flex items-center gap-1">
                 <Link
                   href="/feedback"
-                  className="text-sm font-medium text-white/80 hover:text-white transition-colors"
+                  className="text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent px-2.5 py-1.5 rounded-md transition-colors"
                 >
                   Feedback Boards
                 </Link>
                 {boards.length > 0 && (
                   <Link
                     href={`/roadmap/${boards[0]?.slug || 'general'}`}
-                    className="text-sm font-medium text-white/80 hover:text-white transition-colors"
+                    className="text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent px-2.5 py-1.5 rounded-md transition-colors"
                   >
                     Roadmap
                   </Link>
@@ -144,7 +144,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Right side - Submit Button + Admin Button + Role Badge + User Menu */}
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
               {/* Admin Dashboard Button - Only for Admins/Owners */}
               {(organizationRole === 'owner' || organizationRole === 'admin') && (
                 <Button
@@ -170,7 +170,7 @@ export default function DashboardPage() {
               )}
 
               {organization && (
-                <div className="hidden lg:flex items-center gap-2 text-sm text-white/80">
+                <div className="hidden lg:flex items-center gap-2 text-sm text-muted-foreground">
                   <Building2 className="h-4 w-4" />
                   <span>{organizationRole === 'owner' ? 'Owner' : organizationRole === 'admin' ? 'Admin' : 'Member'}</span>
                 </div>
@@ -199,6 +199,16 @@ export default function DashboardPage() {
                     <User className="mr-2 h-4 w-4" />
                     <span>Profile</span>
                   </DropdownMenuItem>
+                  {/* Switch to Admin Dashboard — only shown for owners and admins */}
+                  {(organizationRole === 'owner' || organizationRole === 'admin') && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={() => router.push('/admin')} className="cursor-pointer">
+                        <Building2 className="mr-2 h-4 w-4" />
+                        <span>Switch to Admin Dashboard</span>
+                      </DropdownMenuItem>
+                    </>
+                  )}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-600">
                     <LogOut className="mr-2 h-4 w-4" />

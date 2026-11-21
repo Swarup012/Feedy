@@ -1,0 +1,288 @@
+/* ==========================================================================
+   AppShell — Shared navigation shell styles
+   Tokens consumed from globals.css + tokens.css (always loaded first).
+   Both variants (admin, member) share structure; only surface colors differ.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Shell wrapper
+   -------------------------------------------------------------------------- */
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* --------------------------------------------------------------------------
+   Topbar — 52px fixed height, full width
+   -------------------------------------------------------------------------- */
+.app-shell__topbar {
+  flex-shrink: 0;
+  height: 52px;
+  border-bottom: 1px solid hsl(var(--border));
+  position: relative;
+  z-index: var(--z-sticky-nav, 300);
+}
+
+/* Admin variant: dark cobalt surface (preserves existing brand identity) */
+.app-shell__topbar--admin {
+  background: hsl(var(--background));
+}
+
+/* Member variant: light surface */
+.app-shell__topbar--member {
+  background: hsl(var(--background));
+}
+
+/* Dark mode: admin topbar uses cobalt brand bg */
+.dark .app-shell__topbar--admin {
+  background: var(--brand-bg, #0b0e14);
+  border-bottom-color: var(--brand-panel-border, rgba(255, 255, 255, 0.08));
+}
+
+.dark .app-shell__topbar--member {
+  background: hsl(var(--background));
+}
+
+/* --------------------------------------------------------------------------
+   Inner layout: left | right, full height
+   -------------------------------------------------------------------------- */
+.app-shell__topbar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+  padding: 0 24px;
+  gap: 12px;
+}
+
+/* --------------------------------------------------------------------------
+   Left group
+   -------------------------------------------------------------------------- */
+.app-shell__topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  min-width: 0;
+  flex: 1;
+}
+
+/* Brand wordmark */
+.app-shell__brand {
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: hsl(var(--foreground));
+  text-decoration: none;
+  flex-shrink: 0;
+  transition: opacity 150ms ease;
+}
+
+.app-shell__brand:hover {
+  opacity: 0.75;
+}
+
+.dark .app-shell__topbar--admin .app-shell__brand {
+  color: var(--brand-ink, #e6e8eb);
+}
+
+/* Vertical divider between brand and org switcher */
+.app-shell__divider {
+  display: block;
+  width: 1px;
+  height: 16px;
+  background: hsl(var(--border));
+  margin: 0 12px;
+  flex-shrink: 0;
+}
+
+.dark .app-shell__topbar--admin .app-shell__divider {
+  background: var(--brand-panel-border, rgba(255, 255, 255, 0.08));
+}
+
+/* --------------------------------------------------------------------------
+   Navigation
+   -------------------------------------------------------------------------- */
+.app-shell__nav {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: 8px;
+}
+
+@media (max-width: 1023px) {
+  .app-shell__nav {
+    display: none;
+  }
+}
+
+.app-shell__nav-link {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: hsl(var(--muted-foreground));
+  text-decoration: none;
+  transition: color 150ms ease, background-color 150ms ease;
+  position: relative;
+  white-space: nowrap;
+}
+
+.app-shell__nav-link:hover {
+  color: hsl(var(--foreground));
+  background-color: hsl(var(--accent));
+}
+
+/* Active state: underline indicator */
+.app-shell__nav-link[aria-current="page"] {
+  color: hsl(var(--primary));
+  background-color: transparent;
+}
+
+.app-shell__nav-link[aria-current="page"]::after {
+  content: "";
+  position: absolute;
+  bottom: -1px;
+  left: 10px;
+  right: 10px;
+  height: 2px;
+  background: hsl(var(--primary));
+  border-radius: 1px 1px 0 0;
+}
+
+/* Dark / admin variant: lighter muted text on dark surface */
+.dark .app-shell__topbar--admin .app-shell__nav-link {
+  color: hsl(214 7.6% 58%); /* --muted-foreground dark value */
+}
+
+.dark .app-shell__topbar--admin .app-shell__nav-link:hover {
+  color: hsl(var(--foreground));
+  background-color: rgba(255, 255, 255, 0.06);
+}
+
+.dark .app-shell__topbar--admin .app-shell__nav-link[aria-current="page"] {
+  color: var(--brand-accent, #4f7cff);
+}
+
+.dark .app-shell__topbar--admin .app-shell__nav-link[aria-current="page"]::after {
+  background: var(--brand-accent, #4f7cff);
+}
+
+/* --------------------------------------------------------------------------
+   Right group
+   -------------------------------------------------------------------------- */
+.app-shell__topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Mobile hamburger toggle
+   -------------------------------------------------------------------------- */
+.app-shell__nav-toggle {
+  display: none;
+}
+
+@media (max-width: 1023px) {
+  .app-shell__nav-toggle {
+    display: inline-flex;
+  }
+}
+
+/* Simple hamburger via CSS — avoids importing an icon for this one element */
+.app-shell__hamburger-icon,
+.app-shell__hamburger-icon::before,
+.app-shell__hamburger-icon::after {
+  display: block;
+  width: 16px;
+  height: 1.5px;
+  background: currentColor;
+  border-radius: 1px;
+  transition: transform 200ms ease, opacity 200ms ease;
+}
+
+.app-shell__hamburger-icon {
+  position: relative;
+}
+
+.app-shell__hamburger-icon::before,
+.app-shell__hamburger-icon::after {
+  content: "";
+  position: absolute;
+  left: 0;
+}
+
+.app-shell__hamburger-icon::before { top: -5px; }
+.app-shell__hamburger-icon::after  { top:  5px; }
+
+/* X state when expanded */
+[aria-expanded="true"] .app-shell__hamburger-icon {
+  background: transparent;
+}
+
+[aria-expanded="true"] .app-shell__hamburger-icon::before {
+  transform: translateY(5px) rotate(45deg);
+}
+
+[aria-expanded="true"] .app-shell__hamburger-icon::after {
+  transform: translateY(-5px) rotate(-45deg);
+}
+
+/* --------------------------------------------------------------------------
+   Mobile nav drawer — slides down from topbar
+   -------------------------------------------------------------------------- */
+.app-shell__mobile-nav {
+  display: none;
+  flex-direction: column;
+  padding: 8px 12px 12px;
+  border-top: 1px solid hsl(var(--border));
+  background: hsl(var(--background));
+  gap: 2px;
+}
+
+.app-shell__mobile-nav--open {
+  display: flex;
+}
+
+.dark .app-shell__topbar--admin + * .app-shell__mobile-nav,
+.dark .app-shell__mobile-nav {
+  background: var(--brand-bg, #0b0e14);
+  border-top-color: var(--brand-panel-border, rgba(255, 255, 255, 0.08));
+}
+
+.app-shell__mobile-nav .app-shell__nav-link {
+  padding: 10px 12px;
+  width: 100%;
+  border-radius: 8px;
+}
+
+@media (min-width: 1024px) {
+  .app-shell__mobile-nav {
+    display: none !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Main content area — scrollable
+   -------------------------------------------------------------------------- */
+.app-shell__main {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+/* --------------------------------------------------------------------------
+   Focus ring — consistent with global focus-visible
+   -------------------------------------------------------------------------- */
+.app-shell__topbar a:focus-visible,
+.app-shell__topbar button:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+  border-radius: 4px;
+}

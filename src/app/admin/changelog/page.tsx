@@ -24,6 +24,7 @@ import { useOrganization } from "@/context/OrganizationContext";
 import { changelogService, Changelog } from "@/services/changelogService";
 import { formatDistanceToNow, format, parseISO } from "date-fns";
 import ReactMarkdown from "react-markdown";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 const TYPE_CONFIG = {
   new: {
@@ -70,6 +71,11 @@ export default function ChangelogPage() {
     labels: [] as string[],
   });
   const [newLabel, setNewLabel] = useState("");
+
+  // Link insertion dialog state
+  const [linkDialogOpen, setLinkDialogOpen] = useState(false);
+  const [linkUrl, setLinkUrl] = useState("");
+  const [linkText, setLinkText] = useState("");
 
   useEffect(() => {
     fetchChangelogs();
@@ -253,8 +259,36 @@ export default function ChangelogPage() {
   const handleItalic = () => insertMarkdown("*", "*");
   const handleCode = () => insertMarkdown("`", "`");
   const handleLink = () => {
-    const url = prompt("Enter URL:");
-    if (url) insertMarkdown("[", `](${url})`);
+    setLinkDialogOpen(true);
+  };
+
+  const handleLinkInsert = () => {
+    const text = linkText.trim();
+    const url = linkUrl.trim();
+    if (url) {
+      if (text) {
+        // Insert as [text](url)
+        const textarea = textareaRef.current;
+        if (textarea) {
+          const start = textarea.selectionStart;
+          const end = textarea.selectionEnd;
+          const before = textarea.value.substring(0, start);
+          const after = textarea.value.substring(end);
+          const newValue = `${before}[${text}](${url})${after}`;
+          setFormData({ ...formData, content: newValue });
+          setTimeout(() => {
+            textarea.focus();
+            const newPos = start + text.length + url.length + 4;
+            textarea.setSelectionRange(newPos, newPos);
+          }, 0);
+        }
+      } else {
+        insertMarkdown("[", `](${url})`);
+      }
+    }
+    setLinkUrl("");
+    setLinkText("");
+    setLinkDialogOpen(false);
   };
   const handleList = () => insertMarkdown("\n- ", "");
   const handleOrderedList = () => insertMarkdown("\n1. ", "");

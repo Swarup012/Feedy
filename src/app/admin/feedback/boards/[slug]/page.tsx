@@ -14,6 +14,8 @@ import { PostsList } from "@/components/feedback/PostsList";
 import { PostDetails } from "@/components/feedback/PostDetails";
 import { CreatePostDialog } from "@/components/feedback/CreatePostDialog";
 import { UpgradeDialog } from "@/components/UpgradeDialog";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { useIsNarrow } from "@/hooks/useIsNarrow";
 import usageService from "@/services/usageService";
 
 export default function BoardPage() {
@@ -45,6 +47,9 @@ export default function BoardPage() {
   const [postLimitReason, setPostLimitReason] = useState<string>("");
   const [mobileView, setMobileView] = useState<"list" | "detail">("list");
   const [showSidebar, setShowSidebar] = useState(false);
+
+  // Progressive collapse: at <1280px PostDetails becomes a right drawer
+  const isNarrow = useIsNarrow(1280);
 
   // ── Filters ──
   const [filters, setFilters] = useState({
@@ -331,21 +336,51 @@ export default function BoardPage() {
           />
         </div>
 
-        {/* ── Post Details: full-width overlay on mobile when viewing ── */}
-        <div className={`
-          max-md:absolute max-md:inset-0 max-md:z-20
-          ${mobileView === "detail" ? "max-md:block" : "max-md:hidden"}
-          md:block md:flex-1 md:min-w-0
-        `}>
-          <PostDetails
-            post={selectedPost}
-            currentBoard={currentBoard}
-            onPostUpdated={handlePostUpdated}
-            onPostDeleted={handlePostDeleted}
-            onBack={handleBackToList}
-            isMobile
-          />
-        </div>
+        {/* ── Post Details:
+              < 1280px → Sheet drawer (progressive collapse, D3 approved)
+              ≥ 1280px → Inline third pane (original three-pane layout)
+              Mobile   → Full-screen overlay (existing behaviour preserved)
+        ── */}
+        {isNarrow ? (
+          /* Drawer mode: <1280px. PostDetails content is identical — only the
+             container changes. All handlers, props, and functionality are preserved. */
+          <Sheet
+            open={!!selectedPost}
+            onOpenChange={(open) => {
+              if (!open) handleBackToList();
+            }}
+          >
+            <SheetContent
+              side="right"
+              className="w-full sm:max-w-[480px] p-0 overflow-y-auto"
+            >
+              <PostDetails
+                post={selectedPost}
+                currentBoard={currentBoard}
+                onPostUpdated={handlePostUpdated}
+                onPostDeleted={handlePostDeleted}
+                onBack={handleBackToList}
+                isMobile
+              />
+            </SheetContent>
+          </Sheet>
+        ) : (
+          /* Three-pane inline mode: ≥1280px */
+          <div className={`
+            max-md:absolute max-md:inset-0 max-md:z-20
+            ${mobileView === "detail" ? "max-md:block" : "max-md:hidden"}
+            md:block md:flex-1 md:min-w-0
+          `}>
+            <PostDetails
+              post={selectedPost}
+              currentBoard={currentBoard}
+              onPostUpdated={handlePostUpdated}
+              onPostDeleted={handlePostDeleted}
+              onBack={handleBackToList}
+              isMobile
+            />
+          </div>
+        )}
 
         {/* Create Post Dialog */}
         <CreatePostDialog

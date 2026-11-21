@@ -25,18 +25,26 @@ export default function RootLayout({
             __html: `try{var t=localStorage.getItem("vite-ui-theme")||localStorage.getItem("theme");var d=t==="dark"||(t==="system"&&matchMedia("(prefers-color-scheme: dark)").matches);var c=document.documentElement.classList;c.remove("light","dark");c.add(d?"dark":"light")}catch(e){}`,
           }}
         />
+        {/* Font preloads — reduce FOUT for Inter and Source Code Pro */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           rel="preconnect"
           href="https://fonts.gstatic.com"
           crossOrigin="anonymous"
         />
+        {/* Inter: weights 300–700 + italic 400 for prose emphasis */}
         <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-          rel="stylesheet"
+          rel="preload"
+          as="style"
+          href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap"
         />
         <link
-          href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap"
+          rel="stylesheet"
+        />
+        {/* Source Code Pro: regular weight only (code blocks, API keys) */}
+        <link
+          href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;500&display=swap"
           rel="stylesheet"
         />
       </head>

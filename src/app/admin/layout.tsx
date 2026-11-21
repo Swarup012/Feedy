@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
+import { useOrganization } from "@/context/OrganizationContext";
 import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
@@ -25,6 +26,7 @@ export default function AdminLayout({
   const pathname = usePathname();
   const router = useRouter();
   const { user, logout } = useAuth();
+  const { organizationRole } = useOrganization();
 
   const { resolvedTheme, setTheme } = useTheme();
   const [viewMode, setViewMode] = useState<"admin" | "public">("admin");
@@ -79,7 +81,7 @@ export default function AdminLayout({
   };
 
   const navItems = [
-    { name: "Smartflow", path: "/admin/autopilot" },
+    { name: "Smart Flow", path: "/admin/autopilot" },
     { name: "AI Chat", path: "/admin/ai-chat" },
     { name: "Users", path: "/admin/users" },
     { name: "Feedback", path: feedbackPath },
@@ -195,6 +197,14 @@ export default function AdminLayout({
                   className="cursor-pointer rounded-lg py-2.5 font-medium"
                 >
                   Contact Us
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                {/* Dashboard switcher — owners and admins can switch to Member View */}
+                <DropdownMenuItem
+                  onClick={() => router.push("/dashboard")}
+                  className="cursor-pointer rounded-lg py-2.5 font-medium"
+                >
+                  Switch to Member View
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
