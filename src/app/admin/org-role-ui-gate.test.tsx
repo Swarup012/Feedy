@@ -96,7 +96,7 @@ vi.mock('@/services/paddleService', () => ({
 }));
 
 // Page-only dialogs are not under test.
-vi.mock('@/components/billing/UpgradeDialog', () => ({
+vi.mock('@/components/UpgradeDialog', () => ({
   UpgradeDialog: () => null,
 }));
 vi.mock('@/components/billing/CancelFlow', () => ({

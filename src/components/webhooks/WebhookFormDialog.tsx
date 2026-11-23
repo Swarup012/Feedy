@@ -249,6 +249,10 @@ export function WebhookFormDialog({ open, onClose, onSaved, existing }: WebhookF
           ) : (
             <div className="fd__body wh-body">
               <div className="wh-config">
+                <p className="fd-section__title">
+                  <span className="fd-section__index">1</span>
+                  Destination
+                </p>
                 <div className="fd-field">
                   <div className="fd-field__top">
                     <span className="fd-label">Delivery</span>
@@ -341,6 +345,10 @@ export function WebhookFormDialog({ open, onClose, onSaved, existing }: WebhookF
               </div>
 
               <div className="wh-subscribe">
+                <p className="fd-section__title">
+                  <span className="fd-section__index">2</span>
+                  Events &amp; scope
+                </p>
                 <div className="fd-field">
                   <div className="fd-field__top">
                     <span className="fd-label" id="wh-events-label">Events</span>

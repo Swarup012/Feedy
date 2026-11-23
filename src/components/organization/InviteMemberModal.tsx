@@ -6,7 +6,6 @@ import {
   Dialog,
   DialogClose,
   DialogContent,
-  DialogDescription,
   DialogTitle,
 } from '@/components/ui/dialog';
 import { invitationService } from '@/services/invitationService';
@@ -110,14 +109,11 @@ export function InviteMemberModal({
   return (
     <>
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="fd w-[min(94vw,600px)] max-w-none gap-0 border-0 bg-transparent p-0 shadow-none [&>button]:hidden">
+      <DialogContent className="fd wg z-[400] w-[min(94vw,580px)] max-w-none gap-0 border-0 bg-transparent p-0 shadow-none [&>button]:hidden">
         <form onSubmit={handleSubmit} className="fd__shell">
           <header className="fd__head">
             <div className="fd__headtext">
               <DialogTitle className="fd__title">Invite a member</DialogTitle>
-              <DialogDescription className="fd__lede">
-                To {organizationName}. The invitation expires in 7 days.
-              </DialogDescription>
             </div>
             <DialogClose type="button" className="fd__close" aria-label="Close">
               <X className="h-4 w-4" aria-hidden="true" />
@@ -126,8 +122,6 @@ export function InviteMemberModal({
 
           <div className="fd__body">
             <section className="fd-section">
-              <p className="fd-section__title">Recipient</p>
-
               <div className="fd-field">
                 <label className="fd-label" htmlFor="email">Email address</label>
                 <div className="inv-email">
@@ -151,8 +145,6 @@ export function InviteMemberModal({
             </section>
 
             <section className="fd-section">
-              <p className="fd-section__title">Access</p>
-
               <div className="fd-field">
                 <span className="fd-label" id="role-label">Role</span>
                 <div className="inv-roles" role="group" aria-labelledby="role-label" id="role">

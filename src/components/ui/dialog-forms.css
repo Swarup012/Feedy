@@ -1,5 +1,6 @@
 /* Hallmark · component: dialogs · genre: modern-minimal · theme: brand · states: 8 · contrast: pass · v2.0.0
  * pre-emit critique: P4 H5 E5 S4 R5 V4 · weakest: V — four composers share one shell; each keeps its own opening: the post leads with a writing plate, the webhook with a delivery ledger, the widget with identity over placement, the invite with a recipient over two access plates, the job role with a single naming line.
+ * waive F24: the dialog sits over a dimmed backdrop, so it keeps both its hairline edge and enough lift to read as above the page.
  */
 
 .fd {
@@ -18,6 +19,9 @@
   border-radius: var(--radius-card);
   background: var(--color-paper);
   color: var(--color-ink);
+  box-shadow:
+    0 1px 2px color-mix(in oklab, var(--color-ink) 6%, transparent),
+    0 16px 40px -16px color-mix(in oklab, var(--color-ink) 22%, transparent);
 }
 
 .fd__form {
@@ -123,6 +127,9 @@
 }
 
 .fd__foot {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
   display: flex;
   align-items: center;
   justify-content: flex-end;
@@ -204,8 +211,8 @@
 .fd-input:focus-visible,
 .fd-textarea:focus-visible {
   outline: none;
-  box-shadow: none;
-  border-color: var(--color-muted);
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-accent) 18%, transparent);
 }
 
 .fd-input[aria-invalid="true"],
@@ -701,8 +708,9 @@
 }
 
 .wh-type:focus-visible {
-  outline: 2px solid var(--color-ink);
-  outline-offset: 1px;
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-accent) 18%, transparent);
 }
 
 .wh-type:active {
@@ -1016,8 +1024,9 @@
 }
 
 .fd-select > select:focus-visible {
-  outline: 2px solid var(--color-ink);
-  outline-offset: 1px;
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-accent) 18%, transparent);
 }
 
 .fd-select > select:disabled {
@@ -1061,6 +1070,22 @@
   color: var(--color-muted);
 }
 
+.fd-section__index {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: var(--radius-pill);
+  background: color-mix(in oklab, var(--color-accent) 12%, var(--color-paper));
+  color: var(--color-accent);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
 .fd-section__title::after {
   content: "";
   flex: 1;
@@ -1075,51 +1100,34 @@
 }
 
 .fd-swatch {
-  position: relative;
   display: inline-flex;
   align-items: center;
   gap: var(--space-xs);
-  min-height: 40px;
-  padding: 0 var(--space-sm);
-  border: var(--rule-hair) solid var(--fd-field-border);
-  border-radius: var(--radius-input, 6px);
-  background: var(--color-paper);
-  color: var(--color-ink-2);
-  font-family: var(--font-body);
-  font-size: var(--text-sm);
-  cursor: pointer;
-  transition:
-    background-color var(--dur-micro) var(--ease-out),
-    border-color var(--dur-micro) var(--ease-out),
-    color var(--dur-micro) var(--ease-out);
-}
-
-.fd-swatch:hover {
-  border-color: var(--color-muted);
-  background: var(--color-paper-2);
-  color: var(--color-ink);
-}
-
-.fd-swatch:focus-within {
-  outline: 2px solid var(--color-ink);
-  outline-offset: 1px;
-}
-
-.fd-swatch__chip {
-  flex-shrink: 0;
-  width: 22px;
-  height: 22px;
-  border-radius: calc(var(--radius-input, 6px) - 3px);
-  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--color-ink) 18%, transparent);
 }
 
 .fd-swatch input[type="color"] {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  opacity: 0;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: calc(var(--radius-input, 6px) - 2px);
+  background: none;
   cursor: pointer;
+}
+
+.fd-swatch input[type="color"]::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+.fd-swatch input[type="color"]::-webkit-color-swatch {
+  border: 1px solid color-mix(in oklab, var(--color-ink) 18%, transparent);
+  border-radius: inherit;
+}
+
+.fd-swatch__hex {
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+  font-variant-numeric: tabular-nums;
 }
 
 /* Widget composer */
@@ -1335,3 +1343,182 @@
     animation: none;
   }
 }
+
+/* ==========================================================================
+   Widget dialogs (.wg) — compact Linear/Canny-style form
+   Scoped to the two widget dialogs only; all other fd dialogs untouched.
+   ========================================================================== */
+
+.wg.fd {
+  width: min(94vw, 580px);
+  max-height: calc(100dvh - 2rem);
+}
+
+/* Raise the widget dialog (and its dim overlay) above the sticky topbar
+   (z 300) without touching the shared primitive. Toasts (--z-toast: 500)
+   and the widget popover (z-[450]) stay above. */
+body:has(.wg.fd) > .fixed.inset-0.z-50 {
+  z-index: 400;
+}
+
+.wg .fd__shell {
+  max-height: calc(100dvh - 2rem);
+}
+
+/* Header: one row — title left, close right */
+.wg .fd__head {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-lg);
+  border-bottom: var(--rule-hair) solid var(--color-rule);
+}
+
+.wg .fd__title {
+  font-family: var(--font-body);
+  font-size: 1.0625rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.wg .fd__close {
+  width: 32px;
+  height: 32px;
+  min-height: 32px;
+}
+
+/* Body scroll area */
+.wg .fd__body {
+  padding: var(--space-md) var(--space-lg);
+  overscroll-behavior: contain;
+}
+
+.wg .fd__body[data-top="false"] {
+  box-shadow: inset 0 6px 8px -8px color-mix(in oklab, var(--color-ink) 22%, transparent);
+}
+
+.wg .fd__body[data-bottom="false"] {
+  box-shadow: inset 0 -6px 8px -8px color-mix(in oklab, var(--color-ink) 22%, transparent);
+}
+
+.wg .fd__body[data-top="false"][data-bottom="false"] {
+  box-shadow:
+    inset 0 6px 8px -8px color-mix(in oklab, var(--color-ink) 22%, transparent),
+    inset 0 -6px 8px -8px color-mix(in oklab, var(--color-ink) 22%, transparent);
+}
+
+/* Sections: plain 13px titles, hairline divider, tighter rhythm */
+.wg .fd-section {
+  gap: var(--space-sm);
+  padding: 0;
+}
+
+.wg .fd-section + .fd-section {
+  margin-top: var(--space-md);
+  padding-top: var(--space-md);
+  border-top: 0;
+  position: relative;
+}
+
+.wg .fd-section + .fd-section::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--rule-hair);
+  background: var(--color-rule);
+}
+
+.wg .fd-section__title {
+  gap: 0;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--color-ink-2);
+}
+
+/* Fields: compact, consistent 38px controls */
+.wg .fd-field {
+  gap: var(--space-3xs);
+}
+
+.wg .fd-label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.wg .fd-input,
+.wg .fd-select > select,
+.wg .wg-perm {
+  min-height: 38px;
+  height: 38px;
+  font-size: 0.875rem;
+  border-radius: var(--radius-input, 6px);
+}
+
+.wg .wg-name .fd-input {
+  min-height: 38px;
+  height: 38px;
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  letter-spacing: normal;
+}
+
+.wg .fd-help-single {
+  line-height: 1.35;
+}
+
+.wg .fd-row {
+  gap: var(--space-sm);
+}
+
+/* Footer: sticky, compact, right-aligned buttons */
+.wg .fd__foot {
+  position: sticky;
+  bottom: 0;
+  justify-content: flex-end;
+  gap: var(--space-xs);
+  padding: var(--space-sm) var(--space-lg);
+  background: var(--color-paper);
+  border-top: var(--rule-hair) solid var(--color-rule);
+}
+
+.wg .fd__foot .fd-btn {
+  flex: 0 0 auto;
+  min-height: 36px;
+  height: 36px;
+  padding: 0 var(--space-md);
+  font-size: 0.875rem;
+}
+
+.wg .fd__foot .fd-btn--commit {
+  min-width: 0;
+}
+
+.wg .fd__foot .fd-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Mobile: near-full-width, buttons stay reachable */
+@media (max-width: 30rem) {
+  .wg.fd,
+  .wg .fd__shell {
+    width: 96vw;
+    max-height: 94dvh;
+  }
+
+  .wg .fd__head,
+  .wg .fd__body,
+  .wg .fd__foot {
+    padding-left: var(--space-md);
+    padding-right: var(--space-md);
+  }
+
+  .wg .fd__foot .fd-btn {
+    min-height: 38px;
+  }
+}
+

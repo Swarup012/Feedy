@@ -99,11 +99,18 @@ export default function WidgetManagementPage() {
   const [loading, setLoading] = useState(true);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [selectedWidget, setSelectedWidget] = useState<Widget | null>(null);
   const [copiedApiKey, setCopiedApiKey] = useState<string | null>(null);
   const [copiedSnippet, setCopiedSnippet] = useState<string | null>(null);
   const [apiSecretDialog, setApiSecretDialog] = useState<string | null>(null);
   const { toast } = useToast();
+
+  const handleBodyScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const el = e.currentTarget;
+    el.setAttribute("data-top", String(el.scrollTop <= 1));
+    el.setAttribute("data-bottom", String(el.scrollTop + el.clientHeight >= el.scrollHeight - 1));
+  };
 
   // Form state
   const [formData, setFormData] = useState<WidgetFormState>({
@@ -159,6 +166,7 @@ export default function WidgetManagementPage() {
 
   const handleCreateWidget = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSaving(true);
 
     try {
       const response = await api.post("/api/admin/widgets", {
@@ -208,11 +216,14 @@ export default function WidgetManagementPage() {
         description: "Failed to create widget",
         variant: "destructive",
       });
+    } finally {
+      setSaving(false);
     }
   };
 
   const handleUpdateWidget = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSaving(true);
 
     if (!selectedWidget) return;
 
@@ -260,6 +271,8 @@ export default function WidgetManagementPage() {
         description: "Failed to update widget",
         variant: "destructive",
       });
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -454,24 +467,19 @@ export default function WidgetManagementPage() {
       </div>
 
       <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-        <DialogContent className="fd wg w-[min(94vw,720px)] max-w-none gap-0 border-0 bg-transparent p-0 shadow-none [&>button]:hidden">
+        <DialogContent className="fd wg z-[400] w-[min(94vw,580px)] max-w-none gap-0 border-0 bg-transparent p-0 shadow-none [&>button]:hidden">
           <form onSubmit={handleCreateWidget} className="fd__shell">
             <header className="fd__head">
               <div className="fd__headtext">
                 <DialogTitle className="fd__title">New widget</DialogTitle>
-                <DialogDescription className="fd__lede">
-                  An embeddable feedback surface for your product.
-                </DialogDescription>
               </div>
               <DialogClose type="button" className="fd__close" aria-label="Close">
                 <X className="h-4 w-4" aria-hidden="true" />
               </DialogClose>
             </header>
 
-            <div className="fd__body">
+            <div className="fd__body" data-top="true" data-bottom="true" onScroll={handleBodyScroll}>
               <section className="fd-section">
-                <p className="fd-section__title">The widget</p>
-
                 <div className="fd-field wg-name">
                   <label className="fd-label" htmlFor="name">Name</label>
                   <input
@@ -481,6 +489,7 @@ export default function WidgetManagementPage() {
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     placeholder="Product feedback"
+                    autoFocus
                     required
                   />
                 </div>
@@ -503,8 +512,6 @@ export default function WidgetManagementPage() {
               </section>
 
               <section className="fd-section">
-                <p className="fd-section__title">Placement and look</p>
-
                 <div className="fd-row">
                   <div className="fd-field">
                     <label className="fd-label" htmlFor="default_board_id">Board</label>
@@ -540,7 +547,7 @@ export default function WidgetManagementPage() {
                           <ChevronDown className="h-4 w-4" aria-hidden="true" />
                         </button>
                       </PopoverTrigger>
-                      <PopoverContent align="start" className="w-72 p-0">
+                      <PopoverContent align="start" className="z-[450] w-72 p-0">
                         <div className="space-y-3 p-3">
                           <WidgetToggles formData={formData} setFormData={setFormData} />
                         </div>
@@ -549,31 +556,13 @@ export default function WidgetManagementPage() {
                   </div>
                 </div>
 
-                <div className="fd-field">
-                  <span className="fd-label">Brand colour</span>
-                  <div className="wg-colour">
-                    <label className="fd-swatch">
-                      <span
-                        className="fd-swatch__chip"
-                        style={{ backgroundColor: formData.primaryColor }}
-                        aria-hidden="true"
-                      />
-                      <span>Pick a colour</span>
-                      <input
-                        type="color"
-                        aria-label="Colour"
-                        value={formData.primaryColor}
-                        onChange={(e) => setFormData({ ...formData, primaryColor: e.target.value })}
-                      />
-                    </label>
-                    <input
-                      aria-label="Color code"
-                      className="fd-input wdg__mono"
-                      value={formData.primaryColor}
-                      onChange={(e) => setFormData({ ...formData, primaryColor: e.target.value })}
-                    />
-                  </div>
-                  <p className="fd-help-single">Used by the embedded widget on your site.</p>
+                <div className="fd-swatch" aria-label="Brand colour">
+                  <input
+                    type="color"
+                    value={formData.primaryColor}
+                    onChange={(e) => setFormData({ ...formData, primaryColor: e.target.value })}
+                  />
+                  <span className="fd-swatch__hex">{formData.primaryColor}</span>
                 </div>
               </section>
             </div>
@@ -582,6 +571,7 @@ export default function WidgetManagementPage() {
               <button
                 type="button"
                 className="fd-btn fd-btn--quiet"
+                disabled={saving}
                 onClick={() => {
                   setShowCreateDialog(false);
                   resetForm();
@@ -589,7 +579,11 @@ export default function WidgetManagementPage() {
               >
                 Cancel
               </button>
-              <button type="submit" className="fd-btn fd-btn--primary fd-btn--commit">
+              <button
+                type="submit"
+                className="fd-btn fd-btn--primary fd-btn--commit"
+                disabled={saving}
+              >
                 Create widget
               </button>
             </footer>
@@ -749,24 +743,19 @@ export default function WidgetManagementPage() {
 
       {/* Edit Dialog */}
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent className="fd wg w-[min(94vw,720px)] max-w-none gap-0 border-0 bg-transparent p-0 shadow-none [&>button]:hidden">
+        <DialogContent className="fd wg z-[400] w-[min(94vw,580px)] max-w-none gap-0 border-0 bg-transparent p-0 shadow-none [&>button]:hidden">
           <form onSubmit={handleUpdateWidget} className="fd__shell">
             <header className="fd__head">
               <div className="fd__headtext">
                 <DialogTitle className="fd__title">Edit widget</DialogTitle>
-                <DialogDescription className="fd__lede">
-                  Change where the widget lives and how it looks.
-                </DialogDescription>
               </div>
               <DialogClose type="button" className="fd__close" aria-label="Close">
                 <X className="h-4 w-4" aria-hidden="true" />
               </DialogClose>
             </header>
 
-            <div className="fd__body">
+            <div className="fd__body" data-top="true" data-bottom="true" onScroll={handleBodyScroll}>
               <section className="fd-section">
-                <p className="fd-section__title">The widget</p>
-
                 <div className="fd-field wg-name">
                   <label className="fd-label" htmlFor="edit-name">Name</label>
                   <input
@@ -775,6 +764,7 @@ export default function WidgetManagementPage() {
                     className="fd-input"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    placeholder="Product feedback"
                     required
                   />
                 </div>
@@ -797,8 +787,6 @@ export default function WidgetManagementPage() {
               </section>
 
               <section className="fd-section">
-                <p className="fd-section__title">Placement and look</p>
-
                 <div className="fd-row">
                   <div className="fd-field">
                     <label className="fd-label" htmlFor="edit-default_board_id">Board</label>
@@ -834,7 +822,7 @@ export default function WidgetManagementPage() {
                           <ChevronDown className="h-4 w-4" aria-hidden="true" />
                         </button>
                       </PopoverTrigger>
-                      <PopoverContent align="start" className="w-72 p-0">
+                      <PopoverContent align="start" className="z-[450] w-72 p-0">
                         <div className="space-y-3 p-3">
                           <WidgetToggles formData={formData} setFormData={setFormData} />
                         </div>
@@ -843,31 +831,13 @@ export default function WidgetManagementPage() {
                   </div>
                 </div>
 
-                <div className="fd-field">
-                  <span className="fd-label">Brand colour</span>
-                  <div className="wg-colour">
-                    <label className="fd-swatch">
-                      <span
-                        className="fd-swatch__chip"
-                        style={{ backgroundColor: formData.primaryColor }}
-                        aria-hidden="true"
-                      />
-                      <span>Pick a colour</span>
-                      <input
-                        type="color"
-                        aria-label="Colour"
-                        value={formData.primaryColor}
-                        onChange={(e) => setFormData({ ...formData, primaryColor: e.target.value })}
-                      />
-                    </label>
-                    <input
-                      aria-label="Color code"
-                      className="fd-input wdg__mono"
-                      value={formData.primaryColor}
-                      onChange={(e) => setFormData({ ...formData, primaryColor: e.target.value })}
-                    />
-                  </div>
-                  <p className="fd-help-single">Used by the embedded widget on your site.</p>
+                <div className="fd-swatch" aria-label="Brand colour">
+                  <input
+                    type="color"
+                    value={formData.primaryColor}
+                    onChange={(e) => setFormData({ ...formData, primaryColor: e.target.value })}
+                  />
+                  <span className="fd-swatch__hex">{formData.primaryColor}</span>
                 </div>
               </section>
             </div>
@@ -876,6 +846,7 @@ export default function WidgetManagementPage() {
               <button
                 type="button"
                 className="fd-btn fd-btn--quiet"
+                disabled={saving}
                 onClick={() => {
                   setShowEditDialog(false);
                   setSelectedWidget(null);
@@ -884,7 +855,11 @@ export default function WidgetManagementPage() {
               >
                 Cancel
               </button>
-              <button type="submit" className="fd-btn fd-btn--primary fd-btn--commit">
+              <button
+                type="submit"
+                className="fd-btn fd-btn--primary fd-btn--commit"
+                disabled={saving}
+              >
                 Save changes
               </button>
             </footer>

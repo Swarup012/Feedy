@@ -23,6 +23,7 @@ export interface UpgradeDialogProps {
   featureName?: string;
   feature?: 'boards' | 'posts' | 'team_members' | 'roadmap_items';
   subscription?: SubscriptionInfo | null;
+  onSuccess?: () => void;
 }
 
 const PADDLE_CLIENT_TOKEN = process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN || 'test_67753ae11c6f27e94e5909861a5';
@@ -50,6 +51,7 @@ export function UpgradeDialog({
   onOpenChange,
   featureName = 'this feature',
   subscription,
+  onSuccess,
 }: UpgradeDialogProps) {
   const { toast } = useToast();
   // Backend gates create-checkout / update-plan to the org owner (authorize(['owner'])).
@@ -139,6 +141,7 @@ export function UpgradeDialog({
             });
             onOpenChange?.(false);
             setLoading(false);
+            onSuccess?.();
             return;
           } catch {
             // fall through to redirect
@@ -165,6 +168,7 @@ export function UpgradeDialog({
           description: response.data.message || `Successfully switched to ${confirmPlan} plan.`,
         });
         onOpenChange?.(false);
+        onSuccess?.();
       }
     } catch (err: any) {
       const msg = err.response?.data?.message || err.message || 'Failed to update plan';
