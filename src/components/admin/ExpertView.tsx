@@ -9,16 +9,20 @@ import {
   Bot,
   CheckCircle2,
   ChevronRight,
+  Sparkles,
 } from 'lucide-react';
+import { ShellIcon } from '@/components/shell/ShellIcon';
 import api from '@/lib/api';
 import { RevenuePanel } from '@/components/admin/RevenuePanel';
+import { RangePills, type ExpertRange } from '@/components/admin/RangePills';
 import '@/app/admin/admin.css';
+
+export { RangePills };
+export type { ExpertRange };
 
 /* ======================================================
    Types
 ====================================================== */
-
-export type ExpertRange = '7d' | '30d' | '90d';
 
 interface TopSeverePost {
   id: string;
@@ -72,12 +76,6 @@ interface ExpertStats {
 /* ======================================================
    Constants
 ====================================================== */
-
-const RANGES: { value: ExpertRange; label: string }[] = [
-  { value: '7d', label: '7d' },
-  { value: '30d', label: '30d' },
-  { value: '90d', label: '90d' },
-];
 
 const RANGE_DAYS: Record<ExpertRange, number> = { '7d': 7, '30d': 30, '90d': 90 };
 
@@ -162,34 +160,6 @@ export function approvalRateLabel(rate: number | null): string {
 }
 
 /* ======================================================
-   Range pills — rendered in the page header, shared here
-====================================================== */
-
-export function RangePills({
-  range,
-  onChange,
-}: {
-  range: ExpertRange;
-  onChange: (r: ExpertRange) => void;
-}) {
-  return (
-    <div className="seg" role="group" aria-label="Date range">
-      {RANGES.map((r) => (
-        <button
-          key={r.value}
-          type="button"
-          aria-pressed={range === r.value}
-          onClick={() => onChange(r.value)}
-          className="seg__btn"
-        >
-          {r.label}
-        </button>
-      ))}
-    </div>
-  );
-}
-
-/* ======================================================
    Skeleton
 ====================================================== */
 
@@ -268,7 +238,10 @@ function BriefingPanel({ summary, briefingRange, generatedAt }: {
     return (
       <section className="panel briefing" aria-labelledby="briefing-title">
         <div className="panel__head">
-          <h2 className="panel__title" id="briefing-title">AI briefing</h2>
+          <h2 className="panel__title briefing__title" id="briefing-title">
+            <ShellIcon icon={Sparkles} className="briefing__marker" />
+            AI briefing
+          </h2>
         </div>
         <div className="panel__body">
           <div className="state-empty">
@@ -285,7 +258,10 @@ function BriefingPanel({ summary, briefingRange, generatedAt }: {
   return (
     <section className="panel briefing" aria-labelledby="briefing-title">
       <div className="panel__head">
-        <h2 className="panel__title" id="briefing-title">AI briefing</h2>
+        <h2 className="panel__title briefing__title" id="briefing-title">
+          <ShellIcon icon={Sparkles} className="briefing__marker" />
+          AI briefing
+        </h2>
       </div>
       <div className="panel__body briefing__body">
         <p className="briefing__text">{summary}</p>

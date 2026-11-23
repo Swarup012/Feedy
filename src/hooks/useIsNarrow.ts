@@ -15,6 +15,7 @@ export function useIsNarrow(breakpointPx = 1280): boolean {
   const [isNarrow, setIsNarrow] = useState(false);
 
   useEffect(() => {
+    if (typeof window.matchMedia !== "function") return;
     const mq = window.matchMedia(`(max-width: ${breakpointPx - 1}px)`);
     setIsNarrow(mq.matches);
 

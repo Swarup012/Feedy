@@ -197,7 +197,7 @@ export default function FirstBoardWelcomePage() {
 
   if (step === "create") {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-background dark:via-background dark:to-background">
+      <div className="min-h-full bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-background dark:via-background dark:to-background">
         <div className="container mx-auto px-4 py-10">
           {/* Back Button */}
           <button
@@ -335,7 +335,7 @@ export default function FirstBoardWelcomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-background dark:via-background dark:to-background">
+    <div className="min-h-full bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-background dark:via-background dark:to-background">
       <div className="container mx-auto px-4 py-10 flex justify-center">
         
         <div className="w-full max-w-md">

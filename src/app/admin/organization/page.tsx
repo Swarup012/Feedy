@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect, type ReactNode } from 'react';
-import { useRouter } from 'next/navigation';
+import { Suspense, useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useOrganization } from '@/context/OrganizationContext';
 import { resolvePlan, PLANS } from '@/config/plans';
 import { useAuth } from '@/hooks/useAuth';
@@ -27,34 +27,20 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import {
-  Activity,
-  Building2,
   Users,
-  Settings,
   Crown,
   Shield,
-  UserPlus,
   Trash2,
   ExternalLink,
   Copy,
   Check,
   Mail,
-  Webhook,
-  CreditCard,
-  Globe,
-  Code,
-  Briefcase,
-  Plug,
-  User,
-  Bell,
   Loader2,
-  Key,
 } from 'lucide-react';
 import { OrganizationSkeleton, MembersTableSkeleton } from '@/components/admin/OrganizationSkeleton';
 import { InviteMemberModal } from '@/components/organization/InviteMemberModal';
 import { PendingInvitations } from '@/components/organization/PendingInvitations';
 import { JobRolesTab } from '@/components/organization/JobRolesTab';
-import { WIDE_CONTAINER } from '@/lib/layout-constants';
 import dynamic from 'next/dynamic';
 const WebhooksPage = dynamic(() => import('@/app/admin/webhooks/page'), { ssr: false });
 const WidgetsPage = dynamic(() => import('@/app/admin/widgets/page'), { ssr: false });
@@ -75,40 +61,6 @@ import { PaidFeatureGate } from '@/components/PaidFeatureGate';
 import { BrandingSection } from '@/components/organization/BrandingSection';
 import { NotificationsTab } from '@/components/organization/NotificationsTab';
 import { ProFeatureGate } from '@/components/ProFeatureGate';
-import { motion } from 'motion/react';
-
-interface SidebarNavItemProps {
-  isActive: boolean;
-  onClick: () => void;
-  children: ReactNode;
-}
-
-function SidebarNavItem({ isActive, onClick, children }: SidebarNavItemProps) {
-  return (
-    <motion.button
-      onClick={onClick}
-      className={`w-full flex items-center gap-3 px-3 py-2 rounded-md transition-colors text-left text-sm relative ${
-        isActive
-          ? 'text-foreground font-medium'
-          : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
-      }`}
-      whileHover={{ x: 2 }}
-      whileTap={{ scale: 0.98 }}
-      transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-    >
-      {isActive && (
-        <motion.div
-          layoutId="sidebar-active"
-          className="absolute inset-0 bg-muted rounded-md"
-          transition={{ type: 'spring', stiffness: 350, damping: 30 }}
-        />
-      )}
-      <span className="relative z-10 flex items-center gap-3">
-        {children}
-      </span>
-    </motion.button>
-  );
-}
 
 interface Member {
   id: string;
@@ -121,7 +73,7 @@ interface Member {
   joined_at?: string;
 }
 
-export default function OrganizationSettingsPage() {
+function OrganizationSettingsInner() {
   const router = useRouter();
   const { toast } = useToast();
   const { organization, organizations, organizationRole, loading, orgsFetchStatus, refreshOrganization } = useOrganization();
@@ -134,7 +86,9 @@ export default function OrganizationSettingsPage() {
   const [inviteRole, setInviteRole] = useState('member');
   const [inviting, setInviting] = useState(false);
   const [copiedSubdomain, setCopiedSubdomain] = useState(false);
-  const [activeTab, setActiveTab] = useState('general');
+  const searchParams = useSearchParams();
+  const activeTab = searchParams.get('tab') || 'general';
+  const setActiveTab = (tab: string) => router.replace(`/admin/organization?tab=${tab}`);
 
   // Invitation modal state
   const [showInviteModal, setShowInviteModal] = useState(false);
@@ -159,16 +113,6 @@ export default function OrganizationSettingsPage() {
     website: '',
     industry: '',
   });
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search);
-      const tab = params.get('tab');
-      if (tab) {
-        setActiveTab(tab);
-      }
-    }
-  }, []);
 
   // ?tab=general#revenue-data → scroll to the Revenue data card once the tab
   // is active and the card has mounted (it can mount late behind the plan
@@ -461,50 +405,8 @@ export default function OrganizationSettingsPage() {
   ).length;
 
   return (
-    <div className="flex min-h-[calc(100vh-70px)]">
-      {/* Animated Sidebar */}
-      <div className="w-52 border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4 flex flex-col sticky top-0 h-[calc(100vh-70px)] overflow-y-auto shrink-0">
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-2">
-            <Building2 className="h-6 w-6 text-primary" />
-            <h1 className="text-base font-bold truncate">{organization.name}</h1>
-          </div>
-          <Badge variant="outline" className="text-xs">
-            {resolvePlan(organization).toUpperCase()}
-          </Badge>
-        </div>
-
-        <nav className="space-y-1 flex-1">
-          {[
-            { tab: 'profile', icon: User, label: 'Profile' },
-            { tab: 'general', icon: Settings, label: 'General' },
-            { tab: 'members', icon: Users, label: `Members (${members.length})` },
-            { tab: 'roles', icon: Briefcase, label: 'Job Roles' },
-            { tab: 'subdomain', icon: ExternalLink, label: 'Subdomain' },
-            { tab: 'webhooks', icon: Webhook, label: 'Webhooks' },
-            { tab: 'api-keys', icon: Key, label: 'API Keys' },
-            { tab: 'widgets', icon: Code, label: 'Widgets' },
-            { tab: 'integrations', icon: Plug, label: 'Integrations' },
-            { tab: 'notifications', icon: Bell, label: 'Notifications' },
-            { tab: 'billing', icon: CreditCard, label: 'Billing' },
-            { tab: 'tracked-users', icon: Activity, label: 'Tracked Users' },
-          ].map(({ tab, icon: Icon, label }) => (
-            <SidebarNavItem
-              key={tab}
-              isActive={activeTab === tab}
-              onClick={() => setActiveTab(tab)}
-            >
-              <Icon className="h-4 w-4" />
-              <span>{label}</span>
-            </SidebarNavItem>
-          ))}
-        </nav>
-      </div>
-
-      {/* Main Content Area */}
-      <div className="flex-1 overflow-auto">
-        <div className={`${WIDE_CONTAINER} py-5`}>
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+    <div className="settings-content">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
             {/* Hidden tab triggers for functionality */}
             <div className="hidden">
               <TabsList>
@@ -876,9 +778,7 @@ export default function OrganizationSettingsPage() {
               <TrackedUsersPage />
             </TabsContent>
 
-          </Tabs>
-        </div>
-      </div>
+      </Tabs>
 
       {/* Invitation Modal */}
       {organization && (
@@ -924,5 +824,13 @@ export default function OrganizationSettingsPage() {
         </AlertDialogContent>
       </AlertDialog>
     </div>
+  );
+}
+
+export default function OrganizationSettingsPage() {
+  return (
+    <Suspense fallback={<OrganizationSkeleton />}>
+      <OrganizationSettingsInner />
+    </Suspense>
   );
 }

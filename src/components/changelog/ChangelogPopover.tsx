@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { changelogService, Changelog } from "@/services/changelogService";
+import { ShellIcon } from "@/components/shell/ShellIcon";
 import { formatDistanceToNow } from "date-fns";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
@@ -94,18 +95,21 @@ export function ChangelogPopover() {
         <Button
           variant="ghost"
           size="icon"
-          className="relative h-8 w-8 hover:bg-gray-100 dark:hover:bg-gray-700"
+          className="relative h-8 w-8 text-muted-foreground hover:bg-muted hover:text-foreground"
+          aria-label="What's new"
         >
-          <Bell className="h-4 w-4" />
+          <ShellIcon icon={Bell} />
           {hasNew && (
-            <span className="absolute top-1 right-1 h-2 w-2 bg-blue-600 rounded-full animate-pulse" />
+            <span className="absolute top-1 right-1 h-2 w-2 bg-primary rounded-full animate-pulse" />
           )}
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className="w-[400px] p-0 shadow-xl border-gray-200 dark:border-border"
-        align="end"
-        sideOffset={8}
+        className="w-[400px] p-0 shadow-xl border-border !z-[calc(var(--z-sticky-nav,300)+10)]"
+        side="right"
+        align="start"
+        sideOffset={12}
+        collisionPadding={8}
       >
         {/* Header */}
         <div className="px-4 py-3 border-b border-gray-200 dark:border-border">

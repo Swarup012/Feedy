@@ -1,29 +1,19 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useAuth } from "@/hooks/useAuth";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { useRouter } from "next/navigation";
-import { useToast } from "@/hooks/use-toast";
 import { useErrorHandler } from "@/hooks/useErrorHandler";
 import { useOrganization } from "@/context/OrganizationContext";
 import api from "@/lib/api";
 
 import { Button } from "@/components/ui/button";
 
-import {
-  Users,
-  ThumbsUp,
-  Zap,
-  LayoutGrid,
-} from "lucide-react";
+import { ThumbsUp, Zap, LayoutGrid } from "lucide-react";
 
 import { TrackedUsersLimitBanner } from "@/components/TrackedUsersLimitBanner";
-import {
-  ExpertView,
-  RangePills,
-  type ExpertRange,
-} from "@/components/admin/ExpertView";
+import { ExpertView } from "@/components/admin/ExpertView";
+import { useDashboardRange } from "@/components/admin/dashboard-range";
 
 import "./admin.css";
 
@@ -32,20 +22,18 @@ import "./admin.css";
 ====================================================== */
 
 export default function AdminPage() {
-  const { user } = useAuth();
   const router = useRouter();
-  const { toast } = useToast();
   const handleError = useErrorHandler({
     context: "loadDashboard",
     showToast: true,
     logError: true,
   });
-  const { organization, organizationRole } = useOrganization();
+  const { organization } = useOrganization();
 
   const [totalPosts, setTotalPosts] = useState<number | null>(null);
   const [totalBoards, setTotalBoards] = useState<number | null>(null);
 
-  const [range, setRange] = useState<ExpertRange>("30d");
+  const { range, setRange } = useDashboardRange();
 
   const isEmpty =
     totalPosts !== null &&
@@ -80,17 +68,6 @@ export default function AdminPage() {
             <h1 className="dash__title">
               What needs your attention right now
             </h1>
-            <div className="dash__actions">
-              {!isEmpty && <RangePills range={range} onChange={setRange} />}
-              <Button
-                onClick={() => router.push("/dashboard")}
-                variant="outline"
-                className="gap-2 h-9 px-4 text-sm font-medium"
-              >
-                <Users className="h-4 w-4" aria-hidden="true" />
-                Member view
-              </Button>
-            </div>
           </section>
 
           <TrackedUsersLimitBanner />

@@ -815,7 +815,7 @@ export default function ApiDocsPage() {
   const [lang, setLang] = useState<Language>('curl');
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-full bg-background">
       <div className="container max-w-4xl mx-auto py-10 px-4">
         {/* Header */}
         <div className="mb-10">

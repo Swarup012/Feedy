@@ -95,7 +95,7 @@ export default function FeedbackPage() {
   // Error State
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen gap-4">
+      <div className="flex flex-col items-center justify-center h-full gap-4">
         <p className="text-destructive font-medium">{error}</p>
         <button
           onClick={() => window.location.reload()}
@@ -110,7 +110,7 @@ export default function FeedbackPage() {
   // Loading State
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen">
+      <div className="flex flex-col items-center justify-center h-full">
         <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
         <p className="text-muted-foreground">Loading your boards...</p>
       </div>
@@ -119,7 +119,7 @@ export default function FeedbackPage() {
 
   // Fallback (if somehow no redirect happened)
   return (
-    <div className="flex flex-col items-center justify-center h-screen">
+    <div className="flex flex-col items-center justify-center h-full">
       <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
       <p className="text-muted-foreground">Redirecting...</p>
     </div>
