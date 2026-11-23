@@ -62,13 +62,13 @@
 @layer base {
   :root {
     /* 60% - Main Content & Background (Canny uses clean, breathable surfaces) */
-    --background: 0 0% 97.6%;       /* #f9f9f9 */
+    --background: 0 0% 100%;       /* Pure White - main background */
     --foreground: 220 13% 10%;   /* #0f1117 - neutral near-black */
 
-    --card: 0 0% 100%;                /* Pure White for posts/cards */
+    --card: 0 0% 97.6%;                /* #f9f9f9 for posts/cards */
     --card-foreground: 220 13% 10%;
 
-    --popover: 0 0% 100%;
+    --popover: 0 0% 97.6%;
     --popover-foreground: 220 13% 10%;
 
     /* 10% - Action Color (Your new Blue: #2c68ec) */
