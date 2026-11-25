@@ -206,7 +206,7 @@ export function RevenuePanel() {
               variant="outline"
               size="sm"
               className="mt-3"
-              onClick={() => router.push('/admin/organization?tab=general#revenue-data')}
+              onClick={() => router.push('/admin/organization?tab=revenue#revenue-data')}
             >
               Set up revenue data
             </Button>

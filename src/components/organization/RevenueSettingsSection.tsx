@@ -1,13 +1,16 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { useOrganization } from '@/context/OrganizationContext';
 import api from '@/lib/api';
+import { planAllowsFeature, resolvePlan } from '@/config/plans';
+import { UpgradeDialog } from '@/components/UpgradeDialog';
+import { LockedNotice } from '@/components/settings/LockedNotice';
+import { ShellIcon } from '@/components/shell/ShellIcon';
 import { Loader2 } from 'lucide-react';
 
 /**
@@ -23,7 +26,12 @@ export function RevenueSettingsSection() {
   const [accountFieldKey, setAccountFieldKey] = useState('');
   const [currency, setCurrency] = useState('USD');
   const [saving, setSaving] = useState(false);
+  const [showUpgrade, setShowUpgrade] = useState(false);
   const isOwner = organizationRole === 'owner';
+  // Flat gate: fields stay visible but disabled on Free; while the org loads
+  // we render active (mirrors the previous PaidFeatureGate loading behaviour).
+  const locked =
+    !!organization && !planAllowsFeature(resolvePlan(organization), 'mrr_insights');
 
   useEffect(() => {
     const settings = organization?.settings || {};
@@ -93,73 +101,85 @@ export function RevenueSettingsSection() {
   };
 
   return (
-    <Card id="revenue-data">
-      <CardHeader>
-        <CardTitle>Revenue data</CardTitle>
-        <CardDescription>
+    <section className="settings-section revenue-section" id="revenue-data">
+      <UpgradeDialog
+        open={showUpgrade}
+        onOpenChange={setShowUpgrade}
+        featureName="Revenue insights"
+      />
+
+      <div className="settings-section__head">
+        <h3 className="settings-section__title revenue-section__title">Revenue data</h3>
+        <p className="settings-section__desc revenue-section__desc">
           Which custom fields carry each customer&apos;s monthly revenue, sent
           with identify(). Example:{' '}
-          <code className="text-xs bg-muted px-1 py-0.5 rounded">
-            {'{ mrr: 299, plan: "pro", company: "acme" }'}
-          </code>
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="space-y-1.5">
-            <Label htmlFor="mrr-field-key" className="text-xs">
-              MRR field key
-            </Label>
-            <Input
-              id="mrr-field-key"
-              placeholder="e.g. mrr"
-              value={mrrFieldKey}
-              onChange={(e) => setMrrFieldKey(e.target.value)}
-              disabled={!isOwner}
-              maxLength={100}
-            />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="account-field-key" className="text-xs">
-              Account field key (optional)
-            </Label>
-            <Input
-              id="account-field-key"
-              placeholder="e.g. company"
-              value={accountFieldKey}
-              onChange={(e) => setAccountFieldKey(e.target.value)}
-              disabled={!isOwner}
-              maxLength={100}
-            />
-            <p className="text-xs text-muted-foreground">
-              Groups people at the same company so one company counts once.
-            </p>
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="mrr-currency" className="text-xs">
-              Currency
-            </Label>
-            <Input
-              id="mrr-currency"
-              placeholder="USD"
-              value={currency}
-              onChange={(e) => setCurrency(e.target.value.toUpperCase())}
-              disabled={!isOwner}
-              maxLength={3}
-              className="uppercase"
-            />
-          </div>
-        </div>
+          <code className="revenue-code">{'{ mrr: 299, plan: "pro", company: "acme" }'}</code>
+        </p>
+      </div>
 
-        {isOwner && (
-          <div className="flex justify-end pt-2">
-            <Button onClick={handleSave} disabled={saving}>
-              {saving && <Loader2 className="h-4 w-4 animate-spin" />}
-              {saving ? 'Saving...' : 'Save Revenue Settings'}
-            </Button>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+      {locked && (
+        <LockedNotice onUpgrade={() => setShowUpgrade(true)}>
+          Revenue insights are available on Starter and Pro.
+        </LockedNotice>
+      )}
+
+      <div className={locked ? 'revenue-grid revenue-grid--locked' : 'revenue-grid'}>
+        <div className="settings-field revenue-grid__field">
+          <Label htmlFor="mrr-field-key" className="settings-label">
+            MRR field key
+          </Label>
+          <Input
+            id="mrr-field-key"
+            placeholder="e.g. mrr"
+            value={mrrFieldKey}
+            onChange={(e) => setMrrFieldKey(e.target.value)}
+            disabled={!isOwner || locked}
+            maxLength={100}
+            className="revenue-input"
+          />
+        </div>
+        <div className="settings-field revenue-grid__field">
+          <Label htmlFor="account-field-key" className="settings-label">
+            Account field key (optional)
+          </Label>
+          <Input
+            id="account-field-key"
+            placeholder="e.g. company"
+            value={accountFieldKey}
+            onChange={(e) => setAccountFieldKey(e.target.value)}
+            disabled={!isOwner || locked}
+            maxLength={100}
+            className="revenue-input"
+          />
+        </div>
+        <div className="settings-field revenue-grid__field">
+          <Label htmlFor="mrr-currency" className="settings-label">
+            Currency
+          </Label>
+          <Input
+            id="mrr-currency"
+            placeholder="USD"
+            value={currency}
+            onChange={(e) => setCurrency(e.target.value.toUpperCase())}
+            disabled={!isOwner || locked}
+            maxLength={3}
+            className="revenue-input uppercase"
+          />
+        </div>
+      </div>
+
+      <p className="revenue-helper">
+        Account field groups people at the same company so one company counts once.
+      </p>
+
+      {isOwner && (
+        <div className="revenue-actions">
+          <Button onClick={handleSave} disabled={saving || locked}>
+            {saving && <Loader2 className="h-4 w-4 animate-spin" />}
+            {saving ? 'Saving...' : 'Save revenue settings'}
+          </Button>
+        </div>
+      )}
+    </section>
   );
 }

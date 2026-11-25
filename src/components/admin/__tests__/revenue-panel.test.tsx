@@ -99,7 +99,7 @@ describe('RevenuePanel', () => {
     await waitFor(() => expect(screen.getByText('No revenue data yet')).toBeTruthy());
     const link = screen.getByRole('button', { name: /set up revenue data/i });
     link.click();
-    expect(h.push).toHaveBeenCalledWith('/admin/organization?tab=general#revenue-data');
+    expect(h.push).toHaveBeenCalledWith('/admin/organization?tab=revenue#revenue-data');
   });
 
   it('data → four tiles, plan bars, top posts, exactly one action button', async () => {

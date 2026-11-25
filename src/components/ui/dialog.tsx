@@ -44,14 +44,16 @@ const dialogSizeClasses: Record<string, string> = {
 
 type DialogContentProps = React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & {
   size?: "sm" | "md" | "lg" | "xl"
+  /** Opt-in overlay styling for one dialog; every other dialog keeps the default. */
+  overlayClassName?: string
 }
 
 const DialogContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
   DialogContentProps
->(({ className, children, size = "md", ...props }, ref) => (
+>(({ className, children, size = "md", overlayClassName, ...props }, ref) => (
   <DialogPortal>
-    <DialogOverlay />
+    <DialogOverlay className={overlayClassName} />
     <DialogPrimitive.Content
       ref={ref}
       className={cn(

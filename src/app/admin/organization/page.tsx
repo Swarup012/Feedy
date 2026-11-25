@@ -57,7 +57,6 @@ import { InvoiceHistory } from '@/components/billing/InvoiceHistory';
 import { CustomDomainSettings } from '@/components/organization/CustomDomainSettings';
 import { PlanWeightsSection } from '@/components/organization/PlanWeightsSection';
 import { RevenueSettingsSection } from '@/components/organization/RevenueSettingsSection';
-import { PaidFeatureGate } from '@/components/PaidFeatureGate';
 import { BrandingSection } from '@/components/organization/BrandingSection';
 import { NotificationsTab } from '@/components/organization/NotificationsTab';
 import { ProFeatureGate } from '@/components/ProFeatureGate';
@@ -117,7 +116,7 @@ function OrganizationSettingsInner() {
   // ?tab=general#revenue-data → scroll to the Revenue data card once the tab
   // is active and the card has mounted (it can mount late behind the plan
   // gate; on Free it never mounts — the hook gives up silently).
-  useScrollToHash('revenue-data', activeTab === 'general' && !loading);
+  useScrollToHash('revenue-data', activeTab === 'revenue' && !loading);
 
   useEffect(() => {
     // Wait for AuthContext to finish loading before making any redirect decisions.
@@ -412,6 +411,8 @@ function OrganizationSettingsInner() {
               <TabsList>
                 <TabsTrigger value="profile" id="tab-profile">Profile</TabsTrigger>
                 <TabsTrigger value="general" id="tab-general">General</TabsTrigger>
+                <TabsTrigger value="branding" id="tab-branding">Branding</TabsTrigger>
+                <TabsTrigger value="revenue" id="tab-revenue">Revenue</TabsTrigger>
                 <TabsTrigger value="members" id="tab-members">Members</TabsTrigger>
                 <TabsTrigger value="roles" id="tab-roles">Job Roles</TabsTrigger>
                 <TabsTrigger value="subdomain" id="tab-subdomain">Subdomain</TabsTrigger>
@@ -432,11 +433,12 @@ function OrganizationSettingsInner() {
 
             {/* General Settings */}
             <TabsContent value="general">
-              <div className="max-w-2xl mx-auto space-y-8 pb-12">
-                <div>
-                  <h2 className="text-lg font-semibold text-foreground">Organization Details</h2>
-                  <p className="text-sm text-muted-foreground mt-1">Update your organization's basic information</p>
-                </div>
+              <div className="settings-content org-page space-y-8">
+                <section className="settings-section">
+                  <div className="settings-section__head">
+                    <h2 className="settings-section__title">Organization Details</h2>
+                    <p className="settings-section__desc">Update your organization's basic information</p>
+                  </div>
 
                 <div className="space-y-6">
                   <div className="space-y-2">
@@ -493,19 +495,36 @@ function OrganizationSettingsInner() {
                     </Button>
                   )}
                 </div>
+                </section>
+              </div>
+            </TabsContent>
+
+            {/* Branding */}
+            <TabsContent value="branding">
+              <div className="settings-content org-page space-y-8">
+                <BrandingSection />
+              </div>
+            </TabsContent>
+
+            {/* Revenue */}
+            <TabsContent value="revenue">
+              <div className="settings-content revenue-page">
+                <div className="revenue-page__head">
+                  <h2 className="revenue-page__title">Revenue</h2>
+                  <p className="revenue-page__subtitle">
+                    Use customer revenue to weight how urgent feedback is.
+                  </p>
+                </div>
 
                 {/* Revenue plan weights — severity scoring multiplier */}
                 <PlanWeightsSection />
 
-                {/* Revenue data — MRR field keys + currency (Starter/Pro) */}
-                <PaidFeatureGate feature="mrr_insights" featureName="Revenue insights">
-                  <RevenueSettingsSection />
-                </PaidFeatureGate>
-
-                {/* Logo + brand color (owner, Starter/Pro) */}
-                <BrandingSection />
+                {/* Revenue data — MRR field keys + currency (Starter/Pro);
+                    gate rendered flat inside the section (locked fields stay visible) */}
+                <RevenueSettingsSection />
               </div>
             </TabsContent>
+
 
             {/* Members Tab */}
             <TabsContent value="members">

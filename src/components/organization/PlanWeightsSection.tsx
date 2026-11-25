@@ -1,14 +1,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { useOrganization } from '@/context/OrganizationContext';
 import api from '@/lib/api';
-import { Plus, Trash2, Loader2 } from 'lucide-react';
+import { ShellIcon } from '@/components/shell/ShellIcon';
+import { Plus, Trash2, Loader2, Scale } from 'lucide-react';
 
 interface PlanWeightRow {
   plan: string;
@@ -122,94 +122,102 @@ export function PlanWeightsSection() {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Revenue plan weights</CardTitle>
-        <CardDescription>
-          Map your end-users' plan strings to revenue weights used by severity
+    <section className="settings-section revenue-section">
+      <div className="settings-section__head">
+        <h3 className="settings-section__title revenue-section__title">Plan weights</h3>
+        <p className="settings-section__desc revenue-section__desc">
+          Map your end-users&apos; plan strings to revenue weights used by severity
           scoring. When a post has multiple authors, the highest mapped weight
           wins; unmapped or missing plans count as 1.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {rows.length === 0 && (
-          <p className="text-sm text-muted-foreground">
-            No plan weights configured — all plans count as 1.
-          </p>
-        )}
+        </p>
+      </div>
 
-        {rows.map((row, index) => (
-          <div key={index} className="flex items-end gap-2">
-            <div className="flex-1 space-y-1.5">
-              <Label htmlFor={`plan-${index}`} className="text-xs">
-                Plan string
-              </Label>
-              <Input
-                id={`plan-${index}`}
-                placeholder="e.g. enterprise"
-                value={row.plan}
-                onChange={(e) => updateRow(index, 'plan', e.target.value)}
-                disabled={!isOwner}
-              />
-            </div>
-            <div className="w-28 space-y-1.5">
-              <Label htmlFor={`weight-${index}`} className="text-xs">
-                Weight
-              </Label>
-              <Input
-                id={`weight-${index}`}
-                type="number"
-                min="0.1"
-                step="0.1"
-                value={row.weight}
-                onChange={(e) => updateRow(index, 'weight', e.target.value)}
-                disabled={!isOwner}
-              />
-            </div>
-            <div className="w-28 space-y-1.5">
-              <Label htmlFor={`price-${index}`} className="text-xs">
-                $/month
-              </Label>
-              <Input
-                id={`price-${index}`}
-                type="number"
-                min="0"
-                step="0.01"
-                placeholder="e.g. 49"
-                value={row.price}
-                onChange={(e) => updateRow(index, 'price', e.target.value)}
-                disabled={!isOwner}
-              />
-            </div>
-            {isOwner && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => removeRow(index)}
-                aria-label={`Remove ${row.plan || 'plan'}`}
-              >
-                <Trash2 className="h-4 w-4 text-destructive" />
-              </Button>
-            )}
-          </div>
-        ))}
-
-        <div className="flex items-center justify-between pt-2">
-          {isOwner ? (
-            <Button variant="outline" size="sm" onClick={addRow}>
-              <Plus className="h-4 w-4" /> Add plan
-            </Button>
-          ) : (
-            <span />
-          )}
-          {isOwner && (
-            <Button onClick={handleSave} disabled={saving}>
-              {saving && <Loader2 className="h-4 w-4 animate-spin" />}
-              {saving ? 'Saving...' : 'Save Plan Weights'}
-            </Button>
-          )}
+      {rows.length === 0 ? (
+        <div className="revenue-empty">
+          <ShellIcon icon={Scale} className="revenue-empty__icon" />
+          <span>No plan weights configured — all plans count as 1.</span>
         </div>
-      </CardContent>
-    </Card>
+      ) : (
+        <div className="revenue-rows">
+          <div className="revenue-row revenue-row--head">
+            <span>Plan</span>
+            <span>Weight</span>
+            <span>$/month</span>
+            <span />
+          </div>
+          {rows.map((row, index) => (
+            <div key={index} className="revenue-row">
+              <div className="revenue-row__field">
+                <Label htmlFor={`plan-${index}`} className="sr-only">
+                  Plan string
+                </Label>
+                <Input
+                  id={`plan-${index}`}
+                  placeholder="e.g. enterprise"
+                  value={row.plan}
+                  onChange={(e) => updateRow(index, 'plan', e.target.value)}
+                  disabled={!isOwner}
+                  className="revenue-input"
+                />
+              </div>
+              <div className="revenue-row__field revenue-row__field--weight">
+                <Label htmlFor={`weight-${index}`} className="sr-only">
+                  Weight
+                </Label>
+                <Input
+                  id={`weight-${index}`}
+                  type="number"
+                  min="0.1"
+                  step="0.1"
+                  value={row.weight}
+                  onChange={(e) => updateRow(index, 'weight', e.target.value)}
+                  disabled={!isOwner}
+                  className="revenue-input"
+                />
+              </div>
+              <div className="revenue-row__field revenue-row__field--price">
+                <Label htmlFor={`price-${index}`} className="sr-only">
+                  $/month
+                </Label>
+                <Input
+                  id={`price-${index}`}
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  placeholder="e.g. 49"
+                  value={row.price}
+                  onChange={(e) => updateRow(index, 'price', e.target.value)}
+                  disabled={!isOwner}
+                  className="revenue-input"
+                />
+              </div>
+              {isOwner && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => removeRow(index)}
+                  aria-label="Remove plan"
+                  className="revenue-row__remove"
+                >
+                  <ShellIcon icon={Trash2} />
+                </Button>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {isOwner && (
+        <div className="revenue-actions">
+          <Button variant="outline" size="sm" onClick={addRow}>
+            <ShellIcon icon={Plus} /> Add plan
+          </Button>
+          <Button onClick={handleSave} disabled={saving}>
+            {saving && <Loader2 className="h-4 w-4 animate-spin" />}
+            {saving ? 'Saving...' : 'Save plan weights'}
+          </Button>
+        </div>
+      )}
+    </section>
   );
 }

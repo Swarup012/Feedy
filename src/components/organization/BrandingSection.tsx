@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -12,7 +11,9 @@ import { uploadService } from '@/services/uploadService';
 import { planAllowsFeature, resolvePlan } from '@/config/plans';
 import { UpgradeDialog } from '@/components/UpgradeDialog';
 import { contrastForeground } from '@/lib/branding-color';
-import { ImagePlus, Loader2, X, ArrowUp, MessageSquare } from 'lucide-react';
+import { ShellIcon } from '@/components/shell/ShellIcon';
+import { LockedNotice } from '@/components/settings/LockedNotice';
+import { Image as ImageIcon, Loader2, X, ArrowUp, MessageSquare } from 'lucide-react';
 
 const DEFAULT_COLOR = '#3b82f6';
 const HEX_RE = /^#[0-9a-fA-F]{6}$/;
@@ -126,81 +127,75 @@ export function BrandingSection() {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Branding</CardTitle>
-        <CardDescription>
+    <section className="settings-section">
+      <div className="settings-section__head">
+        <h3 className="settings-section__title">Branding</h3>
+        <p className="settings-section__desc">
           Logo and brand color shown on your public portal and widget.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        {!isOwner && (
-          <p className="text-sm text-muted-foreground">
-            Only the organization owner can change branding.
-          </p>
-        )}
-        {isOwner && !canBrand && (
-          <div className="flex items-center justify-between gap-3 rounded-md border border-yellow-200 bg-yellow-50 p-3 dark:border-yellow-900 dark:bg-yellow-950">
-            <p className="text-sm text-yellow-800 dark:text-yellow-200">
-              Custom branding is available on Starter and Pro.
-            </p>
-            <Button size="sm" onClick={() => setShowUpgrade(true)}>
-              Upgrade
-            </Button>
-          </div>
-        )}
+        </p>
+      </div>
 
-        {/* Logo */}
-        <div className="space-y-2">
-          <Label className="text-sm font-medium text-foreground">Logo</Label>
-          <div className="flex items-center gap-3">
-            {logoUrl ? (
-              <div className="relative">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={logoUrl}
-                  alt="Organization logo"
-                  className="h-12 w-12 rounded-md border border-border object-contain"
-                />
-                {editable && (
-                  <button
-                    type="button"
-                    onClick={() => setLogoUrl(null)}
-                    className="absolute -right-2 -top-2 rounded-full bg-background p-0.5 shadow ring-1 ring-border hover:bg-muted"
-                    aria-label="Remove logo"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                )}
-              </div>
-            ) : (
-              <div className="flex h-12 w-12 items-center justify-center rounded-md border border-dashed border-border text-muted-foreground">
-                <ImagePlus className="h-5 w-5" />
-              </div>
-            )}
-            {editable && (
-              <>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/jpeg,image/png,image/gif,image/webp"
-                  className="hidden"
-                  onChange={handleFileChange}
-                  aria-label="Upload logo"
-                />
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={uploading}
+      {!isOwner && (
+        <p className="settings-hint">Only the organization owner can change branding.</p>
+      )}
+
+      {isOwner && !canBrand && (
+        <LockedNotice onUpgrade={() => setShowUpgrade(true)}>
+          Custom branding is available on Starter and Pro.
+        </LockedNotice>
+      )}
+
+      {/* Logo */}
+      <div className="settings-field">
+        <Label className="settings-label">Logo</Label>
+        <div className="settings-logo-row">
+          {logoUrl ? (
+            <div className="settings-logo">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={logoUrl}
+                alt="Organization logo"
+                className="settings-logo__img"
+              />
+              {editable && (
+                <button
+                  type="button"
+                  onClick={() => setLogoUrl(null)}
+                  className="settings-logo__remove"
+                  aria-label="Remove logo"
                 >
-                  {uploading && <Loader2 className="h-4 w-4 animate-spin" />}
-                  {uploading ? 'Uploading…' : logoUrl ? 'Replace logo' : 'Upload logo'}
-                </Button>
-              </>
-            )}
-          </div>
+                  <ShellIcon icon={X} />
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="settings-logo settings-logo--empty">
+              <ShellIcon icon={ImageIcon} />
+            </div>
+          )}
+          {editable && (
+            <>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/gif,image/webp"
+                className="hidden"
+                onChange={handleFileChange}
+                aria-label="Upload logo"
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+              >
+                {uploading && <Loader2 className="h-4 w-4 animate-spin" />}
+                {uploading ? 'Uploading…' : logoUrl ? 'Replace logo' : 'Upload logo'}
+              </Button>
+            </>
+          )}
         </div>
+      </div>
 
         {/* Brand color */}
         <div className="space-y-2">
@@ -250,12 +245,12 @@ export function BrandingSection() {
             ];
 
             return (
-              <div className="overflow-hidden rounded-lg border border-border bg-background shadow-sm">
+              <div className="overflow-hidden rounded-lg border border-border bg-background">
                 {/* Browser chrome */}
                 <div className="flex items-center gap-1.5 border-b border-border bg-muted/50 px-3 py-2">
-                  <span className="h-2.5 w-2.5 rounded-full bg-red-400" />
-                  <span className="h-2.5 w-2.5 rounded-full bg-yellow-400" />
-                  <span className="h-2.5 w-2.5 rounded-full bg-green-400" />
+                  <span className="h-2.5 w-2.5 rounded-full bg-muted-foreground/40" />
+                  <span className="h-2.5 w-2.5 rounded-full bg-muted-foreground/25" />
+                  <span className="h-2.5 w-2.5 rounded-full bg-muted-foreground/15" />
                   <div className="ml-2 flex-1 truncate rounded bg-background px-2 py-0.5 text-[10px] text-muted-foreground">
                     {organization?.subdomain ? `${organization.subdomain}.faddy.online` : 'your-org.faddy.online'}
                   </div>
@@ -344,7 +339,6 @@ export function BrandingSection() {
           featureName="Custom Branding"
           subscription={null}
         />
-      </CardContent>
-    </Card>
+    </section>
   );
 }

@@ -7,7 +7,14 @@ import {
   DialogContent,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ChevronDown, Loader2, Paperclip, X } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { ShellIcon } from "@/components/shell/ShellIcon";
+import { Check, ChevronDown, Loader2, Paperclip, Tag, X } from "lucide-react";
 import { postService, Post } from "@/services/postService";
 import { useToast } from "@/hooks/use-toast";
 import { TokenManager } from "@/lib/tokenManager";
@@ -43,22 +50,8 @@ export function CreatePostDialog({
   const [customCategory, setCustomCategory] = useState("");
   const [showCustomCategory, setShowCustomCategory] = useState(false);
   const [fileError, setFileError] = useState<string | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [labels, setLabels] = useState<{ id: string; name: string }[]>([]);
-  const [catOpen, setCatOpen] = useState(false);
-  const catRef = useRef<HTMLDivElement>(null);
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    if (!catOpen) return;
-    const handleOutside = (e: MouseEvent) => {
-      if (catRef.current && !catRef.current.contains(e.target as Node)) {
-        setCatOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleOutside);
-    return () => document.removeEventListener("mousedown", handleOutside);
-  }, [catOpen]);
-
   const defaultCategories = [
     { id: "1", name: "Feature Request" },
     { id: "2", name: "Bug Report" },
@@ -126,6 +119,7 @@ export function CreatePostDialog({
   // Handle submit
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitError(null);
 
     if (!validateForm()) {
       return;
@@ -150,17 +144,15 @@ export function CreatePostDialog({
       setCustomCategory("");
       setShowCustomCategory(false);
       setErrors({});
+      setSubmitError(null);
     } catch (error: any) {
-      toast({
-        title: "Error",
-        // Prefer the server message (e.g. the VISITED org's post-limit 403)
-        // over the generic axios error text.
-        description:
-          error?.response?.data?.message ||
+      // Prefer the server message (e.g. the VISITED org's post-limit 403)
+      // over the generic axios error text.
+      setSubmitError(
+        error?.response?.data?.message ||
           error.message ||
-          "Failed to create post",
-        variant: "destructive",
-      });
+          "Failed to create post"
+      );
     } finally {
       setCreating(false);
     }
@@ -173,6 +165,9 @@ export function CreatePostDialog({
     // Clear error when user starts typing
     if (errors[field]) {
       setErrors({ ...errors, [field]: "" });
+    }
+    if (submitError) {
+      setSubmitError(null);
     }
   };
 
@@ -236,10 +231,25 @@ export function CreatePostDialog({
     setFormData({ ...formData, images: formData.images.filter((_, i) => i !== index) });
   };
 
+  const categoryLabel = showCustomCategory
+    ? customCategory.trim() || "Custom…"
+    : formData.category || "No category";
+  const categoryIsSet = showCustomCategory
+    ? Boolean(customCategory.trim())
+    : Boolean(formData.category);
+  const canCreate = Boolean(formData.title.trim());
+  const inlineErrors = [
+    errors.title,
+    errors.description,
+    fileError,
+    submitError,
+  ].filter((message): message is string => Boolean(message));
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="fd post-dialog w-[min(92vw,760px)] max-w-none gap-0 border-0 bg-transparent p-0 shadow-none [&>button]:hidden"
+        className="fd post-dialog w-[560px] max-w-[calc(100vw-32px)] gap-0 border-0 bg-transparent p-0 shadow-none [&>button]:hidden"
+        overlayClassName="bg-black/45"
         aria-describedby={undefined}
         onOpenAutoFocus={(event) => {
           event.preventDefault();
@@ -256,194 +266,185 @@ export function CreatePostDialog({
                 </p>
               </div>
               <DialogClose type="button" className="fd__close" aria-label="Close">
-                <X className="h-4 w-4" aria-hidden="true" />
+                <ShellIcon icon={X} />
               </DialogClose>
             </header>
 
-            <div className="fd__body post-body">
-              <div className="post-main">
-                <div className="fd-field">
-                  <div className="fd-field__top">
-                    <label className="fd-label" htmlFor="post-title">
-                      Title
-                    </label>
-                    <span className="fd-req">Required</span>
-                  </div>
-                  <input
-                    id="post-title"
-                    ref={titleInputRef}
-                    className="fd-input post-title-input"
-                    placeholder="A short, specific title"
-                    value={formData.title}
-                    onChange={(e) => handleChange("title", e.target.value)}
-                    maxLength={500}
-                    aria-required="true"
-                    aria-invalid={!!errors.title}
-                    aria-describedby="post-title-help"
-                  />
-                  <div className="fd-help" id="post-title-help">
-                    <span className={errors.title ? "fd-error" : undefined}>
-                      {errors.title || "Name the change or problem in one line."}
-                    </span>
-                    <span className="fd-count">{formData.title.length}/500</span>
-                  </div>
-                </div>
-
-                <div className="fd-field">
-                  <div className="fd-field__top">
-                    <label className="fd-label" htmlFor="post-description">
-                      Description
-                    </label>
-                    <span className="fd-opt">Optional</span>
-                  </div>
-                  <textarea
-                    id="post-description"
-                    className="fd-textarea post-description"
-                    placeholder="What happened, what you expected, and what would help."
-                    value={formData.description}
-                    onChange={(e) => handleChange("description", e.target.value)}
-                    rows={7}
-                    maxLength={5000}
-                    aria-invalid={!!errors.description}
-                    aria-describedby="post-description-help"
-                  />
-                  <div className="fd-help" id="post-description-help">
-                    <span className={errors.description ? "fd-error" : undefined}>
-                      {errors.description || "Add the detail that helps someone reproduce it."}
-                    </span>
-                    <span className="fd-count">{formData.description.length}/5000</span>
-                  </div>
+            <div className="fd__body post-dialog__body">
+              <div className="post-dialog__field">
+                <input
+                  id="post-title"
+                  ref={titleInputRef}
+                  className="post-title-input"
+                  placeholder="A short, specific title"
+                  value={formData.title}
+                  onChange={(e) => handleChange("title", e.target.value)}
+                  maxLength={500}
+                  aria-label="Title (required)"
+                  aria-required="true"
+                  aria-invalid={!!errors.title}
+                  aria-describedby="post-title-help"
+                />
+                <div className="post-dialog__hint" id="post-title-help">
+                  <span className="post-dialog__count">{formData.title.length}/500</span>
                 </div>
               </div>
 
-              <aside className="post-rail" aria-label="Post details">
-                <div className="fd-field">
-                  <div className="fd-field__top">
-                    <span className="fd-label">Category</span>
-                    <span className="fd-opt">Optional</span>
-                  </div>
-                  <div className="post-cat-select" ref={catRef}>
+              <div className="post-dialog__field">
+                <textarea
+                  id="post-description"
+                  className="post-description"
+                  placeholder="What happened, what you expected, and what would help."
+                  value={formData.description}
+                  onChange={(e) => handleChange("description", e.target.value)}
+                  rows={5}
+                  maxLength={5000}
+                  aria-label="Description (optional)"
+                  aria-invalid={!!errors.description}
+                  aria-describedby="post-description-help"
+                />
+                <div className="post-dialog__hint" id="post-description-help">
+                  <span className="post-dialog__count">{formData.description.length}/5000</span>
+                </div>
+              </div>
+
+              <div className="post-chips">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
                     <button
                       type="button"
-                      className="post-cat-trigger"
-                      aria-haspopup="listbox"
-                      aria-expanded={catOpen}
-                      onClick={() => setCatOpen((o) => !o)}
+                      className="post-chip"
+                      aria-label={`Category: ${categoryLabel}`}
                     >
-                      <span className={
-                        !formData.category && !showCustomCategory
-                          ? "post-cat-placeholder"
-                          : "post-cat-value"
-                      }>
-                        {showCustomCategory
-                          ? (customCategory.trim() || "Custom…")
-                          : formData.category || "No category"}
+                      <ShellIcon icon={Tag} />
+                      <span
+                        className={
+                          categoryIsSet
+                            ? "post-chip__value"
+                            : "post-chip__value post-chip__value--muted"
+                        }
+                      >
+                        {categoryLabel}
                       </span>
-                      <ChevronDown
-                        className="post-cat-chevron"
-                        aria-hidden="true"
-                      />
+                      <ShellIcon icon={ChevronDown} className="post-chip__chevron" />
                     </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    align="start"
+                    sideOffset={6}
+                    className="post-cat-menu w-auto min-w-[220px] max-w-[min(280px,calc(100vw-32px))] p-1 rounded-md border border-border bg-popover shadow-none !z-[calc(var(--z-modal,400)+10)]"
+                  >
+                    <DropdownMenuItem
+                      className={
+                        !formData.category && !showCustomCategory
+                          ? "post-cat-option is-selected"
+                          : "post-cat-option"
+                      }
+                      onSelect={() => handleCategoryChange("")}
+                    >
+                      <span>No category</span>
+                      {!formData.category && !showCustomCategory && (
+                        <ShellIcon icon={Check} className="post-cat-option__check" />
+                      )}
+                    </DropdownMenuItem>
+                    {predefinedCategories.map((category) => {
+                      const selected =
+                        !showCustomCategory && formData.category === category.name;
+                      return (
+                        <DropdownMenuItem
+                          key={category.id}
+                          className={
+                            selected ? "post-cat-option is-selected" : "post-cat-option"
+                          }
+                          onSelect={() => handleCategoryChange(category.name)}
+                        >
+                          <span>{category.name}</span>
+                          {selected && (
+                            <ShellIcon icon={Check} className="post-cat-option__check" />
+                          )}
+                        </DropdownMenuItem>
+                      );
+                    })}
+                    <DropdownMenuItem
+                      className={
+                        showCustomCategory
+                          ? "post-cat-option is-selected"
+                          : "post-cat-option"
+                      }
+                      onSelect={() => handleCategoryChange("custom")}
+                    >
+                      <span>Custom…</span>
+                      {showCustomCategory && (
+                        <ShellIcon icon={Check} className="post-cat-option__check" />
+                      )}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
 
-                    {catOpen && (
-                      <ul className="post-cat-menu" role="listbox" aria-label="Category">
-                        <li
-                          role="option"
-                          aria-selected={!formData.category && !showCustomCategory}
-                          className="post-cat-option"
-                          onClick={() => { handleCategoryChange(""); setCatOpen(false); }}
-                        >
-                          No category
-                        </li>
-                        {predefinedCategories.map((category) => (
-                          <li
-                            key={category.id}
-                            role="option"                            aria-selected={!showCustomCategory && formData.category === category.name}
-                            className="post-cat-option"
-                            onClick={() => { handleCategoryChange(category.name); setCatOpen(false); }}
-                          >
-                            {category.name}
-                          </li>
-                        ))}
-                        <li
-                          role="option"
-                          aria-selected={showCustomCategory}
-                          className="post-cat-option"
-                          onClick={() => { handleCategoryChange("custom"); setCatOpen(false); }}
-                        >
-                          Custom…
-                        </li>
-                      </ul>
-                    )}
-                  </div>
-                  {showCustomCategory && (
-                    <input
-                      className="fd-input post-custom"
-                      aria-label="Custom category"
-                      placeholder="Name the category"
-                      value={customCategory}
-                      onChange={(e) => setCustomCategory(e.target.value)}
-                      maxLength={100}
-                    />
+                <button
+                  type="button"
+                  className="post-chip"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploading || formData.images.length >= 5}
+                  aria-label={`Attach images, ${formData.images.length} of 5`}
+                >
+                  {uploading ? (
+                    <ShellIcon icon={Loader2} className="animate-spin" />
+                  ) : (
+                    <ShellIcon icon={Paperclip} />
                   )}
-                </div>
+                  <span>Attach images</span>
+                  <span className="post-chip__count">{formData.images.length} of 5</span>
+                </button>
+              </div>
 
-                <div className="fd-field">
-                  <div className="fd-field__top">
-                    <span className="fd-label">Images</span>
-                    <span className="fd-opt">Up to 5</span>
-                  </div>
-                  <div className="post-images">
-                    {formData.images.map((url, index) => (
-                      <div className="post-thumb" key={`${url}-${index}`}>
-                        <img src={url} alt={`Attachment ${index + 1}`} />
-                        <button
-                          type="button"
-                          className="post-thumb__remove"
-                          onClick={() => removeImage(index)}
-                          aria-label={`Remove image ${index + 1}`}
-                        >
-                          <X className="h-3 w-3" aria-hidden="true" />
-                        </button>
-                      </div>
-                    ))}
-                    {formData.images.length < 5 && (
+              {showCustomCategory && (
+                <input
+                  className="post-custom"
+                  aria-label="Custom category"
+                  placeholder="Name the category"
+                  value={customCategory}
+                  onChange={(e) => setCustomCategory(e.target.value)}
+                  maxLength={100}
+                />
+              )}
+
+              {formData.images.length > 0 && (
+                <div className="post-images">
+                  {formData.images.map((url, index) => (
+                    <div className="post-thumb" key={`${url}-${index}`}>
+                      <img src={url} alt={`Attachment ${index + 1}`} />
                       <button
                         type="button"
-                        className="post-add"
-                        onClick={() => fileInputRef.current?.click()}
-                        disabled={uploading}
-                        aria-label="Add an image"
+                        className="post-thumb__remove"
+                        onClick={() => removeImage(index)}
+                        aria-label={`Remove image ${index + 1}`}
                       >
-                        {uploading ? (
-                          <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-                        ) : (
-                          <Paperclip className="h-4 w-4" aria-hidden="true" />
-                        )}
-                        <span>{uploading ? "Uploading" : "Add"}</span>
+                        <ShellIcon icon={X} />
                       </button>
-                    )}
-                  </div>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    className="sr-only"
-                    tabIndex={-1}
-                    onChange={(e) => handleFileUpload(e.target.files)}
-                  />
-                  <div className="fd-help">
-                    <span>{formData.images.length} of 5 attached</span>
-                  </div>
-                  {fileError && (
-                    <p className="fd-error post-file-error" role="alert">
-                      {fileError}
-                    </p>
-                  )}
+                    </div>
+                  ))}
                 </div>
-              </aside>
+              )}
+
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                multiple
+                className="sr-only"
+                tabIndex={-1}
+                onChange={(e) => handleFileUpload(e.target.files)}
+              />
             </div>
+
+            {inlineErrors.length > 0 && (
+              <div className="post-dialog__errors" role="alert">
+                {inlineErrors.map((message, index) => (
+                  <p key={`${index}-${message}`}>{message}</p>
+                ))}
+              </div>
+            )}
 
             <footer className="fd__foot">
               <button
@@ -457,12 +458,12 @@ export function CreatePostDialog({
               <button
                 type="submit"
                 className="fd-btn fd-btn--primary fd-btn--commit"
-                disabled={creating}
+                disabled={creating || !canCreate}
                 aria-busy={creating}
               >
                 {creating ? (
                   <>
-                    <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                    <ShellIcon icon={Loader2} className="animate-spin" />
                     Creating…
                   </>
                 ) : (

@@ -2201,9 +2201,194 @@
 
 .settings-content {
   width: 100%;
-  max-width: 720px;
-  margin: 0 auto;
-  padding: var(--space-lg) var(--gutter) var(--space-2xl);
+  max-width: 728px;
+  padding: 32px 48px 64px;
+}
+
+/* Wide variant for table/list settings pages (Members, Billing, Webhooks, API Keys) */
+.settings-content--wide {
+  max-width: 1120px;
+}
+
+/* Settings sections (General / Branding / Revenue) */
+.settings-section {
+  padding-top: 32px;
+  border-top: 1px solid hsl(var(--border));
+}
+
+.settings-section:first-child {
+  padding-top: 0;
+  border-top: none;
+}
+
+.settings-section__head {
+  margin-bottom: 20px;
+}
+
+.settings-section__title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: hsl(var(--foreground));
+}
+
+.settings-section__desc {
+  margin: 4px 0 0;
+  font-size: 0.875rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.settings-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.settings-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: hsl(var(--foreground));
+}
+
+.settings-hint {
+  margin: 0 0 16px;
+  font-size: 0.8125rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.settings-notice {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  border: 1px solid hsl(var(--border));  border-radius: var(--radius, 8px);
+  background: hsl(var(--muted));
+}
+
+.settings-notice__icon {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  color: hsl(var(--muted-foreground));
+}
+
+.settings-notice__text {
+  margin: 0;
+  font-size: 0.875rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.settings-logo-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.settings-logo {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  overflow: hidden;
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius, 10px);
+  background: hsl(var(--muted));
+  color: hsl(var(--muted-foreground));
+}
+
+.settings-logo--empty {
+  border-style: dashed;
+}
+
+.settings-logo__img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.settings-logo__remove {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border: none;
+  border-radius: 9999px;
+  background: hsl(var(--background) / 0.85);
+  color: hsl(var(--foreground));
+  cursor: pointer;
+}
+
+.settings-logo__remove:hover {
+  background: hsl(var(--muted));
+}
+
+/* General + Branding settings pages (same tight spacing as Revenue) */
+.settings-content.org-page {
+  padding: 8px 16px 32px;
+}
+
+/* Revenue settings page (scoped so no other settings page is affected) */
+.settings-content.revenue-page {
+  padding: 8px 16px 32px;
+}
+
+.revenue-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.revenue-actions > button {
+  box-sizing: border-box;
+  height: 36px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding-left: 14px;
+  padding-right: 14px;
+  font-size: 13px;
+}
+
+.revenue-actions > button[class*='outline'],
+.revenue-actions > button.bg-transparent {
+  border-color: hsl(var(--border));
+}
+
+.revenue-empty {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px dashed hsl(var(--border));
+  border-radius: 8px;
+  color: hsl(var(--muted-foreground));
+}
+
+.revenue-empty__icon {
+  flex-shrink: 0;
+  color: hsl(var(--muted-foreground));
+}
+
+.revenue-helper {
+  margin: 0;
+  font-size: 13px;
+  color: hsl(var(--muted-foreground));
+}
+
+.revenue-code {
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: hsl(var(--muted));
+  font-size: 0.8125em;
 }
 
 .admin-scrim {
@@ -2331,6 +2516,6 @@
   }
 
   .settings-content {
-    padding: var(--space-md) var(--space-md) var(--space-xl);
+    padding: 24px 24px 48px;
   }
 }
