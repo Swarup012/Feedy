@@ -475,7 +475,7 @@ export default function WebhooksPage() {
           <div>
             <div className="flex items-center gap-2 mb-1">
               <WebhookIcon className="h-6 w-6 text-primary" />
-              <h1 className="text-lg font-semibold tracking-tight">Webhooks</h1>
+              <h1 className="settings-page__title">Webhooks</h1>
             </div>
           </div>
           <Button

@@ -2202,12 +2202,18 @@
 .settings-content {
   width: 100%;
   max-width: 728px;
+  margin: 0;
   padding: 32px 48px 64px;
+  box-sizing: border-box;
 }
 
 /* Wide variant for table/list settings pages (Members, Billing, Webhooks, API Keys) */
 .settings-content--wide {
-  max-width: 1120px;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0;
+  padding: 32px 48px 64px;
+  box-sizing: border-box;
 }
 
 /* Settings sections (General / Branding / Revenue) */
@@ -2227,14 +2233,15 @@
 
 .settings-section__title {
   margin: 0;
-  font-size: 1rem;
+  font-size: 0.9375rem;
   font-weight: 600;
   color: hsl(var(--foreground));
 }
 
 .settings-section__desc {
   margin: 4px 0 0;
-  font-size: 0.875rem;
+  font-size: 0.84375rem;
+  line-height: 1.6;
   color: hsl(var(--muted-foreground));
 }
 
@@ -2246,14 +2253,14 @@
 }
 
 .settings-label {
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   font-weight: 500;
   color: hsl(var(--foreground));
 }
 
 .settings-hint {
   margin: 0 0 16px;
-  font-size: 0.8125rem;
+  font-size: 0.75rem;
   color: hsl(var(--muted-foreground));
 }
 
@@ -2338,6 +2345,16 @@
 /* Revenue settings page (scoped so no other settings page is affected) */
 .settings-content.revenue-page {
   padding: 8px 16px 32px;
+}
+
+/* Nested settings wrappers flatten: the outermost wrapper owns width and padding.
+   Without this, Tracked Users (embedded tab) and General/Branding/Revenue stack a
+   second .settings-content inside the first, doubling padding and capping width. */
+.settings-content .settings-content,
+.settings-content .settings-content--wide {
+  max-width: none;
+  margin: 0;
+  padding: 0;
 }
 
 .revenue-actions {
@@ -2518,4 +2535,176 @@
   .settings-content {
     padding: 24px 24px 48px;
   }
+}
+
+/* ── Tracked Users settings page ─────────────────────────────────────── */
+
+.tu-page {
+  --status-success-bg: #ecfdf5;
+  --status-success-border: #a7f3d0;
+  --status-success-text: #047857;
+  --status-warning-bg: #fffbeb;
+  --status-warning-border: #fde68a;
+  --status-warning-text: #b45309;
+  --status-error-bg: #fef2f2;
+  --status-error-border: #fecaca;
+  --status-error-text: #b91c1c;
+}
+
+.dark .tu-page {
+  --status-success-bg: rgba(16, 185, 129, 0.12);
+  --status-success-border: rgba(16, 185, 129, 0.3);
+  --status-success-text: #6ee7b7;
+  --status-warning-bg: rgba(245, 158, 11, 0.12);
+  --status-warning-border: rgba(245, 158, 11, 0.3);
+  --status-warning-text: #fcd34d;
+  --status-error-bg: rgba(239, 68, 68, 0.12);
+  --status-error-border: rgba(239, 68, 68, 0.3);
+  --status-error-text: #fca5a5;
+}
+
+.tu-usage {
+  padding: 0;
+}
+
+.tu-meter {
+  height: 6px;
+  border-radius: 999px;
+  background: hsl(var(--muted));
+  overflow: hidden;
+}
+
+.tu-meter__fill {
+  height: 100%;
+  border-radius: 999px;
+  background: hsl(var(--primary));
+  transition: width 0.2s ease;
+}
+
+.tu-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 24px;
+  padding: 16px 0;
+  border-top: 1px solid hsl(var(--border));
+  border-bottom: 1px solid hsl(var(--border));
+}
+
+.tu-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tu-stat__label {
+  font-size: 0.75rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.tu-stat__value {
+  font-size: 1.5rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: hsl(var(--foreground));
+}
+
+@media (max-width: 640px) {
+  .tu-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.tu-avatar {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: hsl(var(--muted));
+  color: hsl(var(--muted-foreground));
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.tu-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  border: 1px dashed hsl(var(--border));
+  border-radius: 8px;
+  padding: 40px 24px;
+  font-size: 0.875rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.tu-table-wrap {
+  overflow-x: auto;
+}
+
+.tu-table-wrap table {
+  min-width: 720px;
+}
+
+.tu-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-top: 8px;
+}
+
+.tu-breakdown__row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tu-breakdown__top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.tu-breakdown__name {
+  font-size: 0.875rem;
+  color: hsl(var(--foreground));
+}
+
+.tu-breakdown__meta {
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+  color: hsl(var(--muted-foreground));
+}
+
+.tu-breakdown__bar {
+  display: block;
+  height: 6px;
+  border-radius: 999px;
+  background: hsl(var(--muted));
+  overflow: hidden;
+}
+
+.tu-breakdown__bar > span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: hsl(var(--primary));
+}
+
+/* Shared settings type scale */
+.settings-page__title,
+.revenue-page__title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+}
+
+.settings-page__desc {
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: hsl(var(--muted-foreground));
 }

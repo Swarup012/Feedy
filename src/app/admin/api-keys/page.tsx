@@ -91,7 +91,7 @@ export default function ApiKeysPage() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-lg font-semibold">API Keys</h2>
+            <h2 className="settings-page__title">API Keys</h2>
             <p className="text-sm text-muted-foreground">
               Manage keys for programmatic access to the Faddy REST API.
             </p>

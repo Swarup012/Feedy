@@ -813,7 +813,7 @@ function IntegrationsPageInner() {
     <PaidFeatureGate featureName="Integrations" feature="integrations">
     <div className="space-y-6">
       <div>
-        <h1 className="text-lg font-bold tracking-tight">Integrations</h1>
+        <h1 className="settings-page__title">Integrations</h1>
         <p className="text-sm text-muted-foreground mt-1">Connect and manage your favorite tools.</p>
       </div>
 

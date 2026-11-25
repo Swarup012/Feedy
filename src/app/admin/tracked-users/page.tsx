@@ -12,17 +12,8 @@ import trackedUsersService, {
 import api from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
 import { useErrorHandler } from '@/hooks/useErrorHandler';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Progress } from '@/components/ui/progress';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import {
   Table,
@@ -39,67 +30,45 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Calendar, Download, RefreshCw, Trash2 } from 'lucide-react';
 import {
-  Users,
-  Download,
-  RefreshCw,
-  TrendingUp,
-  MessageSquare,
-  ThumbsUp,
-  FileText,
-  Calendar,
-  AlertTriangle,
-  CheckCircle,
-  Trash2,
-} from 'lucide-react';
-import { WIDE_CONTAINER } from '@/lib/layout-constants';
-import {
-  LineChart,
-  Line,
   BarChart,
   Bar,
   Cell,
   XAxis,
   YAxis,
-  CartesianGrid,
   Tooltip,
-  Legend,
   ResponsiveContainer,
 } from 'recharts';
 import { Skeleton } from '@/components/ui/skeleton';
 
 function getStatusBadge(status: string, percent: number) {
-  const config: Record<string, { label: string; className: string; icon: React.ElementType }> = {
+  const config: Record<string, { label: string; className: string }> = {
     good: {
       label: 'Good',
-      // Token-driven: status-success-* adapts automatically to light/dark
       className: 'bg-status-success-bg text-status-success-text border-status-success-border',
-      icon: CheckCircle,
     },
     warning: {
       label: 'Warning',
       className: 'bg-status-warning-bg text-status-warning-text border-status-warning-border',
-      icon: AlertTriangle,
     },
     critical: {
       label: 'Critical',
-      // No dedicated "critical" token — use warning with slightly stronger tint
       className: 'bg-status-warning-bg text-status-warning-text border-status-warning-border',
-      icon: AlertTriangle,
     },
     exceeded: {
       label: 'Limit Reached',
       className: 'bg-status-error-bg text-status-error-text border-status-error-border',
-      icon: AlertTriangle,
     },
   };
   const cfg = config[status] || config.good;
-  const Icon = cfg.icon;
   return (
-    <Badge variant="outline" className={`gap-1 ${cfg.className}`}>
-      <Icon className="h-3 w-3" />
+    <span
+      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium ${cfg.className}`}
+    >
+      <span className="h-1.5 w-1.5 rounded-full bg-current" />
       {cfg.label}
-    </Badge>
+    </span>
   );
 }
 
@@ -108,17 +77,6 @@ function getInitials(name: string | null | undefined): string {
   const parts = name.trim().split(/\s+/);
   if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
   return parts[0].substring(0, 2).toUpperCase();
-}
-
-function getAvatarColor(name: string | null | undefined): string {
-  if (!name) return 'bg-gray-400';
-  const colors = [
-    'bg-blue-500', 'bg-emerald-500', 'bg-violet-500', 'bg-amber-500',
-    'bg-rose-500', 'bg-cyan-500', 'bg-indigo-500', 'bg-pink-500',
-  ];
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  return colors[Math.abs(hash) % colors.length];
 }
 
 export default function TrackedUsersPage() {
@@ -367,7 +325,7 @@ export default function TrackedUsersPage() {
   if (loading) {
     return (
       <ProtectedRoute allowedRoles={["owner", "admin"]}>
-        <div className={`${WIDE_CONTAINER} py-5`}>
+        <div className="settings-content settings-content--wide tu-page">
           <Skeleton className="h-10 w-52 mb-4" />
           <Skeleton className="h-36 mb-4" />
           <div className="grid gap-4 md:grid-cols-4 mb-8">
@@ -383,11 +341,11 @@ export default function TrackedUsersPage() {
 
   return (
     <ProtectedRoute allowedRoles={["owner", "admin"]}>
-      <div className={`${WIDE_CONTAINER} py-5 space-y-5`}>
+      <div className="settings-content settings-content--wide tu-page space-y-5">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-xl font-bold">Tracked Users</h1>
+            <h1 className="settings-page__title">Tracked Users</h1>
             <p className="text-muted-foreground mt-1">
               Monitor unique users interacting with your feedback board
             </p>
@@ -412,218 +370,189 @@ export default function TrackedUsersPage() {
           </div>
         </div>
 
-        {/* Hero Usage Card */}
-        <Card className="overflow-hidden">
-          <CardContent className="p-5">
-            <div className="flex items-start justify-between mb-4">
-              <div className="space-y-1">
-                <p className="text-sm text-muted-foreground">Tracked Users</p>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-3xl font-bold tabular-nums">{usage?.count.toLocaleString() || 0}</span>
-                  <span className="text-lg text-muted-foreground font-medium">of {usage?.limit.toLocaleString() || 0}</span>
-                </div>
+        {/* Usage */}
+        <div className="tu-usage">
+          <div className="flex items-start justify-between mb-4">
+            <div className="space-y-1">
+              <p className="text-sm text-muted-foreground">Tracked Users</p>
+              <div className="flex items-baseline gap-2">
+                <span className="text-3xl font-semibold tabular-nums">{usage?.count.toLocaleString() || 0}</span>
+                <span className="text-lg text-muted-foreground font-medium">of {usage?.limit.toLocaleString() || 0}</span>
               </div>
-              {getStatusBadge(usage?.status || 'good', percentUsed)}
             </div>
-            <Progress value={percentUsed} className="h-2 mb-3" />
-            <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-              <Calendar className="h-3.5 w-3.5" />
-              <span>
-                {usage?.days_remaining || 0} days remaining until reset on{' '}
-                <span className="font-medium text-foreground">{usage?.current_period || ''}</span>
-              </span>
-            </div>
-            {usage?.peak != null && (
-              <p className="text-sm text-muted-foreground mt-2">
-                Peak this month: <span className="font-medium text-foreground">{usage.peak}</span> · Billing is based on your peak, not your current count.
-              </p>
-            )}
-          </CardContent>
-        </Card>
+            {getStatusBadge(usage?.status || 'good', percentUsed)}
+          </div>
+          <div
+            className="tu-meter"
+            role="progressbar"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={Math.round(percentUsed)}
+          >
+            <div className="tu-meter__fill" style={{ width: `${Math.min(percentUsed, 100)}%` }} />
+          </div>
+          <div className="flex items-center gap-1.5 text-sm text-muted-foreground mt-3">
+            <Calendar className="h-3.5 w-3.5" />
+            <span>
+              {usage?.days_remaining || 0} days remaining until reset on{' '}
+              <span className="font-medium text-foreground">{usage?.current_period || ''}</span>
+            </span>
+          </div>
+          {usage?.peak != null && (
+            <p className="text-sm text-muted-foreground mt-2">
+              Peak this month: <span className="font-medium text-foreground">{usage.peak}</span> · Billing is based on your peak, not your current count.
+            </p>
+          )}
+        </div>
 
-        {/* Secondary Stats Grid */}
-        <div className="grid gap-4 md:grid-cols-4">
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="flex-shrink-0 w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <TrendingUp className="h-4 w-4 text-primary" />
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Total Actions</p>
-                  <p className="text-lg font-bold tabular-nums">{totalActions.toLocaleString()}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="flex-shrink-0 w-9 h-9 rounded-lg bg-blue-500/10 flex items-center justify-center">
-                  <FileText className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Posts</p>
-                  <p className="text-lg font-bold tabular-nums">{(usage?.breakdown?.posts || 0).toLocaleString()}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="flex-shrink-0 w-9 h-9 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-                  <ThumbsUp className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Votes</p>
-                  <p className="text-lg font-bold tabular-nums">{(usage?.breakdown?.votes || 0).toLocaleString()}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="flex-shrink-0 w-9 h-9 rounded-lg bg-amber-500/10 flex items-center justify-center">
-                  <MessageSquare className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Comments</p>
-                  <p className="text-lg font-bold tabular-nums">{(usage?.breakdown?.comments || 0).toLocaleString()}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+        {/* Secondary Stats */}
+        <div className="tu-stats">
+          <div className="tu-stat">
+            <span className="tu-stat__label">Total Actions</span>
+            <span className="tu-stat__value">{totalActions.toLocaleString()}</span>
+          </div>
+          <div className="tu-stat">
+            <span className="tu-stat__label">Posts</span>
+            <span className="tu-stat__value">{(usage?.breakdown?.posts || 0).toLocaleString()}</span>
+          </div>
+          <div className="tu-stat">
+            <span className="tu-stat__label">Votes</span>
+            <span className="tu-stat__value">{(usage?.breakdown?.votes || 0).toLocaleString()}</span>
+          </div>
+          <div className="tu-stat">
+            <span className="tu-stat__label">Comments</span>
+            <span className="tu-stat__value">{(usage?.breakdown?.comments || 0).toLocaleString()}</span>
+          </div>
         </div>
 
         {/* Charts */}
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-12 md:grid-cols-2">
           {/* Historical Trend — hidden when < 10 tracked users */}
           {(usage?.count || 0) >= 10 ? (
-            <Card>
-              <CardHeader>
-                <CardTitle>Historical Trend</CardTitle>
-                <CardDescription>Tracked users over the past 6 months</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={history}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="billing_period" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Line
-                      type="monotone"
-                      dataKey="total_users"
-                      stroke="#3b82f6"
-                      strokeWidth={2}
-                      name="Tracked Users"
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
+            <section>
+              <div className="settings-section__head">
+                <h3 className="settings-section__title">Historical Trend</h3>
+                <p className="settings-section__desc">Tracked users over the past 6 months</p>
+              </div>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={history} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
+                  <XAxis
+                    dataKey="billing_period"
+                    tickLine={false}
+                    axisLine={{ stroke: 'hsl(var(--border))' }}
+                    tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
+                  />
+                  <YAxis
+                    allowDecimals={false}
+                    tickLine={false}
+                    axisLine={false}
+                    width={40}
+                    tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
+                  />
+                  <Tooltip
+                    formatter={(value: number) => [value.toLocaleString(), 'Tracked Users']}
+                    cursor={{ fill: 'hsl(var(--muted))', opacity: 0.5 }}
+                  />
+                  <Bar dataKey="total_users" radius={[3, 3, 0, 0]} maxBarSize={40}>
+                    {history.map((entry, index) => (
+                      <Cell
+                        key={`trend-${index}`}
+                        fill={
+                          entry.billing_period === usage?.current_period
+                            ? 'hsl(var(--primary))'
+                            : 'hsl(var(--primary) / 0.25)'
+                        }
+                      />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </section>
           ) : (
-            <Card>
-              <CardHeader>
-                <CardTitle>Historical Trend</CardTitle>
-                <CardDescription>Tracked users over the past 6 months</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-col items-center justify-center py-12 text-center">
-                  <Users className="h-10 w-10 text-muted-foreground/40 mb-3" />
-                  <p className="text-sm text-muted-foreground max-w-xs">
-                    Not enough data yet — check back once you have more tracked users.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+            <section>
+              <div className="settings-section__head">
+                <h3 className="settings-section__title">Historical Trend</h3>
+                <p className="settings-section__desc">Tracked users over the past 6 months</p>
+              </div>
+              <div className="tu-empty">
+                Not enough data yet — check back once you have more tracked users.
+              </div>
+            </section>
           )}
 
-          {/* Action Breakdown — bar chart */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Action Breakdown</CardTitle>
-              <CardDescription>Distribution of user actions this month</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {(() => {
-                const breakdownData = [
-                  { name: 'Posts', value: usage?.breakdown?.posts || 0, color: '#3b82f6' },
-                  { name: 'Votes', value: usage?.breakdown?.votes || 0, color: '#10b981' },
-                  { name: 'Comments', value: usage?.breakdown?.comments || 0, color: '#f59e0b' },
-                ];
-                const hasData = breakdownData.some((d) => d.value > 0);
+          {/* Action Breakdown — per-type rows */}
+          <section>
+            <div className="settings-section__head">
+              <h3 className="settings-section__title">Action Breakdown</h3>
+              <p className="settings-section__desc">Distribution of user actions this month</p>
+            </div>
+            {(() => {
+              const breakdownData = [
+                { name: 'Posts', value: usage?.breakdown?.posts || 0 },
+                { name: 'Votes', value: usage?.breakdown?.votes || 0 },
+                { name: 'Comments', value: usage?.breakdown?.comments || 0 },
+              ];
+              const hasData = breakdownData.some((d) => d.value > 0);
 
-                if (!hasData) {
-                  return (
-                    <div className="flex flex-col items-center justify-center py-12 text-center">
-                      <TrendingUp className="h-10 w-10 text-muted-foreground/40 mb-3" />
-                      <p className="text-sm text-muted-foreground max-w-xs">
-                        No actions recorded yet this month.
-                      </p>
-                    </div>
-                  );
-                }
+              if (!hasData) {
+                return <div className="tu-empty">No actions recorded yet this month.</div>;
+              }
 
-                return (
-                  <ResponsiveContainer width="100%" height={250}>
-                    <BarChart data={breakdownData} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                      <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-                      <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
-                      <Tooltip
-                        formatter={(value: number) => [value.toLocaleString(), 'Count']}
-                        cursor={{ fill: 'hsl(var(--muted))', opacity: 0.5 }}
-                      />
-                      <Bar dataKey="value" radius={[4, 4, 0, 0]} maxBarSize={60}>
-                        {breakdownData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.color} />
-                        ))}
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
-                );
-              })()}
-            </CardContent>
-          </Card>
+              return (
+                <div className="tu-breakdown">
+                  {breakdownData.map((d) => {
+                    const pct = totalActions > 0 ? Math.round((d.value / totalActions) * 100) : 0;
+                    return (
+                      <div key={d.name} className="tu-breakdown__row">
+                        <div className="tu-breakdown__top">
+                          <span className="tu-breakdown__name">{d.name}</span>
+                          <span className="tu-breakdown__meta">
+                            {d.value.toLocaleString()} · {pct}%
+                          </span>
+                        </div>
+                        <span className="tu-breakdown__bar">
+                          <span style={{ width: `${pct}%` }} />
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })()}
+          </section>
         </div>
 
         {/* Users Table */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle>Tracked Users List</CardTitle>
-                <CardDescription>Users who have interacted with your feedback board</CardDescription>
-              </div>
-              <div className="flex gap-2">
-                {isAdmin && selectedIds.size > 0 && (
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={handleBulkDeleteClick}
-                  >
-                    <Trash2 className="h-4 w-4 mr-1.5" />
-                    Delete {selectedIds.size} selected
-                  </Button>
-                )}
-                <Select value={sortBy} onValueChange={(value: any) => setSortBy(value)}>
-                  <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Sort by" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="last_activity_at">Last Seen</SelectItem>
-                    <SelectItem value="created_at">First Seen</SelectItem>
-                    <SelectItem value="total_actions">Most Active</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+        <section>
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="settings-section__title">Tracked Users List</h3>
+              <p className="settings-section__desc">Users who have interacted with your feedback board</p>
             </div>
-          </CardHeader>
-          <CardContent>
+            <div className="flex gap-2">
+              {isAdmin && selectedIds.size > 0 && (
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={handleBulkDeleteClick}
+                >
+                  <Trash2 className="h-4 w-4 mr-1.5" />
+                  Delete {selectedIds.size} selected
+                </Button>
+              )}
+              <Select value={sortBy} onValueChange={(value: any) => setSortBy(value)}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Sort by" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="last_activity_at">Last Seen</SelectItem>
+                  <SelectItem value="created_at">First Seen</SelectItem>
+                  <SelectItem value="total_actions">Most Active</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div className="tu-table-wrap">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -639,18 +568,18 @@ export default function TrackedUsersPage() {
                   <TableHead>User</TableHead>
                   <TableHead>First Seen</TableHead>
                   <TableHead>Last Seen</TableHead>
-                  <TableHead className="text-center">Posts</TableHead>
-                  <TableHead className="text-center">Votes</TableHead>
-                  <TableHead className="text-center">Comments</TableHead>
-                  <TableHead className="text-center">Total</TableHead>
+                  <TableHead className="text-right">Posts</TableHead>
+                  <TableHead className="text-right">Votes</TableHead>
+                  <TableHead className="text-right">Comments</TableHead>
+                  <TableHead className="text-right">Total</TableHead>
                   {isAdmin && <TableHead className="w-10" />}
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {users.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={isAdmin ? 9 : 8} className="text-center text-muted-foreground py-8">
-                      No tracked users yet
+                    <TableCell colSpan={isAdmin ? 9 : 8} className="py-2">
+                      <div className="tu-empty">No tracked users yet</div>
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -667,8 +596,8 @@ export default function TrackedUsersPage() {
                       )}
                       <TableCell>
                         <div className="flex items-center gap-2.5">
-                          <div className={`flex-shrink-0 w-7 h-7 rounded-full ${getAvatarColor(user.display_name)} flex items-center justify-center`}>
-                            <span className="text-[10px] font-semibold text-white">{getInitials(user.display_name)}</span>
+                          <div className="tu-avatar">
+                            <span>{getInitials(user.display_name)}</span>
                           </div>
                           <div className="min-w-0">
                             <div className="font-medium text-sm truncate">{user.display_name || 'Anonymous'}</div>
@@ -680,11 +609,11 @@ export default function TrackedUsersPage() {
                       </TableCell>
                       <TableCell className="text-sm">{formatDate(user.first_tracked_at)}</TableCell>
                       <TableCell className="text-sm">{formatDate(user.last_activity_at)}</TableCell>
-                      <TableCell className="text-center text-sm tabular-nums">{user.posts_created}</TableCell>
-                      <TableCell className="text-center text-sm tabular-nums">{user.votes_cast}</TableCell>
-                      <TableCell className="text-center text-sm tabular-nums">{user.comments_made}</TableCell>
-                      <TableCell className="text-center">
-                        <Badge variant="secondary" className="tabular-nums">{user.total_actions}</Badge>
+                      <TableCell className="text-right text-sm tabular-nums">{user.posts_created}</TableCell>
+                      <TableCell className="text-right text-sm tabular-nums">{user.votes_cast}</TableCell>
+                      <TableCell className="text-right text-sm tabular-nums">{user.comments_made}</TableCell>
+                      <TableCell className="text-right">
+                        <span className="text-sm font-semibold tabular-nums">{user.total_actions}</span>
                       </TableCell>
                       {isAdmin && (
                         <TableCell>
@@ -695,7 +624,7 @@ export default function TrackedUsersPage() {
                             onClick={() => handleSingleDeleteClick(user.id)}
                             title="Remove tracked user"
                           >
-                            <Trash2 className="h-3.5 w-3.5 text-muted-foreground hover:text-red-500" />
+                            <Trash2 className="h-3.5 w-3.5 text-muted-foreground hover:text-destructive" />
                           </Button>
                         </TableCell>
                       )}
@@ -704,8 +633,9 @@ export default function TrackedUsersPage() {
                 )}
               </TableBody>
             </Table>
+          </div>
 
-            {/* Caption */}
+          {/* Caption */}
             <p className="text-xs text-muted-foreground mt-3">
               Different email addresses are tracked as separate users, even for the same name.
             </p>
@@ -736,8 +666,7 @@ export default function TrackedUsersPage() {
                 </div>
               </div>
             )}
-          </CardContent>
-        </Card>
+        </section>
       </div>
 
       {/* Delete confirmation dialogs (admin only) */}

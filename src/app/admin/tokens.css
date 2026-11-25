@@ -67,8 +67,8 @@
   --seg-more: color-mix(in oklab, var(--color-ink) 35%, var(--color-paper));
 
   /* Faces — project brand */
-  --font-display: "Switzer", "Inter", system-ui, sans-serif;
-  --font-body: "Switzer", "Inter", system-ui, sans-serif;
+  --font-display: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-outlier: var(--font-body);
   --display-weight: 600;
 }

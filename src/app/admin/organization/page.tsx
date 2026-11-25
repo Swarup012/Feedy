@@ -404,7 +404,7 @@ function OrganizationSettingsInner() {
   ).length;
 
   return (
-    <div className="settings-content">
+    <div className={activeTab === 'tracked-users' ? 'settings-content settings-content--wide' : 'settings-content'}>
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
             {/* Hidden tab triggers for functionality */}
             <div className="hidden">
@@ -532,7 +532,7 @@ function OrganizationSettingsInner() {
                 {/* Header with Invite button */}
                 <div className="flex items-center justify-between">
                   <div>
-                    <h2 className="text-lg font-semibold text-foreground">Team Members</h2>
+                    <h2 className="settings-page__title">Team Members</h2>
                     <p className="text-sm text-muted-foreground mt-1">
                       {adminCount} / {maxAdmins} admins • {isUnlimitedMembers ? '∞ Members' : `${members.length} / ${planFeatures?.team_members} Members`}
                     </p>
@@ -637,7 +637,7 @@ function OrganizationSettingsInner() {
               <div className="space-y-6">
                 <Card>
                   <CardHeader>
-                    <CardTitle>Organization Subdomain</CardTitle>
+                    <CardTitle className="settings-page__title">Organization Subdomain</CardTitle>
                     <CardDescription>
                       Your unique subdomain for accessing your organization
                     </CardDescription>

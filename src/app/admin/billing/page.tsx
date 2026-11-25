@@ -109,7 +109,7 @@ function BillingContent() {
     <div className={`${NARROW_CONTAINER} py-8 space-y-8`}>
       {/* Page Header */}
       <div>
-        <h1 className="text-2xl font-switzer font-bold text-gray-900 dark:text-white">
+        <h1 className="settings-page__title">
           Billing
         </h1>
         <p className="text-sm text-gray-500 mt-1">

@@ -109,7 +109,7 @@ export function JobRolesTab() {
         <div className="flex items-start gap-3">
           
           <div>
-            <h2 className="text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-50">
+            <h2 className="settings-page__title">
               Job Roles
             </h2>
             <p className="mt-1 text-sm text-slate-500 dark:text-slate-400 max-w-lg">
