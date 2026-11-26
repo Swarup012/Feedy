@@ -18,6 +18,7 @@ export type ApiKeyScope =
 export type ApiKeyEnvironment = 'live' | 'test';
 
 export interface ApiKey {
+  principal_type: 'api_key' | 'zapier_oauth';
   id: string;
   organization_id: string;
   name: string;

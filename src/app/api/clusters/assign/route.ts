@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { assignCluster } from '@/ai/flows/assign-cluster';
+import { createHash, timingSafeEqual } from 'node:crypto';
 
 /**
  * POST /api/clusters/assign
@@ -12,6 +13,14 @@ import { assignCluster } from '@/ai/flows/assign-cluster';
  */
 export async function POST(request: NextRequest) {
   try {
+    const internalSecret = process.env.INTERNAL_API_SECRET;
+    const providedSecret = request.headers.get('x-internal-secret');
+    if (!internalSecret || !providedSecret || !timingSafeEqual(
+      createHash('sha256').update(internalSecret).digest(),
+      createHash('sha256').update(providedSecret).digest(),
+    )) {
+      return NextResponse.json({ success: false, error: 'Authentication required' }, { status: 401 });
+    }
     const body = await request.json();
     const { post_id, board_id, title, description, existing_clusters } = body;
 
@@ -20,6 +29,15 @@ export async function POST(request: NextRequest) {
         { success: false, error: 'post_id, board_id, and title are required' },
         { status: 400 }
       );
+    }
+
+    const backendUrl = process.env.BACKEND_URL || 'http://localhost:3000';
+    const validation = await fetch(`${backendUrl}/api/clusters/validate-assignment`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json', 'x-internal-secret': internalSecret },
+      body: JSON.stringify({ post_id, board_id }),
+    });
+    if (!validation.ok) {
+      return NextResponse.json({ success: false, error: 'Assignment not authorized' }, { status: validation.status });
     }
 
     // ── 1. Run AI cluster assignment ──────────────────────────────────────────
@@ -45,9 +63,6 @@ export async function POST(request: NextRequest) {
     }
 
     // ── 2. Persist cluster_key to the post via backend ────────────────────────
-    const backendUrl = process.env.BACKEND_URL || 'http://localhost:3000';
-    const internalSecret = process.env.INTERNAL_API_SECRET || '';
-
     const updateResponse = await fetch(
       `${backendUrl}/api/clusters/assign-post`,
       {

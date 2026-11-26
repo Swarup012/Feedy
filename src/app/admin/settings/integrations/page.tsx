@@ -1,5 +1,7 @@
 'use client';
 
+import { hasZapierConnection } from '@/services/zapierConnection';
+
 import { Suspense, useCallback, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
@@ -199,7 +201,7 @@ function IntegrationsPageInner() {
     }
   }, [orgId, toast]);
 
-  // Zapier connection = a live "Zapier OAuth ·" API key minted by the OAuth flow.
+  // Zapier connection is represented by an OAuth-created API key.
   // Counts toward the free/starter 1-integration slot like every other card.
   // Re-checked on focus because the OAuth flow opens in another tab.
   useEffect(() => {
@@ -207,7 +209,7 @@ function IntegrationsPageInner() {
     const check = () => {
       apiKeyService
         .listKeys()
-        .then(keys => setZapierActive(keys.some(k => k.name.startsWith('Zapier OAuth'))))
+        .then(keys => setZapierActive(hasZapierConnection(keys)))
         .catch(err => console.error('Failed to load Zapier status:', err));
     };
     check();
