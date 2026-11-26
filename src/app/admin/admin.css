@@ -2708,3 +2708,395 @@
   font-size: 13px;
   color: hsl(var(--muted-foreground));
 }
+
+/* ==========================================================================
+   Webhook form dialog (.wh-dialog) — compact single-column
+   Scoped to the webhook create/edit dialog only; the shared .fd primitives
+   and every other dialog stay untouched. Append-only.
+   ========================================================================== */
+
+.wh-dialog.fd {
+  width: 640px;
+  max-width: calc(100vw - 32px);
+}
+
+.wh-dialog .fd__shell {
+  max-height: calc(100dvh - 190px);
+  border: 1px solid var(--color-rule);
+  border-radius: 12px;
+  background: var(--color-paper);
+  box-shadow: none;
+}
+
+.wh-dialog .fd__head {
+  align-items: flex-start;
+  padding: 20px 24px 10px;
+  border-bottom: 0;
+  background: var(--color-paper);
+}
+
+.wh-dialog .fd__head .fd__title {
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: normal;
+  color: var(--color-ink);
+}
+
+.wh-dialog .fd__head .fd__lede {
+  margin-top: 2px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--color-muted);
+}
+
+.wh-dialog .fd__close {
+  width: 32px;
+  height: 32px;
+}
+
+.wh-dialog .fd__close:focus-visible,
+.wh-dialog .fd-btn:focus-visible,
+.wh-dialog .wh-type:focus-visible,
+.wh-dialog .wh-event-all:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.wh-dialog .fd__body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px 24px;
+  background: var(--color-paper);
+  overscroll-behavior: contain;
+}
+
+.wh-dialog .fd-field {
+  gap: 6px;
+}
+
+.wh-dialog .fd-label,
+.wh-dialog .wh-label {
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--color-ink);
+}
+
+.wh-dialog .wh-optional {
+  color: var(--color-muted);
+  font-weight: 400;
+}
+
+/* Delivery — segmented control */
+.wh-dialog .wh-types {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 2px;
+  padding: 3px;
+  border-radius: 8px;
+  background: var(--color-paper-3);
+}
+
+.wh-dialog .wh-type {
+  min-height: 30px;
+  padding: 0 10px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: color-mix(in oklab, var(--color-ink) 55%, var(--color-muted));
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    background-color var(--dur-micro) var(--ease-out),
+    border-color var(--dur-micro) var(--ease-out),
+    color var(--dur-micro) var(--ease-out);
+}
+
+.wh-dialog .wh-type:hover {
+  background: color-mix(in oklab, var(--color-paper) 55%, transparent);
+  color: var(--color-ink);
+}
+
+.wh-dialog .wh-type[aria-pressed="true"] {
+  border-color: var(--color-rule);
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-weight: 600;
+}
+
+/* Name + endpoint URL */
+.wh-dialog .wh-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr);
+  gap: 16px;
+}
+
+/* Inputs */
+.wh-dialog .fd-input,
+.wh-dialog .fd-textarea {
+  min-height: 0;
+  padding: 8px 10px;
+  border: 1px solid var(--color-rule);
+  border-radius: 6px;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  font-size: 13px;
+  line-height: 1.4;
+  box-shadow: none;
+}
+
+.wh-dialog .fd-input {
+  height: 36px;
+}
+
+.wh-dialog .fd-input:hover,
+.wh-dialog .fd-textarea:hover {
+  border-color: var(--color-rule);
+  background: var(--color-paper);
+}
+
+.wh-dialog .fd-input:focus-visible,
+.wh-dialog .fd-textarea:focus-visible {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px color-mix(in oklab, var(--color-accent) 22%, transparent);
+}
+
+.wh-dialog .fd-input::placeholder,
+.wh-dialog .fd-textarea::placeholder {
+  color: var(--color-muted);
+}
+
+.wh-dialog .wh-url {
+  font-family: var(--font-mono, var(--font-outlier));
+  font-size: 13px;
+}
+
+.wh-dialog .wh-desc {
+  min-height: 0;
+  resize: vertical;
+}
+
+.wh-dialog .wh-help {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--color-muted);
+}
+
+/* Events */
+.wh-dialog .wh-events-block {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.wh-dialog .wh-events-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.wh-dialog .wh-counter {
+  font-size: 12px;
+  line-height: 1.3;
+  color: var(--color-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.wh-dialog .wh-events {
+  display: flex;
+  flex-direction: column;
+}
+
+.wh-dialog .wh-event-group,
+.wh-dialog .wh-event-group:first-child {
+  padding: 12px 0;
+  border-top: 1px solid var(--color-rule);
+}
+
+.wh-dialog .wh-event-group__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.wh-dialog .wh-event-group__name {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--color-ink);
+}
+
+.wh-dialog .wh-event-all {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-accent);
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.3;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.wh-dialog .wh-event-all:hover {
+  color: var(--color-accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.wh-dialog .wh-event-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  row-gap: 4px;
+  column-gap: 16px;
+}
+
+.wh-dialog .wh-event {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 0;
+  padding: 4px 0;
+  border-radius: 0;
+  color: var(--color-ink-2);
+  font-size: 13px;
+  line-height: 1.4;
+  cursor: pointer;
+}
+
+.wh-dialog .wh-event:hover {
+  background: transparent;
+  color: var(--color-ink);
+}
+
+.wh-dialog .wh-event input,
+.wh-dialog .wh-board input {
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  margin: 0;
+  accent-color: var(--color-accent);
+}
+
+.wh-dialog .wh-event input:focus-visible,
+.wh-dialog .wh-board input:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 1px;
+}
+
+/* Boards scope — same compact checkbox grid */
+.wh-dialog .wh-boards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  row-gap: 4px;
+  column-gap: 16px;
+}
+
+.wh-dialog .wh-board,
+.wh-dialog .wh-board:has(input:checked) {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 0;
+  padding: 4px 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--color-ink-2);
+  font-size: 13px;
+  line-height: 1.4;
+  cursor: pointer;
+}
+
+.wh-dialog .wh-board:hover {
+  border-color: transparent;
+  background: transparent;
+  color: var(--color-ink);
+}
+
+.wh-dialog .wh-board:has(input:checked) {
+  color: var(--color-ink);
+}
+
+.wh-dialog .wh-board:has(input:focus-visible) {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 1px;
+}
+
+/* Footer */
+.wh-dialog .fd__foot {
+  position: sticky;
+  bottom: 0;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 20px;
+  border-top: 1px solid var(--color-rule);
+  background: var(--color-paper);
+}
+
+.wh-dialog .fd__foot .fd-btn {
+  flex: 0 0 auto;
+  width: auto;
+  min-height: 36px;
+  height: 36px;
+  padding: 0 16px;
+  font-size: 13px;
+}
+
+.wh-dialog .fd__foot .fd-btn--commit {
+  min-width: 0;
+}
+
+.wh-dialog .wh-secret-body {
+  display: block;
+  padding: 16px 24px;
+}
+
+@media (max-width: 600px) {
+  .wh-dialog.fd {
+    width: calc(100vw - 32px);
+    max-width: calc(100vw - 32px);
+  }
+
+  .wh-dialog .fd__shell {
+    max-height: calc(100dvh - 32px);
+  }
+
+  .wh-dialog .fd__head,
+  .wh-dialog .fd__body,
+  .wh-dialog .wh-secret-body {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .wh-dialog .wh-row,
+  .wh-dialog .wh-event-list,
+  .wh-dialog .wh-boards {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .wh-dialog .fd__foot {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .wh-dialog .fd__foot .fd-btn {
+    flex: 0 0 auto;
+    width: auto;
+  }
+}

@@ -189,26 +189,27 @@ export function WebhookFormDialog({ open, onClose, onSaved, existing }: WebhookF
   return (
     <Dialog open={open} onOpenChange={v => { if (!v) onClose(); }}>
       <DialogContent
-        className="fd wh-dialog w-[min(94vw,820px)] max-w-none gap-0 border-0 bg-transparent p-0 shadow-none [&>button]:hidden"
+        className="fd wh-dialog w-[640px] max-w-[calc(100vw-32px)] gap-0 border-0 bg-transparent p-0 shadow-none [&>button]:hidden"
+        overlayClassName="bg-black/45"
         onOpenAutoFocus={(event) => {
           event.preventDefault();
           nameInputRef.current?.focus();
         }}
       >
         <div className="fd__shell">
-          <header className="fd__head">
+          <header className="fd__head wh-head">
             <div className="fd__headtext">
-              <DialogTitle className="fd__title">
+              <DialogTitle className="fd__title wh-title">
                 {isEditing ? 'Edit webhook' : 'New webhook'}
               </DialogTitle>
-              <DialogDescription className="fd__lede">
+              <DialogDescription className="fd__lede wh-lede">
                 {isEditing
                   ? 'Change where events go and what triggers them.'
                   : 'Send events to an endpoint you control.'}
               </DialogDescription>
             </div>
-            <DialogClose type="button" className="fd__close" aria-label="Close">
-              <X className="h-4 w-4" aria-hidden="true" />
+            <DialogClose type="button" className="fd__close wh-close" aria-label="Close">
+              <X className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
             </DialogClose>
           </header>
 
@@ -230,9 +231,9 @@ export function WebhookFormDialog({ open, onClose, onSaved, existing }: WebhookF
                     onClick={copySecret}
                   >
                     {secretCopied ? (
-                      <Check className="h-4 w-4" aria-hidden="true" />
+                      <Check className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
                     ) : (
-                      <Copy className="h-4 w-4" aria-hidden="true" />
+                      <Copy className="h-4 w-4" strokeWidth={1.5} aria-hidden="true" />
                     )}
                     {secretCopied ? 'Copied' : 'Copy'}
                   </button>
@@ -248,52 +249,50 @@ export function WebhookFormDialog({ open, onClose, onSaved, existing }: WebhookF
             </div>
           ) : (
             <div className="fd__body wh-body">
-              <div className="wh-config">
-                <p className="fd-section__title">
-                  <span className="fd-section__index">1</span>
-                  Destination
-                </p>
-                <div className="fd-field">
-                  <div className="fd-field__top">
-                    <span className="fd-label">Delivery</span>
-                    <span className="fd-req">Required</span>
-                  </div>
-                  <div className="wh-types" role="group" aria-label="Delivery type">
-                    {WEBHOOK_TYPES.map(t => (
-                      <button
-                        key={t.value}
-                        type="button"
-                        className="wh-type"
-                        aria-pressed={type === t.value}
-                        onClick={() => setType(t.value)}
-                      >
-                        {t.label}
-                      </button>
-                    ))}
-                  </div>
+              <div className="fd-field wh-field">
+                <span className="fd-label wh-label" id="wh-delivery-label">
+                  Delivery
+                </span>
+                <div
+                  className="wh-types"
+                  role="group"
+                  aria-labelledby="wh-delivery-label"
+                >
+                  {WEBHOOK_TYPES.map(t => (
+                    <button
+                      key={t.value}
+                      type="button"
+                      className="wh-type"
+                      aria-pressed={type === t.value}
+                      onClick={() => setType(t.value)}
+                    >
+                      {t.label}
+                    </button>
+                  ))}
                 </div>
+              </div>
 
-                <div className="fd-field">
-                  <div className="fd-field__top">
-                    <label className="fd-label" htmlFor="wh-name">Name</label>
-                    <span className="fd-req">Required</span>
-                  </div>
+              <div className="wh-row">
+                <div className="fd-field wh-field">
+                  <label className="fd-label wh-label" htmlFor="wh-name">
+                    Name
+                  </label>
                   <input
                     id="wh-name"
                     ref={nameInputRef}
-                    className="fd-input"
+                    className="fd-input wh-input"
                     placeholder="Slack notifications"
                     value={name}
                     onChange={e => setName(e.target.value)}
+                    required
                     aria-required="true"
                   />
                 </div>
 
-                <div className="fd-field">
-                  <div className="fd-field__top">
-                    <label className="fd-label" htmlFor="wh-url">{urlLabel}</label>
-                    <span className="fd-req">Required</span>
-                  </div>
+                <div className="fd-field wh-field">
+                  <label className="fd-label wh-label" htmlFor="wh-url">
+                    {urlLabel}
+                  </label>
                   <input
                     id="wh-url"
                     className="fd-input wh-url"
@@ -302,141 +301,140 @@ export function WebhookFormDialog({ open, onClose, onSaved, existing }: WebhookF
                     placeholder={urlPlaceholder}
                     value={url}
                     onChange={e => setUrl(e.target.value)}
+                    required
                     aria-required="true"
                   />
                   {type !== 'custom' && (
-                    <p className="fd-help-single">
+                    <p className="fd-help-single wh-help">
                       {type === 'discord'
                         ? 'Discord: channel settings, Integrations, Webhooks.'
                         : 'Slack: Apps, Incoming Webhooks.'}
                     </p>
                   )}
                 </div>
-
-                <div className="fd-field">
-                  <div className="fd-field__top">
-                    <label className="fd-label" htmlFor="wh-desc">Description</label>
-                    <span className="fd-opt">Optional</span>
-                  </div>
-                  <textarea
-                    id="wh-desc"
-                    className="fd-textarea wh-desc"
-                    placeholder="What is this webhook used for?"
-                    value={description}
-                    onChange={e => setDescription(e.target.value)}
-                    rows={3}
-                  />
-                </div>
-
-                {isEditing && (
-                  <div className="wh-active">
-                    <div className="wh-active__text">
-                      <span className="wh-active__title">Active</span>
-                      <span className="wh-active__note">Pause or resume this webhook.</span>
-                    </div>
-                    <Switch
-                      className="wh-switch"
-                      checked={isActive}
-                      onCheckedChange={setIsActive}
-                      aria-label="Webhook active"
-                    />
-                  </div>
-                )}
               </div>
 
-              <div className="wh-subscribe">
-                <p className="fd-section__title">
-                  <span className="fd-section__index">2</span>
-                  Events &amp; scope
-                </p>
-                <div className="fd-field">
-                  <div className="fd-field__top">
-                    <span className="fd-label" id="wh-events-label">Events</span>
-                    <span className="fd-req">Required</span>
-                  </div>
-                  <p className="fd-help-single">
-                    {events.length === 0 ? 'Pick at least one.' : `${events.length} selected.`}
-                  </p>
-                  <div className="wh-events" role="group" aria-labelledby="wh-events-label">
-                    {EVENT_CATEGORIES.map(category => {
-                      const catEvents = ALL_EVENTS.filter(e => e.category === category);
-                      const allSelected = catEvents.every(e => events.includes(e.value));
+              <div className="fd-field wh-field">
+                <label className="fd-label wh-label" htmlFor="wh-desc">
+                  Description <span className="wh-optional">(optional)</span>
+                </label>
+                <textarea
+                  id="wh-desc"
+                  className="fd-textarea wh-desc"
+                  placeholder="What is this webhook used for?"
+                  value={description}
+                  onChange={e => setDescription(e.target.value)}
+                  rows={2}
+                />
+              </div>
 
-                      return (
-                        <div
-                          key={category}
-                          className="wh-event-group"
-                          role="group"
-                          aria-labelledby={`wh-cat-${category}`}
-                        >
-                          <div className="wh-event-group__head">
-                            <span className="wh-event-group__name" id={`wh-cat-${category}`}>
-                              {categoryLabel(category)}
-                            </span>
-                            <button
-                              type="button"
-                              className="wh-event-all"
-                              onClick={() => toggleCategory(category)}
-                              aria-label={`${allSelected ? 'Clear' : 'Select'} all ${categoryLabel(category)} events`}
-                            >
-                              {allSelected ? 'Clear' : 'All'}
-                            </button>
-                          </div>
-                          <div className="wh-event-list">
-                            {catEvents.map(event => (
-                              <label key={event.value} className="wh-event">
-                                <input
-                                  type="checkbox"
-                                  checked={events.includes(event.value)}
-                                  onChange={() => toggleEvent(event.value)}
-                                />
-                                <span>{event.label}</span>
-                              </label>
-                            ))}
-                          </div>
+              {isEditing && (
+                <div className="wh-active">
+                  <div className="wh-active__text">
+                    <span className="wh-active__title">Active</span>
+                    <span className="wh-active__note">Pause or resume this webhook.</span>
+                  </div>
+                  <Switch
+                    className="wh-switch"
+                    checked={isActive}
+                    onCheckedChange={setIsActive}
+                    aria-label="Webhook active"
+                  />
+                </div>
+              )}
+
+              <div className="wh-events-block">
+                <div className="wh-events-head">
+                  <span className="fd-label wh-label" id="wh-events-label">
+                    Events
+                  </span>
+                  <span className="wh-counter" aria-live="polite">
+                    {events.length} selected
+                    {events.length === 0 ? ' · pick at least one' : ''}
+                  </span>
+                </div>
+                <div
+                  className="wh-events"
+                  role="group"
+                  aria-labelledby="wh-events-label"
+                >
+                  {EVENT_CATEGORIES.map(category => {
+                    const catEvents = ALL_EVENTS.filter(e => e.category === category);
+                    const allSelected = catEvents.every(e => events.includes(e.value));
+
+                    return (
+                      <div
+                        key={category}
+                        className="wh-event-group"
+                        role="group"
+                        aria-labelledby={`wh-cat-${category}`}
+                      >
+                        <div className="wh-event-group__head">
+                          <span className="wh-event-group__name" id={`wh-cat-${category}`}>
+                            {categoryLabel(category)}
+                          </span>
+                          <button
+                            type="button"
+                            className="wh-event-all"
+                            onClick={() => toggleCategory(category)}
+                            aria-label={`${allSelected ? 'Clear' : 'Select'} all ${categoryLabel(category)} events`}
+                          >
+                            {allSelected ? 'Clear' : 'Select all'}
+                          </button>
                         </div>
-                      );
-                    })}
-                  </div>
+                        <div className="wh-event-list">
+                          {catEvents.map(event => (
+                            <label key={event.value} className="wh-event">
+                              <input
+                                type="checkbox"
+                                checked={events.includes(event.value)}
+                                onChange={() => toggleEvent(event.value)}
+                              />
+                              <span>{event.label}</span>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
+              </div>
 
-                <div className="fd-field">
-                  <div className="fd-field__top">
-                    <span className="fd-label">Boards</span>
-                    <span className="fd-opt">Optional</span>
+              <div className="fd-field wh-field">
+                <span className="fd-label wh-label">
+                  Boards <span className="wh-optional">(optional)</span>
+                </span>
+                <p className="fd-help-single wh-help">Leave empty for every board.</p>
+                {boardsLoading ? (
+                  <p className="fd-help-single wh-help">Loading boards…</p>
+                ) : boards.length === 0 ? (
+                  <p className="fd-help-single wh-help">No boards in this organization yet.</p>
+                ) : (
+                  <div className="wh-boards">
+                    {boards.map(board => (
+                      <label key={board.id} className="wh-board">
+                        <input
+                          type="checkbox"
+                          checked={boardIds.includes(board.id)}
+                          onChange={() => {
+                            setBoardIds(prev =>
+                              prev.includes(board.id)
+                                ? prev.filter(id => id !== board.id)
+                                : [...prev, board.id]
+                            );
+                          }}
+                        />
+                        <span>{board.name}</span>
+                      </label>
+                    ))}
                   </div>
-                  <p className="fd-help-single">Leave empty for every board.</p>
-                  {boardsLoading ? (
-                    <p className="fd-help-single">Loading boards…</p>
-                  ) : boards.length === 0 ? (
-                    <p className="fd-help-single">No boards in this organization yet.</p>
-                  ) : (
-                    <div className="wh-boards">
-                      {boards.map(board => (
-                        <label key={board.id} className="wh-board">
-                          <input
-                            type="checkbox"
-                            checked={boardIds.includes(board.id)}
-                            onChange={() => {
-                              setBoardIds(prev =>
-                                prev.includes(board.id)
-                                  ? prev.filter(id => id !== board.id)
-                                  : [...prev, board.id]
-                              );
-                            }}
-                          />
-                          <span>{board.name}</span>
-                        </label>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                )}
               </div>
             </div>
           )}
 
           {!newSecret && (
-            <footer className="fd__foot">
+            <footer className="fd__foot wh-foot">
               <button
                 type="button"
                 className="fd-btn fd-btn--quiet"
@@ -454,7 +452,7 @@ export function WebhookFormDialog({ open, onClose, onSaved, existing }: WebhookF
               >
                 {saving ? (
                   <>
-                    <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                    <Loader2 className="h-4 w-4 animate-spin" strokeWidth={1.5} aria-hidden="true" />
                     Saving…
                   </>
                 ) : isEditing ? (
