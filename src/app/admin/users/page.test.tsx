@@ -129,3 +129,20 @@ describe("/admin/users stats panel", () => {
     expect(screen.queryByText(/Couldn't load stats/)).toBeNull();
   });
 });
+
+describe("/admin/users empty state", () => {
+  it("shows one page-level empty state instead of the workbench when there are no end users", async () => {
+    mocks.getList.mockResolvedValue({
+      success: true,
+      data: { users: [], pagination: { page: 1, limit: 50, total: 0, pages: 0 } },
+    });
+
+    render(<UsersPage />);
+
+    expect(await screen.findByText("No end users yet")).toBeTruthy();
+    expect(screen.getByRole("link", { name: "Open feedback board" })).toBeTruthy();
+    expect(screen.queryByPlaceholderText("Search users…")).toBeNull();
+    expect(screen.queryByText("Select a user")).toBeNull();
+    expect(screen.queryByText("Select a user to view details")).toBeNull();
+  });
+});

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+import Link from 'next/link';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { useOrganization } from '@/context/OrganizationContext';
 import orgEndUsersService, { OrgEndUser, OrgEndUserDetail } from '@/services/orgEndUsersService';
@@ -27,6 +28,7 @@ import {
   Calendar,
   Clock,
   Trash2,
+  Users,
 } from 'lucide-react';
 import {
   AlertDialog,
@@ -302,9 +304,35 @@ export default function UsersPage() {
     });
   };
 
+  const isEmpty = !usersLoading && totalUsers === 0;
+
   return (
     <ProtectedRoute>
-      <div className={`${WIDE_CONTAINER} h-full`}>
+      <div className={isEmpty ? undefined : `${WIDE_CONTAINER} h-full`}>
+        {isEmpty ? (
+          <div className="uempty-page">
+            <header className="uempty-head">
+              <h1 className="uempty-title">Users</h1>
+              <p className="uempty-sub">
+                People who have signed in to your feedback board.
+              </p>
+            </header>
+
+            <div className="uempty">
+              <span className="uempty__icon" aria-hidden="true">
+                <Users />
+              </span>
+              <p className="uempty__title">No end users yet</p>
+              <p className="uempty__desc">
+                End users appear here once they sign in to your feedback board.
+                You&apos;ll be able to search them and see their posts and activity.
+              </p>
+              <Link href="/feedback" className="uempty__cta">
+                Open feedback board
+              </Link>
+            </div>
+          </div>
+        ) : (
         <div className="uwork">
 
           {/* ── User rail ──────────────────────────────────────────── */}
@@ -673,6 +701,7 @@ export default function UsersPage() {
             )}
           </aside>
         </div>
+        )}
 
         {/* ── Post Detail Sheet (shared component) ──────────────── */}
         <PostDetailSheet

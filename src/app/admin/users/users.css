@@ -644,6 +644,123 @@
   gap: var(--space-xs);
 }
 
+/* ------------------------------------------------------------
+   Zero end users — one page-level empty state
+   ------------------------------------------------------------ */
+.uempty-page {
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 32px 40px 64px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.uempty-head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+}
+
+.uempty-title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--color-ink);
+}
+
+.uempty-sub {
+  margin: 0;
+  font-size: var(--text-xs);
+  color: var(--ink-soft);
+}
+
+.uempty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 380px;
+  padding: 40px 24px;
+  border: 1px dashed var(--color-rule);
+  border-radius: 12px;
+  text-align: center;
+}
+
+.uempty__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  margin-bottom: var(--space-2xs);
+  border-radius: var(--radius-pill);
+  background: var(--color-paper-3);
+  color: var(--color-muted);
+}
+
+.uempty__icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.uempty__title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.uempty__desc {
+  margin: 0;
+  max-width: 340px;
+  font-size: var(--text-sm);
+  line-height: 1.6;
+  color: var(--ink-soft);
+}
+
+.uempty__cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 14px;
+  padding: 6px 12px;
+  border: 1px solid var(--color-rule);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--color-ink);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  line-height: 1.45;
+  text-decoration: none;
+  transition:
+    border-color var(--dur-micro) var(--ease-out),
+    background-color var(--dur-micro) var(--ease-out);
+}
+
+.uempty__cta:hover {
+  border-color: var(--color-accent);
+  background: color-mix(in oklab, var(--color-accent) 4%, transparent);
+}
+
+.uempty__cta:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+/* Empty state owns a flat topbar; scoped so no other page changes */
+.admin-frame:has(.uempty-page) > .admin-topbar {
+  min-height: 52px;
+  padding: 0 40px;
+  background: var(--color-paper);
+  backdrop-filter: none;
+}
+
+
 /* Sheet body — fixed height under the 64px sheet header */
 .u-sheetbody {
   height: calc(100vh - 64px);

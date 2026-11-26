@@ -5,10 +5,8 @@ import { roadmapService, RoadmapItem } from '@/services/roadmapService';
 import { boardService } from '@/services/boardService';
 import { useAuthContext } from '@/context/AuthContext';
 import api from '@/lib/api';
-import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
 import {
   Dialog,
   DialogContent,
@@ -46,12 +44,8 @@ import {
   EyeOff,
   Link2,
   MessageSquare,
-  TrendingUp,
-  Calendar,
-  GripVertical,
   ArrowUpCircle,
 } from 'lucide-react';
-import { WIDE_CONTAINER } from '@/lib/layout-constants';
 
 export default function AdminRoadmapPage() {
   const { user } = useAuthContext();
@@ -74,6 +68,18 @@ export default function AdminRoadmapPage() {
   
   // Check if user is admin or owner
   const isAdminOrOwner = user?.organization_role === 'admin' || user?.organization_role === 'owner';
+
+  // Topbar actions live in the admin layout; listen for their intent events.
+  useEffect(() => {
+    const openCreateItem = () => setShowCreateDialog(true);
+    const openCreateRoadmap = () => setShowCreateRoadmapDialog(true);
+    window.addEventListener('roadmap:create-item', openCreateItem);
+    window.addEventListener('roadmap:new-roadmap', openCreateRoadmap);
+    return () => {
+      window.removeEventListener('roadmap:create-item', openCreateItem);
+      window.removeEventListener('roadmap:new-roadmap', openCreateRoadmap);
+    };
+  }, []);
 
   // Fetch all boards on mount
   useEffect(() => {
@@ -371,7 +377,7 @@ export default function AdminRoadmapPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="h-14 w-14 border-4 border-slate-200 dark:border-gray-700 border-t-blue-600 rounded-full animate-spin"></div>
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-border border-t-primary" />
       </div>
     );
   }
@@ -379,221 +385,205 @@ export default function AdminRoadmapPage() {
   // If no boards exist, show message
   if (allBoards.length === 0) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <Card className="max-w-md">
-          <CardContent className="pt-6 text-center space-y-4">
-            <div className="text-4xl">📋</div>
-            <h2 className="text-lg font-bold text-gray-900">No Boards Found</h2>
-            <p className="text-gray-600">
-              Please create a board first before managing roadmap items.
-            </p>
-            <Button onClick={() => window.location.href = '/admin/feedback'}>
-              Go to Boards
-            </Button>
-          </CardContent>
-        </Card>
+      <div className="rm-page">
+        <div className="rm-state">
+          <h2 className="rm-state__title">No boards found</h2>
+          <p className="rm-state__text">
+            Please create a board first before managing roadmap items.
+          </p>
+          <Button className="text-[13px]" onClick={() => window.location.href = '/admin/feedback'}>
+            Go to Boards
+          </Button>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className={`${WIDE_CONTAINER} py-4 space-y-4`}>
+    <div className="rm-page">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="rm-head">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Roadmap Management</h1>
-          <p className="text-gray-500 mt-1">Manage your product roadmap </p>
+          <h1 className="rm-title">Roadmap</h1>
+          <p className="rm-subtitle">Manage your product roadmap.</p>
         </div>
-        <div className="flex items-center gap-2">
-          {/* Roadmap Selector */}
-          {isAdminOrOwner && roadmaps.length > 0 && (
-            <>
-              <Select value={selectedRoadmap || ''} onValueChange={setSelectedRoadmap}>
-                <SelectTrigger className="w-[220px]">
-                  <SelectValue placeholder="Select Roadmap" />
-                </SelectTrigger>
-                <SelectContent>
-                  {roadmaps.map((roadmap: any) => (
-                    <SelectItem key={roadmap.id} value={roadmap.id}>
-                      <div className="flex items-center gap-2">
-                        {roadmap.is_default && (
-                          <Badge variant="secondary" className="text-xs">Default</Badge>
-                        )}
-                        {roadmap.name}
-                        <span className="text-xs text-gray-500">({roadmap.item_count || 0})</span>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              
-              {/* Edit Roadmap Button */}
-              {selectedRoadmap && (
-                <Button
-                  onClick={() => setShowEditRoadmapDialog(true)}
-                  variant="ghost"
-                  size="icon"
-                  title="Edit Roadmap"
-                >
-                  <Edit2 className="h-4 w-4" />
-                </Button>
-              )}
-            </>
-          )}
-          
-          {/* Create Roadmap Button - Only for admin/owner */}
-          {isAdminOrOwner && (
-            <Button 
-              onClick={() => setShowCreateRoadmapDialog(true)} 
-              variant="outline"
-              size="lg"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              New Roadmap
-            </Button>
-          )}
-          
-          <Button onClick={() => setShowCreateDialog(true)} size="lg">
-            <Plus className="h-4 w-4 mr-2" />
-            Create Item
-          </Button>
-        </div>
-      </div>
 
+        {/* Roadmap switcher (admin/owner only) */}
+        {isAdminOrOwner && roadmaps.length > 0 && (
+          <div className="rm-context">
+            <Select value={selectedRoadmap || ''} onValueChange={setSelectedRoadmap}>
+              <SelectTrigger
+                className="rm-context-select h-auto w-auto border-0 bg-transparent px-1.5 py-1 text-[13px] font-medium text-muted-foreground shadow-none hover:bg-muted"
+                aria-label="Select roadmap"
+              >
+                <SelectValue placeholder="Select roadmap" />
+              </SelectTrigger>
+              <SelectContent>
+                {roadmaps.map((roadmap: any) => (
+                  <SelectItem key={roadmap.id} value={roadmap.id}>
+                    <div className="flex items-center gap-2">
+                      {roadmap.is_default && (
+                        <Badge variant="secondary" className="text-xs">Default</Badge>
+                      )}
+                      {roadmap.name}
+                      <span className="text-xs text-muted-foreground">{roadmap.item_count || 0}</span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
 
-      {/* Board Selector for Members */}
-      {!isAdminOrOwner && boardSlug && (
-        <div className="flex items-center gap-4">
-          <Label htmlFor="boardSelector" className="text-sm font-medium whitespace-nowrap dark:text-gray-100">
-            Select Board:
-          </Label>
-          <Select value={boardSlug} onValueChange={setBoardSlug}>
-            <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="Select a board" />
-            </SelectTrigger>
-            <SelectContent>
-              {allBoards.map((board: any) => (
-                <SelectItem key={board.slug} value={board.slug}>
-                  <div className="flex items-center gap-2">
-                    <div
-                      className="w-3 h-3 rounded"
-                      style={{ backgroundColor: board.color }}
-                    />
-                    {board.name}
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      )}
-
-      {/* Filters - Board and Status side by side */}
-      {isAdminOrOwner && (
-        <div className="flex items-center gap-4">
-          <Select value={selectedBoardFilter} onValueChange={setSelectedBoardFilter}>
-            <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="All Boards" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Boards</SelectItem>
-              {allBoards.map((board: any) => (
-                <SelectItem key={board.slug} value={board.slug}>
-                  <div className="flex items-center gap-2">
-                    <div
-                      className="w-3 h-3 rounded"
-                      style={{ backgroundColor: board.color }}
-                    />
-                    {board.name}
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          <Select value={selectedView} onValueChange={setSelectedView}>
-            <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="All Statuses" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All</SelectItem>
-              <SelectItem value="planned">Planned</SelectItem>
-              <SelectItem value="in_progress">In Progress</SelectItem>
-              <SelectItem value="in_review">In Review</SelectItem>
-              <SelectItem value="completed">Completed</SelectItem>
-            </SelectContent>
-          </Select>
-
-          {selectedBoardFilter !== 'all' && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setSelectedBoardFilter('all')}
-            >
-              Clear Filter
-            </Button>
-          )}
-        </div>
-      )}
-
-      {/* Kanban Board View */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-        {selectedView === 'all' ? (
-              <>
-                <StatusColumn
-                  title="Planned"
-                  status="planned"
-                  items={groupedByStatus.planned}
-                  onStatusChange={handleStatusChange}
-                  onEdit={setEditingItem}
-                  onDelete={handleDelete}
-                  onUpdate={handleUpdate}
-                  showBoardBadge={isAdminOrOwner}
-                />
-                <StatusColumn
-                  title="In Progress"
-                  status="in_progress"
-                  items={groupedByStatus.in_progress}
-                  onStatusChange={handleStatusChange}
-                  onEdit={setEditingItem}
-                  onDelete={handleDelete}
-                  onUpdate={handleUpdate}
-                  showBoardBadge={isAdminOrOwner}
-                />
-                <StatusColumn
-                  title="In Review"
-                  status="in_review"
-                  items={groupedByStatus.in_review}
-                  onStatusChange={handleStatusChange}
-                  onEdit={setEditingItem}
-                  onDelete={handleDelete}
-                  onUpdate={handleUpdate}
-                  showBoardBadge={isAdminOrOwner}
-                />
-                <StatusColumn
-                  title="Completed"
-                  status="completed"
-                  items={groupedByStatus.completed}
-                  onStatusChange={handleStatusChange}
-                  onEdit={setEditingItem}
-                  onDelete={handleDelete}
-                  onUpdate={handleUpdate}
-                  showBoardBadge={isAdminOrOwner}
-                />
-              </>
-            ) : (
-              <div className="col-span-4">
-                <ItemsList
-                  items={filteredItems}
-                  onStatusChange={handleStatusChange}
-                  onEdit={setEditingItem}
-                  onDelete={handleDelete}
-                  onUpdate={handleUpdate}
-                  showBoardBadge={isAdminOrOwner}
-                />
-              </div>
+            {selectedRoadmap && (
+              <Button
+                onClick={() => setShowEditRoadmapDialog(true)}
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7 text-muted-foreground"
+                title="Edit roadmap"
+                aria-label="Edit roadmap"
+              >
+                <Edit2 className="h-4 w-4" />
+              </Button>
             )}
           </div>
+        )}
+      </div>
+
+      {/* Filters */}
+      <div className="rm-filters">
+        {isAdminOrOwner ? (
+          <>
+            <Select value={selectedBoardFilter} onValueChange={setSelectedBoardFilter}>
+              <SelectTrigger
+                className="rm-select h-auto w-auto min-w-[160px] px-2.5 py-2 text-[13px] font-medium"
+                aria-label="Filter by board"
+              >
+                <SelectValue placeholder="All boards" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All boards</SelectItem>
+                {allBoards.map((board: any) => (
+                  <SelectItem key={board.slug} value={board.slug}>
+                    <div className="flex items-center gap-2">
+                      <div
+                        className="w-3 h-3 rounded"
+                        style={{ backgroundColor: board.color }}
+                      />
+                      {board.name}
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select value={selectedView} onValueChange={setSelectedView}>
+              <SelectTrigger
+                className="rm-select h-auto w-auto min-w-[160px] px-2.5 py-2 text-[13px] font-medium"
+                aria-label="Filter by status"
+              >
+                <SelectValue placeholder="All" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All</SelectItem>
+                <SelectItem value="planned">Planned</SelectItem>
+                <SelectItem value="in_progress">In progress</SelectItem>
+                <SelectItem value="in_review">In review</SelectItem>
+                <SelectItem value="completed">Completed</SelectItem>
+              </SelectContent>
+            </Select>
+
+            {selectedBoardFilter !== 'all' && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 px-2 text-[13px] font-medium text-muted-foreground"
+                onClick={() => setSelectedBoardFilter('all')}
+              >
+                Clear filter
+              </Button>
+            )}
+          </>
+        ) : (
+          boardSlug && (
+            <Select value={boardSlug} onValueChange={setBoardSlug}>
+              <SelectTrigger
+                className="rm-select h-auto w-auto min-w-[160px] px-2.5 py-2 text-[13px] font-medium"
+                aria-label="Select board"
+              >
+                <SelectValue placeholder="Select a board" />
+              </SelectTrigger>
+              <SelectContent>
+                {allBoards.map((board: any) => (
+                  <SelectItem key={board.slug} value={board.slug}>
+                    <div className="flex items-center gap-2">
+                      <div
+                        className="w-3 h-3 rounded"
+                        style={{ backgroundColor: board.color }}
+                      />
+                      {board.name}
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )
+        )}
+      </div>
+
+      {/* Kanban / list view */}
+      {selectedView === 'all' ? (
+        <div className="rm-grid">
+          <StatusColumn
+            title="Planned"
+            status="planned"
+            items={groupedByStatus.planned}
+            onStatusChange={handleStatusChange}
+            onEdit={setEditingItem}
+            onDelete={handleDelete}
+            onUpdate={handleUpdate}
+            showBoardBadge={isAdminOrOwner}
+          />
+          <StatusColumn
+            title="In progress"
+            status="in_progress"
+            items={groupedByStatus.in_progress}
+            onStatusChange={handleStatusChange}
+            onEdit={setEditingItem}
+            onDelete={handleDelete}
+            onUpdate={handleUpdate}
+            showBoardBadge={isAdminOrOwner}
+          />
+          <StatusColumn
+            title="In review"
+            status="in_review"
+            items={groupedByStatus.in_review}
+            onStatusChange={handleStatusChange}
+            onEdit={setEditingItem}
+            onDelete={handleDelete}
+            onUpdate={handleUpdate}
+            showBoardBadge={isAdminOrOwner}
+          />
+          <StatusColumn
+            title="Completed"
+            status="completed"
+            items={groupedByStatus.completed}
+            onStatusChange={handleStatusChange}
+            onEdit={setEditingItem}
+            onDelete={handleDelete}
+            onUpdate={handleUpdate}
+            showBoardBadge={isAdminOrOwner}
+          />
+        </div>
+      ) : (
+        <ItemsList
+          items={filteredItems}
+          onStatusChange={handleStatusChange}
+          onEdit={setEditingItem}
+          onDelete={handleDelete}
+          onUpdate={handleUpdate}
+          showBoardBadge={isAdminOrOwner}
+        />
+      )}
 
       {/* Create Dialog */}
       <CreateEditDialog
@@ -642,7 +632,7 @@ export default function AdminRoadmapPage() {
             className="space-y-4"
           >
             <div>
-              <Label htmlFor="roadmap-name">Roadmap Name *</Label>
+              <Label className="text-[13px] font-medium" htmlFor="roadmap-name">Roadmap Name *</Label>
               <Input
                 id="roadmap-name"
                 name="name"
@@ -652,7 +642,7 @@ export default function AdminRoadmapPage() {
               />
             </div>
             <div>
-              <Label htmlFor="roadmap-description">Description (Optional)</Label>
+              <Label className="text-[13px] font-medium" htmlFor="roadmap-description">Description (Optional)</Label>
               <Textarea
                 id="roadmap-description"
                 name="description"
@@ -665,15 +655,16 @@ export default function AdminRoadmapPage() {
               <Button
                 type="button"
                 variant="outline"
+                className="text-[13px]"
                 onClick={() => setShowCreateRoadmapDialog(false)}
                 disabled={isSubmitting}
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={isSubmitting}>
+              <Button type="submit" className="text-[13px]" disabled={isSubmitting}>
                 {isSubmitting ? (
                   <>
-                    <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></div>
+                    <div className="h-4 w-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin mr-2"></div>
                     Creating...
                   </>
                 ) : (
@@ -709,7 +700,7 @@ export default function AdminRoadmapPage() {
             className="space-y-4"
           >
             <div>
-              <Label htmlFor="edit-roadmap-name">Roadmap Name *</Label>
+              <Label className="text-[13px] font-medium" htmlFor="edit-roadmap-name">Roadmap Name *</Label>
               <Input
                 id="edit-roadmap-name"
                 name="name"
@@ -720,7 +711,7 @@ export default function AdminRoadmapPage() {
               />
             </div>
             <div>
-              <Label htmlFor="edit-roadmap-description">Description (Optional)</Label>
+              <Label className="text-[13px] font-medium" htmlFor="edit-roadmap-description">Description (Optional)</Label>
               <Textarea
                 id="edit-roadmap-description"
                 name="description"
@@ -734,15 +725,16 @@ export default function AdminRoadmapPage() {
               <Button
                 type="button"
                 variant="outline"
+                className="text-[13px]"
                 onClick={() => setShowEditRoadmapDialog(false)}
                 disabled={isSubmitting}
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={isSubmitting}>
+              <Button type="submit" className="text-[13px]" disabled={isSubmitting}>
                 {isSubmitting ? (
                   <>
-                    <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></div>
+                    <div className="h-4 w-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin mr-2"></div>
                     Updating...
                   </>
                 ) : (
@@ -781,11 +773,13 @@ function StatusColumn({
   showBoardBadge,
 }: any) {
   return (
-    <div className="rounded-lg border-2 border-gray-200 dark:border-gray-700 p-4">
-      <h3 className="font-semibold text-sm uppercase tracking-wide text-gray-700 dark:text-gray-300 mb-4">
-        {title} ({items.length})
-      </h3>
-      <div className="space-y-3">
+    <section className="rm-column">
+      <div className="rm-column__head">
+        <span className={`rm-dot rm-dot--${status}`} aria-hidden="true" />
+        <h2 className="rm-column__title">{title}</h2>
+        <span className="rm-column__count">{items.length}</span>
+      </div>
+      <div className="rm-column__items">
         {items.map((item: RoadmapItem) => (
           <RoadmapCard
             key={item.id}
@@ -798,17 +792,17 @@ function StatusColumn({
           />
         ))}
         {items.length === 0 && (
-          <div className="text-center py-8 text-gray-400 text-sm">No items</div>
+          <div className="rm-empty">No items</div>
         )}
       </div>
-    </div>
+    </section>
   );
 }
 
 // Items List Component (List View)
 function ItemsList({ items, onStatusChange, onEdit, onDelete, onUpdate, showBoardBadge }: any) {
   return (
-    <div className="space-y-3">
+    <div className="rm-list">
       {items.map((item: RoadmapItem) => (
         <RoadmapCard
           key={item.id}
@@ -818,28 +812,19 @@ function ItemsList({ items, onStatusChange, onEdit, onDelete, onUpdate, showBoar
           onDelete={onDelete}
           onUpdate={onUpdate}
           showBoardBadge={showBoardBadge}
-          isListView
         />
       ))}
       {items.length === 0 && (
-        <div className="text-center py-8 text-gray-400">No items found</div>
+        <div className="rm-empty">No items found</div>
       )}
     </div>
   );
 }
 
 // Roadmap Card Component
-function RoadmapCard({ item, onStatusChange, onEdit, onDelete, onUpdate, isListView, showBoardBadge }: any) {
+function RoadmapCard({ item, onStatusChange, onEdit, onDelete, onUpdate, showBoardBadge }: any) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedTitle, setEditedTitle] = useState(item.title);
-
-  const statusColors: any = {
-    planned: 'bg-gray-500',
-    in_progress: 'bg-blue-500',
-    in_review: 'bg-yellow-500',
-    completed: 'bg-green-500',
-    cancelled: 'bg-red-500',
-  };
 
   const handleQuickUpdate = async () => {
     if (editedTitle !== item.title) {
@@ -851,132 +836,113 @@ function RoadmapCard({ item, onStatusChange, onEdit, onDelete, onUpdate, isListV
   };
 
   return (
-    <Card className={`hover:shadow-md transition-shadow ${isListView ? 'w-full' : ''}`}>
-      <CardContent className="p-4">
-        {/* Drag Handle */}
-        <div className="flex items-start gap-3">
-          <GripVertical className="h-4 w-4 text-gray-400 mt-1 cursor-move" />
-          
-          <div className="flex-1 min-w-0">
-            {/* Title - Inline Editable */}
-            {isEditing ? (
-              <Input
-                value={editedTitle}
-                onChange={(e) => setEditedTitle(e.target.value)}
-                onBlur={handleQuickUpdate}
-                onKeyDown={(e) => e.key === 'Enter' && handleQuickUpdate()}
-                className="font-semibold text-sm mb-2"
-                autoFocus
+    <div className="rm-item">
+      <div className="rm-item__body">
+        {/* Title - Inline Editable */}
+        {isEditing ? (
+          <Input
+            value={editedTitle}
+            onChange={(e) => setEditedTitle(e.target.value)}
+            onBlur={handleQuickUpdate}
+            onKeyDown={(e) => e.key === 'Enter' && handleQuickUpdate()}
+            className="rm-item__input h-8 text-sm"
+            autoFocus
+          />
+        ) : (
+          <h4
+            className="rm-item__title"
+            onClick={() => setIsEditing(true)}
+          >
+            {item.title}
+          </h4>
+        )}
+
+        {/* Description */}
+        {item.description && (
+          <p className="rm-item__desc">{item.description}</p>
+        )}
+
+        {/* Meta line: board, votes, comments, links */}
+        <div className="rm-item__meta">
+          {showBoardBadge && item.board && (
+            <span className="rm-item__board">
+              <span
+                className="rm-board-dot"
+                style={{ backgroundColor: item.board.color }}
               />
-            ) : (
-              <h4
-                className="font-semibold text-sm mb-2 cursor-pointer hover:text-blue-600"
-                onClick={() => setIsEditing(true)}
-              >
-                {item.title}
-              </h4>
-            )}
-
-            {/* Description */}
-            <p className="text-xs text-gray-600 mb-3 line-clamp-2">{item.description}</p>
-
-            {/* Board Badge (only show for admin/owner viewing all boards) */}
-            {showBoardBadge && item.board && (
-              <div className="mb-3">
-                <Badge 
-                  variant="outline" 
-                  className="text-xs"
-                  style={{ 
-                    borderColor: item.board.color,
-                    color: item.board.color
-                  }}
-                >
-                  <div className="flex items-center gap-1.5">
-                    <div 
-                      className="w-2 h-2 rounded-full" 
-                      style={{ backgroundColor: item.board.color }}
-                    />
-                    {item.board.name}
-                  </div>
-                </Badge>
-              </div>
-            )}
-
-            {/* Footer */}
-            <div className="flex items-center justify-between text-xs text-gray-500">
-              <div className="flex items-center gap-3">
-                <span className="flex items-center gap-1">
-                  <ArrowUpCircle className="h-3 w-3" />
-                  {item.vote_count}
-                </span>
-                <span className="flex items-center gap-1">
-                  <MessageSquare className="h-3 w-3" />
-                  {item.comment_count}
-                </span>
-                {item.linked_feedback?.length > 0 && (
-                  <span className="flex items-center gap-1">
-                    <Link2 className="h-3 w-3" />
-                    {item.linked_feedback.length}
-                  </span>
-                )}
-              </div>
-
-              {/* Actions */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-                    <MoreVertical className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => onEdit(item)}>
-                    <Edit2 className="h-4 w-4 mr-2" />
-                    Edit Details
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => onStatusChange(item.id, 'planned')}>
-                    Move to Planned
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => onStatusChange(item.id, 'in_progress')}>
-                    Move to In Progress
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => onStatusChange(item.id, 'in_review')}>
-                    Move to In Review
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => onStatusChange(item.id, 'completed')}>
-                    Move to Completed
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    onClick={() => onUpdate(item.id, { is_public: !item.is_public })}
-                  >
-                    {item.is_public ? (
-                      <>
-                        <EyeOff className="h-4 w-4 mr-2" />
-                        Make Private
-                      </>
-                    ) : (
-                      <>
-                        <Eye className="h-4 w-4 mr-2" />
-                        Make Public
-                      </>
-                    )}
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => onDelete(item.id)} className="text-red-600">
-                    <Trash2 className="h-4 w-4 mr-2" />
-                    Delete
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          </div>
+              {item.board.name}
+            </span>
+          )}
+          <span className="rm-item__stat">
+            <ArrowUpCircle />
+            {item.vote_count}
+          </span>
+          <span className="rm-item__stat">
+            <MessageSquare />
+            {item.comment_count}
+          </span>
+          {item.linked_feedback?.length > 0 && (
+            <span className="rm-item__stat">
+              <Link2 />
+              {item.linked_feedback.length}
+            </span>
+          )}
         </div>
+      </div>
 
-        {/* Status Indicator */}
-        <div className={`absolute top-0 left-0 w-1 h-full ${statusColors[item.status]} rounded-l`} />
-      </CardContent>
-    </Card>
+      {/* Actions */}
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7 shrink-0 text-muted-foreground"
+          >
+            <MoreVertical className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem onClick={() => onEdit(item)}>
+            <Edit2 className="h-4 w-4 mr-2" />
+            Edit Details
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={() => onStatusChange(item.id, 'planned')}>
+            Move to Planned
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => onStatusChange(item.id, 'in_progress')}>
+            Move to In Progress
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => onStatusChange(item.id, 'in_review')}>
+            Move to In Review
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => onStatusChange(item.id, 'completed')}>
+            Move to Completed
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            onClick={() => onUpdate(item.id, { is_public: !item.is_public })}
+          >
+            {item.is_public ? (
+              <>
+                <EyeOff className="h-4 w-4 mr-2" />
+                Make Private
+              </>
+            ) : (
+              <>
+                <Eye className="h-4 w-4 mr-2" />
+                Make Public
+              </>
+            )}
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={() => onDelete(item.id)} className="text-destructive">
+            <Trash2 className="h-4 w-4 mr-2" />
+            Delete
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
   );
 }
 
@@ -1053,7 +1019,7 @@ function CreateEditDialog({ open, onClose, onSave, title, initialData, boards = 
           {/* Board Selector - Only show when creating new item */}
           {!initialData && boards.length > 0 && (
             <div>
-              <Label htmlFor="boardSlug">Select Board *</Label>
+              <Label className="text-[13px] font-medium" htmlFor="boardSlug">Select Board *</Label>
               <Select 
                 value={formData.boardSlug} 
                 onValueChange={(v) => setFormData({ ...formData, boardSlug: v })}
@@ -1079,7 +1045,7 @@ function CreateEditDialog({ open, onClose, onSave, title, initialData, boards = 
           )}
 
           <div>
-            <Label htmlFor="title">Title *</Label>
+            <Label className="text-[13px] font-medium" htmlFor="title">Title *</Label>
             <Input
               id="title"
               value={formData.title}
@@ -1091,7 +1057,7 @@ function CreateEditDialog({ open, onClose, onSave, title, initialData, boards = 
           </div>
 
           <div>
-            <Label htmlFor="description">Description *</Label>
+            <Label className="text-[13px] font-medium" htmlFor="description">Description *</Label>
             <Textarea
               id="description"
               value={formData.description}
@@ -1105,7 +1071,7 @@ function CreateEditDialog({ open, onClose, onSave, title, initialData, boards = 
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="status">Status</Label>
+              <Label className="text-[13px] font-medium" htmlFor="status">Status</Label>
               <Select 
                 value={formData.status} 
                 onValueChange={(v) => setFormData({ ...formData, status: v })}
@@ -1132,17 +1098,17 @@ function CreateEditDialog({ open, onClose, onSave, title, initialData, boards = 
               onCheckedChange={(checked) => setFormData({ ...formData, is_public: checked })}
               disabled={isSubmitting}
             />
-            <Label htmlFor="is_public">Make this item public</Label>
+            <Label className="text-[13px] font-medium" htmlFor="is_public">Make this item public</Label>
           </div>
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting}>
+            <Button type="button" variant="outline" className="text-[13px]" onClick={onClose} disabled={isSubmitting}>
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting}>
+            <Button type="submit" className="text-[13px]" disabled={isSubmitting}>
               {isSubmitting ? (
                 <>
-                  <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></div>
+                  <div className="h-4 w-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin mr-2"></div>
                   {initialData ? 'Saving...' : 'Creating...'}
                 </>
               ) : (

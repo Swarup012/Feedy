@@ -438,6 +438,32 @@ function DashboardTopbarActions() {
   );
 }
 
+function RoadmapTopbarActions() {
+  const { user } = useAuth();
+  const isAdminOrOwner =
+    user?.organization_role === "admin" || user?.organization_role === "owner";
+
+  return (
+    <>
+      {isAdminOrOwner && (
+        <Button
+          variant="outline"
+          className="h-auto py-1.5 px-3 text-[13px] font-medium shadow-none"
+          onClick={() => window.dispatchEvent(new Event("roadmap:new-roadmap"))}
+        >
+          New roadmap
+        </Button>
+      )}
+      <Button
+        className="h-auto py-1.5 px-3 text-[13px] font-medium shadow-none"
+        onClick={() => window.dispatchEvent(new Event("roadmap:create-item"))}
+      >
+        Create item
+      </Button>
+    </>
+  );
+}
+
 export default function AdminLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
@@ -468,6 +494,7 @@ export default function AdminLayout({
 
   const settings = isSettingsPath(pathname);
   const dashboard = pathname === "/admin";
+  const roadmap = !!pathname?.startsWith("/admin/roadmap");
   const title = getPageTitle(pathname);
 
   return (
@@ -507,7 +534,7 @@ export default function AdminLayout({
         )}
 
         <div className="admin-frame">
-          <header className="admin-topbar">
+          <header className={cn("admin-topbar", roadmap && "admin-topbar--roadmap")}>
             <div className="admin-topbar__left">
               <button
                 type="button"
@@ -524,6 +551,7 @@ export default function AdminLayout({
 
             <div className="admin-topbar__actions">
               {dashboard && <DashboardTopbarActions />}
+              {roadmap && <RoadmapTopbarActions />}
             </div>
           </header>
 
