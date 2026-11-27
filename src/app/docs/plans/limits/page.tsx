@@ -76,9 +76,10 @@ export default function PlanLimitsPage() {
       <DocsH2>Tracked Users &amp; Overage</DocsH2>
       <p>
         A <strong>tracked user</strong> is any unique external person who
-        submits feedback, upvotes, or comments. Internal team members are not
-        counted. Users are identified by email address, deduplicated per billing
-        period.
+        submits feedback, upvotes, comments, or contributes a Slack clarification
+        that Faddy saves under a published post. Internal team members are not
+        counted. Each email address counts once per UTC calendar month. Slack
+        clarifications count in the month Faddy first saves them.
       </p>
       <p>
         Both Starter and Pro include 125 users with a 25-user grace buffer.
