@@ -54,6 +54,7 @@ import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
 import { usePostRealtime } from "@/hooks/usePostRealtime";
 import { PostRevenueLine } from "./PostRevenueLine";
+import { MergedHistoryItem } from "./MergedHistoryItem";
 import api from "@/lib/api";
 import { useIsCustomHost } from "@/context/CustomHostContext";
 import "./post-details.css";
@@ -1052,19 +1053,7 @@ export function PostDetails({
                     {mergedHistory.map((item) => {
                       const SourceIcon = SOURCE_PLATFORM_ICONS[item.source_platform ?? ""];
                       return (
-                        <div key={item.id} className="pd__merged-item">
-                          <span className="pd__merged-icon">
-                            {SourceIcon && <SourceIcon className="h-4 w-4" />}
-                          </span>
-                          <div className="pd__cmt-body">
-                            <p className="pd__merged-text">{item.description}</p>
-                            <span className="pd__merged-when">
-                              {formatDistanceToNow(new Date(item.created_at), {
-                                addSuffix: true,
-                              })}
-                            </span>
-                          </div>
-                        </div>
+                        <MergedHistoryItem key={item.id} item={item} Icon={SourceIcon} />
                       );
                     })}
                   </div>
