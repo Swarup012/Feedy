@@ -41,7 +41,7 @@ export default function PlanLimitsPage() {
           <strong>125</strong> tracked users included
         </li>
         <li>
-          <strong>25</strong> grace buffer (overage starts at 150)
+          <strong>5</strong> grace users (overage starts at 131)
         </li>
         <li>
           <strong>Unlimited</strong> team members, 5 admins
@@ -63,7 +63,7 @@ export default function PlanLimitsPage() {
           <strong>125</strong> tracked users included
         </li>
         <li>
-          <strong>25</strong> grace buffer (overage starts at 150)
+          <strong>5</strong> grace users (overage starts at 131)
         </li>
         <li>
           <strong>Unlimited</strong> team members, 10 admins
@@ -82,9 +82,10 @@ export default function PlanLimitsPage() {
         clarifications count in the month Faddy first saves them.
       </p>
       <p>
-        Both Starter and Pro include 125 users with a 25-user grace buffer.
-        Charges begin at 150 users at <strong>$12 per block of 50</strong>,
-        billed monthly via Paddle.
+        Both Starter and Pro include 125 tracked users plus five grace users.
+        Starting at 131 users, overage is <strong>$3.60 per started block of 10</strong>.
+        Paddle collects one charge based on your peak in the UTC month.
+        This also applies to annual plans.
       </p>
       <p>
         Free plan has a hard cap of 20 — no overage. When reached, new users can

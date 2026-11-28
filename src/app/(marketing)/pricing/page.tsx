@@ -637,14 +637,14 @@ export default function PricingPage() {
                   <tr>
                     <td>Grace Buffer</td>
                     <td>-</td>
-                    <td>20% (25 users)</td>
-                    <td>20% (25 users)</td>
+                    <td>5 users</td>
+                    <td>5 users</td>
                   </tr>
                   <tr>
                     <td>Overage Price</td>
                     <td>-</td>
-                    <td>$12 per 50 users</td>
-                    <td>$12 per 50 users</td>
+                    <td>$3.60 per started block of 10</td>
+                    <td>$3.60 per started block of 10</td>
                   </tr>
                   <tr>
                     <td>Free Trial</td>
@@ -686,17 +686,17 @@ export default function PricingPage() {
                     </span>
                   </div>
                   <div className="pr-zone">
-                    <div className="pr-zone__range">126-150</div>
+                    <div className="pr-zone__range">126–130</div>
                     <span className="pr-zone__unit">users</span>
                     <span className="pr-zone__price">$0 /mo</span>
                     <span className="pr-zone__note">Free grace buffer</span>
                   </div>
                   <div className="pr-zone pr-zone--paid">
-                    <div className="pr-zone__range">151+</div>
+                    <div className="pr-zone__range">131+</div>
                     <span className="pr-zone__unit">users</span>
-                    <span className="pr-zone__price">$12 / 50 users</span>
+                    <span className="pr-zone__price">$3.60 / started block of 10</span>
                     <span className="pr-zone__note">
-                      Pay only for what you use
+                      Based on peak monthly usage
                     </span>
                   </div>
                 </div>
@@ -712,14 +712,14 @@ export default function PricingPage() {
                     <li>
                       <h4>Grace buffer</h4>
                       <p>
-                        25 extra users free: no charges until you hit 150.
+                        The first five above 125 are free. Overage starts at 131 users.
                       </p>
                     </li>
                     <li>
                       <h4>Simple overage</h4>
                       <p>
-                        $12 per 50 additional users, billed monthly. Cancel
-                        anytime.
+                        $3.60 per started block of 10 above 130, collected in one
+                        charge per UTC month, including on annual plans.
                       </p>
                     </li>
                   </ol>
@@ -733,18 +733,18 @@ export default function PricingPage() {
                       <span className="pr-invoice__amt">$25</span>
                     </div>
                     <div className="pr-invoice__row">
-                      <span>Grace buffer (26-150 users)</span>
+                      <span>Grace buffer (126–130 users)</span>
                       <span className="pr-invoice__amt pr-invoice__amt--free">
                         $0
                       </span>
                     </div>
                     <div className="pr-invoice__row">
-                      <span>Overage (30 users = 1 block)</span>
-                      <span className="pr-invoice__amt">+$12</span>
+                      <span>Overage (50 users = 5 blocks)</span>
+                      <span className="pr-invoice__amt">+$18.00</span>
                     </div>
                     <div className="pr-invoice__row">
                       <span>Total</span>
-                      <span className="pr-invoice__total">$37/mo</span>
+                      <span className="pr-invoice__total">$43.00 before tax</span>
                     </div>
                   </div>
                 </div>
@@ -782,10 +782,9 @@ export default function PricingPage() {
                   What happens if I exceed my tracked user limit?
                 </h3>
                 <p className="pr-faq__a">
-                  You have a 20% grace buffer (25 users) before any overage
-                  charges apply. After that, you’re charged $12 per 50
-                  additional users, billed monthly. You can track your usage in
-                  real-time on your dashboard.
+                  There’s no overage through 130 tracked users. Starting at 131,
+                  you pay $3.60 per started block of 10 based on your peak in
+                  the UTC month. Your dashboard shows your estimate.
                 </p>
               </div>
 

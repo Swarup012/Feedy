@@ -1,6 +1,7 @@
 'use client';
 
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
+import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { useOrganization } from '@/context/OrganizationContext';
@@ -70,7 +71,7 @@ function AuthorizeInner() {
   const [sessionChecked, setSessionChecked] = useState(false);
   const [selectedOrgId, setSelectedOrgId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [actionError, setActionError] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<{ message: string; code?: string } | null>(null);
 
   // refreshUser is recreated on every AuthContext render — hold it in a ref
   // so the verification effect below can't loop on identity changes.
@@ -168,11 +169,11 @@ function AuthorizeInner() {
         destination.origin !== approved.origin ||
         destination.pathname !== approved.pathname
       ) {
-        setActionError("Faddy didn't approve this redirect target. Nothing was sent.");
+        setActionError({ message: "Faddy didn't approve this redirect target. Nothing was sent." });
         return false;
       }
     } catch {
-      setActionError("Faddy didn't approve this redirect target. Nothing was sent.");
+      setActionError({ message: "Faddy didn't approve this redirect target. Nothing was sent." });
       return false;
     }
     // The flow is over — drop the saved return URL before leaving for Zapier.
@@ -209,10 +210,10 @@ function AuthorizeInner() {
       }
       if (!res.ok || typeof data?.data?.redirect_url !== 'string') {
         setBusy(false);
-        setActionError(
-          data?.message ||
-            "Faddy couldn't approve this connection. Nothing was created — please try again."
-        );
+        setActionError({
+          code: data?.code,
+          message: data?.message || "Faddy couldn't approve this connection. Please try again.",
+        });
         return;
       }
       // The ONLY place the returned redirect URL (which carries the code) is
@@ -223,7 +224,7 @@ function AuthorizeInner() {
       }
     } catch {
       setBusy(false);
-      setActionError("Couldn't reach Faddy. Check your connection and try again.");
+      setActionError({ message: "Couldn't reach Faddy. Check your connection and try again." });
     }
   };
 
@@ -278,7 +279,7 @@ function AuthorizeInner() {
                 key={org.id}
                 variant="outline"
                 className="w-full justify-start"
-                onClick={() => setSelectedOrgId(org.id)}
+                onClick={() => { setSelectedOrgId(org.id); setActionError(null); }}
               >
                 {org.name}
               </Button>
@@ -332,7 +333,8 @@ function AuthorizeInner() {
                     key={org.id}
                     size="sm"
                     variant={org.id === selectedOrg.id ? 'default' : 'outline'}
-                    onClick={() => setSelectedOrgId(org.id)}
+                    disabled={busy}
+                    onClick={() => { setSelectedOrgId(org.id); setActionError(null); }}
                   >
                     {org.name}
                   </Button>
@@ -344,7 +346,14 @@ function AuthorizeInner() {
           {actionError && (
             <div className="flex items-start gap-2 text-xs text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800/50 rounded-lg px-3 py-2">
               <AlertCircle className="h-3.5 w-3.5 mt-0.5 shrink-0" />
-              <span>{actionError}</span>
+              <div role="alert">
+                <p>{actionError.message}</p>
+                {actionError.code === 'PZ001' && (
+                  <Link href="/admin/api-keys" target="_blank" rel="noopener noreferrer" className="mt-1 inline-block underline">
+                    Open API Keys and select {selectedOrg.name}
+                  </Link>
+                )}
+              </div>
             </div>
           )}
 

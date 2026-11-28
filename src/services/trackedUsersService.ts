@@ -22,6 +22,16 @@ export interface TrackedUsersUsage {
     comments: number;
   };
   peak: number | null;
+  overage?: {
+    totalCents: number;
+    pricePerBlockCents: number;
+    effectiveLimit: number;
+    peakUsers: number;
+    blocks: number;
+    overageUsers: number;
+    inGracePeriod: boolean;
+    warningMessage: string | null;
+  } | null;
   status: 'good' | 'warning' | 'critical' | 'exceeded';
 }
 

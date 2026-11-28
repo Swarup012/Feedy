@@ -82,12 +82,12 @@ describe("prices are unchanged by the notifications tier move", () => {
     expect(PLANS.pro.yearlyTotal).toBe(588);
   });
 
-  it("keeps the overage economics", () => {
-    expect(PLANS.starter.overage).toEqual({
-      grace_buffer: 25,
-      effective_limit: 150,
-      price_per_block: 12,
-      block_size: 50,
+  it.each(["starter", "pro"] as const)("publishes the new overage rate for %s", (plan) => {
+    expect(PLANS[plan].overage).toEqual({
+      grace_buffer: 5,
+      effective_limit: 130,
+      price_per_block_cents: 360,
+      block_size: 10,
     });
   });
 });

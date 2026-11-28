@@ -152,7 +152,7 @@ function Endpoint({
 const BASE = 'https://api.faddy.online';
 const KEY = 'fdy_live_YOUR_KEY';
 
-function examples(get: string, post?: { body: string; patch?: boolean }): Record<Language, string> {
+function examples(get: string, post?: { body: string; patch?: boolean; idempotencyKey?: string }): Record<Language, string> {
   const curlGet = `curl -H "Authorization: Bearer ${KEY}" \\
   ${BASE}${get}`;
 
@@ -182,14 +182,16 @@ console.log(data);`;
   const curlPost = `curl -X ${method} \\
   -H "Authorization: Bearer ${KEY}" \\
   -H "Content-Type: application/json" \\
-  -d '${post.body}' \\
+${post.idempotencyKey ? `  -H "Idempotency-Key: ${post.idempotencyKey}" \\
+` : ''}  -d '${post.body}' \\
   ${BASE}${get}`;
 
   const nodePost = `const res = await fetch('${BASE}${get}', {
   method: '${method}',
   headers: {
     'Authorization': 'Bearer ${KEY}',
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json'${post.idempotencyKey ? `,
+    'Idempotency-Key': '${post.idempotencyKey}'` : ''}
   },
   body: JSON.stringify(${post.body})
 });
@@ -206,7 +208,8 @@ const res = await fetch('${BASE}${get}', {
   method: '${method}',
   headers: {
     'Authorization': 'Bearer ${KEY}',
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json'${post.idempotencyKey ? `,
+    'Idempotency-Key': '${post.idempotencyKey}'` : ''}
   },
   body: JSON.stringify(${post.body} as const)
 });
@@ -219,6 +222,26 @@ console.log(data);`;
 // ─────────────────────────────────────────────────────────────
 // Page data — all response shapes verified against real output
 // ─────────────────────────────────────────────────────────────
+
+const commentCreatedResponse = `{
+  "success": true,
+  "message": "Comment added",
+  "data": {
+    "comment": {
+      "id": "89a99485-79fa-4170-8f6e-1b88ba162fd1",
+      "post_id": "ec9f4d97-c054-4052-962f-c0c7346c3b36",
+      "author_id": null,
+      "content": "Thanks for the feedback!",
+      "is_admin": false,
+      "created_at": "2026-09-15T12:20:40.61535+00:00",
+      "updated_at": "2026-09-15T12:20:40.61535+00:00",
+      "parent_id": null,
+      "like_count": 0,
+      "tracking_code": null,
+      "author": null
+    }
+  }
+}`;
 
 const endpoints = [
   {
@@ -458,6 +481,7 @@ console.log(data);`,
     description: 'Create a new post. Webhooks fire automatically (post.created). Posts created through the API also fire post.created, so a Zap that creates posts in Faddy must filter out data.post.source = "api" to avoid loops. Optional attribution: author_name is stored on the post; author_email links (or creates) an end-user contact — existing contacts are never modified.',
     scopes: ['posts:write'],
     examples: examples('/api/v1/posts', {
+      idempotencyKey: 'feature-created-event-123',
       body: `{
   "board_id": "abc-123",
   "title": "New feature",
@@ -550,25 +574,21 @@ console.log(data);`,
   "content": "Thanks for the feedback!"
 }`,
     }),
-    response: `{
-  "success": true,
-  "message": "Comment added",
-  "data": {
-    "comment": {
-      "id": "89a99485-79fa-4170-8f6e-1b88ba162fd1",
-      "post_id": "ec9f4d97-c054-4052-962f-c0c7346c3b36",
-      "author_id": null,
-      "content": "Thanks for the feedback!",
-      "is_admin": false,
-      "created_at": "2026-09-15T12:20:40.61535+00:00",
-      "updated_at": "2026-09-15T12:20:40.61535+00:00",
-      "parent_id": null,
-      "like_count": 0,
-      "tracking_code": null,
-      "author": null
-    }
-  }
+    response: commentCreatedResponse,
+  },
+  {
+    method: 'POST',
+    path: '/api/v1/comments',
+    description: 'Add a comment with the target post_id in the JSON body. The post must belong to the API key’s organization.',
+    scopes: ['comments:write'],
+    examples: examples('/api/v1/comments', {
+      idempotencyKey: 'comment-created-event-123',
+      body: `{
+  "post_id": "ec9f4d97-c054-4052-962f-c0c7346c3b36",
+  "content": "Thanks for the feedback!"
 }`,
+    }),
+    response: commentCreatedResponse,
   },
   {
     method: 'GET',
@@ -939,6 +959,18 @@ export default function ApiDocsPage() {
               Pro plan: 600 requests per minute. Returns <code className="font-mono bg-muted px-1 py-0.5 rounded">429</code> when exceeded.
             </p>
           </div>
+        </div>
+
+        <div className="mb-10 rounded-xl border bg-card p-6 text-sm">
+          <h2 className="font-semibold mb-2">Idempotency</h2>
+          <p className="text-muted-foreground">
+            Add an optional <code>Idempotency-Key</code> header to <code>POST /api/v1/posts</code>,
+            {' '}<code>POST /api/v1/comments</code>, or <code>POST /api/v1/posts/:id/comments</code>.
+            Use 1–128 visible ASCII characters without commas. For retries, send the same key, body,
+            and endpoint with the same API key. Within 24 hours the API returns the original
+            {' '}<code>201</code> response. Using the key for a different request returns <code>409</code>.
+            After 24 hours, the same key can create another record.
+          </p>
         </div>
 
         {/* Endpoints */}

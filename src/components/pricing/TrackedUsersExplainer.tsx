@@ -7,12 +7,9 @@ import { ChevronDown, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PLANS } from "@/config/plans";
 
-// ─── Derived values from shared config ───────────────────────────────────────
-const TRACKED_USERS = PLANS.starter.features.tracked_users;   // 125
-const OVERAGE_GRACE = PLANS.starter.overage!.grace_buffer;    // 25
-const OVERAGE_EFFECTIVE = PLANS.starter.overage!.effective_limit; // 150
-const OVERAGE_BLOCK = PLANS.starter.overage!.block_size;      // 50
-const OVERAGE_PRICE = PLANS.starter.overage!.price_per_block; // $12
+const TRACKED_USERS = PLANS.starter.features.tracked_users;
+const { grace_buffer: OVERAGE_GRACE, effective_limit: OVERAGE_EFFECTIVE,
+  block_size: OVERAGE_BLOCK, price_per_block_cents: OVERAGE_PRICE_CENTS } = PLANS.starter.overage!;
 
 // Stepped snap points that map to slider index 0-7
 const SNAP_POINTS = [20, 100, 250, 500, 1000, 2000, 5000, 10000] as const;
@@ -21,18 +18,9 @@ function formatUsers(n: number): string {
   return n >= 1000 ? `${+(n / 1000).toFixed(1)}k` : `${n}`;
 }
 
-/**
- * Overage formula (matches backend plans.config.js):
- *   - 125 tracked users included in both Starter & Pro
- *   - 25-user grace buffer → charges begin after 150 total
- *   - $12 per block of 50 additional users, rounded UP
- *
- * Example: 200 users → ceil((200-150)/50)*12 = ceil(1.0)*12 = $12/mo
- * Example: 201 users → ceil((201-150)/50)*12 = ceil(1.02)*12 = 2*12 = $24/mo
- */
 function calcOverage(users: number): { extraCost: number; extraBlocks: number } {
   const extraBlocks = Math.ceil(Math.max(0, users - OVERAGE_EFFECTIVE) / OVERAGE_BLOCK);
-  const extraCost = extraBlocks * OVERAGE_PRICE;
+  const extraCost = (extraBlocks * OVERAGE_PRICE_CENTS) / 100;
   return { extraCost, extraBlocks };
 }
 
@@ -80,7 +68,7 @@ export function TrackedUsersExplainer({
   const selectedUsers = rawUsers;
 
   const { extraCost, extraBlocks } = calcOverage(selectedUsers);
-  const isIncluded = selectedUsers <= TRACKED_USERS; // <= 125
+  const isIncluded = extraBlocks === 0;
 
   return (
     <div className="pr-est">
@@ -137,7 +125,7 @@ export function TrackedUsersExplainer({
               First <strong>{OVERAGE_GRACE} users over the limit</strong> are
               free. After that, it’s{" "}
               <strong>
-                ${OVERAGE_PRICE} per {OVERAGE_BLOCK} additional users/mo
+                ${(OVERAGE_PRICE_CENTS / 100).toFixed(2)} per started block of {OVERAGE_BLOCK}
               </strong>
               , billed monthly.
             </p>
@@ -268,8 +256,8 @@ function OverageSummary({
 
   // aria-live announcement text
   const statusText = isIncluded
-    ? `Included in your plan: no extra cost for ${users} tracked users.`
-    : `${extraBlocks} overage block${extraBlocks !== 1 ? "s" : ""} over the included 125: $${extraCost}/mo added to your base plan price.`;
+    ? `No overage for ${users} tracked users.`
+    : `${extraBlocks} overage block${extraBlocks !== 1 ? "s" : ""} above ${OVERAGE_EFFECTIVE}: $${extraCost.toFixed(2)}/mo added to your base plan price.`;
 
   return (
     <div className="pr-est__summary">
@@ -283,14 +271,13 @@ function OverageSummary({
       >
         {isIncluded ? (
           <p className="pr-est__status pr-est__status--in">
-            ✓ Included in your plan: no extra cost.
+            ✓ No overage at this usage.
           </p>
         ) : (
           <p className="pr-est__status pr-est__status--over">
-            {extraBlocks} block{extraBlocks !== 1 ? "s" : ""} over the included
-            125
+            {extraBlocks} block{extraBlocks !== 1 ? "s" : ""} above {OVERAGE_EFFECTIVE}
             {" → "}
-            <strong>+${extraCost}/mo</strong> overage
+            <strong>+${extraCost.toFixed(2)}/mo</strong> overage
           </p>
         )}
       </div>
@@ -314,8 +301,8 @@ function OverageSummary({
       </div>
 
       <p className="pr-est__fine">
-        Both plans include 125 users. Overage charges after the 25-user grace
-        buffer (at 150 total), billed monthly.
+        Both plans include {TRACKED_USERS} users and {OVERAGE_GRACE} grace users.
+        Overage is billed once per UTC month based on peak usage, including on annual plans.
       </p>
     </div>
   );
@@ -349,14 +336,14 @@ function PlanSplitCard({
         {extraCost > 0 && (
           <div className="pr-est__splitrow pr-est__splitrow--over">
             <span>Overage</span>
-            <span>+${extraCost}/mo</span>
+            <span>+${extraCost.toFixed(2)}/mo</span>
           </div>
         )}
       </div>
 
       <div className="pr-est__splittotal">
-        <span>Est. total</span>
-        <b>${total}/mo</b>
+        <span>{billingCycle === "yearly" ? "Est. monthly equivalent" : "Est. monthly total"}</span>
+        <b>${total.toFixed(2)}/mo</b>
       </div>
 
       {billingCycle === "yearly" && (

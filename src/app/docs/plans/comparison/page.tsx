@@ -31,8 +31,8 @@ export default function PlansComparisonPage() {
       <ul>
         <li>Unlimited boards &amp; posts</li>
         <li>125 tracked users included</li>
-        <li>25-user grace buffer (overage starts at 150)</li>
-        <li>Overage: $12 per 50 users</li>
+        <li>5-user grace buffer (overage starts at 131)</li>
+        <li>Overage: $3.60 per started block of 10 above 130</li>
         <li>Unlimited team members, 5 admins</li>
         <li>Unlimited roadmap items</li>
         <li>Smart Flow</li>
@@ -50,8 +50,8 @@ export default function PlansComparisonPage() {
       <ul>
         <li>Everything in Starter, plus:</li>
         <li>125 tracked users included</li>
-        <li>25-user grace buffer (overage starts at 150)</li>
-        <li>Overage: $12 per 50 users</li>
+        <li>5-user grace buffer (overage starts at 131)</li>
+        <li>Overage: $3.60 per started block of 10 above 130</li>
         <li>Up to 10 admins</li>
         <li>Smart Flow with advanced automation</li>
         <li>Advanced Severity Detection</li>
@@ -63,10 +63,10 @@ export default function PlansComparisonPage() {
 
       <DocsH2>Tracked Users &amp; Overage</DocsH2>
       <p>
-        Both Starter and Pro include <strong>125 tracked users</strong> per
-        month with a <strong>25-user grace buffer</strong>. Overage begins at
-        150 users, billed at <strong>$12 per block of 50 users</strong> via
-        Paddle.
+        Both Starter and Pro include 125 tracked users plus five grace users.
+        Starting at 131 users, overage is <strong>$3.60 per started block of 10</strong>.
+        Paddle collects one charge based on your peak in the UTC month.
+        This also applies to annual plans.
       </p>
       <p>
         Free plan has a hard cap of 20 tracked users — no overage is available.

@@ -263,7 +263,7 @@ export default function CannyAlternativeClient() {
                 Simple flat pricing
               </h2>
               <p className="text-slate-500 dark:text-muted-foreground text-lg max-w-xl mx-auto">
-                One price. No user-based overages. No surprises on your invoice.
+                Flat plan pricing with 125 tracked users included on paid plans. Usage overage starts above 130 users.
               </p>
             </div>
 

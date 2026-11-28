@@ -5,7 +5,7 @@
  * exact /oauth/authorize request after authenticating.
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, waitFor, cleanup } from '@testing-library/react';
+import { render, waitFor, cleanup, fireEvent, screen } from '@testing-library/react';
 
 const s = vi.hoisted(() => ({
   auth: {
@@ -14,11 +14,12 @@ const s = vi.hoisted(() => ({
     isAuthenticated: false,
     refreshUser: async () => {},
   } as any,
+  organizations: [] as Array<{ id: string; name: string; role: string; subscription_plan: string }>,
 }));
 
 vi.mock('@/hooks/useAuth', () => ({ useAuth: () => s.auth }));
 vi.mock('@/context/OrganizationContext', () => ({
-  useOrganization: () => ({ organizations: [], loading: false }),
+  useOrganization: () => ({ organizations: s.organizations, loading: false }),
 }));
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
@@ -62,11 +63,31 @@ function savedContext(): { path: string; search: string } | null {
 }
 
 beforeEach(() => {
+  s.organizations = [];
   stubLocalStorage();
   window.history.replaceState(null, '', `/oauth/authorize${SEARCH}`);
   globalThis.fetch = vi.fn(() =>
     Promise.resolve({ ok: true, json: async () => ({ valid: true }) })
   ) as unknown as typeof fetch;
+});
+
+it('points a Starter admin to key management when the Zapier cap is reached', async () => {
+  s.auth = {
+    user: { id: 'user-1', email: 'someone@faddy.site' },
+    loading: false,
+    isAuthenticated: true,
+    refreshUser: async () => {},
+  };
+  s.organizations = [{ id: 'org-1', name: 'Example Org', role: 'admin', subscription_plan: 'starter' }];
+  globalThis.fetch = vi.fn(async (_url, init) => init?.method === 'POST'
+    ? { ok: false, status: 403, json: async () => ({ code: 'PZ001', message: 'Revoke an old Zapier key in API Keys, then try again.' }) }
+    : { ok: true, json: async () => ({ valid: true }) }
+  ) as unknown as typeof fetch;
+
+  render(<OAuthAuthorizePage />);
+  fireEvent.click(await screen.findByRole('button', { name: 'Allow' }));
+  expect((await screen.findByRole('alert')).textContent).toContain('Revoke an old Zapier key');
+  expect(screen.getByRole('link', { name: /Open API Keys and select Example Org/ }).getAttribute('href')).toBe('/admin/api-keys');
 });
 
 afterEach(() => {

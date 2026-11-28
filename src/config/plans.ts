@@ -38,7 +38,7 @@ export interface PlanFeatures {
 export interface PlanOverage {
   grace_buffer: number;
   effective_limit: number;
-  price_per_block: number;
+  price_per_block_cents: number;
   block_size: number;
 }
 
@@ -119,10 +119,10 @@ export const PLANS: Record<PlanTier, PlanConfig> = {
       mrr_insights: true,
     },
     overage: {
-      grace_buffer: 25,
-      effective_limit: 150,
-      price_per_block: 12.0,
-      block_size: 50,
+      grace_buffer: 5,
+      effective_limit: 130,
+      price_per_block_cents: 360,
+      block_size: 10,
     },
   },
   pro: {
@@ -158,10 +158,10 @@ export const PLANS: Record<PlanTier, PlanConfig> = {
       mrr_insights: true,
     },
     overage: {
-      grace_buffer: 25,
-      effective_limit: 150,
-      price_per_block: 12.0,
-      block_size: 50,
+      grace_buffer: 5,
+      effective_limit: 130,
+      price_per_block_cents: 360,
+      block_size: 10,
     },
   },
 };

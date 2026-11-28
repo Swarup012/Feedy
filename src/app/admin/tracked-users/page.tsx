@@ -400,7 +400,12 @@ export default function TrackedUsersPage() {
           </div>
           {usage?.peak != null && (
             <p className="text-sm text-muted-foreground mt-2">
-              Peak this month: <span className="font-medium text-foreground">{usage.peak}</span> · Billing is based on your peak, not your current count.
+              Peak this month: <span className="font-medium text-foreground">{usage.peak}</span> · Overage is based on the highest count in the UTC month.
+            </p>
+          )}
+          {usage?.overage?.warningMessage && (
+            <p className="text-sm text-muted-foreground mt-2" role="status">
+              {usage.overage.warningMessage}
             </p>
           )}
         </div>

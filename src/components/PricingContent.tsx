@@ -476,14 +476,14 @@ export default function PricingContent() {
                   <tr>
                     <td className="py-4 px-6 text-sm text-gray-900 dark:text-white">Grace Buffer</td>
                     <td className="py-4 px-6 text-center text-sm text-gray-500">-</td>
-                    <td className="py-4 px-6 text-center text-sm text-gray-700 dark:text-gray-300 bg-blue-50/50 dark:bg-blue-900/10">20% (25 users)</td>
-                    <td className="py-4 px-6 text-center text-sm text-gray-700 dark:text-gray-300">20% (25 users)</td>
+                    <td className="py-4 px-6 text-center text-sm text-gray-700 dark:text-gray-300 bg-blue-50/50 dark:bg-blue-900/10">5 users</td>
+                    <td className="py-4 px-6 text-center text-sm text-gray-700 dark:text-gray-300">5 users</td>
                   </tr>
                   <tr>
                     <td className="py-4 px-6 text-sm text-gray-900 dark:text-white">Overage Price</td>
                     <td className="py-4 px-6 text-center text-sm text-gray-500">-</td>
-                    <td className="py-4 px-6 text-center text-sm text-gray-700 dark:text-gray-300 bg-blue-50/50 dark:bg-blue-900/10">$12 per 50 users</td>
-                    <td className="py-4 px-6 text-center text-sm text-gray-700 dark:text-gray-300">$12 per 50 users</td>
+                    <td className="py-4 px-6 text-center text-sm text-gray-700 dark:text-gray-300 bg-blue-50/50 dark:bg-blue-900/10">$3.60 per started block of 10</td>
+                    <td className="py-4 px-6 text-center text-sm text-gray-700 dark:text-gray-300">$3.60 per started block of 10</td>
                   </tr>
                   <tr>
                     <td className="py-4 px-6 text-sm text-gray-900 dark:text-white">Free Trial</td>
@@ -519,10 +519,10 @@ export default function PricingContent() {
                 <span className="text-white text-xs font-semibold">0 – 125</span>
               </div>
               <div className="flex-[1] bg-blue-400 flex items-center justify-center">
-                <span className="text-white text-xs font-semibold hidden sm:block">126 – 150</span>
+                <span className="text-white text-xs font-semibold hidden sm:block">126 – 130</span>
               </div>
               <div className="flex-[1] bg-blue-600 flex items-center justify-center rounded-r-xl">
-                <span className="text-white text-xs font-semibold">151+</span>
+                <span className="text-white text-xs font-semibold">131+</span>
               </div>
             </div>
             {/* Zone labels */}
@@ -542,7 +542,7 @@ export default function PricingContent() {
               <div className="flex-[1] text-center">
                 <span className="inline-flex items-center gap-1 text-xs text-gray-600 dark:text-gray-400">
                   <span className="w-2 h-2 rounded-full bg-blue-600 inline-block" />
-                  Overage &mdash; <strong className="text-gray-800 dark:text-gray-200">$12/50 users</strong>
+                  Overage &mdash; <strong className="text-gray-800 dark:text-gray-200">$3.60 per started block of 10</strong>
                 </span>
               </div>
             </div>
@@ -578,8 +578,8 @@ export default function PricingContent() {
                   <div className="w-px flex-1 bg-gradient-to-b from-blue-300 to-blue-400 dark:from-blue-700 dark:to-blue-600 my-2 min-h-[2rem]" />
                 </div>
                 <div className="pb-6 flex-1">
-                  <h4 className="font-semibold text-gray-900 dark:text-white text-sm mb-1">Get a Free 20% Grace Buffer</h4>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">We won't charge you until you reach <span className="font-semibold text-gray-700 dark:text-gray-200">150 users</span>. 25 extra users, completely free — giving you room to grow without surprise bills.</p>
+                  <h4 className="font-semibold text-gray-900 dark:text-white text-sm mb-1">Get Five Grace Users</h4>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">There’s no overage through <span className="font-semibold text-gray-700 dark:text-gray-200">130 users</span>.</p>
                 </div>
               </div>
               {/* Step 3 */}
@@ -588,8 +588,8 @@ export default function PricingContent() {
                   <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 border-2 border-blue-500 dark:border-blue-500 flex items-center justify-center text-blue-700 dark:text-blue-400 font-bold text-xs flex-shrink-0">3</div>
                 </div>
                 <div className="flex-1">
-                  <h4 className="font-semibold text-gray-900 dark:text-white text-sm mb-1">Pay Only for What You Use</h4>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">After 150 users, pay <span className="font-semibold text-gray-700 dark:text-gray-200">$12 per 50 additional users</span> each month. No commitments, cancel anytime.</p>
+                  <h4 className="font-semibold text-gray-900 dark:text-white text-sm mb-1">One Monthly Charge</h4>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">Pay <span className="font-semibold text-gray-700 dark:text-gray-200">$3.60 per started block of 10 users above 130</span>. We bill once per UTC month based on your peak, including on annual plans.</p>
                 </div>
               </div>
             </div>
@@ -602,10 +602,10 @@ export default function PricingContent() {
             </div>
             <div className="divide-y divide-gray-100 dark:divide-gray-800">
               {[
-                { range: "151 – 200", cost: "+$12" },
-                { range: "201 – 250", cost: "+$24" },
-                { range: "251 – 300", cost: "+$36" },
-                { range: "301 – 350", cost: "+$48" },
+                { range: "131 – 140", cost: "+$3.60" },
+                { range: "141 – 150", cost: "+$7.20" },
+                { range: "151 – 160", cost: "+$10.80" },
+                { range: "161 – 170", cost: "+$14.40" },
               ].map((row, i) => (
                 <div key={i} className="flex items-center justify-between px-6 py-3 bg-gray-50/40 dark:bg-gray-800/30">
                   <span className="text-sm text-gray-500 dark:text-gray-400 tabular-nums">{row.range}</span>
@@ -614,7 +614,7 @@ export default function PricingContent() {
               ))}
             </div>
             <div className="px-6 py-3 bg-blue-50 dark:bg-blue-900/20 border-t border-blue-100 dark:border-blue-800/50">
-              <p className="text-xs text-blue-600 dark:text-blue-400 font-medium">Per 50 users / month</p>
+              <p className="text-xs text-blue-600 dark:text-blue-400 font-medium">Based on your peak in the UTC month</p>
             </div>
           </div>
         </div>
@@ -634,13 +634,13 @@ export default function PricingContent() {
               </div>
               <div className="h-5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden flex gap-0.5">
                 <div className="bg-green-500 h-full rounded-l-full" style={{ width: "69.4%" }} title="0–125: Included" />
-                <div className="bg-blue-400 h-full" style={{ width: "13.9%" }} title="126–150: Grace" />
-                <div className="bg-blue-600 h-full rounded-r-full" style={{ width: "11.1%" }} title="151–180: Overage" />
+                <div className="bg-blue-400 h-full" style={{ width: "2.8%" }} title="126–130: Grace" />
+                <div className="bg-blue-600 h-full rounded-r-full" style={{ width: "27.8%" }} title="131–180: Overage" />
               </div>
               <div className="relative mt-1.5 text-xs text-gray-400" style={{ height: "1.1rem" }}>
                 <span className="absolute left-0">0</span>
                 <span className="absolute" style={{ left: "69.4%" }}>125</span>
-                <span className="absolute" style={{ left: "83.3%" }}>150</span>
+                <span className="absolute" style={{ left: "72.2%" }}>130</span>
                 <span className="absolute right-0 font-semibold text-blue-600">180</span>
               </div>
               <div className="flex items-center gap-4 mt-3 text-xs text-gray-500 dark:text-gray-400">
@@ -654,8 +654,8 @@ export default function PricingContent() {
             <div className="rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden">
               {[
                 { dot: "bg-green-500", label: "Base Plan (125 users included)", value: "$25", valueClass: "" },
-                { dot: "bg-blue-400", label: "Grace Buffer (26–150 users)", value: "$0", valueClass: "text-green-600" },
-                { dot: "bg-blue-600", label: "Overage (30 users = 1 block × $12)", value: "+$12", valueClass: "" },
+                { dot: "bg-blue-400", label: "Grace buffer (126–130 users)", value: "$0", valueClass: "text-green-600" },
+                { dot: "bg-blue-600", label: "Overage (50 users = 5 blocks × $3.60)", value: "+$18.00", valueClass: "" },
               ].map((row, i) => (
                 <div key={i} className="flex items-center justify-between px-5 py-3.5 border-b border-gray-100 dark:border-gray-700 last:border-0 bg-gray-50/40 dark:bg-gray-800/30">
                   <div className="flex items-center gap-3">
@@ -666,8 +666,8 @@ export default function PricingContent() {
                 </div>
               ))}
               <div className="flex items-center justify-between px-5 py-4 bg-blue-50 dark:bg-blue-900/20 border-t-2 border-blue-200 dark:border-blue-700">
-                <span className="font-bold text-gray-900 dark:text-white">Total This Month</span>
-                <span className="text-lg font-bold text-blue-600 tabular-nums">$37</span>
+                <span className="font-bold text-gray-900 dark:text-white">Total before tax</span>
+                <span className="text-lg font-bold text-blue-600 tabular-nums">$43.00</span>
               </div>
             </div>
 
@@ -675,7 +675,7 @@ export default function PricingContent() {
             <div className="flex items-start gap-3 rounded-xl bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800/60 px-5 py-4">
               <Check className="w-4 h-4 text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5" />
               <p className="text-sm text-green-900 dark:text-green-100 leading-relaxed">
-                <strong>You only pay for 30 extra users</strong> thanks to the grace buffer — not 55. Track your usage in real-time on your dashboard.
+                The five grace users bring the charge threshold to 130. Track your monthly peak on your dashboard.
               </p>
             </div>
           </div>
@@ -728,10 +728,9 @@ export default function PricingContent() {
             </CardHeader>
             <CardContent>
               <p className="text-gray-600 dark:text-gray-400">
-                You have a 20% grace buffer (25 users) before any overage
-                charges apply. After that, you're charged $12 per 50 additional
-                users, billed monthly. You can track your usage in real-time
-                on your dashboard.
+                There’s no overage through 130 tracked users. Starting at 131,
+                you pay $3.60 per started block of 10 based on your peak in
+                the UTC month. Your dashboard shows your estimate.
               </p>
             </CardContent>
           </Card>

@@ -6,7 +6,6 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Users, TrendingUp, AlertTriangle, CheckCircle, DollarSign, Shield, ChevronRight } from 'lucide-react';
 import trackedUsersService, { TrackedUsersUsage } from '@/services/trackedUsersService';
-import { PLANS } from '@/config/plans';
 import { Skeleton } from '@/components/ui/skeleton';
 
 interface OverageStatus {
@@ -14,6 +13,7 @@ interface OverageStatus {
   overageBlocks: number;
   overageUsers: number;
   overageCost: number;
+  pricePerBlock: number;
   graceRemaining: number;
   warningLevel: 'none' | 'info' | 'warning' | 'critical';
 }
@@ -45,11 +45,16 @@ export function TrackedUsersWidget({ onUsageClick, variant = 'basic' }: TrackedU
       if (response.success) {
         setUsage(response.data);
         
-        // Calculate overage status if on Starter plan
-        if (response.data.plan_type === 'starter') {
-          calculateOverageStatus(response.data);
-        }
-        
+        const estimate = response.data.overage;
+        setOverageStatus(estimate ? {
+          inGracePeriod: estimate.inGracePeriod,
+          overageBlocks: estimate.blocks,
+          overageUsers: estimate.overageUsers,
+          overageCost: estimate.totalCents / 100,
+          pricePerBlock: estimate.pricePerBlockCents / 100,
+          graceRemaining: Math.max(0, estimate.effectiveLimit - estimate.peakUsers),
+          warningLevel: estimate.blocks > 0 ? 'critical' : estimate.inGracePeriod ? 'warning' : 'none',
+        } : null);
         setError(null);
       } else {
         setError(response.error || 'Failed to load usage');
@@ -60,43 +65,6 @@ export function TrackedUsersWidget({ onUsageClick, variant = 'basic' }: TrackedU
     } finally {
       setLoading(false);
     }
-  };
-
-  const calculateOverageStatus = (usageData: TrackedUsersUsage) => {
-    const overage = PLANS.starter.overage!;
-    const baseLimit = PLANS.starter.features.tracked_users;
-    const graceBuffer = overage.grace_buffer;
-    const graceLimit = overage.effective_limit;
-    const overageBlockSize = overage.block_size;
-    const overagePricePerBlock = overage.price_per_block;
-    
-    const currentUsers = usageData.count;
-    const inGracePeriod = currentUsers > baseLimit && currentUsers <= graceLimit;
-    const graceRemaining = inGracePeriod ? graceLimit - currentUsers : 0;
-    
-    let overageUsers = 0;
-    let overageBlocks = 0;
-    let overageCost = 0;
-    let warningLevel: 'none' | 'info' | 'warning' | 'critical' = 'none';
-    
-    if (currentUsers > graceLimit) {
-      overageUsers = currentUsers - graceLimit;
-      overageBlocks = Math.ceil(overageUsers / overageBlockSize);
-      overageCost = overageBlocks * overagePricePerBlock;
-      warningLevel = 'critical';
-    } else if (currentUsers > baseLimit * 0.9) {
-      // Warning at 90% of base limit (112+ users)
-      warningLevel = inGracePeriod ? 'warning' : 'info';
-    }
-    
-    setOverageStatus({
-      inGracePeriod,
-      overageBlocks,
-      overageUsers,
-      overageCost,
-      graceRemaining,
-      warningLevel,
-    });
   };
 
   const getStatusColor = (status: string, hasOverage: boolean = false) => {
@@ -139,13 +107,13 @@ export function TrackedUsersWidget({ onUsageClick, variant = 'basic' }: TrackedU
   };
 
   const getStatusBadge = (status: string, usagePercent: number, overageStatus: OverageStatus | null) => {
-    // For Starter plan with overage
+    // For eligible paid plans
     if (overageStatus) {
       if (overageStatus.overageCost > 0) {
         return (
           <Badge variant="destructive" className="flex items-center gap-1">
             <DollarSign className="h-3 w-3" />
-            +${overageStatus.overageCost} Overage
+            +${overageStatus.overageCost.toFixed(2)} Overage
           </Badge>
         );
       }
@@ -204,7 +172,7 @@ export function TrackedUsersWidget({ onUsageClick, variant = 'basic' }: TrackedU
     return (
       <Card
         className={`cursor-pointer transition-all hover:shadow-md flex flex-col ${
-          overageStatus?.overageCost > 0 || usage.status === 'exceeded' ? 'border-status-error-border' :
+          (overageStatus?.overageCost ?? 0) > 0 || usage.status === 'exceeded' ? 'border-status-error-border' :
           overageStatus?.inGracePeriod || usage.status === 'critical' || usage.status === 'warning' ? 'border-status-warning-border' : ''
         }`}
         onClick={onUsageClick}
@@ -212,7 +180,7 @@ export function TrackedUsersWidget({ onUsageClick, variant = 'basic' }: TrackedU
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <div className="flex items-center gap-2">
             <CardTitle className="text-sm font-medium">Tracked Users</CardTitle>
-            <div className={getStatusColor(usage.status, overageStatus?.overageCost! > 0)}>
+            <div className={getStatusColor(usage.status, (overageStatus?.overageCost ?? 0) > 0)}>
               {getStatusIcon(usage.status, overageStatus?.warningLevel)}
             </div>
           </div>
@@ -235,7 +203,7 @@ export function TrackedUsersWidget({ onUsageClick, variant = 'basic' }: TrackedU
             </div>
 
             {/* Overage Status — compact single-row banner */}
-            {usage.plan_type === 'starter' && overageStatus && overageStatus.inGracePeriod && (
+            {overageStatus && overageStatus.inGracePeriod && (
               <div className="flex items-center gap-2 bg-status-warning-bg border border-status-warning-border rounded-lg px-3 py-2">
                 <Shield className="h-3.5 w-3.5 text-status-warning-text flex-shrink-0" />
                 <span className="text-xs text-status-warning-text">
@@ -243,11 +211,11 @@ export function TrackedUsersWidget({ onUsageClick, variant = 'basic' }: TrackedU
                 </span>
               </div>
             )}
-            {usage.plan_type === 'starter' && overageStatus && overageStatus.overageCost > 0 && (
+            {overageStatus && overageStatus.overageCost > 0 && (
               <div className="flex items-center gap-2 bg-status-error-bg border border-status-error-border rounded-lg px-3 py-2">
                 <DollarSign className="h-3.5 w-3.5 text-status-error-text flex-shrink-0" />
                 <span className="text-xs text-status-error-text">
-                  ${overageStatus.overageCost} overage ({overageStatus.overageUsers} users)
+                  ${overageStatus.overageCost.toFixed(2)} overage ({overageStatus.overageUsers} users)
                 </span>
               </div>
             )}
@@ -257,7 +225,7 @@ export function TrackedUsersWidget({ onUsageClick, variant = 'basic' }: TrackedU
               <Progress
                 value={Math.min(usage.usage_percent, 100)}
                 className={
-                  overageStatus?.overageCost > 0 || usage.status === 'exceeded' ? 'bg-status-error-bg [&>div]:bg-status-error-text' :
+                  (overageStatus?.overageCost ?? 0) > 0 || usage.status === 'exceeded' ? 'bg-status-error-bg [&>div]:bg-status-error-text' :
                   overageStatus?.inGracePeriod || usage.status === 'critical' || usage.status === 'warning' ? 'bg-status-warning-bg [&>div]:bg-status-warning-text' :
                   ''
                 }
@@ -291,7 +259,7 @@ export function TrackedUsersWidget({ onUsageClick, variant = 'basic' }: TrackedU
   return (
     <Card
       className={`cursor-pointer transition-all hover:shadow-md flex flex-col h-full ${
-        overageStatus?.overageCost > 0 || usage.status === 'exceeded' ? 'border-status-error-border' :
+        (overageStatus?.overageCost ?? 0) > 0 || usage.status === 'exceeded' ? 'border-status-error-border' :
         overageStatus?.inGracePeriod || usage.status === 'critical' || usage.status === 'warning' ? 'border-status-warning-border' : ''
       }`}
       onClick={onUsageClick}
@@ -316,8 +284,8 @@ export function TrackedUsersWidget({ onUsageClick, variant = 'basic' }: TrackedU
             </div>
           </div>
 
-          {/* Overage Status - Starter Plan Only (distinct callout band) */}
-          {usage.plan_type === 'starter' && overageStatus && (
+          {/* Overage status */}
+          {overageStatus && (
             <div className="space-y-2">
               {/* Grace Period Warning */}
               {overageStatus.inGracePeriod && (
@@ -343,30 +311,17 @@ export function TrackedUsersWidget({ onUsageClick, variant = 'basic' }: TrackedU
                     <DollarSign className="h-4 w-4 text-status-error-text flex-shrink-0 mt-0.5" />
                     <div className="text-xs">
                       <div className="font-semibold text-status-error-text">
-                        Overage This Month: ${overageStatus.overageCost}
+                        Estimated overage this month: ${overageStatus.overageCost.toFixed(2)}
                       </div>
                       <div className="text-status-error-text/90 mt-0.5">
-                        {overageStatus.overageUsers} users over limit ({overageStatus.overageBlocks} block{overageStatus.overageBlocks > 1 ? 's' : ''} × ${PLANS.starter.overage!.price_per_block})
+                        {overageStatus.overageUsers} users over limit ({overageStatus.overageBlocks} block{overageStatus.overageBlocks > 1 ? 's' : ''} × ${overageStatus.pricePerBlock.toFixed(2)})
                       </div>
                     </div>
                   </div>
                 </div>
               )}
 
-              {/* Next Bill Preview */}
-              <div className="bg-gray-50 dark:bg-card rounded-lg p-2 text-xs">
-                <div className="flex justify-between items-center">
-                  <span className="text-muted-foreground">Next bill estimate:</span>
-                  <span className="font-semibold">
-                    ${(PLANS.starter.monthlyPrice + (overageStatus.overageCost || 0)).toFixed(2)}
-                  </span>
-                </div>
-                {overageStatus.overageCost > 0 && (
-                  <div className="text-[10px] text-muted-foreground mt-1">
-                    ${PLANS.starter.monthlyPrice} base + ${overageStatus.overageCost} overage
-                  </div>
-                )}
-              </div>
+
             </div>
           )}
 
@@ -375,7 +330,7 @@ export function TrackedUsersWidget({ onUsageClick, variant = 'basic' }: TrackedU
             <Progress
               value={Math.min(usage.usage_percent, 100)}
               className={
-                overageStatus?.overageCost > 0 || usage.status === 'exceeded' ? 'bg-status-error-bg [&>div]:bg-status-error-text' :
+                (overageStatus?.overageCost ?? 0) > 0 || usage.status === 'exceeded' ? 'bg-status-error-bg [&>div]:bg-status-error-text' :
                 overageStatus?.inGracePeriod || usage.status === 'critical' || usage.status === 'warning' ? 'bg-status-warning-bg [&>div]:bg-status-warning-text' :
                 ''
               }
