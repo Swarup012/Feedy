@@ -71,7 +71,7 @@ beforeEach(() => {
   ) as unknown as typeof fetch;
 });
 
-it('points a Starter admin to key management when the Zapier cap is reached', async () => {
+it('points a Starter admin to Integrations when the Zapier cap is reached', async () => {
   s.auth = {
     user: { id: 'user-1', email: 'someone@faddy.site' },
     loading: false,
@@ -80,14 +80,14 @@ it('points a Starter admin to key management when the Zapier cap is reached', as
   };
   s.organizations = [{ id: 'org-1', name: 'Example Org', role: 'admin', subscription_plan: 'starter' }];
   globalThis.fetch = vi.fn(async (_url, init) => init?.method === 'POST'
-    ? { ok: false, status: 403, json: async () => ({ code: 'PZ001', message: 'Revoke an old Zapier key in API Keys, then try again.' }) }
+    ? { ok: false, status: 403, json: async () => ({ code: 'PZ001', message: 'Disconnect Zapier in Integrations, then connect again.' }) }
     : { ok: true, json: async () => ({ valid: true }) }
   ) as unknown as typeof fetch;
 
   render(<OAuthAuthorizePage />);
   fireEvent.click(await screen.findByRole('button', { name: 'Allow' }));
-  expect((await screen.findByRole('alert')).textContent).toContain('Revoke an old Zapier key');
-  expect(screen.getByRole('link', { name: /Open API Keys and select Example Org/ }).getAttribute('href')).toBe('/admin/api-keys');
+  expect((await screen.findByRole('alert')).textContent).toContain('Disconnect Zapier in Integrations');
+  expect(screen.getByRole('link', { name: /Open Integrations and select Example Org/ }).getAttribute('href')).toBe('/admin/organization?tab=integrations#zapier');
 });
 
 afterEach(() => {

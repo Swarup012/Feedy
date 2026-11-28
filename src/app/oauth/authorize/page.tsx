@@ -318,8 +318,7 @@ function AuthorizeInner() {
             able to: create posts, read posts and boards, and manage webhooks that send
             new-post events to {CLIENT_NAME}. Each connection creates an API key named{' '}
             <span className="font-mono text-foreground">&apos;{keyName}&apos;</span> on
-            your API keys page. Disconnecting in {CLIENT_NAME} does not revoke it; revoke
-            it on the API keys page.
+            Faddy. To revoke the organization’s Zapier keys, disconnect Zapier in Integrations.
           </p>
 
           {eligible.length > 1 && (
@@ -349,8 +348,8 @@ function AuthorizeInner() {
               <div role="alert">
                 <p>{actionError.message}</p>
                 {actionError.code === 'PZ001' && (
-                  <Link href="/admin/api-keys" target="_blank" rel="noopener noreferrer" className="mt-1 inline-block underline">
-                    Open API Keys and select {selectedOrg.name}
+                  <Link href="/admin/organization?tab=integrations#zapier" target="_blank" rel="noopener noreferrer" className="mt-1 inline-block underline">
+                    Open Integrations and select {selectedOrg.name}
                   </Link>
                 )}
               </div>

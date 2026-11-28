@@ -1,11 +1,20 @@
-import { describe, expect, it } from 'vitest';
-import { hasZapierConnection } from '../services/zapierConnection';
-import type { ApiKey } from '../services/apiKeyService';
+import { describe, it, expect, vi } from 'vitest';
+import api from '@/lib/api';
+import { zapierConnection } from '@/services/zapierConnection';
 
-describe('Zapier connection state', () => {
-  it('uses the principal type, not the key name', () => {
-    const key = { name: 'Zapier OAuth spoof', principal_type: 'api_key' } as ApiKey;
-    expect(hasZapierConnection([key])).toBe(false);
-    expect(hasZapierConnection([{ ...key, name: 'renamed', principal_type: 'zapier_oauth' }])).toBe(true);
+vi.mock('@/lib/api', () => ({
+  default: { get: vi.fn(), delete: vi.fn() },
+}));
+
+describe('Zapier connection management', () => {
+  it('loads only the Zapier count and disconnects through the same org-scoped endpoint', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: { data: { activeConnections: 3 } } });
+    vi.mocked(api.delete).mockResolvedValue({ data: { success: true } });
+
+    expect(await zapierConnection.getActiveCount('org-1')).toBe(3);
+    await zapierConnection.disconnect('org-1');
+
+    expect(api.get).toHaveBeenCalledWith('/api/orgs/org-1/integrations/zapier');
+    expect(api.delete).toHaveBeenCalledWith('/api/orgs/org-1/integrations/zapier');
   });
 });

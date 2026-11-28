@@ -452,8 +452,8 @@ export default function PricingContent() {
                   </tr>
                   <tr>
                     <td className="py-4 px-6 text-sm text-gray-900 dark:text-white">Integrations</td>
-                    <td className="py-4 px-6 text-center text-sm text-gray-700 dark:text-gray-300">1</td>
-                    <td className="py-4 px-6 text-center bg-blue-50/50 dark:bg-blue-900/10 text-sm font-medium">1</td>
+                    <td className="py-4 px-6 text-center text-sm text-gray-700 dark:text-gray-300">1 active, including Zapier</td>
+                    <td className="py-4 px-6 text-center bg-blue-50/50 dark:bg-blue-900/10 text-sm font-medium">1 active, including Zapier</td>
                     <td className="py-4 px-6 text-center"><Check className="w-5 h-5 text-green-500 mx-auto" /></td>
                   </tr>
                   <tr>

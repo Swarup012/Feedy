@@ -1,6 +1,6 @@
 'use client';
 
-import { hasZapierConnection } from '@/services/zapierConnection';
+import { zapierConnection } from '@/services/zapierConnection';
 
 import { Suspense, useCallback, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
@@ -40,7 +40,6 @@ import {
   type ChannelBoardMapping,
 } from '@/services/autopilotService';
 import { boardService, type Board } from '@/services/boardService';
-import { apiKeyService } from '@/services/apiKeyService';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -91,7 +90,11 @@ function IntegrationsPageInner() {
   const [discordStatus, setDiscordStatus] = useState<DiscordStatus | null>(null);
   const [slackStatus, setSlackStatus] = useState<SlackStatus | null>(null);
   const [githubStatus, setGithubStatus] = useState<GitHubStatus | null>(null);
-  const [zapierActive, setZapierActive] = useState(false);
+  const [zapierStatus, setZapierStatus] = useState<{ orgId: string; count: number | null } | null>(null);
+  const zapierCount = zapierStatus?.orgId === orgId ? zapierStatus?.count ?? 0 : 0;
+  const zapierActive = zapierCount > 0;
+  const [zapierDisconnectTarget, setZapierDisconnectTarget] = useState<string | null>(null);
+  const [disconnectingZapier, setDisconnectingZapier] = useState(false);
   const [discordChannels, setDiscordChannels] = useState<DiscordChannel[]>([]);
   const [slackChannels, setSlackChannels] = useState<SlackChannel[]>([]);
 
@@ -201,21 +204,28 @@ function IntegrationsPageInner() {
     }
   }, [orgId, toast]);
 
-  // Zapier connection is represented by an OAuth-created API key.
-  // Counts toward the free/starter 1-integration slot like every other card.
-  // Re-checked on focus because the OAuth flow opens in another tab.
+  // Zapier may complete OAuth in another tab.
   useEffect(() => {
-    if (!orgId) return;
-    const check = () => {
-      apiKeyService
-        .listKeys()
-        .then(keys => setZapierActive(hasZapierConnection(keys)))
-        .catch(err => console.error('Failed to load Zapier status:', err));
+    if (!orgId || disconnectingZapier) return;
+    let request = 0;
+    const check = async () => {
+      const current = ++request;
+      try {
+        const count = await zapierConnection.getActiveCount(orgId);
+        if (request === current) setZapierStatus({ orgId, count });
+      } catch {
+        if (request === current) {
+          setZapierStatus(previous => previous?.orgId === orgId ? previous : { orgId, count: null });
+        }
+      }
     };
-    check();
+    void check();
     window.addEventListener('focus', check);
-    return () => window.removeEventListener('focus', check);
-  }, [orgId]);
+    return () => {
+      ++request;
+      window.removeEventListener('focus', check);
+    };
+  }, [orgId, disconnectingZapier]);
 
   useEffect(() => {
     if (!orgId) return;
@@ -690,7 +700,7 @@ function IntegrationsPageInner() {
       toast({
         title: 'Opening Zapier',
         description:
-          'Approving access creates an API key for Zapier — revoke it any time on the API keys page.',
+          'You can disconnect Zapier any time from Integrations.',
       });
       return;
     }
@@ -700,6 +710,24 @@ function IntegrationsPageInner() {
       title: 'Zapier connection is not configured yet',
       description: 'Zapier setup is unavailable right now. Please try again later.',
     });
+  };
+
+  const handleDisconnectZapier = async () => {
+    if (!orgId || orgId !== zapierDisconnectTarget || disconnectingZapier) return;
+    setDisconnectingZapier(true);
+    try {
+      await zapierConnection.disconnect(orgId);
+      setZapierStatus({ orgId, count: 0 });
+      toast({ title: 'Zapier disconnected' });
+    } catch {
+      toast({
+        title: 'Could not disconnect Zapier',
+        description: 'Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setDisconnectingZapier(false);
+    }
   };
 
   const handleDisconnectIntercom = async () => {
@@ -833,6 +861,25 @@ function IntegrationsPageInner() {
               </h2>
 
               <div className="space-y-2">
+                {zapierActive && (
+                  <div id="zapier">
+                    <IntegrationCardConnected
+                      name="Zapier"
+                      icon={<Zap className="h-5 w-5" style={{ color: ZAPIER_BRAND_COLOR }} />}
+                      brandColor={ZAPIER_BRAND_COLOR}
+                      status="active"
+                      subtitle={`${zapierCount} active connection${zapierCount === 1 ? '' : 's'}`}
+                      settingsContent={<p className="text-sm text-muted-foreground">Zapier counts as one integration for this organization.</p>}
+                      footerContent={
+                        <IntegrationDisconnectButton
+                          onClick={() => setZapierDisconnectTarget(orgId)}
+                          loading={disconnectingZapier}
+                          label="Disconnect Zapier"
+                        />
+                      }
+                    />
+                  </div>
+                )}
                 {isDiscordActive && (
                   <IntegrationCardConnected
                     name="Discord"
@@ -1241,7 +1288,7 @@ function IntegrationsPageInner() {
             </div>
             {starterLimitReached && (
               <p className="text-sm text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 rounded-lg px-3 py-2">
-                Starter plan allows 1 connected integration. Disconnect your current integration to connect a different one, or upgrade to Pro for unlimited.
+                Free and Starter plans allow one connected integration. Disconnect your current integration to connect a different one, or upgrade to Pro.
               </p>
             )}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-lg">
@@ -1286,7 +1333,7 @@ function IntegrationsPageInner() {
                   disabled={starterLimitReached}
                 />
               )}
-              {!zapierActive && (
+              {!zapierActive && zapierStatus?.orgId === orgId && zapierStatus.count !== null && (
                 <IntegrationCardAdd
                   name="Zapier"
                   icon={<Zap className="h-5 w-5" style={{ color: ZAPIER_BRAND_COLOR }} />}
@@ -1297,7 +1344,10 @@ function IntegrationsPageInner() {
                 />
               )}
             </div>
-            {!zapierActive && !ZAPIER_APP_URL && (
+            {zapierStatus?.orgId === orgId && zapierStatus.count === null && (
+              <p className="text-xs text-muted-foreground">Could not load Zapier status. Refresh the page to try again.</p>
+            )}
+            {!zapierActive && zapierStatus?.orgId === orgId && zapierStatus.count === 0 && !ZAPIER_APP_URL && (
               <p className="mt-3 text-xs text-muted-foreground">
                 Zapier connection is not configured yet.
               </p>
@@ -1306,6 +1356,15 @@ function IntegrationsPageInner() {
           </section>
         </>
       )}
+      <ConfirmDialog
+        open={zapierDisconnectTarget === orgId}
+        onOpenChange={open => { if (!open) setZapierDisconnectTarget(null); }}
+        title="Disconnect Zapier?"
+        description="This revokes every Zapier key for this organization. Zaps that use these keys will need to reconnect."
+        confirmLabel="Disconnect Zapier"
+        variant="destructive"
+        onConfirm={handleDisconnectZapier}
+      />
     </div>
     </PaidFeatureGate>
   );

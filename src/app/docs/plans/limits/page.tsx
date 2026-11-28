@@ -73,6 +73,13 @@ export default function PlanLimitsPage() {
         </li>
       </ul>
 
+      <DocsH2>Integration Limits</DocsH2>
+      <p>
+        Free and Starter organizations can have one active integration. Zapier is available
+        on both plans and uses that slot, even when the organization has more than one Zapier
+        connection. To revoke all Zapier keys, choose Disconnect Zapier in Integrations.
+      </p>
+
       <DocsH2>Tracked Users &amp; Overage</DocsH2>
       <p>
         A <strong>tracked user</strong> is any unique external person who

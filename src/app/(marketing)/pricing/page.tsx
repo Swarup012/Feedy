@@ -494,10 +494,8 @@ export default function PricingPage() {
                   </tr>
                   <tr>
                     <td>Integrations</td>
-                    <td>
-                      <Yes />
-                    </td>
-                    <td>1 active</td>
+                    <td>1 active, including Zapier</td>
+                    <td>1 active, including Zapier</td>
                     <td>Unlimited</td>
                   </tr>
                   <tr>

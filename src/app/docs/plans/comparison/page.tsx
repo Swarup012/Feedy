@@ -16,7 +16,7 @@ export default function PlansComparisonPage() {
         <li>20 tracked users (hard limit, no overage)</li>
         <li>3 team members, up to 3 admins</li>
         <li>Unlimited roadmap items</li>
-        <li>Smart Flow (1 integration)</li>
+        <li>Smart Flow with one active integration, including Zapier</li>
         <li>10 AI chat credits/month</li>
         <li>Advanced analytics</li>
         <li>Public roadmap &amp; changelog</li>
@@ -37,7 +37,7 @@ export default function PlansComparisonPage() {
         <li>Unlimited roadmap items</li>
         <li>Smart Flow</li>
         <li>AI Chat</li>
-        <li>1 active integration (Slack, Discord or Intercom)</li>
+        <li>One active integration, including Zapier</li>
         <li>Custom branding</li>
         <li>MRR insights</li>
         <li>High-Severity Feedback Alerts</li>

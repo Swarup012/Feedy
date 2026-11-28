@@ -266,7 +266,7 @@ export function getPlanFeatureDisplay(tier: PlanTier): {
       { text: '20 tracked users', included: true },
       { text: '3 admins', included: true },
       { text: '10 AI chat credits/month', included: true },
-      { text: 'Smart Flow (1 integration)', included: true },
+      { text: 'Smart Flow with one integration, including Zapier', included: true },
       { text: 'Feedback boards, widget, roadmap and changelog', included: true, highlight: true },
     );
   } else if (tier === 'starter') {
@@ -275,7 +275,7 @@ export function getPlanFeatureDisplay(tier: PlanTier): {
       { text: '125+ tracked users', included: true, highlight: true },
       { text: 'AI chat - 50 credits/month', included: true },
       { text: '5 admins', included: true },
-      { text: 'Smart Flow (multiple integrations)', included: true },
+      { text: 'Smart Flow with one integration, including Zapier', included: true },
       { text: 'Custom branding and MRR insights', included: true },
       { text: 'High-Severity Feedback Alerts', included: true, highlight: true },
     );
